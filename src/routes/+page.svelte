@@ -1,6 +1,5 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import CharacterWriter from "../components/CharacterWriter.svelte";
     import { ProfileService, type Profile } from "../lib/profile";
     import { profileStore } from "../stores/stores";
     
@@ -17,6 +16,7 @@
             // TODO: do this somewhere else
             profileService.ensureProfileDeckData(deckId).then(() => {
                 profileService.processTodaySchedule();
+                profile = profile
             });
         });
     })
@@ -26,13 +26,13 @@
 </script>
 
 <main class="container">
-    <!-- <CharacterWriter /> -->
     <div class="deck-list-container">
     </div>
     {#each activeDeckIds as deckId}
         <div class="deck-card-container">
             <a class="deck-card" href="/review/{deckId}">
                 {deckId}
+                {profile.deckData[deckId]?.scheduledNewCardCount}
             </a>
             <a class="deck-card-button" href="/deck/{deckId}">
                 B

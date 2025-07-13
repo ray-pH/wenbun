@@ -1,5 +1,6 @@
 import { get, type Writable } from "svelte/store"
 import { loadDeck } from "./util"
+import * as FSRS from "ts-fsrs"
 const UNGROUPED_GROUP = "__ungrouped__"
 
 export interface Profile {
@@ -9,6 +10,7 @@ export interface Profile {
 
 export interface DeckData {
     groups: Record<string, string[]>
+    schedule: Record<string, FSRS.Card>
     scheduledNewCardCount: number
     lastNewCardCheckDate: Date
 }
@@ -48,6 +50,7 @@ export class ProfileService {
             groups: {
                 [UNGROUPED_GROUP]: deck
             },
+            schedule: {},
             scheduledNewCardCount: 0,
             lastNewCardCheckDate: new Date(0),
         }
