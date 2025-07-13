@@ -26,3 +26,33 @@ export async function loadDeck(deckName: string): Promise<string[] | undefined> 
         return undefined;
     }
 }
+
+export function dateDiff(start: Date, end: Date): { days: number, hours: number, minutes: number, seconds: number, milliseconds: number } {
+    let delta = end.getTime() - start.getTime();
+    const milliseconds = delta % 1000;
+    delta = Math.floor(delta / 1000);
+    const seconds = delta % 60;
+    delta = Math.floor(delta / 60);
+    const minutes = delta % 60;
+    delta = Math.floor(delta / 60);
+    const hours = delta % 24;
+    delta = Math.floor(delta / 24);
+    const days = delta;
+    return { days, hours, minutes, seconds, milliseconds };
+}
+export function dateDiffFormatted(start: Date, end: Date): string {
+    const diff = dateDiff(start, end);
+    if (diff.days > 0) {
+        return `${diff.days}d`
+    }
+    if (diff.hours > 0) {
+        return `${diff.hours}h`
+    }
+    if (diff.minutes > 0) {
+        return `${diff.minutes}m`
+    }
+    if (diff.seconds > 0) {
+        return `${diff.seconds}s`
+    }
+    return `${diff.milliseconds}ms`
+}
