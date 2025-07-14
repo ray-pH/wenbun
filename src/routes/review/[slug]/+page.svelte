@@ -59,7 +59,7 @@
         {#if isComplete}
             <div class="review-buttons-container">
                 {#each reviewButtonsLabel as label, i}
-                    <button class="review-button" onclick={() => onReviewButtonClick(i)}>
+                    <button class="review-button" onclick={() => onReviewButtonClick(i+1)}>
                         <div class="review-button-inner">
                             <span>{label}</span>
                             <span>{scheduledTimeStr[(i+1) as FSRS.Grade]}</span>
