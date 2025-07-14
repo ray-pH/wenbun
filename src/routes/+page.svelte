@@ -1,27 +1,13 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { ProfileService, type Profile } from "../lib/profile";
-    import { profileStore } from "../stores/stores";
+    import { App } from "$lib/app";
     
-    // debug
-    let profile: Profile = {
-        decks: ['old-hsk1'],
-        deckData: {}
-    }
-    profileStore.set(profile);
-    let profileService = new ProfileService(profileStore);
-    
+    let app = new App();
+    $: activeDeckIds = Object.keys(app.deckData);
     onMount(async () => {
-        profile.decks.forEach(deckId => {
-            // TODO: do this somewhere else
-            profileService.ensureProfileDeckData(deckId).then(() => {
-                profileService.processTodaySchedule();
-                profile = profile
-            });
-        });
+        await app.init();
+        app = app;
     })
-    
-    let activeDeckIds: string[] = profile.decks;
     
 </script>
 
@@ -32,7 +18,7 @@
         <div class="deck-card-container">
             <a class="deck-card" href="/review/{deckId}">
                 {deckId}
-                {profile.deckData[deckId]?.scheduledNewCardCount}
+                {app.deckData[deckId]?.scheduledNewCardCount}
             </a>
             <a class="deck-card-button" href="/deck/{deckId}">
                 B

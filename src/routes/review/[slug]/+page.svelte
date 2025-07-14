@@ -1,6 +1,5 @@
 <script lang="ts">
-    import { get } from "svelte/store";
-    import { profileStore } from "../../../stores/stores";
+    import { App } from "$lib/app";
     import CharacterWriter from "../../../components/CharacterWriter.svelte";
     import * as FSRS from "ts-fsrs"
     import { onMount } from "svelte";
@@ -9,13 +8,18 @@
 
     export let data: {slug?: string};
     let deckId = data.slug || '';
-    let profile = get(profileStore);
-    let deckData = profile.deckData[deckId];
-    let groups = deckData.groups;
-    let cards = Object.values(groups).flat();
+    
+    let isPageReady = false;
+    let app = new App();
+    onMount(async () => {
+        await app.init();
+        await wordlist.init();
+        app = app;
+        isPageReady = true;
+        nextCard();
+    })
     
     let isComplete = false;
-    let isWordlistReady = false;
     let wordlist = new ChineseCharacterWordlist();
     const reviewButtonsLabel = ['Fail', 'Hard', 'Good', 'Easy'];
     
@@ -23,32 +27,18 @@
     const params = FSRS.generatorParameters()
     const fsrs: FSRS.FSRS = new FSRS.FSRS(params);
     
-    let currentCard: string;
-    let schedulingCards: FSRS.RecordLog;
+    let currentCardId: number | undefined = undefined;
     let scheduledTimeStr: string[] = [];
     
-    onMount(() => {
-        wordlist.init().then(() => {
-            isWordlistReady = true;
-            currentCard = getNextCard();
-        })
-    })
-    
-    // TODO: move these functions to profileService
-    function getNextCard() {
-        // TODO: check schedule
-        return getNewCard();
-    }
-    function getNewCard() {
-        const unusedCards = cards.filter((s) => !deckData.schedule[s])
-        let id = unusedCards[0];
-        let card = FSRS.createEmptyCard();
-        deckData.schedule[id] = card;
-        profileStore.set(profile);
-        schedulingCards = fsrs.repeat(card, new Date());
+    function nextCard() {
+        const id = app.getNextCard(deckId);
+        const card = app.getCard(deckId, id);
+        if (!card) return;
+        const schedulingCards = fsrs.repeat(card, new Date());
+        currentCardId = id;
         updateScheduledDays(schedulingCards);
-        return id;
     }
+    
     function updateScheduledDays(schedulingCards: FSRS.RecordLog) {
         for (let i = 1; i <= 4; i++) {
             const now = schedulingCards[i as FSRS.Grade].log.due;
@@ -56,21 +46,20 @@
             scheduledTimeStr[i] = dateDiffFormatted(now, due);
         }
     }
-    function characterWriterDataFromId(id: string): CharacterWriterData | undefined {
-        // TODO: separate characters from id
-        return wordlist.getCharacterWriterData(id);
+    function characterWriterDataFromId(id: number): CharacterWriterData | undefined {
+        const word = app.getCardWord(deckId, id);
+        return wordlist.getCharacterWriterData(word);
     }
     function onComplete() {
-        getNextCard();
         isComplete = true;
     }
 </script>
 
 
 <div class="container">
-    {#if isWordlistReady && currentCard}
+    {#if isPageReady && (currentCardId !== undefined)}
         <div class="character-writer-container">
-            <CharacterWriter characterData={characterWriterDataFromId(currentCard)} onComplete={() => onComplete()} />
+            <CharacterWriter characterData={characterWriterDataFromId(currentCardId)} onComplete={() => onComplete()} />
         </div>
         <!-- {#if isComplete} -->
             <div class="review-buttons-container">

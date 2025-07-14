@@ -1,15 +1,20 @@
 <script lang="ts">
-    import { get } from "svelte/store";
-    import { profileStore } from "../../../stores/stores";
+    import { App } from "$lib/app";
+    import { onMount } from "svelte";
     import { SvelteMap } from "svelte/reactivity";
 
     export let data: {slug?: string};
     let deckId = data.slug || '';
     
-    let profile = get(profileStore);
-    let deckData = profile.deckData[deckId];
-    let groups = deckData?.groups ?? {};
-    let groupNames = Object.keys(groups);
+    let app = new App();
+    onMount(async () => {
+        await app.init();
+        app = app;
+    })
+    
+    $: deckData = app.deckData[deckId];
+    $: groups = deckData?.groups ?? {};
+    $: groupNames = Object.keys(groups);
     
     let accordionState = new SvelteMap<string, boolean>();
     function toggleAccordion(id: string) {
@@ -34,7 +39,7 @@
                 {#if accordionState.get(groupName)}
                     <div class="group-content">
                         {#each groups[groupName] as word}
-                            {word}
+                            {app.getCardWord(deckId, word)}
                         {/each}
                     </div>
                 {/if}
