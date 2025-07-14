@@ -135,11 +135,19 @@ export class App {
         const schedulingCards = this.fsrs.repeat(card, new Date()) as FSRS.RecordLog;
         this.setCard(deckId, cardId, schedulingCards[grade].card);
         this.pushReviewLog(deckId, cardId, schedulingCards[grade].log);
+        // if this is a new card, reduce the count of scheduled new cards by 1
+        if (card.state === 0) {
+            this.deckData[deckId].scheduledNewCardCount--;
+        }
     }
     
-    getNextCard(deckId: string): number {
-        // TODO: check schedule
-        return this.getNewCard(deckId);
+    getNextCard(deckId: string): number | undefined {
+        // TODO: change new card position based on config
+        if (this.deckData[deckId].scheduledNewCardCount > 0) {
+            return this.getNewCard(deckId);
+        } else {
+            return this.getTodaysScheduledCards(deckId)[0];
+        }
     }
     getNewCard(deckId: string): number {
         let deckData = this.deckData[deckId];
@@ -185,5 +193,15 @@ export class App {
             ratingScheduledTimeStr[grade] = dateDiffFormatted(now, due);
         }
         return ratingScheduledTimeStr;
+    }
+    
+    getTodaysScheduledCards(deckId: string): number[] {
+        const deckData = this.deckData[deckId];
+        if (!deckData) return [];
+        const today = new Date();
+        const todaysCards = Object.entries(deckData.schedule).filter(([id, s]) => s.due.getDate() === today.getDate());
+        // sort by time
+        todaysCards.sort((a, b) => a[1].due.getTime() - b[1].due.getTime());
+        return todaysCards.map((s) => +s[0]);
     }
 }

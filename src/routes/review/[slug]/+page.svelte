@@ -20,6 +20,7 @@
     })
     
     let isComplete = false;
+    let isDoneToday = false;
     let wordlist = new ChineseCharacterWordlist();
     const reviewButtonsLabel = ['Fail', 'Hard', 'Good', 'Easy'];
     
@@ -28,6 +29,11 @@
     function nextCard() {
         isComplete = false;
         const id = app.getNextCard(deckId);
+        if (id == undefined) {
+            // done for today
+            isDoneToday = true;
+            return;
+        }
         const card = app.getCard(deckId, id);
         if (!card) return;
         currentCardId = id;
@@ -50,7 +56,10 @@
 
 
 <div class="container">
-    {#if isPageReady && (currentCardId !== undefined)}
+    {#if isDoneToday} 
+        <div>You have done today's review.</div>
+    {/if}
+    {#if isPageReady && (currentCardId !== undefined) && !isDoneToday}
         <div class="character-writer-container">
             {#key currentCardId}
                 <CharacterWriter characterData={characterWriterDataFromId(currentCardId)} onComplete={() => onComplete()} />
