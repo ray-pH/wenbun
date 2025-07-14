@@ -1,6 +1,6 @@
 <script lang="ts">
     import { App } from "$lib/app";
-    import CharacterWriter from "../../../components/CharacterWriter.svelte";
+    import CharacterWriter from "$lib/components/CharacterWriter.svelte";
     import * as FSRS from "ts-fsrs"
     import { onMount } from "svelte";
     import { type CharacterWriterData } from "$lib/util";

@@ -1,7 +1,7 @@
 <script lang="ts">
     import HanziWriter from 'hanzi-writer';
     import { onMount } from 'svelte';
-    import type { CharacterWriterData, CharacterWriterConfig } from '../lib/util';
+    import type { CharacterWriterData, CharacterWriterConfig } from '$lib/util';
     
     let width = 500;
     let height = 500;
