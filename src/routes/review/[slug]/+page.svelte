@@ -3,7 +3,7 @@
     import CharacterWriter from "../../../components/CharacterWriter.svelte";
     import * as FSRS from "ts-fsrs"
     import { onMount } from "svelte";
-    import { dateDiffFormatted, type CharacterWriterData } from "$lib/util";
+    import { type CharacterWriterData } from "$lib/util";
     import { ChineseCharacterWordlist } from "$lib/chinese";
 
     export let data: {slug?: string};
@@ -23,29 +23,17 @@
     let wordlist = new ChineseCharacterWordlist();
     const reviewButtonsLabel = ['Fail', 'Hard', 'Good', 'Easy'];
     
-    // TODO: load from profile
-    const params = FSRS.generatorParameters()
-    const fsrs: FSRS.FSRS = new FSRS.FSRS(params);
-    
     let currentCardId: number | undefined = undefined;
-    let scheduledTimeStr: string[] = [];
-    
+    let scheduledTimeStr: Record<FSRS.Grade, string> = {1: '', 2: '', 3: '', 4: ''};
     function nextCard() {
+        isComplete = false;
         const id = app.getNextCard(deckId);
         const card = app.getCard(deckId, id);
         if (!card) return;
-        const schedulingCards = fsrs.repeat(card, new Date());
         currentCardId = id;
-        updateScheduledDays(schedulingCards);
+        scheduledTimeStr = app.getRatingScheduledTimeStr(deckId, id);
     }
     
-    function updateScheduledDays(schedulingCards: FSRS.RecordLog) {
-        for (let i = 1; i <= 4; i++) {
-            const now = schedulingCards[i as FSRS.Grade].log.due;
-            const due = schedulingCards[i as FSRS.Grade].card.due;
-            scheduledTimeStr[i] = dateDiffFormatted(now, due);
-        }
-    }
     function characterWriterDataFromId(id: number): CharacterWriterData | undefined {
         const word = app.getCardWord(deckId, id);
         return wordlist.getCharacterWriterData(word);
@@ -53,26 +41,33 @@
     function onComplete() {
         isComplete = true;
     }
+    async function onReviewButtonClick(grade: FSRS.Grade) {
+        app.rateCard(deckId, currentCardId!, grade);
+        await app.save();
+        nextCard();
+    }
 </script>
 
 
 <div class="container">
     {#if isPageReady && (currentCardId !== undefined)}
         <div class="character-writer-container">
-            <CharacterWriter characterData={characterWriterDataFromId(currentCardId)} onComplete={() => onComplete()} />
+            {#key currentCardId}
+                <CharacterWriter characterData={characterWriterDataFromId(currentCardId)} onComplete={() => onComplete()} />
+            {/key}
         </div>
-        <!-- {#if isComplete} -->
+        {#if isComplete}
             <div class="review-buttons-container">
                 {#each reviewButtonsLabel as label, i}
-                    <button class="review-button">
+                    <button class="review-button" onclick={() => onReviewButtonClick(i)}>
                         <div class="review-button-inner">
                             <span>{label}</span>
-                            <span>{scheduledTimeStr[i+1]}</span>
+                            <span>{scheduledTimeStr[(i+1) as FSRS.Grade]}</span>
                         </div>
                     </button>
                 {/each}
             </div>
-        <!-- {/if} -->
+        {/if}
     {/if}
 </div>
 

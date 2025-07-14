@@ -1,5 +1,5 @@
 import * as FSRS from "ts-fsrs"
-import { loadDeck } from "./util"
+import { dateDiffFormatted, loadDeck } from "./util"
 import { load } from '@tauri-apps/plugin-store';
 const UNGROUPED_GROUP = "__ungrouped__"
 
@@ -7,6 +7,7 @@ const STORE_FILENAME = "profile.json"
 const STORE_KEY_DECKS = "decks"
 const STORE_KEY_DECK_DATA = "deckData"
 
+const FSRS_GRADES: FSRS.Grade[] = [FSRS.Rating.Again, FSRS.Rating.Hard, FSRS.Rating.Good, FSRS.Rating.Easy];
 
 export interface DeckData {
     deck: string[];
@@ -27,9 +28,17 @@ export class App {
     decks: string[] = [];
     deckData: Record<string, DeckData> = {};
     config: Config = DEFAULT_CONFIG;
+    reviewLogs: {deckId: string, cardId: number, log: FSRS.ReviewLog}[] = [];
     isLoadDone = false;
+    fsrs!: FSRS.FSRS;
     
     constructor() {
+        this.updateFSRS();
+    }
+    
+    updateFSRS() {
+        const params = FSRS.generatorParameters()
+        this.fsrs = new FSRS.FSRS(params);
     }
     
     async init(): Promise<void> {
@@ -120,6 +129,14 @@ export class App {
         }
     }
     
+    rateCard(deckId: string, cardId: number, grade: FSRS.Grade): void {
+        const card = this.getCard(deckId, cardId);
+        if (!card) return;
+        const schedulingCards = this.fsrs.repeat(card, new Date()) as FSRS.RecordLog;
+        this.setCard(deckId, cardId, schedulingCards[grade].card);
+        this.pushReviewLog(deckId, cardId, schedulingCards[grade].log);
+    }
+    
     getNextCard(deckId: string): number {
         // TODO: check schedule
         return this.getNewCard(deckId);
@@ -135,7 +152,16 @@ export class App {
         return id;
     }
     
+    pushReviewLog(deckId: string, cardId: number, log: FSRS.ReviewLog): void {
+        this.reviewLogs.push({deckId, cardId, log});
+    }
+    setCard(deckId: string, cardId: number, card: FSRS.Card): void {
+        const deckData = this.deckData[deckId];
+        if (!deckData) return;
+        deckData.schedule[cardId] = card;
+    }
     getCard(deckId: string, cardId: number): FSRS.Card | undefined {
+        // TODO: better missing card handling
         const deckData = this.deckData[deckId];
         if (!deckData) return undefined;
         return deckData.schedule[cardId];
@@ -146,5 +172,18 @@ export class App {
         const card = deckData.deck[cardId];
         if (!card) return '';
         return card;
+    }
+    getRatingScheduledTimeStr(deckId: string, cardId: number): Record<FSRS.Grade, string> {
+        const card = this.getCard(deckId, cardId);
+        let ratingScheduledTimeStr: Record<FSRS.Grade, string> = {1: '', 2: '', 3: '', 4: ''};
+        
+        if (!card) return ratingScheduledTimeStr;
+        const schedulingCards = this.fsrs.repeat(card, new Date()) as FSRS.RecordLog;
+        for (const grade of FSRS_GRADES) {
+            const now = schedulingCards[grade].log.due;
+            const due = schedulingCards[grade].card.due;
+            ratingScheduledTimeStr[grade] = dateDiffFormatted(now, due);
+        }
+        return ratingScheduledTimeStr;
     }
 }
