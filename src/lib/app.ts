@@ -1,6 +1,6 @@
 import * as FSRS from "ts-fsrs"
 import { dateDiffFormatted, loadDeck } from "./util"
-import { load } from '@tauri-apps/plugin-store';
+import { type IStorage, TauriStorage } from "./storage";
 const UNGROUPED_GROUP = "__ungrouped__"
 
 const STORE_FILENAME = "profile.json"
@@ -31,9 +31,12 @@ export class App {
     reviewLogs: {deckId: string, cardId: number, log: FSRS.ReviewLog}[] = [];
     isLoadDone = false;
     fsrs!: FSRS.FSRS;
-    
+
+    storage: IStorage;
+
     constructor() {
         this.updateFSRS();
+        this.storage = new TauriStorage(STORE_FILENAME); // use tauri storage implementation for now
     }
     
     updateFSRS() {
@@ -59,20 +62,19 @@ export class App {
     }
     
     async load() {
-        const store = await load(STORE_FILENAME, {autoSave: false});
-        const decksPromise    = store.get(STORE_KEY_DECKS);
-        const deckDataPromise = store.get(STORE_KEY_DECK_DATA);
-        const [rawDecks, rawDeckData] = await Promise.all([decksPromise, deckDataPromise]) as any;
-        this.decks = (await store.get(STORE_KEY_DECKS)) || [];
-        this.deckData = (await store.get(STORE_KEY_DECK_DATA)) || {};
-        this.decks    = rawDecks    || [];
+        const [rawDecks, rawDeckData] = await Promise.all([
+            this.storage.load<string[]>(STORE_KEY_DECKS),
+            this.storage.load<Record<string, DeckData>>(STORE_KEY_DECK_DATA),
+        ]);
+        this.decks = rawDecks || [];
         this.deckData = rawDeckData || {};
         this.isLoadDone = true;
     }
     async save() {
-        const store = await load(STORE_FILENAME, {autoSave: false});
-        await store.set(STORE_KEY_DECKS, this.decks);
-        await store.set(STORE_KEY_DECK_DATA, this.deckData);
+        await Promise.all([
+            this.storage.save(STORE_KEY_DECKS, this.decks),
+            this.storage.save(STORE_KEY_DECK_DATA, this.deckData),
+        ]);
     }
     
     isNeedToProcessTodaySchedule(): boolean {
