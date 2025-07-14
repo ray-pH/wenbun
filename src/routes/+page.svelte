@@ -11,7 +11,7 @@
     
 </script>
 
-<main class="container">
+<div class="main-container">
     <div class="deck-list-container">
     </div>
     {#each activeDeckIds as deckId}
@@ -25,10 +25,10 @@
             </a>
         </div>
     {/each}
-</main>
+</div>
 
 <style>
-    .container {
+    .main-container {
         display: flex;
         flex-direction: column;
         align-items: center;
