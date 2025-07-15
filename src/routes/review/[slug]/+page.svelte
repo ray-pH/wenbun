@@ -53,6 +53,14 @@
         await app.save();
         nextCard();
     }
+    function getReviewButtonClass(grade: FSRS.Grade): string {
+        switch (grade) {
+            case FSRS.Rating.Easy: return 'review-button-easy';
+            case FSRS.Rating.Good: return 'review-button-good';
+            case FSRS.Rating.Hard: return 'review-button-hard';
+            case FSRS.Rating.Again: return 'review-button-fail';
+        }
+    }
 </script>
 
 
@@ -68,12 +76,12 @@
             {/key}
         </div>
         {#if isComplete}
-            <div class="review-buttons-container">
+            <div class="review-button-container">
                 {#each reviewButtonsLabel as label, i}
-                    <button class="review-button" onclick={() => onReviewButtonClick(i+1)}>
+                    <button class={`review-button ${getReviewButtonClass(i+1)}`} onclick={() => onReviewButtonClick(i+1)}>
                         <div class="review-button-inner">
-                            <span>{label}</span>
-                            <span>{scheduledTimeStr[(i+1) as FSRS.Grade]}</span>
+                            <div class="review-time">{scheduledTimeStr[(i+1) as FSRS.Grade]}</div>
+                            <div class="review-label">{label}</div>
                         </div>
                     </button>
                 {/each}
@@ -93,14 +101,52 @@
     .character-writer-container {
         margin: 1em 0;
     }
+    .review-button-container {
+        position: absolute;
+        bottom: 0;
+        padding: 2em 2em 3em 2em;
+    }
+    .review-label {
+        font-weight: bold;
+        padding: 0.2em 2em;
+    }
+    .review-button-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
     .review-button {
         all: unset;
+        position: relative;
         cursor: pointer;
-        color: blue;
+        color: var(--color);
         padding: 0.5em 1em;
         border-radius: 0.5em;
+        &.review-button-fail {
+            --color: #DB6B6C;
+        }
+        &.review-button-hard {
+            --color: black;
+        }
+        &.review-button-good {
+            --color: #419E6F;
+        }
+        &.review-button-easy {
+            --color: #3E92CC;
+        }
     }
     .review-button:hover {
         background-color: lightgray;
+    }
+    .review-button::after {
+        content: '';
+        position: absolute;
+        left: 10%;
+        bottom: 0;
+        width: 80%;
+        height: 0.3em;
+        background-color: var(--color, #3E92CC); /* or any color */
+        border-radius: 0.2em;
+        z-index: 1;
     }
 </style>

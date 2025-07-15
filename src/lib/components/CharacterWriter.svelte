@@ -53,21 +53,30 @@
         justify-content: center;
     }
     .meaning {
-        margin: 1em;
+        max-width: 40em;
+        min-height: 8em;
+        margin: 0.5em;
     }
     .reading {
         font-size: 2em;
-        margin: 1em;
+        margin: 0.5em;
+    }
+    .grid-background {
+        padding: 2em;
+        background-color: #FFFFFF90;
+        border-radius: 0.5em;
     }
 </style>
 
 <div class="character-writer">
-    <div class="meaning">{meaningStr}</div>
     <div class="reading">{characterData?.reading}</div>
-    <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} id="grid-background-target">
-      <line x1="0" y1="0" x2={width} y2={height} stroke={gridStroke} />
-      <line x1={width} y1="0" x2="0" y2={height} stroke={gridStroke} />
-      <line x1={width/2} y1="0" x2={width/2} y2={height} stroke={gridStroke} />
-      <line x1="0" y1={height/2} x2={width} y2={height/2} stroke={gridStroke} />
-    </svg>
+    <div class="meaning">{meaningStr}</div>
+    <div class="grid-background">
+        <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} id="grid-background-target">
+        <line x1="0" y1="0" x2={width} y2={height} stroke={gridStroke} />
+        <line x1={width} y1="0" x2="0" y2={height} stroke={gridStroke} />
+        <line x1={width/2} y1="0" x2={width/2} y2={height} stroke={gridStroke} />
+        <line x1="0" y1={height/2} x2={width} y2={height/2} stroke={gridStroke} />
+        </svg>
+    </div>
 </div>
