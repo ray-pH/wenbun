@@ -16,12 +16,7 @@
 	}
     let { onComplete, characterData, app }: Props = $props();
     
-    // export let characterData: CharacterWriterData | undefined = {
-    //     characters: '爱',
-    //     reading: 'ài',
-    //     meanings: [ "to love; to be fond of; to like", "affection", "to be inclined (to do sth); to tend to (happen)" ],
-    //     tags: [["tone4"]]
-    // }
+    let completedCharCount: number = $state(0);
     let cardConfig: CharacterWriterConfig = {
         isFirstTime: false,
         isQuiz: true
@@ -35,25 +30,41 @@
             }
         }
     }
-    
+    function completeChar() {
+        completedCharCount = completedCharCount + 1;
+        if (completedCharCount == characterData?.characters.length) {
+            onComplete();
+        } else {
+            //TODO: add small delay
+            setupHanziWriter(completedCharCount);
+        }
+    }
     let writer: HanziWriter;
-    onMount(() => {
+    function setupHanziWriter(index: number) {
         if (!characterData) return;
-        const tone = getChineseTone(characterData.tags[0]);
-        writer = HanziWriter.create('grid-background-target', characterData.characters[0], {
+        if (writer) {
+            writer.cancelQuiz();
+            writer.hideCharacter();
+        }
+        const tone = getChineseTone(characterData.tags[index]);
+        writer = HanziWriter.create('grid-background-target', characterData.characters[index], {
           width: width,
           height: height,
           padding: 5,
           showCharacter: false, showOutline: false,
           highlightOnComplete: false,
-          strokeColor: app.getChineseToneColor(tone),
+          strokeColor: app.getChineseToneColor(tone) ?? "#555",
           onComplete: () => {
-              onComplete();
+              completeChar();
           }
         });
         if (cardConfig.isQuiz) {
             writer.quiz();
         }
+    }
+    
+    onMount(() => {
+        setupHanziWriter(0);
     });
 </script>
 
@@ -66,8 +77,11 @@
     }
     .meaning {
         max-width: 40em;
-        min-height: 8em;
+        height: 5em;
+        overflow-y: scroll;
+        /* min-height: 8em; */
         margin: 0.5em;
+        margin-bottom: 2em;
     }
     .reading {
         font-size: 2em;
@@ -78,17 +92,57 @@
         background-color: #FFFFFF90;
         border-radius: 0.5em;
     }
+    .character-container {
+        display: flex;
+        flex-direction: column;
+    }
+    .character-box-container {
+        margin-top: 0.5em;
+        padding-right: 0.5em;
+        font-size: 2em;
+        color: #00000090;
+        align-self: end;
+        span {
+            margin-left: 0.2em;
+        }
+        .empty-character-box {
+            position: relative;
+        }
+        .empty-character-box::after {
+            content: "";
+            position: absolute;
+            top: 0.2em;
+            left: -0.05em;
+            right: 0.05em;
+            bottom: 0.2em;
+            border: 2px dashed;
+            pointer-events: none;
+        }
+    }
 </style>
 
 <div class="character-writer">
     <div class="reading">{characterData?.reading}</div>
     <div class="meaning">{meaningStr}</div>
-    <div class="grid-background">
-        <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} id="grid-background-target">
-        <line x1="0" y1="0" x2={width} y2={height} stroke={gridStroke} />
-        <line x1={width} y1="0" x2="0" y2={height} stroke={gridStroke} />
-        <line x1={width/2} y1="0" x2={width/2} y2={height} stroke={gridStroke} />
-        <line x1="0" y1={height/2} x2={width} y2={height/2} stroke={gridStroke} />
-        </svg>
+    <div class="character-container">
+        <div class="grid-background">
+            <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} id="grid-background-target">
+            <line x1="0" y1="0" x2={width} y2={height} stroke={gridStroke} />
+            <line x1={width} y1="0" x2="0" y2={height} stroke={gridStroke} />
+            <line x1={width/2} y1="0" x2={width/2} y2={height} stroke={gridStroke} />
+            <line x1="0" y1={height/2} x2={width} y2={height/2} stroke={gridStroke} />
+            </svg>
+        </div>
+        {#if characterData?.characters}
+            <div class="character-box-container">
+                {#each characterData.characters as character, i}
+                    {#if i < completedCharCount}
+                        <span>{character}</span>
+                    {:else}
+                        <span class="empty-character-box">&#x3000;</span>
+                    {/if}
+                {/each}
+            </div>
+        {/if}
     </div>
 </div>
