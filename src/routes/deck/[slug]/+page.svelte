@@ -167,7 +167,7 @@
                     background-color: #3E92CC;
                 }
                 &.card-status-relearning {
-                    background-color: #F9C4A5;
+                    background-color: #F9C26A;
                 }
                 &.card-status-previously-started {
                     background-color: gray;

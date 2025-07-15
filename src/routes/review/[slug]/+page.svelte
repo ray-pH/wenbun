@@ -72,7 +72,7 @@
     {#if isPageReady && (currentCardId !== undefined) && !isDoneToday}
         <div class="character-writer-container">
             {#key currentCardId}
-                <CharacterWriter characterData={characterWriterDataFromId(currentCardId)} onComplete={() => onComplete()} />
+                <CharacterWriter app={app} characterData={characterWriterDataFromId(currentCardId)} onComplete={() => onComplete()} />
             {/key}
         </div>
         {#if isComplete}

@@ -1,3 +1,14 @@
+export type DeepRequired<T> =
+  // Leave functions as-is
+  T extends (...args: any[]) => any ? T :
+  // Recurse into arrays
+  T extends Array<infer U>       ? DeepRequiredArray<U> :
+  // Recurse into plain objects
+  T extends object               ? { [K in keyof T]-?: DeepRequired<T[K]> } :
+  // Primitives, etc.
+                                  T
+interface DeepRequiredArray<T> extends Array<DeepRequired<T>> {}
+
 export interface CharacterWriterData {
     characters: string;
     reading: string;
@@ -58,4 +69,9 @@ export function dateDiffFormatted(start: Date, end: Date): string {
     //     return `${prefix}${diff.seconds}s`
     // }
     // return `${diff.milliseconds}ms`
+}
+
+export function parseIntOrUndefined(value: string) {
+    const n = parseInt(value, 10);
+    return isNaN(n) ? undefined : n;
 }

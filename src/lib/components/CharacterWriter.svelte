@@ -1,7 +1,9 @@
 <script lang="ts">
     import HanziWriter from 'hanzi-writer';
     import { onMount } from 'svelte';
-    import type { CharacterWriterData, CharacterWriterConfig } from '$lib/util';
+    import { TONE_PREFIX } from '$lib/chinese';
+    import { type CharacterWriterData, type CharacterWriterConfig, parseIntOrUndefined } from '$lib/util';
+    import type { App } from '$lib/app';
     
     let width = 500;
     let height = 500;
@@ -10,8 +12,9 @@
     interface Props {
 		onComplete: () => void;
 		characterData: CharacterWriterData | undefined;
+		app: App
 	}
-    let { onComplete, characterData }: Props = $props();
+    let { onComplete, characterData, app }: Props = $props();
     
     // export let characterData: CharacterWriterData | undefined = {
     //     characters: '爱',
@@ -25,16 +28,25 @@
     }
     let meaningStr = characterData?.meanings.join("; ");
     
+    function getChineseTone(tags: string[]): number | undefined {
+        for (const tag of tags) {
+            if (tag.startsWith(TONE_PREFIX)) {
+                return parseIntOrUndefined(tag.substring(TONE_PREFIX.length));
+            }
+        }
+    }
+    
     let writer: HanziWriter;
     onMount(() => {
         if (!characterData) return;
+        const tone = getChineseTone(characterData.tags[0]);
         writer = HanziWriter.create('grid-background-target', characterData.characters[0], {
           width: width,
           height: height,
           padding: 5,
-          showCharacter: false,
-          showOutline: false,
+          showCharacter: false, showOutline: false,
           highlightOnComplete: false,
+          strokeColor: app.getChineseToneColor(tone),
           onComplete: () => {
               onComplete();
           }

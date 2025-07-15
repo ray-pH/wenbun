@@ -1,6 +1,7 @@
 import * as FSRS from "ts-fsrs"
-import { dateDiffFormatted, loadDeck } from "./util"
+import { dateDiffFormatted, loadDeck, type DeepRequired } from "./util"
 import { type IStorage, TauriStorage } from "./storage";
+import _ from "lodash";
 const UNGROUPED_GROUP = "__ungrouped__"
 
 const STORE_FILENAME = "profile.json"
@@ -28,10 +29,21 @@ export interface DeckData {
 }
 
 export interface Config {
-    scheduledNewCardCount: number;
+    scheduledNewCardCount?: number;
+    // chinese
+    zh: {
+        isColorBasedOnTone?: boolean;
+        toneColors?: string[];
+    }
 }
-const DEFAULT_CONFIG: Config = {
+
+const DEFAULT_CONFIG: DeepRequired<Config> = {
     scheduledNewCardCount: 5,
+    zh: {
+        isColorBasedOnTone: true,
+        // TODO: change 3rd color
+        toneColors: ['#3E92CC', '#419E6F', '#7C3AED', '#DB6B6C'],
+    }
 }
 
 export class App {
@@ -140,6 +152,10 @@ export class App {
         }
     }
     
+    getConfig(): DeepRequired<Config> {
+        return _.merge({}, DEFAULT_CONFIG, this.config);
+    }
+    
     rateCard(deckId: string, cardId: number, grade: FSRS.Grade, date?: Date): void {
         const card = this.getCard(deckId, cardId);
         if (!card) return;
@@ -239,5 +255,13 @@ export class App {
         // sort by time
         todaysCards.sort((a, b) => a[1].due.getTime() - b[1].due.getTime());
         return todaysCards.map((s) => +s[0]);
+    }
+    
+    getChineseToneColor(tone?: number): string | undefined {
+        if (!tone) return undefined;
+        const config = this.getConfig();
+        if (!config.zh.isColorBasedOnTone) return undefined;
+        const colors = config.zh.toneColors;
+        return colors[tone - 1];
     }
 }

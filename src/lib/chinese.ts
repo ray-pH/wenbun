@@ -1,4 +1,6 @@
-import type { CharacterWriterData } from "./util";
+import { parseIntOrUndefined, type CharacterWriterData } from "./util";
+
+export const TONE_PREFIX = 'tone-';
 
 export interface ChineseWordData {
     simplified: string;
@@ -45,6 +47,12 @@ export class ChineseCharacterWordlist {
         const reading = wordData.forms[0].transcriptions.pinyin;
         const meanings = wordData.forms.map((f) => f.meanings).flat();
         const tags: string[][] = []
+        
+        const numericReading = wordData.forms[0].transcriptions.numeric;
+        numericReading.split(' ').forEach((reading, i) => {
+            const tone = parseIntOrUndefined(reading[reading.length - 1]) ?? 0;
+            tags[i] = [`${TONE_PREFIX}${tone}`];
+        });
         
         return <CharacterWriterData>{ characters, reading, meanings, tags };
     }
