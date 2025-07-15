@@ -1,5 +1,6 @@
 <script lang="ts">
     import { App } from "$lib/app";
+    import TopBar from "$lib/components/TopBar.svelte";
     import { onMount } from "svelte";
     import { SvelteMap } from "svelte/reactivity";
 
@@ -23,7 +24,7 @@
     }
 </script>
 
-
+<TopBar title="Deck" backUrl="/"></TopBar>
 <div class="container">
     <div class="group-container">
         {#each groupNames as groupName}

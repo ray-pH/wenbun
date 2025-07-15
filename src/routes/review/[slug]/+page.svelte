@@ -5,6 +5,7 @@
     import { onMount } from "svelte";
     import { type CharacterWriterData } from "$lib/util";
     import { ChineseCharacterWordlist } from "$lib/chinese";
+    import TopBar from "$lib/components/TopBar.svelte";
 
     export let data: {slug?: string};
     let deckId = data.slug || '';
@@ -55,6 +56,7 @@
 </script>
 
 
+<TopBar title="Review" backUrl="/"></TopBar>
 <div class="container">
     {#if isDoneToday} 
         <div>You have done today's review.</div>

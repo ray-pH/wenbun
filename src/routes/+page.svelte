@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { App } from "$lib/app";
+    import TopBar from "$lib/components/TopBar.svelte";
     
     let app = new App();
     $: activeDeckIds = Object.keys(app.deckData);
@@ -11,6 +12,7 @@
     
 </script>
 
+<TopBar title="WenBun"></TopBar>
 <div class="main-container">
     <div class="deck-list-container">
     </div>
@@ -28,6 +30,9 @@
 </div>
 
 <style>
+    :global(body) {
+        margin: 0;
+    }
     .main-container {
         display: flex;
         flex-direction: column;
@@ -35,6 +40,7 @@
         justify-content: center;
         height: 100%;
         width: 100%;
+        margin: 1em 0;
     }
     .deck-list-container {
         display: flex;
