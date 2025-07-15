@@ -49,10 +49,12 @@ export function dateDiffFormatted(start: Date, end: Date): string {
         return `${diff.hours}h`
     }
     if (diff.minutes > 0) {
-        return `${diff.minutes}m`
+        return `< ${diff.minutes}m`
     }
-    if (diff.seconds > 0) {
-        return `${diff.seconds}s`
-    }
-    return `${diff.milliseconds}ms`
+    return '< 1m';
+    // if (diff.seconds > 0) {
+    //     const prefix = isShowLessThan ? '<' : '';
+    //     return `${prefix}${diff.seconds}s`
+    // }
+    // return `${diff.milliseconds}ms`
 }

@@ -31,7 +31,11 @@
 
 <style>
     :global(body) {
+        max-width: 100vw;
+        overflow-x: hidden;
         margin: 0;
+        padding: 0;
+        background-color: #E0E0E0;
     }
     .main-container {
         display: flex;

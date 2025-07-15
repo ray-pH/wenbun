@@ -9,8 +9,18 @@ const STORE_KEY_DECK_DATA = "deckData"
 
 const FSRS_GRADES: FSRS.Grade[] = [FSRS.Rating.Again, FSRS.Rating.Hard, FSRS.Rating.Good, FSRS.Rating.Easy];
 
+export enum WenBunCustomState {
+    New = "New",
+    Learning = "Learning",
+    ReviewYoung = "Young",
+    ReviewMature = "Mature",
+    Relearning = "Relearning",
+    PreviouslyStarted = "Previously Started", // mark cards that are already started learning before this deck
+}
+
 export interface DeckData {
     deck: string[];
+    previouslyStarted: number[]; // list of card ids that are marked as previously started (i.e. already started learning before this deck)
     groups: Record<string, number[]>
     schedule: Record<number, FSRS.Card>
     scheduledNewCardCount: number
@@ -47,7 +57,6 @@ export class App {
     async init(): Promise<void> {
         // await this.load();
         await this.debug();
-        // console.log('hello', this.isNeedToProcessTodaySchedule());
         if (this.isNeedToProcessTodaySchedule()) {
             await this.processTodaySchedule();
         }
@@ -81,7 +90,6 @@ export class App {
         const today = new Date();
         for (const deckId of Object.keys(this.deckData)) {
             const deckData = this.deckData[deckId];
-            console.log({deckId, deckData})
             if (new Date(deckData.lastScheduleCheckDate).getDate() < today.getDate()) {
                 return true;
             }
@@ -110,6 +118,7 @@ export class App {
             groups: {
                 [UNGROUPED_GROUP]: Array.from(deck.keys()) // 0..(deck.length - 1)
             },
+            previouslyStarted: [],
             schedule: {},
             scheduledNewCardCount: 0,
             lastScheduleCheckDate: new Date(0).getTime(),
@@ -131,10 +140,10 @@ export class App {
         }
     }
     
-    rateCard(deckId: string, cardId: number, grade: FSRS.Grade): void {
+    rateCard(deckId: string, cardId: number, grade: FSRS.Grade, date?: Date): void {
         const card = this.getCard(deckId, cardId);
         if (!card) return;
-        const schedulingCards = this.fsrs.repeat(card, new Date()) as FSRS.RecordLog;
+        const schedulingCards = this.fsrs.repeat(card, date ?? new Date()) as FSRS.RecordLog;
         this.setCard(deckId, cardId, schedulingCards[grade].card);
         this.pushReviewLog(deckId, cardId, schedulingCards[grade].log);
         // if this is a new card, reduce the count of scheduled new cards by 1
@@ -183,6 +192,14 @@ export class App {
         if (!card) return '';
         return card;
     }
+    getCardDue(deckId: string, cardId: number): Date | undefined {
+        return this.getCard(deckId, cardId)?.due;
+    }
+    getCardDueFormatted(deckId: string, cardId: number): string {
+        const due = this.getCardDue(deckId, cardId);
+        if (!due) return 'Not Started';
+        return dateDiffFormatted(new Date(), due);
+    }
     getRatingScheduledTimeStr(deckId: string, cardId: number): Record<FSRS.Grade, string> {
         const card = this.getCard(deckId, cardId);
         let ratingScheduledTimeStr: Record<FSRS.Grade, string> = {1: '', 2: '', 3: '', 4: ''};
@@ -195,6 +212,23 @@ export class App {
             ratingScheduledTimeStr[grade] = dateDiffFormatted(now, due);
         }
         return ratingScheduledTimeStr;
+    }
+    getWenbunCustomState(deckId: string, cardId: number): WenBunCustomState {
+        if (this.deckData[deckId]?.previouslyStarted?.includes(cardId)) {
+            return WenBunCustomState.PreviouslyStarted;
+        }
+        const card = this.getCard(deckId, cardId);
+        switch (card?.state) {
+            case FSRS.State.Learning: return WenBunCustomState.Learning;
+            case FSRS.State.Review: {
+                //TODO: get mature limit from config
+                if (card.scheduled_days >= 21) return WenBunCustomState.ReviewMature;
+                else return WenBunCustomState.ReviewYoung;
+            }
+            case FSRS.State.Relearning: return WenBunCustomState.Relearning;
+            case FSRS.State.New:
+            default: return WenBunCustomState.New;
+        }
     }
     
     getTodaysScheduledCards(deckId: string): number[] {
