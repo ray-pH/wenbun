@@ -64,7 +64,7 @@ export class App {
     
     async debug() {
         if (true || this.decks.length === 0) {
-            this.decks = ['old-hsk1']
+            this.decks = ['test']
             await this.ensureDeckData();
             await this.save();
         }

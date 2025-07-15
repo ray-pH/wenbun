@@ -12,6 +12,7 @@ export interface CharacterWriterConfig {
 
 const deckToURL: Record<string, string> = {
     'old-hsk1': '/assets/decks/old-hsk1.txt',
+    'test': '/assets/decks/test.txt',
 }
 
 export async function loadDeck(deckName: string): Promise<string[] | undefined> {
