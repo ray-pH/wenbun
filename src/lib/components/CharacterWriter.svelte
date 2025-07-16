@@ -8,6 +8,9 @@
     let width = 500;
     let height = 500;
     let gridStroke = "#DDD";
+    const NEXT_CHAR_DELAY = 500;
+    // const correctSound = new Audio('/assets/sounds/rightanswer-95219.mp3');
+    const correctSound = new Audio('/assets/sounds/correct-choice-43861.mp3');
     
     interface Props {
 		onComplete: () => void;
@@ -31,12 +34,15 @@
         }
     }
     function completeChar() {
+        correctSound.play();
         completedCharCount = completedCharCount + 1;
         if (completedCharCount == characterData?.characters.length) {
             onComplete();
         } else {
-            //TODO: add small delay
-            setupHanziWriter(completedCharCount);
+            window.setTimeout(() => {
+                setupHanziWriter(completedCharCount);
+                // play sound
+            }, NEXT_CHAR_DELAY);
         }
     }
     let writer: HanziWriter;
