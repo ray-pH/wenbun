@@ -17,3 +17,12 @@ export const DeckInfo = [
 export const ChineseToneColorPalette = {
     Default: ['#3E92CC', '#419E6F', '#7C3AED', '#DB6B6C'],
 }
+
+export const CHINESE_WORLISTS_SRC = [
+    '/assets/wordlist/complete-hsk-vocabulary/old/1.json',
+    '/assets/wordlist/complete-hsk-vocabulary/old/2.json',
+    '/assets/wordlist/complete-hsk-vocabulary/old/3.json',
+    '/assets/wordlist/complete-hsk-vocabulary/old/4.json',
+    '/assets/wordlist/complete-hsk-vocabulary/old/5.json',
+    '/assets/wordlist/complete-hsk-vocabulary/old/6.json',
+]

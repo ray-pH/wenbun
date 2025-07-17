@@ -1,3 +1,4 @@
+import { CHINESE_WORLISTS_SRC } from "./constants";
 import { parseIntOrUndefined, type CharacterWriterData } from "./util";
 
 export const TONE_PREFIX = 'tone-';
@@ -30,11 +31,13 @@ export class ChineseCharacterWordlist {
     }
     
     async init(): Promise<void> {
-        const res = await fetch('/assets/wordlist/complete-hsk-vocabulary/old/1.json');
-        const data = await res.json() as ChineseWordData[];
-        // generate map
-        for (const word of data) {
-            this.map.set(word.simplified, word);
+        for (const url of CHINESE_WORLISTS_SRC) {
+            const res = await fetch(url);
+            const data = await res.json() as ChineseWordData[];
+            // generate map
+            for (const word of data) {
+                this.map.set(word.simplified, word);
+            }
         }
         this.initialized = true;
     }
