@@ -2,6 +2,7 @@ import * as FSRS from "ts-fsrs"
 import { dateDiffFormatted, loadDeck, type DeepRequired } from "./util"
 import { type IStorage, TauriStorage } from "./storage";
 import _ from "lodash";
+import { ChineseToneColorPalette } from "./constants";
 const UNGROUPED_GROUP = "__ungrouped__"
 
 const STORE_FILENAME = "profile.json"
@@ -42,7 +43,7 @@ const DEFAULT_CONFIG: DeepRequired<Config> = {
     zh: {
         isColorBasedOnTone: true,
         // TODO: change 3rd color
-        toneColors: ['#3E92CC', '#419E6F', '#7C3AED', '#DB6B6C'],
+        toneColors: ChineseToneColorPalette.Default,
     }
 }
 
@@ -134,6 +135,14 @@ export class App {
             schedule: {},
             scheduledNewCardCount: 0,
             lastScheduleCheckDate: new Date(0).getTime(),
+        }
+    }
+    
+    async addDeck(deckId: string): Promise<void> {
+        if (!this.decks.includes(deckId)) {
+            this.decks.push(deckId);
+            await this.ensureDeckDataById(deckId);
+            await this.save();
         }
     }
     

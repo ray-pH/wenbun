@@ -21,14 +21,8 @@ export interface CharacterWriterConfig {
     isQuiz: boolean;
 }
 
-const deckToURL: Record<string, string> = {
-    'old-hsk1': '/assets/decks/old-hsk1.txt',
-    'test': '/assets/decks/test.txt',
-}
-
-export async function loadDeck(deckName: string): Promise<string[] | undefined> {
-    const url = deckToURL[deckName];
-    if (!url) return undefined;
+export async function loadDeck(deckId: string): Promise<string[] | undefined> {
+    const url = `/assets/decks/${deckId}.txt`;
     try {
         const res = await fetch(url);
         const text = await res.text();

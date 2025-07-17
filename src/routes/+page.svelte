@@ -14,6 +14,9 @@
 
 <TopBar title="WenBun"></TopBar>
 <div class="main-container">
+    <div class="top-container">
+        <a class="a-button" href="/deck-browser/">Add New Deck</a>
+    </div>
     <div class="deck-list-container">
     </div>
     {#each activeDeckIds as deckId}
@@ -75,5 +78,16 @@
         display: flex;
         justify-content: center;
         align-items: center;
+    }
+    .top-container {
+        margin: 2em;
+    }
+    .a-button {
+        all: unset;
+        display: block;
+        background-color: #FFFFFF90;
+        width: 20em;
+        border-radius: 0.5em;
+        padding: 1em;
     }
 </style>
