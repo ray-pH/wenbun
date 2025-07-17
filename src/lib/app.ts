@@ -180,7 +180,7 @@ export class App {
     getNextCard(deckId: string): number | undefined {
         // TODO: precalculate the next card on review
         // TODO: change new card position based on config
-        if (this.deckData[deckId].scheduledNewCardCount > 0) {
+        if (this.deckData[deckId].scheduledNewCardCount > 0 && this.getNewCardsCount(deckId) > 0) {
             return this.getNewCard(deckId);
         } else {
             return this.getTodaysScheduledCards(deckId)[0];
@@ -195,6 +195,14 @@ export class App {
         let card = FSRS.createEmptyCard();
         deckData.schedule[id] = card;
         return id;
+    }
+    
+    getNewCardsCount(deckId: string): number {
+        const deckData = this.deckData[deckId];
+        const groups = deckData.groups;
+        const cards = Object.values(groups).flat();
+        const unusedCards = cards.filter((s) => !deckData.schedule[s])
+        return unusedCards.length;
     }
     
     pushReviewLog(deckId: string, cardId: number, log: FSRS.ReviewLog): void {
