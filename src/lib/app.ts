@@ -192,7 +192,7 @@ export class App {
         let deckData = this.deckData[deckId];
         let groups = deckData.groups
         let cards = Object.values(groups).flat();
-        const unusedCards = cards.filter((s) => !deckData.schedule[s])
+        const unusedCards = cards.filter((s) => !deckData.schedule[s] || deckData.schedule[s].state === FSRS.State.New)
         let id = unusedCards[0];
         let card = FSRS.createEmptyCard();
         deckData.schedule[id] = card;
