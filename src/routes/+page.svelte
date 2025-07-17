@@ -10,27 +10,31 @@
         app = app;
     })
     
+    async function resetDebugProfile(): Promise<void> {
+        await app.init(true);
+        app = app;
+    }
 </script>
 
 <TopBar title="WenBun"></TopBar>
 <div class="main-container">
     <div class="top-container">
+        <button class="a-button" onclick={() => resetDebugProfile()}>Reset Debug Profile</button>
+        <br>
         <a class="a-button" href="/deck-browser/">Add New Deck</a>
     </div>
     <div class="deck-list-container">
-    </div>
-    {#each activeDeckIds as deckId}
-        <div class="deck-card-container">
-            <a class="deck-card" href="/review/{deckId}">
-                {deckId}
-                {app.deckData[deckId]?.scheduledNewCardCount}
-            </a>
-            <a class="deck-card-button" href="/deck/{deckId}">
-                B
-            </a>
-        </div>
-    {/each}
-</div>
+        {#each activeDeckIds as deckId}
+            <div class="deck-card-container">
+                <a class="deck-card" href="/review/{deckId}">
+                    {deckId}
+                    {app.deckData[deckId]?.scheduledNewCardCount}
+                </a>
+                <a class="deck-card-button" href="/deck/{deckId}">
+                    B
+                </a>
+            </div>
+        {/each} </div> </div>
 
 <style>
     :global(body) {
@@ -51,7 +55,8 @@
     }
     .deck-list-container {
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
+        gap: 1em;
     }
     .deck-card-container {
         display: flex;
@@ -89,5 +94,6 @@
         width: 20em;
         border-radius: 0.5em;
         padding: 1em;
+        cursor: pointer;
     }
 </style>

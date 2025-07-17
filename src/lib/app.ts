@@ -67,20 +67,22 @@ export class App {
         this.fsrs = new FSRS.FSRS(params);
     }
     
-    async init(): Promise<void> {
-        // await this.load();
-        await this.debug();
+    async init(debug = false): Promise<void> {
+        if (debug) {
+            await this.debug();
+        } else {
+            await this.load();
+        }
         if (this.isNeedToProcessTodaySchedule()) {
             await this.processTodaySchedule();
         }
     }
     
     async debug() {
-        if (true || this.decks.length === 0) {
-            this.decks = ['test']
-            await this.ensureDeckData();
-            await this.save();
-        }
+        this.decks = ['test'];
+        this.deckData = {};
+        await this.ensureDeckData();
+        await this.save();
     }
     
     async load() {
