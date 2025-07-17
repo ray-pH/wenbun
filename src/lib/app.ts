@@ -234,7 +234,7 @@ export class App {
     getCardDueFormatted(deckId: string, cardId: number): string {
         const due = this.getCardDue(deckId, cardId);
         if (!due) return 'Not Started';
-        return dateDiffFormatted(new Date(), due);
+        return dateDiffFormatted(new Date(), new Date(due));
     }
     getRatingScheduledTimeStr(deckId: string, cardId: number): Record<FSRS.Grade, string> {
         const card = this.getCard(deckId, cardId);
