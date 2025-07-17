@@ -178,6 +178,7 @@ export class App {
     }
     
     getNextCard(deckId: string): number | undefined {
+        // TODO: precalculate the next card on review
         // TODO: change new card position based on config
         if (this.deckData[deckId].scheduledNewCardCount > 0) {
             return this.getNewCard(deckId);
