@@ -2,6 +2,7 @@
     import { onMount } from "svelte";
     import { App } from "$lib/app";
     import TopBar from "$lib/components/TopBar.svelte";
+    import { DeckInfo } from "$lib/constants";
     
     let app = new App();
     $: activeDeckIds = Object.keys(app.deckData);
@@ -14,6 +15,9 @@
         await app.init(true);
         app = app;
     }
+    function getDeckInfo(deckId: string): typeof DeckInfo[number] {
+        return DeckInfo.find((s) => s.id === deckId) ?? { id: deckId, title: deckId, subtitle: ''};
+    }
 </script>
 
 <TopBar title="WenBun"></TopBar>
@@ -23,18 +27,30 @@
         <br>
         <a class="a-button" href="/deck-browser/">Add New Deck</a>
     </div>
+    <div class="hr"></div>
     <div class="deck-list-container">
         {#each activeDeckIds as deckId}
             <div class="deck-card-container">
-                <a class="deck-card" href="/review/{deckId}">
-                    {deckId}
-                    {app.deckData[deckId]?.scheduledNewCardCount}
-                </a>
+                {@render deckCard(getDeckInfo(deckId))}
                 <a class="deck-card-button" href="/deck/{deckId}">
                     B
                 </a>
             </div>
-        {/each} </div> </div>
+        {/each} 
+    </div> 
+</div>
+
+{#snippet deckCard(info: typeof DeckInfo[number])}
+    <a class="deck-card" href="/review/{info.id}">
+        <div class="left">
+            <span class="deck-card-title">{info.title}</span>
+            <span class="deck-card-subtitle">{info.subtitle}</span>
+        </div>
+        <div class="right">
+            {app.deckData[info.id]?.scheduledNewCardCount}
+        </div>
+    </a>
+{/snippet}
 
 <style>
     :global(body) {
@@ -53,10 +69,16 @@
         width: 100%;
         margin: 1em 0;
     }
+    .hr {
+        width: 20em;
+        height: 1px;
+        background-color: #00000090;
+    }
     .deck-list-container {
         display: flex;
         flex-direction: column;
         gap: 1em;
+        margin-top: 2em;
     }
     .deck-card-container {
         display: flex;
@@ -66,12 +88,31 @@
     }
     .deck-card {
         all: unset;
-        color: white;
-        background-color: #3E92CC;
+        /* background-color: #3E92CC; */
+        /* background-color: #FFFFFF90;
         border-radius: 0.5em;
         width: 20em;
         height: 2em;
-        padding: 0.5em;
+        padding: 0.5em; */
+        
+        background-color: #FFFFFF90;
+        border-radius: 0.5em;
+        width: 20em;
+        padding: 1em;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        
+        .deck-card-title {
+            font-weight: bold;
+        }
+        .deck-card-subtitle {
+            color: #00000080;
+            font-size: 0.9em;
+        }
+        .right {
+            color: #3E92CC;
+        }
     }
     .deck-card-button {
         all: unset;
