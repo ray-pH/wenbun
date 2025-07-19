@@ -67,7 +67,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     
     learningSteps: ["1m", "10m"],
     alreadyLearningLearningSteps: ["5d", "15d"],
-    desiredRetention: 90,
+    desiredRetention: 0.9,
     enableShortTerm: true,
     enableFuzz: false,
     FSRSParams: DEFAULT_FSRS_PARAM,

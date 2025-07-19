@@ -15,7 +15,8 @@ export const DeckInfo = [
 ]
 
 export const ChineseToneColorPalette = {
-    Default: ['#3E92CC', '#419E6F', '#7C3AED', '#DB6B6C'],
+    Default: ['#3E92CC', '#419E6F', '#7C3AED', '#DB6B6C', '#555555'],
+    "Tofu Like": ['#DB6B6C','#419E6F', '#3E92CC', '#7C3AED', '#555555'],
 }
 
 export const CHINESE_WORLISTS_SRC = [
@@ -31,3 +32,65 @@ export const DEFAULT_FSRS_PARAM =  [
     0.212, 1.2931, 2.3065, 8.2956, 6.4133, 0.8334, 3.0194, 0.001, 1.8722, 0.1666, 
     0.796, 1.4835, 0.0614, 0.2629, 1.6483, 0.6014, 1.8729, 0.5425, 0.0912, 0.0658, 0.1542, 
 ]
+
+export const SETTINGS_LABEL_DATA = {
+  newCardPerDay: {
+    label: "New Card Per Day",
+    help: "Specifies the number of new cards to learn each day.",
+  },
+  maxReviewsPerDay: {
+    label: "Max Reviews Per Day",
+    help: "Specifies the maximum number of cards to review each day.",
+  },
+  newCardOrder: {
+    label: "New Card Order",
+    help: "Determines the sequence in which new cards are introduced.",
+  },
+  newAlreadyLearningCardPerDay: {
+    label: "New Already Learning Card Per Day",
+    help: "Specifies the number of cards per day drawn from the “Already Learning” pool.",
+  },
+  newAlreadyLearningCardOrder: {
+    label: "New Already Learning Card Order",
+    help: "Determines the sequence in which cards from the “Already Learning” pool are presented.",
+  },
+
+  learningSteps: {
+    label: "Learning Steps",
+    help: "TODO",
+  },
+  alreadyLearningLearningSteps: {
+    label: "Already Learning Learning Steps",
+    help: "TODO",
+  },
+  desiredRetention: {
+    label: "Desired Retention",
+    help: "Defines the target probability of successful recall. Higher values increase review frequency (recommended range: 0.8–0.9).",
+  },
+  enableShortTerm: {
+    label: "Enable Short Term",
+    help: "When disabled, the short-term review schedule is bypassed.",
+  },
+  enableFuzz: {
+    label: "Enable Fuzz",
+    help: "When enabled, introduces slight random variation to intervals to prevent reviews from clustering on the same day.",
+  },
+  FSRSParams: {
+    label: "FSRS Params",
+    help: "Specifies advanced parameters for the FSRS review algorithm.",
+  },
+
+  zhIsColorBasedOnTone: {
+    label: "Color The Characters Based On Their Tone",
+    help: "When enabled, assigns a distinct color to each Chinese tone to facilitate recognition.",
+  },
+  zhToneColors: {
+    label: "Tone Colors",
+    help: "Specifies the colors used for each Chinese tone.",
+  },
+  zhTone1: { label: "Tone 1", help: "" },
+  zhTone2: { label: "Tone 2", help: "" },
+  zhTone3: { label: "Tone 3", help: "" },
+  zhTone4: { label: "Tone 4", help: "" },
+  zhToneNeutral: { label: "Neutral", help: "" },
+}
