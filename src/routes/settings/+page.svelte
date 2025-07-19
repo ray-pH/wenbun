@@ -14,7 +14,7 @@
         await app.init();
         config = _.cloneDeep(app.getConfig());
         learningStepsString = config.learningSteps.join(" ");
-        alreadyLearningLearningStepsString = config.alreadyLearningLearningSteps.join(" ");
+        previouslyStudiedLearningStepsString = config.previouslyStudiedLearningSteps.join(" ");
         fsrsParamsString = config.FSRSParams.join(",");
         app = app;
     })
@@ -29,10 +29,10 @@
     }
     
     let learningStepsString = "";
-    let alreadyLearningLearningStepsString = "";
+    let previouslyStudiedLearningStepsString = "";
     let fsrsParamsString = "";
     let isLearningStepsStringValid = true;
-    let isAlreadyLearningLearningStepsStringValid = true;
+    let isPreviouslyStudiedLearningStepsStringValid = true;
     let isFSRSParamsStringValid = true;
     $: {
         if (config) {
@@ -41,10 +41,10 @@
             if (isLearningStepStringValid) {
                 config.learningSteps = learningStepsParts as FSRS.Steps;
             }
-            const alreadyLearningLearningStepsParts = alreadyLearningLearningStepsString.split(" ").map((s) => s.trim()).filter((s) => s);
-            const isAlreadyLearningLearningStepsStringValid = alreadyLearningLearningStepsParts.length < 4 && alreadyLearningLearningStepsParts.every((s) => s.match(/^\d+[m|d]$/));
-            if (isAlreadyLearningLearningStepsStringValid) {
-                config.alreadyLearningLearningSteps = alreadyLearningLearningStepsParts as FSRS.Steps;
+            const previouslyStudiedLearningStepsParts = previouslyStudiedLearningStepsString.split(" ").map((s) => s.trim()).filter((s) => s);
+            const isPreviouslyStudiedLearningStepsStringValid = previouslyStudiedLearningStepsParts.length < 4 && previouslyStudiedLearningStepsParts.every((s) => s.match(/^\d+[m|d]$/));
+            if (isPreviouslyStudiedLearningStepsStringValid) {
+                config.previouslyStudiedLearningSteps = previouslyStudiedLearningStepsParts as FSRS.Steps;
             }
             const fsrsParamsParts = fsrsParamsString.split(",").map((s) => s.trim()).filter((s) => s);
             const isFSRSParamsStringValid = fsrsParamsParts.length === 21 && fsrsParamsParts.every((s) => !isNaN(parseFloat(s)));
@@ -77,11 +77,11 @@
                         <option value={NewCardOrder.BeforeReviews}>Before Reviews</option>
                     </select>
                 </SettingsItem>
-                <SettingsItem key="newAlreadyLearningCardPerDay">
-                    <input type="number" bind:value={config.newAlreadyLearningCardPerDay}>
+                <SettingsItem key="newPreviouslyStudiedCardPerDay">
+                    <input type="number" bind:value={config.newPreviouslyStudiedCardPerDay}>
                 </SettingsItem>
-                <SettingsItem key="newAlreadyLearningCardOrder">
-                    <select bind:value={config.newAlreadyLearningCardOrder}>
+                <SettingsItem key="newPreviouslyStudiedCardOrder">
+                    <select bind:value={config.newPreviouslyStudiedCardOrder}>
                         <option value={NewCardOrder.Mix}>Mix</option>
                         <option value={NewCardOrder.AfterReviews}>After Reviews</option>
                         <option value={NewCardOrder.BeforeReviews}>Before Reviews</option>
@@ -99,10 +99,10 @@
                         class:invalid={!isLearningStepsStringValid}
                     >
                 </SettingsItem>
-                <SettingsItem key="alreadyLearningLearningSteps">
+                <SettingsItem key="previouslyStudiedLearningSteps">
                     <input type="text" 
-                        bind:value={alreadyLearningLearningStepsString} 
-                        class:invalid={!isAlreadyLearningLearningStepsStringValid}
+                        bind:value={previouslyStudiedLearningStepsString} 
+                        class:invalid={!isPreviouslyStudiedLearningStepsStringValid}
                     >
                 </SettingsItem>
                 <SettingsItem key="desiredRetention">

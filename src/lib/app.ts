@@ -17,7 +17,7 @@ export enum WenBunCustomState {
     ReviewYoung = "Young",
     ReviewMature = "Mature",
     Relearning = "Relearning",
-    PreviouslyStarted = "Previously Started", // mark cards that are already started learning before this deck
+    PreviouslyStudied = "Previously Studied", // mark cards that are previously studied before this deck
 }
 
 export enum NewCardOrder {
@@ -28,7 +28,7 @@ export enum NewCardOrder {
 
 export interface DeckData {
     deck: string[];
-    previouslyStarted: number[]; // list of card ids that are marked as previously started (i.e. already started learning before this deck)
+    previouslyStudied: number[]; // list of card ids that are marked as previously studied (i.e. previously studied before this deck)
     groups: Record<string, number[]>
     schedule: Record<number, FSRS.Card>
     scheduledNewCardCount: number
@@ -40,12 +40,12 @@ export interface WenbunConfig {
     newCardPerDay?: number;
     maxReviewsPerDay?: number; //not implemented
     newCardOrder?: NewCardOrder; //not implemented
-    newAlreadyLearningCardPerDay?: number; //not implemented
-    newAlreadyLearningCardOrder?: NewCardOrder; //not implemented
+    newPreviouslyStudiedCardPerDay?: number; //not implemented
+    newPreviouslyStudiedCardOrder?: NewCardOrder; //not implemented
     
     // FSRS
     learningSteps?: FSRS.Steps; //not implemented
-    alreadyLearningLearningSteps?: FSRS.Steps; //not implemented
+    previouslyStudiedLearningSteps?: FSRS.Steps; //not implemented
     desiredRetention?: number; //not implemented
     enableShortTerm?: boolean; //not implemented
     enableFuzz?: boolean; //not implemented
@@ -62,11 +62,11 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     newCardPerDay: 5,
     maxReviewsPerDay: 200,
     newCardOrder: NewCardOrder.Mix,
-    newAlreadyLearningCardPerDay: 20,
-    newAlreadyLearningCardOrder: NewCardOrder.Mix,
+    newPreviouslyStudiedCardPerDay: 20,
+    newPreviouslyStudiedCardOrder: NewCardOrder.Mix,
     
     learningSteps: ["1m", "10m"],
-    alreadyLearningLearningSteps: ["5d", "15d"],
+    previouslyStudiedLearningSteps: ["5d", "15d"],
     desiredRetention: 0.9,
     enableShortTerm: true,
     enableFuzz: false,
@@ -165,7 +165,7 @@ export class App {
             groups: {
                 [UNGROUPED_GROUP]: Array.from(deck.keys()) // 0..(deck.length - 1)
             },
-            previouslyStarted: [],
+            previouslyStudied: [],
             schedule: {},
             scheduledNewCardCount: 0,
             lastScheduleCheckDate: new Date(0).getTime(),
@@ -287,8 +287,8 @@ export class App {
         return ratingScheduledTimeStr;
     }
     getWenbunCustomState(deckId: string, cardId: number): WenBunCustomState {
-        if (this.deckData[deckId]?.previouslyStarted?.includes(cardId)) {
-            return WenBunCustomState.PreviouslyStarted;
+        if (this.deckData[deckId]?.previouslyStudied?.includes(cardId)) {
+            return WenBunCustomState.PreviouslyStudied;
         }
         const card = this.getCard(deckId, cardId);
         switch (card?.state) {

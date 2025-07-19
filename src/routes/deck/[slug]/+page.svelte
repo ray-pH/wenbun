@@ -47,7 +47,7 @@
             case WenBunCustomState.ReviewYoung: return 'card-status-review-young';
             case WenBunCustomState.ReviewMature: return 'card-status-review-mature';
             case WenBunCustomState.Relearning: return 'card-status-relearning';
-            case WenBunCustomState.PreviouslyStarted: return 'card-status-previously-started';
+            case WenBunCustomState.PreviouslyStudied: return 'card-status-previously-studied';
         }
     }
 </script>
@@ -169,7 +169,7 @@
                 &.card-status-relearning {
                     background-color: #F9C26A;
                 }
-                &.card-status-previously-started {
+                &.card-status-previously-studied {
                     background-color: gray;
                 }
             }

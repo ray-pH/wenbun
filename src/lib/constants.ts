@@ -46,21 +46,21 @@ export const SETTINGS_LABEL_DATA = {
     label: "New Card Order",
     help: "Determines the sequence in which new cards are introduced.",
   },
-  newAlreadyLearningCardPerDay: {
-    label: "New Already Learning Card Per Day",
-    help: "Specifies the number of cards per day drawn from the “Already Learning” pool.",
+  newPreviouslyStudiedCardPerDay: {
+    label: "New Previously Studied Card Per Day",
+    help: "Specifies the number of cards per day drawn from the \"Previously Studied\" pool.",
   },
-  newAlreadyLearningCardOrder: {
-    label: "New Already Learning Card Order",
-    help: "Determines the sequence in which cards from the “Already Learning” pool are presented.",
+  newPreviouslyStudiedCardOrder: {
+    label: "New Previously Studied Card Order",
+    help: "Determines the sequence in which cards from the \"Previously Studied\" pool are presented.",
   },
 
   learningSteps: {
     label: "Learning Steps",
     help: "TODO",
   },
-  alreadyLearningLearningSteps: {
-    label: "Already Learning Learning Steps",
+  previouslyStudiedLearningSteps: {
+    label: "Previously Studied Learning Steps",
     help: "TODO",
   },
   desiredRetention: {
