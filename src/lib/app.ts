@@ -2,7 +2,7 @@ import * as FSRS from "ts-fsrs"
 import { dateDiffFormatted, loadDeck, type DeepRequired } from "./util"
 import { type IStorage, TauriStorage } from "./storage";
 import _ from "lodash";
-import { ChineseToneColorPalette } from "./constants";
+import { ChineseToneColorPalette, DEFAULT_FSRS_PARAM } from "./constants";
 const UNGROUPED_GROUP = "__ungrouped__"
 
 const STORE_FILENAME = "profile.json"
@@ -20,6 +20,12 @@ export enum WenBunCustomState {
     PreviouslyStarted = "Previously Started", // mark cards that are already started learning before this deck
 }
 
+export enum NewCardOrder {
+    Mix = "Mix",
+    AfterReviews = "After Reviews",
+    BeforeReviews = "Before Reviews",
+}
+
 export interface DeckData {
     deck: string[];
     previouslyStarted: number[]; // list of card ids that are marked as previously started (i.e. already started learning before this deck)
@@ -29,8 +35,22 @@ export interface DeckData {
     lastScheduleCheckDate: number
 }
 
-export interface Config {
-    scheduledNewCardCount?: number;
+export interface WenbunConfig {
+    // learning
+    newCardPerDay?: number;
+    maxReviewsPerDay?: number; //not implemented
+    newCardOrder?: NewCardOrder; //not implemented
+    newAlreadyLearningCardPerDay?: number; //not implemented
+    newAlreadyLearningCardOrder?: NewCardOrder; //not implemented
+    
+    // FSRS
+    learningSteps?: FSRS.Steps; //not implemented
+    alreadyLearningLearningSteps?: FSRS.Steps; //not implemented
+    desiredRetention?: number; //not implemented
+    enableShortTerm?: boolean; //not implemented
+    enableFuzz?: boolean; //not implemented
+    FSRSParams?: number[]; //not implemented
+    
     // chinese
     zh: {
         isColorBasedOnTone?: boolean;
@@ -38,8 +58,20 @@ export interface Config {
     }
 }
 
-const DEFAULT_CONFIG: DeepRequired<Config> = {
-    scheduledNewCardCount: 5,
+const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
+    newCardPerDay: 5,
+    maxReviewsPerDay: 200,
+    newCardOrder: NewCardOrder.Mix,
+    newAlreadyLearningCardPerDay: 20,
+    newAlreadyLearningCardOrder: NewCardOrder.Mix,
+    
+    learningSteps: ["1m", "10m"],
+    alreadyLearningLearningSteps: ["5d", "15d"],
+    desiredRetention: 90,
+    enableShortTerm: true,
+    enableFuzz: false,
+    FSRSParams: DEFAULT_FSRS_PARAM,
+    
     zh: {
         isColorBasedOnTone: true,
         // TODO: change 3rd color
@@ -50,7 +82,7 @@ const DEFAULT_CONFIG: DeepRequired<Config> = {
 export class App {
     decks: string[] = [];
     deckData: Record<string, DeckData> = {};
-    config: Config = DEFAULT_CONFIG;
+    config: WenbunConfig = DEFAULT_CONFIG;
     reviewLogs: {deckId: string, cardId: number, log: FSRS.ReviewLog}[] = [];
     isLoadDone = false;
     fsrs!: FSRS.FSRS;
@@ -118,7 +150,7 @@ export class App {
             const deckData = this.deckData[deckId];
             if (new Date(deckData.lastScheduleCheckDate).getDate() < today.getDate()) {
                 // do the daily routine
-                deckData.scheduledNewCardCount = this.config.scheduledNewCardCount || DEFAULT_CONFIG.scheduledNewCardCount;
+                deckData.scheduledNewCardCount = this.config.newCardPerDay || DEFAULT_CONFIG.newCardPerDay;
                 deckData.lastScheduleCheckDate = today.getTime();
             }
         }
@@ -163,8 +195,13 @@ export class App {
         }
     }
     
-    getConfig(): DeepRequired<Config> {
+    getConfig(): DeepRequired<WenbunConfig> {
         return _.merge({}, DEFAULT_CONFIG, this.config);
+    }
+    
+    async saveConfig(config: WenbunConfig): Promise<void> {
+        this.config = config;
+        await this.save();
     }
     
     rateCard(deckId: string, cardId: number, grade: FSRS.Grade, date?: Date): void {

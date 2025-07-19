@@ -2,8 +2,9 @@
     interface Props {
 		title: string;
 		backUrl?: string
+		isSettings?: boolean
 	}
-    let { title, backUrl }: Props = $props();
+    let { title, backUrl, isSettings }: Props = $props();
 </script>
 
 <div class="top-bar">
@@ -18,6 +19,11 @@
         <span class="title">{title}</span>
     </div>
     <div class="right">
+        {#if !isSettings}
+            <a class="icon-button" href="/settings">
+                S
+            </a>
+        {/if}
     </div>
 </div>
 
@@ -25,6 +31,7 @@
     .top-bar {
         position: relative;
         display: flex;
+        justify-content: space-between;
         align-items: center;
         width: 100%;
         min-height: 2em;
@@ -32,8 +39,8 @@
         padding: 0.5em;
         color: white;
     }
-    .left, .right {
-        flex: 1;
+    .right {
+        margin-right: 1em;
     }
     .center {
         position: absolute;
