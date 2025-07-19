@@ -44,12 +44,12 @@ export interface WenbunConfig {
     newPreviouslyStudiedCardOrder?: NewCardOrder; //not implemented
     
     // FSRS
-    learningSteps?: FSRS.Steps; //not implemented
-    previouslyStudiedLearningSteps?: FSRS.Steps; //not implemented
-    desiredRetention?: number; //not implemented
-    enableShortTerm?: boolean; //not implemented
-    enableFuzz?: boolean; //not implemented
-    FSRSParams?: number[]; //not implemented
+    learningSteps?: FSRS.Steps;
+    previouslyStudiedLearningSteps?: FSRS.Steps;
+    desiredRetention?: number;
+    enableShortTerm?: boolean;
+    enableFuzz?: boolean;
+    FSRSParams?: number[];
     
     // chinese
     zh: {
@@ -74,7 +74,6 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     
     zh: {
         isColorBasedOnTone: true,
-        // TODO: change 3rd color
         toneColors: ChineseToneColorPalette.Default,
     }
 }
@@ -86,6 +85,7 @@ export class App {
     reviewLogs: {deckId: string, cardId: number, log: FSRS.ReviewLog}[] = [];
     isLoadDone = false;
     fsrs!: FSRS.FSRS;
+    fsrsPrevStudied!: FSRS.FSRS;
 
     storage: IStorage;
 
@@ -95,8 +95,26 @@ export class App {
     }
     
     updateFSRS() {
-        const params = FSRS.generatorParameters()
+        const config = this.getConfig();
+        const params = FSRS.generatorParameters({
+            request_retention: config.desiredRetention,
+            // maximum_interval: number;
+            w: config.FSRSParams,
+            enable_fuzz: config.enableFuzz,
+            enable_short_term: config.enableShortTerm,
+            learning_steps: config.learningSteps,
+        })
         this.fsrs = new FSRS.FSRS(params);
+        
+        const prevStudiedParams = FSRS.generatorParameters({
+            request_retention: config.desiredRetention,
+            // maximum_interval: number;
+            w: config.FSRSParams,
+            enable_fuzz: config.enableFuzz,
+            enable_short_term: config.enableShortTerm,
+            learning_steps: config.previouslyStudiedLearningSteps,
+        });
+        this.fsrsPrevStudied = new FSRS.FSRS(prevStudiedParams);
     }
     
     async init(debug = false): Promise<void> {
