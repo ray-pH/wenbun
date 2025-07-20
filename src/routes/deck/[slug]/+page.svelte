@@ -50,14 +50,29 @@
             case WenBunCustomState.PreviouslyStudied: return 'card-status-previously-studied';
         }
     }
+    
+    let groupContentCount =  20;
+    async function splitIntoGroupsOf() {
+        const groupCount = Math.ceil(deckData.deck.length / groupContentCount);
+        const confirm = window.confirm(`Split the deck into ${groupCount} groups?`);
+        if (confirm) {
+            app.splitDeckIntoGroupOfN(deckId, groupContentCount);
+            await app.save();
+            app = app;
+        }
+    }
 </script>
 
 <TopBar title="Deck" backUrl="/"></TopBar>
 <div class="container">
+    <div class="top-container" style="display: flex; gap: 0.5em; margin-bottom: 2em">
+        <button class="button" onclick={() => splitIntoGroupsOf()}>Split into groups of</button>
+        <input class="input" type="number" bind:value={groupContentCount} min="1" max="100">
+    </div>
     <div class="group-container">
         {#each groupNames as groupName}
             <div class="group">
-                <button class="group-header" on:click={() => toggleAccordion(groupName)}>
+                <button class="group-header" onclick={() => toggleAccordion(groupName)}>
                     <div>
                         {groupName == '__ungrouped__' ? 'Ungrouped' : groupName}
                     </div>
@@ -101,7 +116,8 @@
     }
     .group-container {
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
+        gap: 2em;
     }
     .group-content {
         width: 100%;
@@ -178,6 +194,25 @@
     .card-status-new {
         .due {
             color: #00000050;
+        }
+    }
+    .button {
+        all: unset;
+        color: white;
+        background-color: #3E92CC;
+        border-radius: 0.5em;
+        font-size: 0.9em;
+        padding: 0.5em 1em;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        &:hover {
+            opacity: 0.8;
+        }
+        &:disabled {
+            background-color: gray;
+            pointer-events: none;
         }
     }
 </style>

@@ -415,4 +415,17 @@ export class App {
         const colors = config.zh.toneColors;
         return colors[tone - 1];
     }
+    
+    splitDeckIntoGroupOfN(deckId: string, groupContentCount: number): void {
+        const deckData = this.deckData[deckId];
+        if (!deckData) return;
+        const ids = Array.from(deckData.deck.keys())
+        const groups: Record<string, number[]> = {};
+        const groupCount = Math.ceil(ids.length / groupContentCount);
+        for (let i = 0; i < groupCount; i++) {
+            const groupId = `group-${i + 1}`;
+            groups[groupId] = ids.slice(i * groupContentCount, (i + 1) * groupContentCount);
+        }
+        deckData.groups = groups;
+    }
 }
