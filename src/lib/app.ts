@@ -8,6 +8,8 @@ const UNGROUPED_GROUP = "__ungrouped__"
 const STORE_FILENAME = "profile.json"
 const STORE_KEY_DECKS = "decks"
 const STORE_KEY_DECK_DATA = "deckData"
+const STORE_KEY_CONFIG = "config"
+const STORE_KEY_REVIEW_LOGS = "reviewLogs"
 
 const FSRS_GRADES: FSRS.Grade[] = [FSRS.Rating.Again, FSRS.Rating.Hard, FSRS.Rating.Good, FSRS.Rating.Easy];
 
@@ -75,14 +77,20 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     zh: {
         isColorBasedOnTone: true,
         toneColors: ChineseToneColorPalette.Default,
-    }
+    },
+}
+
+type ReviewLog = {
+    deckId: string;
+    cardId: number;
+    log: FSRS.ReviewLog;
 }
 
 export class App {
     decks: string[] = [];
     deckData: Record<string, DeckData> = {};
     config: WenbunConfig = DEFAULT_CONFIG;
-    reviewLogs: {deckId: string, cardId: number, log: FSRS.ReviewLog}[] = [];
+    reviewLogs: ReviewLog[] = [];
     isLoadDone = false;
     fsrs!: FSRS.FSRS;
     fsrsPrevStudied!: FSRS.FSRS;
@@ -136,19 +144,54 @@ export class App {
     }
     
     async load() {
-        const [rawDecks, rawDeckData] = await Promise.all([
+        const [decks, deckData, config, reviewLogs] = await Promise.all([
             this.storage.load<string[]>(STORE_KEY_DECKS),
             this.storage.load<Record<string, DeckData>>(STORE_KEY_DECK_DATA),
+            this.storage.load<WenbunConfig>(STORE_KEY_CONFIG),
+            this.storage.load<ReviewLog[]>(STORE_KEY_REVIEW_LOGS),
         ]);
-        this.decks = rawDecks || [];
-        this.deckData = rawDeckData || {};
+        this.decks = decks || [];
+        this.deckData = deckData || {};
+        this.config = config || DEFAULT_CONFIG;
+        this.reviewLogs = reviewLogs || [];
         this.isLoadDone = true;
     }
     async save() {
         await Promise.all([
             this.storage.save(STORE_KEY_DECKS, this.decks),
             this.storage.save(STORE_KEY_DECK_DATA, this.deckData),
+            this.storage.save(STORE_KEY_CONFIG, this.config),
+            this.storage.save(STORE_KEY_REVIEW_LOGS, this.reviewLogs),
         ]);
+    }
+    
+    exportProfile(): string {
+        const profileData = {
+            config: this.config,
+            decks: this.decks,
+            deckData: this.deckData,
+            reviewLogs: this.reviewLogs,
+            meta: {
+                _profileVersion: 1,
+            }
+        }
+        return JSON.stringify(profileData);
+    }
+    async tryImportProfile(jsonStr: string): Promise<boolean> {
+        // TODO: handle profile versioning
+        // TODO: backup data
+        // TODO: ensure structure
+        try {
+            const {config, decks, deckData, reviewLogs, meta} = JSON.parse(jsonStr);
+            this.config = config;
+            this.decks = decks;
+            this.deckData = deckData;
+            this.reviewLogs = reviewLogs;
+            await this.save();
+            return true;
+        } catch (e) {
+            return false;
+        }
     }
     
     isNeedToProcessTodaySchedule(): boolean {

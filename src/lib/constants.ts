@@ -44,7 +44,7 @@ export const SETTINGS_LABEL_DATA = {
   },
   newCardOrder: {
     label: "New Card Order",
-    help: "Determines the sequence in which new cards are introduced.",
+    help: "Specifies how new cards are interleaved with review cards.",
   },
   newPreviouslyStudiedCardPerDay: {
     label: "New Previously Studied Card Per Day",
@@ -52,16 +52,16 @@ export const SETTINGS_LABEL_DATA = {
   },
   newPreviouslyStudiedCardOrder: {
     label: "New Previously Studied Card Order",
-    help: "Determines the sequence in which cards from the \"Previously Studied\" pool are presented.",
+    help: "Specifies how cards from the “Previously Studied” pool are interleaved with review cards.",
   },
 
   learningSteps: {
     label: "Learning Steps",
-    help: "TODO",
+    help: "Defines the sequence of intervals used by FSRS during the initial learning phase before cards enter the long-term review schedule.",
   },
   previouslyStudiedLearningSteps: {
     label: "Previously Studied Learning Steps",
-    help: "TODO",
+    help: "Defines the sequence of intervals used by FSRS during the initial learning phase for cards in the \"Previously Studied\" pool before they enter the long-term review schedule.",
   },
   desiredRetention: {
     label: "Desired Retention",
@@ -81,7 +81,7 @@ export const SETTINGS_LABEL_DATA = {
   },
 
   zhIsColorBasedOnTone: {
-    label: "Color The Characters Based On Their Tone",
+    label: "Color Characters Based On Their Tone",
     help: "When enabled, assigns a distinct color to each Chinese tone to facilitate recognition.",
   },
   zhToneColors: {

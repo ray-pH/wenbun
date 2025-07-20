@@ -10,14 +10,25 @@
     
     let app = new App();
     let config: DeepRequired<WenbunConfig>;
+    let initialConfig: DeepRequired<WenbunConfig>;
     onMount(async () => {
         await app.init();
         config = _.cloneDeep(app.getConfig());
+        initialConfig = _.cloneDeep(config);
         learningStepsString = config.learningSteps.join(" ");
         previouslyStudiedLearningStepsString = config.previouslyStudiedLearningSteps.join(" ");
         fsrsParamsString = config.FSRSParams.join(",");
+        profileStr = app.exportProfile();
+        initialProfileStr = profileStr;
         app = app;
     })
+    
+    $: isConfigChanged = !_.isEqual(config, initialConfig);
+    
+    async function saveConfig() {
+        await app.saveConfig(config);
+        initialConfig = _.cloneDeep(config);
+    }
     
     let selectedTonePreset = '';
     function loadChineseToneColorPreset(key: string) {
@@ -54,6 +65,18 @@
         }
     }
     
+    let isShowProfileTextbox = false;
+    let profileStr = "";
+    let initialProfileStr = "";
+    $: isProfileStrChanged = profileStr !== initialProfileStr;
+    function importProfileData() {
+        app.tryImportProfile(profileStr).then((success) => {
+            if (success) {
+            } else {
+                window.alert("Failed to import profile data");
+            }
+        });
+    }
     
 </script>
 
@@ -61,6 +84,30 @@
 <TopBar title="Settings" backUrl="/" isSettings={true}></TopBar>
 <div class="main-container">
     {#if config}
+        <div class="settings-section">
+            <!-- TODO: improve the UI for this -->
+            <button class="button" onclick={() => saveConfig()} disabled={!isConfigChanged}>Save</button>
+        </div>
+        <div class="settings-section">
+            <div class="section-title">Profile</div>
+                <div>
+                    {#if isShowProfileTextbox}
+                        <textarea bind:value={profileStr} class="profile-textarea"></textarea>
+                        <br>
+                        <button class="button" onclick={() => importProfileData()} disabled={!isProfileStrChanged}>import</button>
+                        <div class="settings-label-help" style="margin: 1em 0">
+                            To export the profile data, copy the text above and store it somewhere safe.<br>
+                            To import the profile data, paste the text into the textbox and click the import button.
+                        </div>
+                    {/if}
+                    <button class="button" onclick={() => isShowProfileTextbox = !isShowProfileTextbox}>
+                        import/export
+                    </button>
+                </div>
+            <div class="section-container">
+            </div>
+        </div>
+        
         <div class="settings-section">
             <div class="section-title">Learning</div>
             <div class="section-container">
@@ -195,6 +242,35 @@
         gap: 1em;
         input {
             width: 5em;
+        }
+    }
+    .settings-label-help {
+        color: #00000090;
+        font-size: 0.8em;
+    }
+    .profile-textarea {
+        width: 100%;
+        height: 10em;
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
+    .button {
+        all: unset;
+        color: white;
+        background-color: #3E92CC;
+        border-radius: 0.5em;
+        font-size: 0.9em;
+        padding: 0.5em 1em;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        &:hover {
+            opacity: 0.8;
+        }
+        &:disabled {
+            background-color: gray;
+            pointer-events: none;
         }
     }
 </style>
