@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { App, WenBunCustomState } from "$lib/app";
+    import { App, DEFAULT_GROUP_CONTENT_COUNT, WenBunCustomState } from "$lib/app";
     import TopBar from "$lib/components/TopBar.svelte";
     import { onMount } from "svelte";
     import { SvelteMap } from "svelte/reactivity";
@@ -32,8 +32,7 @@
     }
     
     $: deckData = app.deckData[deckId];
-    $: groups = deckData?.groups ?? {};
-    $: groupNames = Object.keys(groups);
+    $: groups = deckData?.groups ?? [];
     
     let accordionState = new SvelteMap<string, boolean>();
     function toggleAccordion(id: string) {
@@ -51,7 +50,7 @@
         }
     }
     
-    let groupContentCount =  20;
+    let groupContentCount = DEFAULT_GROUP_CONTENT_COUNT;
     async function splitIntoGroupsOf() {
         const groupCount = Math.ceil(deckData.deck.length / groupContentCount);
         const confirm = window.confirm(`Split the deck into ${groupCount} groups?`);
@@ -70,19 +69,19 @@
         <input class="input" type="number" bind:value={groupContentCount} min="1" max="100">
     </div>
     <div class="group-container">
-        {#each groupNames as groupName}
+        {#each groups as group}
             <div class="group">
-                <button class="group-header" onclick={() => toggleAccordion(groupName)}>
+                <button class="group-header" onclick={() => toggleAccordion(group.label)}>
                     <div>
-                        {groupName == '__ungrouped__' ? 'Ungrouped' : groupName}
+                        {group.label == '__ungrouped__' ? 'Ungrouped' : group.label}
                     </div>
                     <div>
-                        {accordionState.get(groupName) ? '-' : '+'}
+                        {accordionState.get(group.label) ? '-' : '+'}
                     </div>
                 </button>
-                {#if accordionState.get(groupName)}
+                {#if accordionState.get(group.label)}
                     <div class="group-content">
-                        {#each groups[groupName] as id}
+                        {#each group.cardIds as id}
                             <div class={`card ${getCardStatusClass(deckId, id)}`}>
                                 <div class="card-word">
                                     <span class="word">

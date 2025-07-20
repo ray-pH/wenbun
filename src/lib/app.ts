@@ -12,6 +12,7 @@ const STORE_KEY_CONFIG = "config"
 const STORE_KEY_REVIEW_LOGS = "reviewLogs"
 
 const FSRS_GRADES: FSRS.Grade[] = [FSRS.Rating.Again, FSRS.Rating.Hard, FSRS.Rating.Good, FSRS.Rating.Easy];
+export const DEFAULT_GROUP_CONTENT_COUNT = 30;
 
 export enum WenBunCustomState {
     New = "New",
@@ -31,7 +32,7 @@ export enum NewCardOrder {
 export interface DeckData {
     deck: string[];
     previouslyStudied: number[]; // list of card ids that are marked as previously studied (i.e. previously studied before this deck)
-    groups: Record<string, number[]>
+    groups: Array<{ label: string, cardIds: number[] }>
     schedule: Record<number, FSRS.Card>
     scheduledNewCardCount: number
     scheduledPreviouslyStudiedCardCount: number
@@ -224,9 +225,9 @@ export class App {
         if (!deck) return undefined;
         return <DeckData>{
             deck,
-            groups: {
-                [UNGROUPED_GROUP]: Array.from(deck.keys()) // 0..(deck.length - 1)
-            },
+            groups: [
+                { label: UNGROUPED_GROUP, cardIds: Array.from(deck.keys()) } // 0..(deck.length - 1)
+            ],
             previouslyStudied: [],
             schedule: {},
             scheduledNewCardCount: 0,
@@ -240,6 +241,7 @@ export class App {
         if (!this.decks.includes(deckId)) {
             this.decks.push(deckId);
             await this.ensureDeckDataById(deckId);
+            this.splitDeckIntoGroupOfN(deckId, DEFAULT_GROUP_CONTENT_COUNT)
             await this.save();
         }
     }
@@ -309,12 +311,12 @@ export class App {
     }
     
     getNewCard(deckId: string): number {
-        let deckData = this.deckData[deckId];
-        let groups = deckData.groups
-        let cards = Object.values(groups).flat();
+        const deckData = this.deckData[deckId];
+        const groups = deckData.groups
+        const cards = groups.flatMap((g) => g.cardIds);
         const unusedCards = cards.filter((s) => !deckData.schedule[s] || deckData.schedule[s].state === FSRS.State.New)
-        let id = unusedCards[0];
-        let card = FSRS.createEmptyCard();
+        const id = unusedCards[0];
+        const card = FSRS.createEmptyCard();
         deckData.schedule[id] = card;
         return id;
     }
@@ -327,7 +329,7 @@ export class App {
     getNewCardsCount(deckId: string): number {
         const deckData = this.deckData[deckId];
         const groups = deckData.groups;
-        const cards = Object.values(groups).flat();
+        const cards = groups.flatMap((g) => g.cardIds);
         const unusedCards = cards.filter((s) => !deckData.schedule[s])
         return unusedCards.length;
     }
@@ -420,11 +422,14 @@ export class App {
         const deckData = this.deckData[deckId];
         if (!deckData) return;
         const ids = Array.from(deckData.deck.keys())
-        const groups: Record<string, number[]> = {};
+        const groups: typeof deckData.groups = [];
         const groupCount = Math.ceil(ids.length / groupContentCount);
         for (let i = 0; i < groupCount; i++) {
             const groupId = `group-${i + 1}`;
-            groups[groupId] = ids.slice(i * groupContentCount, (i + 1) * groupContentCount);
+            groups.push({ 
+                label: groupId, 
+                cardIds: ids.slice(i * groupContentCount, (i + 1) * groupContentCount) 
+            });
         }
         deckData.groups = groups;
     }
