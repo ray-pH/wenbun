@@ -34,6 +34,7 @@ export interface DeckData {
     groups: Record<string, number[]>
     schedule: Record<number, FSRS.Card>
     scheduledNewCardCount: number
+    scheduledPreviouslyStudiedCardCount: number
     lastScheduleCheckDate: number
 }
 
@@ -42,7 +43,7 @@ export interface WenbunConfig {
     newCardPerDay?: number;
     maxReviewsPerDay?: number; //not implemented
     newCardOrder?: NewCardOrder; //not implemented
-    newPreviouslyStudiedCardPerDay?: number; //not implemented
+    newPreviouslyStudiedCardPerDay?: number;
     newPreviouslyStudiedCardOrder?: NewCardOrder; //not implemented
     
     // FSRS
@@ -206,12 +207,14 @@ export class App {
     }
     
     async processTodaySchedule(): Promise<void> {
+        const config = this.getConfig();
         const today = new Date();
         for (const deckId of Object.keys(this.deckData)) {
             const deckData = this.deckData[deckId];
             if (new Date(deckData.lastScheduleCheckDate).getDate() < today.getDate()) {
                 // do the daily routine
-                deckData.scheduledNewCardCount = this.config.newCardPerDay || DEFAULT_CONFIG.newCardPerDay;
+                deckData.scheduledNewCardCount = config.newCardPerDay;
+                deckData.scheduledPreviouslyStudiedCardCount = config.newPreviouslyStudiedCardPerDay;
                 deckData.lastScheduleCheckDate = today.getTime();
             }
         }
@@ -229,6 +232,7 @@ export class App {
             previouslyStudied: [],
             schedule: {},
             scheduledNewCardCount: 0,
+            scheduledPreviouslyStudiedCardCount: 0,
             lastScheduleCheckDate: new Date(0).getTime(),
         }
     }
@@ -266,6 +270,7 @@ export class App {
     }
     
     rateCard(deckId: string, cardId: number, grade: FSRS.Grade, date?: Date): void {
+        const deckData = this.deckData[deckId];
         const card = this.getCard(deckId, cardId);
         if (!card) return;
         const schedulingCards = this.fsrs.repeat(card, date ?? new Date()) as FSRS.RecordLog;
@@ -273,19 +278,36 @@ export class App {
         this.pushReviewLog(deckId, cardId, schedulingCards[grade].log);
         // if this is a new card, reduce the count of scheduled new cards by 1
         if (card.state === 0) {
-            this.deckData[deckId].scheduledNewCardCount--;
+            deckData.scheduledNewCardCount--;
+        }
+        // if this is a previously studied card, remove it from the list and reduce the count of scheduled previously studied cards by 1
+        else if (deckData.previouslyStudied.includes(cardId)) {
+            deckData.previouslyStudied.splice(deckData.previouslyStudied.indexOf(cardId), 1);
+            deckData.scheduledPreviouslyStudiedCardCount--;
+        }
+        // normal review card
+        else {
+            // TODO: this is not fully correct
+            deckData.maxTodaysReviewCount--;
         }
     }
     
     getNextCard(deckId: string): number | undefined {
         // TODO: precalculate the next card on review
+        const deckData = this.deckData[deckId];
+        const newCard = (deckData.scheduledNewCardCount > 0 && this.getNewCardsCount(deckId) > 0) 
+            ? this.getNewCard(deckId) : undefined;
+        const previouslyStudiedCards = (deckData.scheduledPreviouslyStudiedCardCount > 0 && this.getPreviouslyStutedCardsCount(deckId) > 0) 
+            ? this.getPreviouslyStudiedCard(deckId) : undefined;
+        const todaysCards = this.getTodaysScheduledCards(deckId)[0];
+        
         // TODO: change new card position based on config
-        if (this.deckData[deckId].scheduledNewCardCount > 0 && this.getNewCardsCount(deckId) > 0) {
-            return this.getNewCard(deckId);
-        } else {
-            return this.getTodaysScheduledCards(deckId)[0];
-        }
+        // currently, the order is: new card, previously studied card, today's card
+        if (newCard) return newCard;
+        if (previouslyStudiedCards) return previouslyStudiedCards;
+        return todaysCards;
     }
+    
     getNewCard(deckId: string): number {
         let deckData = this.deckData[deckId];
         let groups = deckData.groups
@@ -297,12 +319,21 @@ export class App {
         return id;
     }
     
+    getPreviouslyStudiedCard(deckId: string): number | undefined {
+        const deckData = this.deckData[deckId];
+        return deckData?.previouslyStudied[0];
+    }
+    
     getNewCardsCount(deckId: string): number {
         const deckData = this.deckData[deckId];
         const groups = deckData.groups;
         const cards = Object.values(groups).flat();
         const unusedCards = cards.filter((s) => !deckData.schedule[s])
         return unusedCards.length;
+    }
+    
+    getPreviouslyStutedCardsCount(deckId: string): number {
+        return this.deckData[deckId].previouslyStudied.length;
     }
     
     pushReviewLog(deckId: string, cardId: number, log: FSRS.ReviewLog): void {
