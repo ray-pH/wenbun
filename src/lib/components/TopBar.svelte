@@ -7,6 +7,7 @@
     let { title, backUrl, isSettings }: Props = $props();
 </script>
 
+<div class="top-bar-placeholder">hello</div>
 <div class="top-bar">
     <div class="left">
         {#if backUrl}
@@ -28,13 +29,19 @@
 </div>
 
 <style>
+    .top-bar-placeholder {
+        height: 2em;
+        margin-bottom: 3em;
+    }
     .top-bar {
-        position: relative;
+        position: fixed;
+        top: 0;
+        left: 0;
         display: flex;
         justify-content: space-between;
         align-items: center;
         width: 100%;
-        min-height: 2em;
+        height: 2em;
         background-color: #3E92CC;
         padding: 0.5em;
         color: white;
