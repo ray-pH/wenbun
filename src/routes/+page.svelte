@@ -11,10 +11,6 @@
         app = app;
     })
     
-    async function resetDebugProfile(): Promise<void> {
-        await app.init(true);
-        app = app;
-    }
     function getDeckInfo(deckId: string): typeof DeckInfo[number] {
         return DeckInfo.find((s) => s.id === deckId) ?? { id: deckId, title: deckId, subtitle: ''};
     }
@@ -23,8 +19,6 @@
 <TopBar title="WenBun"></TopBar>
 <div class="main-container">
     <div class="top-container">
-        <button class="a-button" onclick={() => resetDebugProfile()}>Reset Debug Profile</button>
-        <br>
         <a class="a-button" href="/deck-browser/">Add New Deck</a>
     </div>
     <div class="hr"></div>

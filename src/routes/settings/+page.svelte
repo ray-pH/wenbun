@@ -30,6 +30,13 @@
         initialConfig = _.cloneDeep(config);
     }
     
+    async function resetDebugProfile(): Promise<void> {
+        const confirm = window.confirm("Are you sure you want to reset to the debug profile?");
+        if (!confirm) return;
+        await app.debug();
+        app = app;
+    }
+    
     let selectedTonePreset = '';
     function loadChineseToneColorPreset(key: string) {
         const colors = (ChineseToneColorPalette as any)[key];
@@ -99,6 +106,8 @@
                             To export the profile data, copy the text above and store it somewhere safe.<br>
                             To import the profile data, paste the text into the textbox and click the import button.
                         </div>
+                        <button class="button" onclick={() => resetDebugProfile()}>Reset Debug Profile</button>
+                        <br>
                     {/if}
                     <button class="button" onclick={() => isShowProfileTextbox = !isShowProfileTextbox}>
                         import/export

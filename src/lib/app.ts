@@ -128,11 +128,7 @@ export class App {
     }
     
     async init(debug = false): Promise<void> {
-        if (debug) {
-            await this.debug();
-        } else {
-            await this.load();
-        }
+        await this.load();
         if (this.isNeedToProcessTodaySchedule()) {
             await this.processTodaySchedule();
         }
