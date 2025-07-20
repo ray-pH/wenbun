@@ -35,13 +35,14 @@ export interface DeckData {
     schedule: Record<number, FSRS.Card>
     scheduledNewCardCount: number
     scheduledPreviouslyStudiedCardCount: number
+    maxTodaysReviewCount: number
     lastScheduleCheckDate: number
 }
 
 export interface WenbunConfig {
     // learning
     newCardPerDay?: number;
-    maxReviewsPerDay?: number; //not implemented
+    maxReviewsPerDay?: number; // TODO: current implementation is not fully correct
     newCardOrder?: NewCardOrder; //not implemented
     newPreviouslyStudiedCardPerDay?: number;
     newPreviouslyStudiedCardOrder?: NewCardOrder; //not implemented
@@ -215,6 +216,7 @@ export class App {
                 // do the daily routine
                 deckData.scheduledNewCardCount = config.newCardPerDay;
                 deckData.scheduledPreviouslyStudiedCardCount = config.newPreviouslyStudiedCardPerDay;
+                deckData.maxTodaysReviewCount = config.maxReviewsPerDay;
                 deckData.lastScheduleCheckDate = today.getTime();
             }
         }
@@ -233,6 +235,7 @@ export class App {
             schedule: {},
             scheduledNewCardCount: 0,
             scheduledPreviouslyStudiedCardCount: 0,
+            maxTodaysReviewCount: 0,
             lastScheduleCheckDate: new Date(0).getTime(),
         }
     }
@@ -299,7 +302,8 @@ export class App {
             ? this.getNewCard(deckId) : undefined;
         const previouslyStudiedCards = (deckData.scheduledPreviouslyStudiedCardCount > 0 && this.getPreviouslyStutedCardsCount(deckId) > 0) 
             ? this.getPreviouslyStudiedCard(deckId) : undefined;
-        const todaysCards = this.getTodaysScheduledCards(deckId)[0];
+        const todaysCards = (deckData.maxTodaysReviewCount > 0)
+            ? this.getTodaysScheduledCards(deckId)[0] : undefined;
         
         // TODO: change new card position based on config
         // currently, the order is: new card, previously studied card, today's card
