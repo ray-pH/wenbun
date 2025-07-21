@@ -402,9 +402,10 @@ export class App {
         const deckData = this.deckData[deckId];
         if (!deckData) return [];
         const today = new Date();
-        const todaysCards = Object.entries(deckData.schedule).filter(([id, s]) => 
-            s.due.getDate() === today.getDate() || s.due.getDate() === today.getDate() + 1
-        );
+        const todaysCards = Object.entries(deckData.schedule).filter(([id, s]) => {
+            const due = new Date(s.due);
+            return due.getDate() === today.getDate() || due.getDate() === today.getDate() + 1
+        });
         // sort by time
         todaysCards.sort((a, b) => a[1].due.getTime() - b[1].due.getTime());
         return todaysCards.map((s) => +s[0]);
