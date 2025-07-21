@@ -1,4 +1,4 @@
-import { CHINESE_WORLISTS_SRC } from "./constants";
+import { CHINESE_WORLISTS_SRC, SLUG_NO_DATA_IN_DICT } from "./constants";
 import { parseIntOrUndefined, type CharacterWriterData } from "./util";
 
 export const TONE_PREFIX = 'tone-';
@@ -44,7 +44,14 @@ export class ChineseCharacterWordlist {
     
     getCharacterWriterData(word: string): CharacterWriterData | undefined {
         const wordData = this.map.get(word);
-        if (!wordData) return undefined;
+        if (!wordData) {
+            return {
+                characters: word,
+                reading: word,
+                meanings: [SLUG_NO_DATA_IN_DICT],
+                tags: []
+            }
+        }
         
         const characters = wordData.simplified;
         const reading = wordData.forms[0].transcriptions.pinyin;

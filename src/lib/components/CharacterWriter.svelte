@@ -52,7 +52,7 @@
             writer.cancelQuiz();
             writer.hideCharacter();
         }
-        const tone = getChineseTone(characterData.tags[index]);
+        const tone = getChineseTone(characterData.tags[index] ?? []);
         writer = HanziWriter.create('grid-background-target', characterData.characters[index], {
           width: width,
           height: height,
