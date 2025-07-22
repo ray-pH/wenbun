@@ -411,10 +411,11 @@ export class App {
     }
     
     getScheduledReviewCardsCount(deckId: string): number {
-        const todaysScheduledCardsLen = this.getTodaysScheduledCards(deckId).length;
-        const config = this.getConfig();
         const deckData = this.deckData[deckId];
-        const count = Math.min(todaysScheduledCardsLen, config.maxReviewsPerDay - deckData.doneTodayReviewCount);
+        const todaysScheduledCards = this.getTodaysScheduledCards(deckId);
+        const todaysReviewCards = todaysScheduledCards.filter((id) => deckData.schedule[id]?.state === FSRS.State.Review);
+        const config = this.getConfig();
+        const count = Math.min(todaysReviewCards.length, config.maxReviewsPerDay - deckData.doneTodayReviewCount);
         return Math.max(0, count);
     }
     getScheduledNewCardsCount(deckId: string): number {

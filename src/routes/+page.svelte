@@ -41,6 +41,9 @@
             <span class="deck-card-subtitle">{info.subtitle}</span>
         </div>
         <div class="right">
+            <span class="deck-count-learn-relearn">
+                {app.getLearningRelearningCardsCount(info.id) || ''}
+            </span>
             <span class="deck-count-review">
                 {app.getScheduledReviewCardsCount(info.id) || ''}
             </span>
@@ -120,7 +123,11 @@
         .right {
             display: grid;
             gap: 0.5em;
-            grid-template-columns: 1.5em 1.5em 1.5em;
+            grid-template-columns: 1.5em 1.5em 1.5em 1.5em;
+            .deck-count-learn-relearn {
+                place-self: center;
+                color: #DB6B6C
+            }
             .deck-count-review {
                 place-self: center;
                 color: #419E6F
