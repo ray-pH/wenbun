@@ -207,9 +207,11 @@ export class App {
     async processTodaySchedule(): Promise<void> {
         const config = this.getConfig();
         const today = new Date();
+        const todaysDate = getDaysSinceEpochLocal(today);
         for (const deckId of Object.keys(this.deckData)) {
             const deckData = this.deckData[deckId];
-            if (new Date(deckData.lastScheduleCheckDate).getDate() < today.getDate()) {
+            const lastScheduleCheckDate = getDaysSinceEpochLocal(new Date(deckData.lastScheduleCheckDate));
+            if (lastScheduleCheckDate < todaysDate) {
                 // do the daily routine
                 deckData.scheduledNewCardCount = config.newCardPerDay;
                 deckData.scheduledPreviouslyStudiedCardCount = config.newPreviouslyStudiedCardPerDay;
