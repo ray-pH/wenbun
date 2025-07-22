@@ -52,7 +52,9 @@
                         </div>
                     </div>
                     {#if !app.decks.includes(info.id)}
-                        <button class="deck-add-button" onclick={() => addDeck(info.id)}>+</button>
+                        <button class="deck-add-button" onclick={() => addDeck(info.id)} title="Add deck" aria-label="Add deck">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
                     {/if}
                 </div>
             {/each}

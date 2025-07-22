@@ -11,8 +11,8 @@
 <div class="top-bar">
     <div class="left">
         {#if backUrl}
-            <a class="icon-button" href={backUrl}>
-                &lt;
+            <a class="icon-button" href={backUrl} title="Back" aria-label="Back">
+                <i class="fa-solid fa-chevron-left"></i>
             </a>
         {/if}
     </div>
@@ -21,8 +21,8 @@
     </div>
     <div class="right">
         {#if !isSettings}
-            <a class="icon-button" href="/settings">
-                S
+            <a class="icon-button" href="/settings" title="Settings" aria-label="Settings">
+                <i class="fa-solid fa-gear"></i>
             </a>
         {/if}
     </div>

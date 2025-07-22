@@ -130,19 +130,28 @@
                         {group.label == '__ungrouped__' ? 'Ungrouped' : group.label}
                     </div>
                     <div>
-                        {accordionState.get(group.label) ? '-' : '+'}
+                        {#if accordionState.get(group.label)}
+                            <i class="fa-solid fa-chevron-down"></i>
+                        {:else}
+                            <i class="fa-solid fa-chevron-right"></i>
+                        {/if}
                     </div>
                 </button>
                 {#if accordionState.get(group.label)}
                     {#if selectModeGroup == group.label}
                         <div style="display: flex; flex-direction: row; justify-content: space-between; width: 100%">
                             <div class="group-buttons-container">
-                                <button class="button" onclick={() => stopSelectMode()}>cancel selection</button>
-                                <button class="button" onclick={() => selectAll()}>select all</button>
+                                <button class="button" onclick={() => stopSelectMode()}>
+                                    <i class="fa-solid fa-xmark"></i>cancel selection
+                                </button>
+                                <button class="button" onclick={() => selectAll()}>
+                                    <i class="fa-solid fa-check-double"></i>select all
+                                </button>
                             </div>
                             <div class="group-buttons-container" style="flex-direction: row-reverse;">
-                                <button class="button" disabled={selections.size == 0}
-                                    onclick={() => addPreviouslyStudiedMark()}>mark as previously studied</button>
+                                <button class="button" disabled={selections.size == 0} onclick={() => addPreviouslyStudiedMark()}>
+                                    <i class="fa-solid fa-book-open"></i>mark as previously studied
+                                </button>
                                 <button class="button" disabled={selections.size == 0}
                                     onclick={() => removePreviouslyStudiedMark()}>remove previously studied mark</button>
                             </div>
@@ -301,6 +310,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        gap: 0.5em;
         cursor: pointer;
         &:hover {
             opacity: 0.8;

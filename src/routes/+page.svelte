@@ -26,8 +26,8 @@
         {#each activeDeckIds as deckId}
             <div class="deck-card-container">
                 {@render deckCard(getDeckInfo(deckId))}
-                <a class="deck-card-button" href="/deck/{deckId}">
-                    B
+                <a class="deck-card-button" href="/deck/{deckId}" title="Deck Info" aria-label="Deck Info">
+                    <i class="fa-solid fa-list"></i>
                 </a>
             </div>
         {/each} 
