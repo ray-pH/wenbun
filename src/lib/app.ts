@@ -398,6 +398,23 @@ export class App {
         }
     }
     
+    addPreviouslyStudiedMark(deckId: string, cardId: number): void {
+        const deckData = this.deckData[deckId];
+        if (!deckData) return;
+        if (deckData.previouslyStudied.includes(cardId)) return;
+        const cardState = this.getWenbunCustomState(deckId, cardId);
+        // you can only mark a new card as previously studied
+        if (cardState !== WenBunCustomState.New) return;
+        deckData.previouslyStudied.push(cardId);
+    }
+    removePreviouslyStudiedMark(deckId: string, cardId: number): void {
+        const deckData = this.deckData[deckId];
+        if (!deckData) return;
+        const index = deckData.previouslyStudied.indexOf(cardId);
+        if (index < 0) return;
+        deckData.previouslyStudied.splice(index, 1);
+    }
+    
     getTodaysScheduledCards(deckId: string): number[] {
         const deckData = this.deckData[deckId];
         if (!deckData) return [];

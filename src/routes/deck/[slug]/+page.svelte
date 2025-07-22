@@ -2,7 +2,7 @@
     import { App, DEFAULT_GROUP_CONTENT_COUNT, WenBunCustomState } from "$lib/app";
     import TopBar from "$lib/components/TopBar.svelte";
     import { onMount } from "svelte";
-    import { SvelteMap } from "svelte/reactivity";
+    import { SvelteMap, SvelteSet } from "svelte/reactivity";
     import * as FSRS from "ts-fsrs"
 
     export let data: {slug?: string};
@@ -39,7 +39,7 @@
         accordionState.set(id, !accordionState.get(id));
         accordionState = accordionState;
     }
-    function getCardStatusClass(deckId: string, cardId: number): string {
+    function getCardStatusClass(deckId: string, cardId: number, app: App): string {
         switch (app.getWenbunCustomState(deckId, cardId) ?? WenBunCustomState.New) {
             case WenBunCustomState.New: return 'card-status-new';
             case WenBunCustomState.Learning: return 'card-status-learning';
@@ -60,6 +60,60 @@
             app = app;
         }
     }
+    
+    let selectModeGroup: string | null = null;
+    let selections: SvelteSet<number> = new SvelteSet();
+    function startSelectMode(group: string, cardId?: number, e?: MouseEvent) {
+        e?.stopPropagation();
+        selectModeGroup = group;
+        selections.clear();
+        if (cardId != undefined) selections.add(cardId);
+        selections = selections;
+    }
+    function stopSelectMode() {
+        selectModeGroup = null;
+        selections.clear();
+        selections = selections;
+    }
+    function isSelected(groupLabel: string, cardId: number, selections: SvelteSet<number>): boolean {
+        return selectModeGroup == groupLabel && selections.has(cardId);
+    }
+    function toggleSelect(groupLabel: string, cardId: number) {
+        if (selectModeGroup != groupLabel) return;
+        if (selections.has(cardId)) {
+            selections.delete(cardId);
+        } else {
+            selections.add(cardId);
+        }
+        selections = selections;
+    }
+    function selectAll() {
+        if (selectModeGroup == null) return;
+        const group = deckData.groups.find(g => g.label == selectModeGroup);
+        if (group == undefined) return;
+        selections.clear();
+        for (const id of group.cardIds) {
+            selections.add(id);
+        }
+        selections = selections;
+    }
+    async function addPreviouslyStudiedMark() {
+        if (selectModeGroup == null) return;
+        selections.forEach((id) => {
+            app.addPreviouslyStudiedMark(deckId, id);
+        });
+        await app.save();
+        app = app;
+    }
+    async function removePreviouslyStudiedMark() {
+        if (selectModeGroup == null) return;
+        selections.forEach((id) => {
+            app.removePreviouslyStudiedMark(deckId, id);
+        });
+        await app.save();
+        app = app;
+    }
+    
 </script>
 
 <TopBar title="Deck" backUrl="/"></TopBar>
@@ -80,16 +134,45 @@
                     </div>
                 </button>
                 {#if accordionState.get(group.label)}
+                    {#if selectModeGroup == group.label}
+                        <div style="display: flex; flex-direction: row; justify-content: space-between; width: 100%">
+                            <div class="group-buttons-container">
+                                <button class="button" onclick={() => stopSelectMode()}>cancel selection</button>
+                                <button class="button" onclick={() => selectAll()}>select all</button>
+                            </div>
+                            <div class="group-buttons-container" style="flex-direction: row-reverse;">
+                                <button class="button" disabled={selections.size == 0}
+                                    onclick={() => addPreviouslyStudiedMark()}>mark as previously studied</button>
+                                <button class="button" disabled={selections.size == 0}
+                                    onclick={() => removePreviouslyStudiedMark()}>remove previously studied mark</button>
+                            </div>
+                        </div>
+                    {/if}
                     <div class="group-content">
                         {#each group.cardIds as id}
-                            <div class={`card ${getCardStatusClass(deckId, id)}`}>
+                            <div 
+                                class={`card ${getCardStatusClass(deckId, id, app)}`} 
+                                class:selectable={selectModeGroup == group.label}
+                                class:selected={isSelected(group.label, id, selections)}
+                                onclick={() => toggleSelect(group.label, id)}
+                                onkeydown={(e) => {
+                                    if (e.key == 'Enter') toggleSelect(group.label, id);
+                                }}
+                                role="button"
+                                tabindex="0"
+                            >
+                                {#if selectModeGroup != group.label}
+                                    <button class="button select-button" onclick={(e) => startSelectMode(group.label, id, e)}>
+                                        select
+                                    </button>
+                                {/if}
                                 <div class="card-word">
                                     <span class="word">
                                         {app.getCardWord(deckId, id)}
                                     </span>
                                 </div>
                                 <div class="card-details">
-                                    <div class={`status ${getCardStatusClass(deckId, id)}`}>
+                                    <div class={`status ${getCardStatusClass(deckId, id, app)}`}>
                                         {app.getWenbunCustomState(deckId, id) ?? WenBunCustomState.New}
                                     </div>
                                     <div class="due">
@@ -143,6 +226,7 @@
     }
     .card {
         display: flex;
+        position: relative;
         flex-direction: column;
         padding: 0.5em;
         background-color: #FFFFFF90;
@@ -152,6 +236,13 @@
         align-items: center;
         min-width: 10em;
         flex-grow: 1;
+        &.selectable {
+            cursor: pointer;
+        }
+        &.selected {
+            outline: 5px solid #3E92CC;
+            outline-offset: -3px;
+        }
         .card-word {
             font-size: 4em;
             padding: 0em 0.2em;
@@ -182,10 +273,10 @@
                     background-color: #3E92CC;
                 }
                 &.card-status-relearning {
-                    background-color: #F9C26A;
+                    background-color: #DB6B6C;
                 }
                 &.card-status-previously-studied {
-                    background-color: gray;
+                    background-color: #DA8C22;
                 }
             }
         }
@@ -193,6 +284,11 @@
     .card-status-new {
         .due {
             color: #00000050;
+        }
+    }
+    .card-status-previously-studied {
+        .due {
+            display: none;
         }
     }
     .button {
@@ -213,5 +309,20 @@
             background-color: gray;
             pointer-events: none;
         }
+    }
+    .select-button {
+        position: absolute;
+        left: 0.5em;
+        visibility: hidden;
+    }
+    .card:hover .select-button {
+        visibility: visible;
+    }
+    .group-buttons-container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.5em;
+        margin: 0.5em 0;
     }
 </style>
