@@ -206,7 +206,6 @@ export class App {
     }
     
     async processTodaySchedule(): Promise<void> {
-        const config = this.getConfig();
         const today = new Date();
         const todaysDate = getDaysSinceEpochLocal(today);
         for (const deckId of Object.keys(this.deckData)) {
@@ -462,7 +461,7 @@ export class App {
             return due <= tomorrow
         });
         // sort by time
-        todaysCards.sort((a, b) => a[1].due.getTime() - b[1].due.getTime());
+        todaysCards.sort((a, b) => new Date(a[1].due).getTime() - new Date(b[1].due).getTime());
         return todaysCards.map((s) => +s[0]);
     }
     
