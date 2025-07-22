@@ -1,5 +1,5 @@
 import * as FSRS from "ts-fsrs"
-import { dateDiffFormatted, loadDeck, type DeepRequired } from "./util"
+import { dateDiffFormatted, getDaysSinceEpochLocal, loadDeck, type DeepRequired } from "./util"
 import { type IStorage, TauriStorage } from "./storage";
 import _ from "lodash";
 import { ChineseToneColorPalette, DEFAULT_FSRS_PARAM } from "./constants";
@@ -418,10 +418,11 @@ export class App {
     getTodaysScheduledCards(deckId: string): number[] {
         const deckData = this.deckData[deckId];
         if (!deckData) return [];
-        const today = new Date();
+        const today = getDaysSinceEpochLocal(new Date());
+        const tomorrow = today + 1;
         const todaysCards = Object.entries(deckData.schedule).filter(([id, s]) => {
-            const due = new Date(s.due);
-            return due.getDate() === today.getDate() || due.getDate() === today.getDate() + 1
+            const due = getDaysSinceEpochLocal(new Date(s.due));
+            return due <= tomorrow
         });
         // sort by time
         todaysCards.sort((a, b) => a[1].due.getTime() - b[1].due.getTime());

@@ -65,6 +65,11 @@ export function dateDiffFormatted(start: Date, end: Date): string {
     // return `${diff.milliseconds}ms`
 }
 
+export function getDaysSinceEpochLocal(date = new Date()): number {
+    const localMidnight = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    return Math.floor(localMidnight.getTime() / (1000 * 60 * 60 * 24));
+}
+
 export function parseIntOrUndefined(value: string) {
     const n = parseInt(value, 10);
     return isNaN(n) ? undefined : n;
