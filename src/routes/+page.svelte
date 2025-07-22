@@ -41,7 +41,15 @@
             <span class="deck-card-subtitle">{info.subtitle}</span>
         </div>
         <div class="right">
-            {app.deckData[info.id]?.scheduledNewCardCount}
+            <span class="deck-count-review">
+                {app.getScheduledReviewCardsCount(info.id) || ''}
+            </span>
+            <span class="deck-count-new">
+                {app.getScheduledNewCardsCount(info.id) || ''}
+            </span>
+            <span class="deck-count-previously-studied">
+                {app.getPreviouslyStutedCardsCount(info.id) || ''}
+            </span>
         </div>
     </a>
 {/snippet}
@@ -106,6 +114,25 @@
         }
         .right {
             color: #3E92CC;
+        }
+    }
+    .deck-card {
+        .right {
+            display: grid;
+            gap: 0.5em;
+            grid-template-columns: 1.5em 1.5em 1.5em;
+            .deck-count-review {
+                place-self: center;
+                color: #419E6F
+            }
+            .deck-count-new {
+                place-self: center;
+                color: #3E92CC;
+            }
+            .deck-count-previously-studied {
+                place-self: center;
+                color: #DA8C22;
+            }
         }
     }
     .deck-card-button {

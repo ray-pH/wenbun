@@ -312,13 +312,19 @@ export class App {
     
     getNewCard(deckId: string): number {
         const deckData = this.deckData[deckId];
-        const groups = deckData.groups
-        const cards = groups.flatMap((g) => g.cardIds);
-        const unusedCards = cards.filter((s) => !deckData.schedule[s] || deckData.schedule[s].state === FSRS.State.New)
-        const id = unusedCards[0];
+        const newCards = this.getNewCards(deckId);
+        const id = newCards[0];
         const card = FSRS.createEmptyCard();
         deckData.schedule[id] = card;
         return id;
+    }
+    
+    getNewCards(deckId: string): number[] {
+        const deckData = this.deckData[deckId];
+        const groups = deckData.groups
+        const cards = groups.flatMap((g) => g.cardIds);
+        const newCards = cards.filter((id) => this.getWenbunCustomState(deckId, id) === WenBunCustomState.New);
+        return newCards;
     }
     
     getPreviouslyStudiedCard(deckId: string): number | undefined {
@@ -327,11 +333,7 @@ export class App {
     }
     
     getNewCardsCount(deckId: string): number {
-        const deckData = this.deckData[deckId];
-        const groups = deckData.groups;
-        const cards = groups.flatMap((g) => g.cardIds);
-        const unusedCards = cards.filter((s) => !deckData.schedule[s])
-        return unusedCards.length;
+        return this.getNewCards(deckId).length;
     }
     
     getPreviouslyStutedCardsCount(deckId: string): number {
@@ -396,6 +398,18 @@ export class App {
             case FSRS.State.New:
             default: return WenBunCustomState.New;
         }
+    }
+    
+    getScheduledReviewCardsCount(deckId: string): number {
+        return this.getTodaysScheduledCards(deckId).length;
+    }
+    getScheduledNewCardsCount(deckId: string): number {
+        const deckData = this.deckData[deckId];
+        return Math.min(this.getNewCardsCount(deckId), deckData.scheduledNewCardCount);
+    }
+    getScheduledPreviouslyStudiedCardsCount(deckId: string): number {
+        const deckData = this.deckData[deckId];
+        return Math.min(this.getPreviouslyStutedCardsCount(deckId), deckData.scheduledPreviouslyStudiedCardCount);
     }
     
     addPreviouslyStudiedMark(deckId: string, cardId: number): void {
