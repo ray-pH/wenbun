@@ -1,8 +1,9 @@
 import * as FSRS from "ts-fsrs"
 import { dateDiffFormatted, getDaysSinceEpochLocal, loadDeck, type DeepRequired } from "./util"
-import { type IStorage, TauriStorage } from "./storage";
+import { BrowserIndexedDBStorage, type IStorage, TauriStorage } from "./storage";
 import _ from "lodash";
 import { ChineseToneColorPalette, DEFAULT_FSRS_PARAM } from "./constants";
+import { isTauri } from "@tauri-apps/api/core";
 const UNGROUPED_GROUP = "__ungrouped__"
 
 const STORE_FILENAME = "profile.json"
@@ -103,8 +104,13 @@ export class App {
 
     constructor() {
         this.updateFSRS();
-        this.storage = new TauriStorage(STORE_FILENAME); // use tauri storage implementation for now
+        if (isTauri()) {
+            this.storage = new TauriStorage(STORE_FILENAME);
+        } else {
+            this.storage = new BrowserIndexedDBStorage(STORE_FILENAME);
+        }
     }
+    
     
     updateFSRS() {
         const config = this.getConfig();
