@@ -5,8 +5,8 @@
     import { SvelteMap, SvelteSet } from "svelte/reactivity";
     import * as FSRS from "ts-fsrs"
 
-    export let data: {slug?: string};
-    let deckId = data.slug || '';
+    export let data: {deckId?: string};
+    let deckId = data.deckId || '';
     
     let app = new App();
     onMount(async () => {

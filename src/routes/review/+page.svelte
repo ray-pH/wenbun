@@ -7,8 +7,8 @@
     import { ChineseCharacterWordlist } from "$lib/chinese";
     import TopBar from "$lib/components/TopBar.svelte";
 
-    export let data: {slug?: string};
-    let deckId = data.slug || '';
+    export let data: {deckId?: string};
+    let deckId = data.deckId || '';
     
     let isPageReady = false;
     let app = new App();
