@@ -309,8 +309,7 @@ export class App {
     
     getNextCard(deckId: string): number | undefined {
         // TODO: precalculate the next card on review
-        const deckData = this.deckData[deckId];
-        const newCard = (this.getScheduledNewCardsCount(deckId)) 
+        const newCard = (this.getScheduledNewCardsCount(deckId) > 0) 
             ? this.getNewCard(deckId) : undefined;
         const previouslyStudiedCards = (this.getScheduledPreviouslyStudiedCardsCount(deckId) > 0) 
             ? this.getPreviouslyStudiedCard(deckId) : undefined;
@@ -319,9 +318,9 @@ export class App {
         
         // TODO: change new card position based on config
         // currently, the order is: new card, previously studied card, today's card
-        if (newCard) return newCard;
-        if (previouslyStudiedCards) return previouslyStudiedCards;
-        if (todaysCards) return todaysCards;
+        if (newCard !== undefined) return newCard;
+        if (previouslyStudiedCards !== undefined) return previouslyStudiedCards;
+        if (todaysCards !== undefined) return todaysCards;
         return undefined;
     }
     
