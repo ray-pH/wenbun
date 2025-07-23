@@ -44,7 +44,7 @@ export interface DeckData {
 export interface WenbunConfig {
     // learning
     newCardPerDay?: number;
-    maxReviewsPerDay?: number; // TODO: current implementation is not fully correct
+    maxReviewsPerDay?: number;
     newCardOrder?: NewCardOrder; //not implemented
     newPreviouslyStudiedCardPerDay?: number;
     newPreviouslyStudiedCardOrder?: NewCardOrder; //not implemented
