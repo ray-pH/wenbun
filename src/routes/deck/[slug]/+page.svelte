@@ -212,14 +212,16 @@
     }
     .group-content {
         width: 100%;
+        box-sizing: border-box;
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
         gap: 0.5em;
-        margin: 0.5em;
+        margin-top: 0.5em;
     }
     .group {
-        width: 34em;
+        width: 100%;
+        max-width: 34em;
     }
     .group-header {
         all: unset;
@@ -229,6 +231,7 @@
         color: white;
         border-radius: 0.5em;
         width: 100%;
+        box-sizing: border-box;
         display: flex;
         align-items: center;
         justify-content: space-between;

@@ -5,12 +5,21 @@
     import { type CharacterWriterData, type CharacterWriterConfig, parseIntOrUndefined } from '$lib/util';
     import type { App } from '$lib/app';
     
-    let width = 500;
-    let height = 500;
+    let width = $state(500);
+    let height = $state(500);
     let gridStroke = "#DDD";
     const NEXT_CHAR_DELAY = 500;
     // const correctSound = new Audio('/assets/sounds/rightanswer-95219.mp3');
     const correctSound = new Audio('/assets/sounds/correct-choice-43861.mp3');
+
+    function getEmInPx(): number {
+        return parseFloat(getComputedStyle(document.documentElement).fontSize);
+    }
+    function updateWidth() {
+        const emPx = getEmInPx() * 5 * 2;
+        width = Math.min(window.innerWidth - emPx, 500);
+        height = width;
+    }
     
     interface Props {
 		onComplete: () => void;
@@ -70,7 +79,12 @@
     }
     
     onMount(() => {
+        updateWidth();
+        window.addEventListener('resize', updateWidth);
         setupHanziWriter(0);
+        return () => {
+            window.removeEventListener('resize', updateWidth);
+        };
     });
 </script>
 
@@ -83,6 +97,7 @@
     }
     .meaning {
         max-width: 40em;
+        width: 80vw;
         height: 5em;
         overflow-y: scroll;
         /* min-height: 8em; */

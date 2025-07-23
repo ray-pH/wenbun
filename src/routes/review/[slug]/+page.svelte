@@ -75,10 +75,14 @@
                 <CharacterWriter app={app} characterData={characterWriterDataFromId(currentCardId)} onComplete={() => onComplete()} />
             {/key}
         </div>
-        {#if isComplete}
+        <div class="bottom-container">
             <div class="review-button-container">
                 {#each reviewButtonsLabel as label, i}
-                    <button class={`review-button ${getReviewButtonClass(i+1)}`} onclick={() => onReviewButtonClick(i+1)}>
+                    <button 
+                        class={`review-button ${getReviewButtonClass(i+1)}`} 
+                        class:is-complete={isComplete}
+                        onclick={() => onReviewButtonClick(i+1)}
+                    >
                         <div class="review-button-inner">
                             <div class="review-time">{scheduledTimeStr[(i+1) as FSRS.Grade]}</div>
                             <div class="review-label">{label}</div>
@@ -86,7 +90,7 @@
                     </button>
                 {/each}
             </div>
-        {/if}
+        </div>
     {/if}
 </div>
 
@@ -101,10 +105,21 @@
     .character-writer-container {
         margin: 1em 0;
     }
-    .review-button-container {
+    .bottom-container {
         position: absolute;
         bottom: 0;
         padding: 2em 2em 3em 2em;
+        box-sizing: border-box;
+        width: 100vw;
+        @media (max-width: 600px) {
+            padding-bottom: 1em;
+        }
+    }
+    .review-button-container {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
     }
     .review-label {
         font-weight: bold;
@@ -120,19 +135,34 @@
         position: relative;
         cursor: pointer;
         color: var(--color);
-        padding: 0.5em 1em;
+        padding: 0.5em 0;
+        flex-grow: 1;
+        max-width: 8.5em;
         border-radius: 0.5em;
-        &.review-button-fail {
-            --color: #DB6B6C;
+        &:not(.is-complete) {
+            --color: gray;
+            pointer-events: none;
+            opacity: 0.5;
+            .review-time {
+                visibility: hidden;
+            }
+            .review-label {
+                visibility: hidden;
+            }
         }
-        &.review-button-hard {
-            --color: black;
-        }
-        &.review-button-good {
-            --color: #419E6F;
-        }
-        &.review-button-easy {
-            --color: #3E92CC;
+        &.is-complete {
+            &.review-button-fail {
+                --color: #DB6B6C;
+            }
+            &.review-button-hard {
+                --color: black;
+            }
+            &.review-button-good {
+                --color: #419E6F;
+            }
+            &.review-button-easy {
+                --color: #3E92CC;
+            }
         }
     }
     .review-button:hover {

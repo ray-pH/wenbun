@@ -64,6 +64,7 @@
         margin: 0;
         padding: 0;
         background-color: #E0E0E0;
+        font-family: 'Noto Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
     .main-container {
         display: flex;
@@ -75,7 +76,8 @@
         margin: 1em 0;
     }
     .hr {
-        width: 20em;
+        width: calc(100vw - 2em);
+        max-width: 20em;
         height: 1px;
         background-color: #00000090;
     }
@@ -90,23 +92,19 @@
         flex-direction: row;
         align-items: center;
         gap: 0.5em;
+        width: calc(100vw - 2em);
+        max-width: 30em;
     }
     .deck-card {
         all: unset;
-        /* background-color: #3E92CC; */
-        /* background-color: #FFFFFF90;
-        border-radius: 0.5em;
-        width: 20em;
-        height: 2em;
-        padding: 0.5em; */
-        
         background-color: #FFFFFF90;
         border-radius: 0.5em;
-        width: 20em;
         padding: 1em;
+        flex-grow: 1;
         display: flex;
         align-items: center;
         justify-content: space-between;
+        cursor: pointer;
         
         .deck-card-title {
             font-weight: bold;
@@ -146,6 +144,7 @@
         all: unset;
         color: white;
         background-color: #3E92CC;
+        cursor: pointer;
         border-radius: 0.5em;
         width: 2.5em;
         height: 2.5em;
@@ -160,7 +159,8 @@
         all: unset;
         display: block;
         background-color: #FFFFFF90;
-        width: 20em;
+        width: calc(100vw - 4em);
+        max-width: 20em;
         border-radius: 0.5em;
         padding: 1em;
         cursor: pointer;

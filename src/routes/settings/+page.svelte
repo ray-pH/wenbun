@@ -227,10 +227,13 @@
         margin: 1em 0;
     }
     .settings-section {
-        width: 25em;
+        width: 100%;
+        padding: 0 1em;
+        max-width: 25em;
+        box-sizing: border-box;
     }
     .settings-section::after {
-        width: 23em;
+        width: 90%;
         height: 1px;
         background-color: #00000090;
         content: '';
