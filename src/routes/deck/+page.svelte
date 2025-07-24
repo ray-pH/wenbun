@@ -220,8 +220,10 @@
         margin-top: 0.5em;
     }
     .group {
-        width: 100%;
-        max-width: 34em;
+        width: 100vw;
+        padding: 0 1em;
+        box-sizing: border-box;
+        max-width: 38em;
     }
     .group-header {
         all: unset;
