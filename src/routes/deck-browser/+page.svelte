@@ -51,11 +51,12 @@
                             <span class="deck-card-count">{deckDataMap.get(info.id)?.cardCount ?? 0} cards</span>
                         </div>
                     </div>
-                    {#if !app.decks.includes(info.id)}
-                        <button class="deck-add-button" onclick={() => addDeck(info.id)} title="Add deck" aria-label="Add deck">
-                            <i class="fa-solid fa-plus"></i>
-                        </button>
-                    {/if}
+                    <button 
+                        class="deck-add-button" class:invisible={app.decks.includes(info.id)}
+                        onclick={() => addDeck(info.id)} title="Add deck" aria-label="Add deck"
+                    >
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
                 </div>
             {/each}
         </div>
@@ -80,6 +81,8 @@
         gap: 1em;
     }
     .deck-card-container {
+        width: 90vw;
+        max-width: 25em;
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -88,9 +91,10 @@
     .deck-card {
         background-color: #FFFFFF90;
         border-radius: 0.5em;
-        width: 20em;
+        box-sizing: border-box;
         padding: 1em;
         display: flex;
+        flex-grow: 1;
         align-items: center;
         justify-content: space-between;
         
@@ -115,6 +119,9 @@
         opacity: 1;
         &:hover {
             opacity: 0.6;
+        }
+        &.invisible {
+            opacity: 0;
         }
     }
 </style>
