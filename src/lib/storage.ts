@@ -1,4 +1,4 @@
-import { load, Store } from '@tauri-apps/plugin-store';
+import { load, type Store } from '@tauri-apps/plugin-store';
 
 export interface IStorage {
   load<T>(key: string): Promise<T | undefined>;
