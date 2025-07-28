@@ -350,10 +350,6 @@ export class App {
         return this.getNewCards(deckId).length;
     }
     
-    getPreviouslyStutedCardsCount(deckId: string): number {
-        return this.deckData[deckId].previouslyStudied.length;
-    }
-    
     pushReviewLog(deckId: string, cardId: number, log: FSRS.ReviewLog): void {
         this.reviewLogs.push({deckId, cardId, log});
     }
