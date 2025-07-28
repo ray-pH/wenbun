@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { base } from '$app/paths';
     import { onMount } from "svelte";
     import { App, NewCardOrder, type WenbunConfig } from "$lib/app";
     import TopBar from "$lib/components/TopBar.svelte";
@@ -88,7 +89,7 @@
 </script>
 
 <!-- TODO: setup proper backUrl -->
-<TopBar title="Settings" backUrl="/" isSettings={true}></TopBar>
+<TopBar title="Settings" backUrl="{base}/" isSettings={true}></TopBar>
 <div class="main-container">
     {#if config}
         <div class="settings-section">

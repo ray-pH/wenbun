@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { base } from '$app/paths';
     import { App, DEFAULT_GROUP_CONTENT_COUNT, WenBunCustomState } from "$lib/app";
     import TopBar from "$lib/components/TopBar.svelte";
     import { onMount } from "svelte";
@@ -116,7 +117,7 @@
     
 </script>
 
-<TopBar title="Deck" backUrl="/"></TopBar>
+<TopBar title="Deck" backUrl="{base}/"></TopBar>
 <div class="container">
     <div class="top-container" style="display: flex; gap: 0.5em; margin-bottom: 2em">
         <button class="button" onclick={() => splitIntoGroupsOf()}>Split into groups of</button>

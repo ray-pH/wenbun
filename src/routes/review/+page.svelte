@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { base } from '$app/paths';
     import { App } from "$lib/app";
     import CharacterWriter from "$lib/components/CharacterWriter.svelte";
     import * as FSRS from "ts-fsrs"
@@ -64,7 +65,7 @@
 </script>
 
 
-<TopBar title="Review" backUrl="/"></TopBar>
+<TopBar title="Review" backUrl="{base}/"></TopBar>
 <div class="container">
     {#if isDoneToday} 
         <div>You have done today's review.</div>

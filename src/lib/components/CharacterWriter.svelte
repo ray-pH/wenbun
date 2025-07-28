@@ -4,13 +4,14 @@
     import { TONE_PREFIX } from '$lib/chinese';
     import { type CharacterWriterData, type CharacterWriterConfig, parseIntOrUndefined } from '$lib/util';
     import type { App } from '$lib/app';
+    import { base } from '$app/paths';
     
     let width = $state(500);
     let height = $state(500);
     let gridStroke = "#DDD";
     const NEXT_CHAR_DELAY = 500;
-    // const correctSound = new Audio('/assets/sounds/rightanswer-95219.mp3');
-    const correctSound = new Audio('/assets/sounds/correct-choice-43861.mp3');
+    // const correctSound = new Audio(`${base}/assets/sounds/rightanswer-95219.mp3`);
+    const correctSound = new Audio(`${base}/assets/sounds/correct-choice-43861.mp3`);
 
     function getEmInPx(): number {
         return parseFloat(getComputedStyle(document.documentElement).fontSize);

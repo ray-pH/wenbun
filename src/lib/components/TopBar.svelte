@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { base } from '$app/paths';
     interface Props {
 		title: string;
 		backUrl?: string
@@ -21,7 +22,7 @@
     </div>
     <div class="right">
         {#if !isSettings}
-            <a class="icon-button" href="/settings" title="Settings" aria-label="Settings">
+            <a class="icon-button" href="{base}/settings" title="Settings" aria-label="Settings">
                 <i class="fa-solid fa-gear"></i>
             </a>
         {/if}

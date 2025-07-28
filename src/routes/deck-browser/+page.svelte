@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { base } from '$app/paths';
     import { onMount } from "svelte";
     import { App } from "$lib/app";
     import { DeckInfo } from "$lib/constants";
@@ -36,7 +37,7 @@
     }
 </script>
 
-<TopBar title="Browse Decks" backUrl="/"></TopBar>
+<TopBar title="Browse Decks" backUrl="{base}/"></TopBar>
 <div class="main-container">
     {#if isLoaded}
         <div class="deck-list-container">

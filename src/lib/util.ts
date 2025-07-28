@@ -1,3 +1,5 @@
+import { base } from "$app/paths";
+
 export type DeepRequired<T> =
   // Leave functions as-is
   T extends (...args: any[]) => any ? T :
@@ -22,7 +24,7 @@ export interface CharacterWriterConfig {
 }
 
 export async function loadDeck(deckId: string): Promise<string[] | undefined> {
-    const url = `/assets/decks/${deckId}.txt`;
+    const url = `${base}/assets/decks/${deckId}.txt`;
     try {
         const res = await fetch(url);
         const text = await res.text();

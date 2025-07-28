@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { base } from '$app/paths';
     import { onMount } from "svelte";
     import { App } from "$lib/app";
     import TopBar from "$lib/components/TopBar.svelte";
@@ -19,14 +20,14 @@
 <TopBar title="WenBun"></TopBar>
 <div class="main-container">
     <div class="top-container">
-        <a class="a-button" href="/deck-browser/">Add New Deck</a>
+        <a class="a-button" href="{base}/deck-browser/">Add New Deck</a>
     </div>
     <div class="hr"></div>
     <div class="deck-list-container">
         {#each activeDeckIds as deckId}
             <div class="deck-card-container">
                 {@render deckCard(getDeckInfo(deckId))}
-                <a class="deck-card-button" href="/deck?id={deckId}" title="Deck Info" aria-label="Deck Info">
+                <a class="deck-card-button" href="{base}/deck?id={deckId}" title="Deck Info" aria-label="Deck Info">
                     <i class="fa-solid fa-list"></i>
                 </a>
             </div>
@@ -35,7 +36,7 @@
 </div>
 
 {#snippet deckCard(info: typeof DeckInfo[number])}
-    <a class="deck-card" href="/review?id={info.id}">
+    <a class="deck-card" href="{base}/review?id={info.id}">
         <div class="left">
             <span class="deck-card-title">{info.title}</span>
             <span class="deck-card-subtitle">{info.subtitle}</span>

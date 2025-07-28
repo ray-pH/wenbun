@@ -1,3 +1,5 @@
+import { base } from "$app/paths";
+
 export const DeckInfo = [
     {id: 'hsk1-v2.0', title: 'HSK 1', subtitle: '(v2.0)'},
     {id: 'hsk2-v2.0', title: 'HSK 2', subtitle: '(v2.0)'},
@@ -19,7 +21,7 @@ export const ChineseToneColorPalette = {
     "Tofu Like": ['#DB6B6C','#419E6F', '#3E92CC', '#7C3AED', '#555555'],
 }
 
-export const CHINESE_DICT_SRC = '/assets/dict/zh_dict.json';
+export const CHINESE_DICT_SRC = `${base}/assets/dict/zh_dict.json`;
 
 export const SLUG_NO_DATA_IN_DICT = "ERROR: information about this word is not available in the dictionary. Please report this issue to the developer.";
 
