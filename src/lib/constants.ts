@@ -19,14 +19,7 @@ export const ChineseToneColorPalette = {
     "Tofu Like": ['#DB6B6C','#419E6F', '#3E92CC', '#7C3AED', '#555555'],
 }
 
-export const CHINESE_WORLISTS_SRC = [
-    '/assets/wordlist/complete-hsk-vocabulary/old/1.json',
-    '/assets/wordlist/complete-hsk-vocabulary/old/2.json',
-    '/assets/wordlist/complete-hsk-vocabulary/old/3.json',
-    '/assets/wordlist/complete-hsk-vocabulary/old/4.json',
-    '/assets/wordlist/complete-hsk-vocabulary/old/5.json',
-    '/assets/wordlist/complete-hsk-vocabulary/old/6.json',
-]
+export const CHINESE_DICT_SRC = '/assets/dict/zh_dict.json';
 
 export const SLUG_NO_DATA_IN_DICT = "ERROR: information about this word is not available in the dictionary. Please report this issue to the developer.";
 

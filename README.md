@@ -25,6 +25,7 @@
 * [hanzi-writer-data](https://github.com/chanind/hanzi-writer-data) — Chinese stroke data
 * [Open FSRS](https://github.com/open-spaced-repetition) — scheduling algorithm
 * [complete-hsk-vocabulary](https://github.com/drkameleon/complete-hsk-vocabulary) — Chinese vocabulary data
+* [hskhsk.com](https://github.com/glxxyz/hskhsk.com) — HSK vocabulary data
 * [KanjiVG](https://kanjivg.tagaini.net/) — planned source for Kanji stroke data
 
 ## Tech Stack
