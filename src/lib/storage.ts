@@ -6,32 +6,32 @@ export interface IStorage {
 }
 
 export class TauriStorage implements IStorage {
-  private storeFilename: string;
-  private store: Store | null = null;
-  private isLoaded: boolean = false;
-
-  constructor(storeFilename: string) {
-    this.storeFilename = storeFilename;
-  }
-
-  private async ensureStoreLoaded(): Promise<void> {
-    if (!this.isLoaded) {
-      this.store = await load(this.storeFilename, { autoSave: false });
-      this.isLoaded = true;
+    private storeFilename: string;
+    private store: Store | null = null;
+    private isLoaded: boolean = false;
+    
+    constructor(storeFilename: string) {
+        this.storeFilename = storeFilename;
     }
-  }
-
-  public async load<T>(key: string): Promise<T | undefined> {
-    await this.ensureStoreLoaded();
-    if (!this.store) return undefined;
-    return await this.store.get(key);
-  }
-
-  public async save<T>(key: string, value: T): Promise<void> {
-    await this.ensureStoreLoaded();
-    if (!this.store) return;
-    await this.store.set(key, value);
-  }
+    
+    private async ensureStoreLoaded(): Promise<void> {
+        if (!this.isLoaded) {
+        this.store = await load(this.storeFilename, { autoSave: false });
+        this.isLoaded = true;
+        }
+    }
+    
+    public async load<T>(key: string): Promise<T | undefined> {
+        await this.ensureStoreLoaded();
+        if (!this.store) return undefined;
+        return await this.store.get(key);
+    }
+    
+    public async save<T>(key: string, value: T): Promise<void> {
+        await this.ensureStoreLoaded();
+        if (!this.store) return;
+        await this.store.set(key, value);
+    }
 }
 
 const DEFAULT_DB_NAME = 'wenbun-deck-manager';
