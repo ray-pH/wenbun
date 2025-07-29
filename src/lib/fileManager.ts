@@ -42,6 +42,27 @@ export class WebFileManager implements IFileManager {
         const blob = data instanceof Uint8Array
             ? new Blob([data], { type: mimeType })
             : new Blob([data], { type: mimeType });
+    
+        // Chromium File System Access API
+        if ('showSaveFilePicker' in window) {
+            // Derive extension for the accept map, e.g. ".txt" from "file.txt"
+            const extension = filename.includes('.') 
+                ? filename.slice(filename.lastIndexOf('.')) 
+                : '';
+            const handle = await (window as any).showSaveFilePicker({
+                suggestedName: filename,
+                types: [{
+                    description: 'File',
+                    accept: { [mimeType]: [extension] }
+                }]
+            });
+            const writable = await handle.createWritable();
+            await writable.write(blob);
+            await writable.close();
+            return;
+        }
+    
+        // Fallback: anchor click
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
