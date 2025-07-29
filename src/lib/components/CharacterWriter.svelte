@@ -64,15 +64,15 @@
         }
         const tone = getChineseTone(characterData.tags[index] ?? []);
         writer = HanziWriter.create('grid-background-target', characterData.characters[index], {
-          width: width,
-          height: height,
-          padding: 5,
-          showCharacter: false, showOutline: false,
-          highlightOnComplete: false,
-          strokeColor: app.getChineseToneColor(tone) ?? "#555",
-          onComplete: () => {
-              completeChar();
-          }
+            width: width,
+            height: height,
+            padding: 5,
+            showCharacter: false, showOutline: false,
+            highlightOnComplete: false,
+            strokeColor: app.getChineseToneColor(tone) ?? "#555",
+            onComplete: () => {
+                completeChar();
+            }
         });
         if (cardConfig.isQuiz) {
             writer.quiz();

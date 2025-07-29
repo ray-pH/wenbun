@@ -31,63 +31,63 @@ export const DEFAULT_FSRS_PARAM =  [
 ]
 
 export const SETTINGS_LABEL_DATA = {
-  newCardPerDay: {
-    label: "New Card Per Day",
-    help: "Specifies the number of new cards to learn each day.",
-  },
-  maxReviewsPerDay: {
-    label: "Max Reviews Per Day",
-    help: "Specifies the maximum number of cards to review each day.",
-  },
-  newCardOrder: {
-    label: "New Card Order",
-    help: "Specifies how new cards are interleaved with review cards.",
-  },
-  newPreviouslyStudiedCardPerDay: {
-    label: "New Previously Studied Card Per Day",
-    help: "Specifies the number of cards per day drawn from the \"Previously Studied\" pool.",
-  },
-  newPreviouslyStudiedCardOrder: {
-    label: "New Previously Studied Card Order",
-    help: "Specifies how cards from the “Previously Studied” pool are interleaved with review cards.",
-  },
-
-  learningSteps: {
-    label: "Learning Steps",
-    help: "Defines the sequence of intervals used by FSRS during the initial learning phase before cards enter the long-term review schedule.",
-  },
-  previouslyStudiedLearningSteps: {
-    label: "Previously Studied Learning Steps",
-    help: "Defines the sequence of intervals used by FSRS during the initial learning phase for cards in the \"Previously Studied\" pool before they enter the long-term review schedule.",
-  },
-  desiredRetention: {
-    label: "Desired Retention",
-    help: "Defines the target probability of successful recall. Higher values increase review frequency (recommended range: 0.8–0.9).",
-  },
-  enableShortTerm: {
-    label: "Enable Short Term",
-    help: "When disabled, the short-term review schedule is bypassed.",
-  },
-  enableFuzz: {
-    label: "Enable Fuzz",
-    help: "When enabled, introduces slight random variation to intervals to prevent reviews from clustering on the same day.",
-  },
-  FSRSParams: {
-    label: "FSRS Params",
-    help: "Specifies advanced parameters for the FSRS review algorithm.",
-  },
-
-  zhIsColorBasedOnTone: {
-    label: "Color Characters Based On Their Tone",
-    help: "When enabled, assigns a distinct color to each Chinese tone to facilitate recognition.",
-  },
-  zhToneColors: {
-    label: "Tone Colors",
-    help: "Specifies the colors used for each Chinese tone.",
-  },
-  zhTone1: { label: "Tone 1", help: "" },
-  zhTone2: { label: "Tone 2", help: "" },
-  zhTone3: { label: "Tone 3", help: "" },
-  zhTone4: { label: "Tone 4", help: "" },
-  zhToneNeutral: { label: "Neutral", help: "" },
+    newCardPerDay: {
+        label: "New Card Per Day",
+        help: "Specifies the number of new cards to learn each day.",
+    },
+    maxReviewsPerDay: {
+        label: "Max Reviews Per Day",
+        help: "Specifies the maximum number of cards to review each day.",
+    },
+    newCardOrder: {
+        label: "New Card Order",
+        help: "Specifies how new cards are interleaved with review cards.",
+    },
+    newPreviouslyStudiedCardPerDay: {
+        label: "New Previously Studied Card Per Day",
+        help: "Specifies the number of cards per day drawn from the \"Previously Studied\" pool.",
+    },
+    newPreviouslyStudiedCardOrder: {
+        label: "New Previously Studied Card Order",
+        help: "Specifies how cards from the “Previously Studied” pool are interleaved with review cards.",
+    },
+    
+    learningSteps: {
+        label: "Learning Steps",
+        help: "Defines the sequence of intervals used by FSRS during the initial learning phase before cards enter the long-term review schedule.",
+    },
+    previouslyStudiedLearningSteps: {
+        label: "Previously Studied Learning Steps",
+        help: "Defines the sequence of intervals used by FSRS during the initial learning phase for cards in the \"Previously Studied\" pool before they enter the long-term review schedule.",
+    },
+    desiredRetention: {
+        label: "Desired Retention",
+        help: "Defines the target probability of successful recall. Higher values increase review frequency (recommended range: 0.8–0.9).",
+    },
+    enableShortTerm: {
+        label: "Enable Short Term",
+        help: "When disabled, the short-term review schedule is bypassed.",
+    },
+    enableFuzz: {
+        label: "Enable Fuzz",
+        help: "When enabled, introduces slight random variation to intervals to prevent reviews from clustering on the same day.",
+    },
+    FSRSParams: {
+        label: "FSRS Params",
+        help: "Specifies advanced parameters for the FSRS review algorithm.",
+    },
+    
+    zhIsColorBasedOnTone: {
+        label: "Color Characters Based On Their Tone",
+        help: "When enabled, assigns a distinct color to each Chinese tone to facilitate recognition.",
+    },
+    zhToneColors: {
+        label: "Tone Colors",
+        help: "Specifies the colors used for each Chinese tone.",
+    },
+    zhTone1: { label: "Tone 1", help: "" },
+    zhTone2: { label: "Tone 2", help: "" },
+    zhTone3: { label: "Tone 3", help: "" },
+    zhTone4: { label: "Tone 4", help: "" },
+    zhToneNeutral: { label: "Neutral", help: "" },
 }
