@@ -1,0 +1,15 @@
+{
+    "name": "WenBun",
+    "short_name": "WenBun",
+    "start_url": "./",
+    "display": "standalone",
+    "background_color": "#E0E0E0",
+    "theme_color": "#3E92CC",
+    "icons": [
+        {
+            "src": "./favicon.png",
+            "sizes": "128x128",
+            "type": "image/png"
+        }
+    ]
+}
