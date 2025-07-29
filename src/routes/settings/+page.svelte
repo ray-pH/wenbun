@@ -79,15 +79,17 @@
     $: isProfileStrChanged = profileStr !== initialProfileStr;
     function importProfileData() {
         app.tryImportProfile(profileStr).then((success) => {
-            if (success) {
-            } else {
-                window.alert("Failed to import profile data");
-            }
+            alertImportProfile(success);
         });
     }
-    async function tryUploadProfile() {
-        const success = await app.tryUploadProfile();
+    function tryUploadProfile() {
+        app.tryUploadProfile().then((success) => {
+            alertImportProfile(success);
+        });
+    }
+    function alertImportProfile(success: boolean) {
         if (success) {
+            window.alert("Successfully imported profile data");
         } else {
             window.alert("Failed to import profile data");
         }
