@@ -139,7 +139,7 @@
                     <input type="number" bind:value={config.maxReviewsPerDay}>
                 </SettingsItem>
                 <SettingsItem key="newCardOrder">
-                    <select bind:value={config.newCardOrder}>
+                    <select disabled bind:value={config.newCardOrder}>
                         <option value={NewCardOrder.Mix}>Mix</option>
                         <option value={NewCardOrder.AfterReviews}>After Reviews</option>
                         <option value={NewCardOrder.BeforeReviews}>Before Reviews</option>
@@ -149,7 +149,7 @@
                     <input type="number" bind:value={config.newPreviouslyStudiedCardPerDay}>
                 </SettingsItem>
                 <SettingsItem key="newPreviouslyStudiedCardOrder">
-                    <select bind:value={config.newPreviouslyStudiedCardOrder}>
+                    <select disabled bind:value={config.newPreviouslyStudiedCardOrder}>
                         <option value={NewCardOrder.Mix}>Mix</option>
                         <option value={NewCardOrder.AfterReviews}>After Reviews</option>
                         <option value={NewCardOrder.BeforeReviews}>Before Reviews</option>
