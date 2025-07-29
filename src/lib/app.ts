@@ -62,6 +62,7 @@ export interface WenbunConfig {
     zh: {
         isColorBasedOnTone?: boolean;
         toneColors?: string[];
+        alwaysShowReading?: boolean;
     }
 }
 
@@ -82,6 +83,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     zh: {
         isColorBasedOnTone: true,
         toneColors: ChineseToneColorPalette.Default,
+        alwaysShowReading: false,
     },
 }
 

@@ -182,6 +182,9 @@
         <div class="settings-section">
             <div class="section-title">Chinese</div>
             <div class="section-container">
+                <SettingsItem key="zhAlwaysShowReading">
+                    <input type="checkbox" bind:checked={config.zh.alwaysShowReading}>
+                </SettingsItem>
                 <SettingsItem key="zhIsColorBasedOnTone">
                     <input type="checkbox" bind:checked={config.zh.isColorBasedOnTone}>
                 </SettingsItem>

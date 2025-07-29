@@ -90,4 +90,8 @@ export const SETTINGS_LABEL_DATA = {
     zhTone3: { label: "Tone 3", help: "" },
     zhTone4: { label: "Tone 4", help: "" },
     zhToneNeutral: { label: "Neutral", help: "" },
+    zhAlwaysShowReading: {
+        label: "Always Show Reading",
+        help: "When disabled, the reading will only be shown after the card is answered correctly.",
+    }
 }
