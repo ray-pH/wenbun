@@ -59,14 +59,6 @@
 {/snippet}
 
 <style>
-    :global(body) {
-        max-width: 100vw;
-        overflow-x: hidden;
-        margin: 0;
-        padding: 0;
-        background-color: #E0E0E0;
-        font-family: 'Noto Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    }
     .main-container {
         display: flex;
         flex-direction: column;
