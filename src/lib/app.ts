@@ -497,9 +497,10 @@ export class App {
     
     async downloadProfile(): Promise<void> {
         const profileStr = this.exportProfile();
+        const date = new Date().toLocaleDateString('en-CA');
         await this.fileManager.download({
             data: profileStr,
-            filename: "profile.txt",
+            filename: `wenbun-profile-${date}.txt`,
             mimeType: "text/plain",
         });
     }
