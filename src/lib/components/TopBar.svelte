@@ -32,7 +32,7 @@
 <style>
     .top-bar-placeholder {
         height: 2em;
-        margin-bottom: 3em;
+        margin-bottom: 0em;
     }
     .top-bar {
         position: fixed;

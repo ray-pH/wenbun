@@ -229,6 +229,7 @@
         height: 100%;
         width: 100%;
         margin: 1em 0;
+        padding-top: 1em;
     }
     .settings-section {
         width: 100%;

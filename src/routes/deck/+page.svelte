@@ -205,6 +205,7 @@
         align-items: center;
         justify-content: center;
         margin: 1em;
+        padding-top: 1em;
     }
     .group-container {
         display: flex;
