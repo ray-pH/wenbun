@@ -12,6 +12,7 @@
     const NEXT_CHAR_DELAY = 500;
     // const correctSound = new Audio(`${base}/assets/sounds/rightanswer-95219.mp3`);
     const correctSound = new Audio(`${base}/assets/sounds/correct-choice-43861.mp3`);
+    let isComplete = $state(false);
 
     function getEmInPx(): number {
         return parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -48,6 +49,7 @@
         completedCharCount = completedCharCount + 1;
         if (completedCharCount == characterData?.characters.length) {
             onComplete();
+            isComplete = true;
         } else {
             window.setTimeout(() => {
                 setupHanziWriter(completedCharCount);
@@ -98,16 +100,18 @@
     }
     .meaning {
         max-width: 40em;
-        width: 80vw;
-        height: 5em;
-        overflow-y: scroll;
-        /* min-height: 8em; */
         margin: 0.5em;
-        margin-bottom: 2em;
+        font-size: 1.2em;
     }
     .reading {
-        font-size: 2em;
-        margin: 0.5em;
+        font-size: 1.2em;
+        margin-bottom: 0.5em;
+        background-color: #FFFFFF90;
+        padding: 0.2em 0.4em;
+        border-radius: 0.5rem;
+        &.is-hidden {
+            visibility: hidden;
+        }
     }
     .grid-background {
         padding: 2em;
@@ -144,8 +148,10 @@
 </style>
 
 <div class="character-writer">
-    <div class="reading">{characterData?.reading}</div>
     <div class="meaning">{meaningStr}</div>
+    <div class="reading" class:is-hidden={!app.getConfig().zh.alwaysShowReading && !isComplete}>
+        {characterData?.reading}
+    </div>
     <div class="character-container">
         <div class="grid-background">
             <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} id="grid-background-target">
