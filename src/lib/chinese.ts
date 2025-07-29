@@ -44,6 +44,7 @@ export class ChineseCharacterWordlist {
     }
     
     getCharacterWriterData(word: string): CharacterWriterData | undefined {
+        word = word.replace(/\r/g, '');
         const wordData = this.dict[word];
         if (!wordData) {
             return {
