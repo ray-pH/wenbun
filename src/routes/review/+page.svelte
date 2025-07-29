@@ -140,6 +140,7 @@
         flex-grow: 1;
         max-width: 8.5em;
         border-radius: 0.5em;
+        background-color: #E0E0E090;
         &:not(.is-complete) {
             --color: gray;
             pointer-events: none;
