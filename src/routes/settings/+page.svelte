@@ -85,6 +85,13 @@
             }
         });
     }
+    async function tryUploadProfile() {
+        const success = await app.tryUploadProfile();
+        if (success) {
+        } else {
+            window.alert("Failed to import profile data");
+        }
+    }
     
 </script>
 
@@ -98,23 +105,27 @@
         </div>
         <div class="settings-section">
             <div class="section-title">Profile</div>
-                <div>
-                    {#if isShowProfileTextbox}
-                        <textarea bind:value={profileStr} class="profile-textarea"></textarea>
-                        <br>
-                        <button class="button" onclick={() => importProfileData()} disabled={!isProfileStrChanged}>import</button>
-                        <div class="settings-label-help" style="margin: 1em 0">
-                            To export the profile data, copy the text above and store it somewhere safe.<br>
-                            To import the profile data, paste the text into the textbox and click the import button.
-                        </div>
-                        <button class="button" onclick={() => resetDebugProfile()}>Reset Debug Profile</button>
-                        <br>
-                    {/if}
-                    <button class="button" onclick={() => isShowProfileTextbox = !isShowProfileTextbox}>
-                        import/export
-                    </button>
-                </div>
             <div class="section-container">
+                {#if isShowProfileTextbox}
+                    <textarea bind:value={profileStr} class="profile-textarea"></textarea>
+                    <button class="button" onclick={() => importProfileData()} disabled={!isProfileStrChanged}>import</button>
+                    <div class="settings-label-help" style="margin: 1em 0">
+                        To manually export the profile data, copy the text above and store it somewhere safe.<br>
+                        To manually import the profile data, paste the text into the textbox and click the import button.
+                    </div>
+                    <button class="button" onclick={() => resetDebugProfile()}>Reset Debug Profile</button>
+                {/if}
+                <button class="button" onclick={() => isShowProfileTextbox = !isShowProfileTextbox}>
+                    manual import/export
+                </button>
+                <button class="button" onclick={() => app.downloadProfile()}>
+                    <i class="fa-solid fa-download"></i>&nbsp;
+                    export profile data (download)
+                </button>
+                <button class="button" onclick={() => tryUploadProfile()}>
+                    <i class="fa-solid fa-upload"></i>&nbsp;
+                    import profile data (upload)
+                </button>
             </div>
         </div>
         

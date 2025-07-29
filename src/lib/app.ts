@@ -4,6 +4,7 @@ import { BrowserIndexedDBStorage, type IStorage, TauriStorage } from "./storage"
 import _ from "lodash";
 import { ChineseToneColorPalette, DEFAULT_FSRS_PARAM } from "./constants";
 import { isTauri } from "@tauri-apps/api/core";
+import { WebFileManager, type IFileManager } from "./fileManager";
 const UNGROUPED_GROUP = "__ungrouped__"
 
 const STORE_FILENAME = "profile.json"
@@ -103,6 +104,7 @@ export class App {
     fsrsPrevStudied!: FSRS.FSRS;
 
     storage: IStorage;
+    fileManager: IFileManager;
 
     constructor() {
         this.updateFSRS();
@@ -111,6 +113,7 @@ export class App {
         } else {
             this.storage = new BrowserIndexedDBStorage(STORE_FILENAME);
         }
+        this.fileManager = new WebFileManager();
     }
     
     
@@ -490,5 +493,21 @@ export class App {
             });
         }
         deckData.groups = groups;
+    }
+    
+    async downloadProfile(): Promise<void> {
+        const profileStr = this.exportProfile();
+        await this.fileManager.download({
+            data: profileStr,
+            filename: "profile.txt",
+            mimeType: "text/plain",
+        });
+    }
+    
+    async tryUploadProfile(): Promise<boolean> {
+        const payload = await this.fileManager.upload();
+        if (payload === null) return false;
+        if (typeof payload.data !== "string") return false;
+        return this.tryImportProfile(payload.data);
     }
 }
