@@ -40,7 +40,7 @@
         const card = app.getCard(deckId, id, true);
         if (!card) return;
         currentCardId = id;
-        scheduledTimeStr = app.getRatingScheduledTimeStr(card);
+        scheduledTimeStr = app.getRatingScheduledTimeStr(deckId, id);
         cardState = app.getWenbunCustomState(deckId, id);
     }
     

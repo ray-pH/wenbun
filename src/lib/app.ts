@@ -75,7 +75,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     newPreviouslyStudiedCardOrder: NewCardOrder.Mix,
     
     learningSteps: ["1m", "10m"],
-    previouslyStudiedLearningSteps: ["5d", "15d"],
+    previouslyStudiedLearningSteps: ["1m", "5d"],
     desiredRetention: 0.9,
     enableShortTerm: true,
     enableFuzz: false,
@@ -287,7 +287,9 @@ export class App {
         const deckData = this.deckData[deckId];
         const card = this.getCard(deckId, cardId, true);
         if (!card) return;
-        const schedulingCards = this.fsrs.repeat(card, date ?? new Date()) as FSRS.RecordLog;
+        const isPreviouslyStudied = this.deckData[deckId]?.previouslyStudied?.includes(cardId);
+        const fsrs = isPreviouslyStudied ? this.fsrsPrevStudied : this.fsrs;
+        const schedulingCards = fsrs.repeat(card, date ?? new Date()) as FSRS.RecordLog;
         this.setCard(deckId, cardId, schedulingCards[grade].card);
         this.pushReviewLog(deckId, cardId, schedulingCards[grade].log);
         
@@ -402,11 +404,14 @@ export class App {
         if (!due) return 'Not Started';
         return dateDiffFormatted(new Date(), new Date(due));
     }
-    getRatingScheduledTimeStr(card: FSRS.Card): Record<FSRS.Grade, string> {
+    getRatingScheduledTimeStr(deckId: string, cardId: number): Record<FSRS.Grade, string> {
+        const card = this.getCard(deckId, cardId, true);
         let ratingScheduledTimeStr: Record<FSRS.Grade, string> = {1: '', 2: '', 3: '', 4: ''};
         
         if (!card) return ratingScheduledTimeStr;
-        const schedulingCards = this.fsrs.repeat(card, new Date()) as FSRS.RecordLog;
+        const isPreviouslyStudied = this.deckData[deckId]?.previouslyStudied?.includes(cardId);
+        const fsrs = isPreviouslyStudied ? this.fsrsPrevStudied : this.fsrs;
+        const schedulingCards = fsrs.repeat(card, new Date()) as FSRS.RecordLog;
         for (const grade of FSRS_GRADES) {
             const now = schedulingCards[grade].log.due;
             const due = schedulingCards[grade].card.due;
