@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link href="https://cdn.jsdelivr.net/npm/diagramatics@1.8/css/diagramatics.css" rel="stylesheet">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@100..900&family=Zhi+Mang+Xing&display=swap" rel="stylesheet">
+</head>
+<body>
+	<svg id="mysvg" width=512 height=512></svg>
+</body>
+<script type="module">
+    import * as dg from 'https://cdn.jsdelivr.net/npm/diagramatics@1.8/dist/diagramatics.min.js'
+    
+    const mysvg = document.getElementById('mysvg');
+    const V2 = dg.V2;
+    
+    // =========================================
+    const c_main = '#3E92CC'
+    const boundary = dg.square(100).opacity(0)
+    const bg = dg.square(95).stroke('none').fill(c_main).apply(dg.mod.round_corner(10))
+    const wen = dg.text('文')
+        // .textfill('white').fontscale(1).fontsize(60)
+        .textfill('white').fontscale(1).fontsize(65)
+        .fontweight(600)
+        .fontfamily('"Noto Sans SC"')
+        // .translate(V2(-10,1))
+        .translate(V2(-21,2))
+    const bun = dg.text('文')
+        // .textfill('lightgray').fontscale(1).fontsize(100)
+        .textfill('lightgray').fontscale(1).fontsize(105)
+        .opacity(0.8)
+        .fontfamily('"Zhi Mang Xing"')
+        // .translate(V2(10,-15))
+        .translate(V2(8,-15))
+    
+    dg.draw_to_svg_element(mysvg, dg.diagram_combine(boundary, bg));
+    dg.draw_to_svg_element(mysvg, dg.diagram_combine(wen, bun), {
+        set_html_attribute: false,
+        clear_svg: false
+    });
+    
+    // dg.download_svg_as_png(mysvg);
+</script>
+
+</html>
