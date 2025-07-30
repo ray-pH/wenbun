@@ -109,14 +109,15 @@
     .bottom-container {
         position: absolute;
         bottom: 0;
-        padding: 2em 2em 3em 2em;
+        padding-bottom: 3em;
         box-sizing: border-box;
         width: 100vw;
         @media (max-width: 600px) {
-            padding-bottom: 1em;
+            padding-bottom: 0.6em;
         }
     }
     .review-button-container {
+        width: 100vw;
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -124,7 +125,7 @@
     }
     .review-label {
         font-weight: bold;
-        padding: 0.2em 2em;
+        padding: 0.2em 0;
     }
     .review-button-inner {
         display: flex;
