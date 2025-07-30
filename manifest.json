@@ -7,8 +7,18 @@
     "theme_color": "#3E92CC",
     "icons": [
         {
-            "src": "./favicon.png",
+            "src": "./wenbun-128.png",
             "sizes": "128x128",
+            "type": "image/png"
+        },
+        {
+            "src": "./wenbun-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "./wenbun-512.png",
+            "sizes": "512x512",
             "type": "image/png"
         }
     ]
