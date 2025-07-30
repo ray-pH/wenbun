@@ -31,15 +31,15 @@
     function nextCard() {
         isComplete = false;
         const id = app.getNextCard(deckId);
-        if (id == undefined) {
+        if (id === undefined) {
             // done for today
             isDoneToday = true;
             return;
         }
-        const card = app.getCard(deckId, id);
+        const card = app.getCard(deckId, id, true);
         if (!card) return;
         currentCardId = id;
-        scheduledTimeStr = app.getRatingScheduledTimeStr(deckId, id);
+        scheduledTimeStr = app.getRatingScheduledTimeStr(card);
     }
     
     function characterWriterDataFromId(id: number): CharacterWriterData | undefined {

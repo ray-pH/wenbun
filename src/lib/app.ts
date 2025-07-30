@@ -285,7 +285,7 @@ export class App {
     
     rateCard(deckId: string, cardId: number, grade: FSRS.Grade, date?: Date): void {
         const deckData = this.deckData[deckId];
-        const card = this.getCard(deckId, cardId);
+        const card = this.getCard(deckId, cardId, true);
         if (!card) return;
         const schedulingCards = this.fsrs.repeat(card, date ?? new Date()) as FSRS.RecordLog;
         this.setCard(deckId, cardId, schedulingCards[grade].card);
@@ -333,8 +333,6 @@ export class App {
         const deckData = this.deckData[deckId];
         const newCards = this.getNewCards(deckId);
         const id = newCards[0];
-        const card = FSRS.createEmptyCard();
-        deckData.schedule[id] = card;
         return id;
     }
     
@@ -363,10 +361,12 @@ export class App {
         if (!deckData) return;
         deckData.schedule[cardId] = card;
     }
-    getCard(deckId: string, cardId: number): FSRS.Card | undefined {
-        // TODO: better missing card handling
+    getCard(deckId: string, cardId: number, isCreateNewCardIfNeeded = false): FSRS.Card | undefined {
         const deckData = this.deckData[deckId];
         if (!deckData) return undefined;
+        if (isCreateNewCardIfNeeded && deckData.schedule[cardId] === undefined) {
+            return FSRS.createEmptyCard();
+        }
         return deckData.schedule[cardId];
     }
     getCardWord(deckId: string, cardId: number): string {
@@ -384,8 +384,7 @@ export class App {
         if (!due) return 'Not Started';
         return dateDiffFormatted(new Date(), new Date(due));
     }
-    getRatingScheduledTimeStr(deckId: string, cardId: number): Record<FSRS.Grade, string> {
-        const card = this.getCard(deckId, cardId);
+    getRatingScheduledTimeStr(card: FSRS.Card): Record<FSRS.Grade, string> {
         let ratingScheduledTimeStr: Record<FSRS.Grade, string> = {1: '', 2: '', 3: '', 4: ''};
         
         if (!card) return ratingScheduledTimeStr;
