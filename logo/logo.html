@@ -40,7 +40,40 @@
         clear_svg: false
     });
     
-    // dg.download_svg_as_png(mysvg);
+    async function fontToDataURL(url) {
+        const res = await fetch(url);
+        const blob = await res.blob();
+        return await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+        });
+    }
+    async function embedFontFaces(svg) {
+        const [notoDataURL, zhiDataURL] = await Promise.all([
+            fontToDataURL('./NotoSansSC-VariableFont_wght.ttf'),
+            fontToDataURL('./ZhiMangXing-Regular.ttf')
+        ]);
+        const SVG_NS = "http://www.w3.org/2000/svg";
+        const defs  = document.createElementNS(SVG_NS, "defs");
+        const style = document.createElementNS(SVG_NS, "style");
+        style.setAttribute("type", "text/css");
+        style.textContent = `
+        @font-face {
+            font-family: 'Noto Sans SC';
+            src: url('${notoDataURL}') format('truetype');
+        }
+        @font-face {
+            font-family: 'Zhi Mang Xing';
+            src: url('${zhiDataURL}') format('truetype');
+        }
+        `;
+        defs.appendChild(style);
+        svg.insertBefore(defs, svg.firstChild);
+    }
+    embedFontFaces(mysvg).then(() => {
+        dg.download_svg_as_png(mysvg);
+    })
 </script>
 
 </html>
