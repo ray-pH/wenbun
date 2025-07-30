@@ -1,6 +1,6 @@
 <script lang="ts">
     import { base } from '$app/paths';
-    import { App } from "$lib/app";
+    import { App, WenBunCustomState } from "$lib/app";
     import CharacterWriter from "$lib/components/CharacterWriter.svelte";
     import * as FSRS from "ts-fsrs"
     import { onMount } from "svelte";
@@ -24,6 +24,7 @@
     let isComplete = false;
     let isDoneToday = false;
     let wordlist = new ChineseCharacterWordlist();
+    let cardState: WenBunCustomState | undefined = undefined;
     const reviewButtonsLabel = ['Fail', 'Hard', 'Good', 'Easy'];
     
     let currentCardId: number | undefined = undefined;
@@ -40,6 +41,7 @@
         if (!card) return;
         currentCardId = id;
         scheduledTimeStr = app.getRatingScheduledTimeStr(card);
+        cardState = app.getWenbunCustomState(deckId, id);
     }
     
     function characterWriterDataFromId(id: number): CharacterWriterData | undefined {
@@ -71,6 +73,20 @@
         <div>You have done today's review.</div>
     {/if}
     {#if isPageReady && (currentCardId !== undefined) && !isDoneToday}
+        <div class="counter">
+            <span class="deck-count-learn-relearn" class:underlined={cardState === WenBunCustomState.Learning || cardState === WenBunCustomState.Relearning}>
+                {app.getLearningRelearningCardsCount(deckId) || ''}
+            </span>
+            <span class="deck-count-review" class:underlined={cardState === WenBunCustomState.ReviewYoung || cardState === WenBunCustomState.ReviewMature}>
+                {app.getScheduledReviewCardsCount(deckId) || ''}
+            </span>
+            <span class="deck-count-new" class:underlined={cardState === WenBunCustomState.New}>
+                {app.getScheduledNewCardsCount(deckId) || ''}
+            </span>
+            <span class="deck-count-previously-studied" class:underlined={cardState === WenBunCustomState.PreviouslyStudied}>
+                {app.getScheduledPreviouslyStudiedCardsCount(deckId) || ''}
+            </span>
+        </div>
         <div class="character-writer-container">
             {#key currentCardId}
                 <CharacterWriter app={app} characterData={characterWriterDataFromId(currentCardId)} onComplete={() => onComplete()} />
@@ -104,7 +120,26 @@
         width: 100%;
     }
     .character-writer-container {
-        margin: 1em 0;
+        margin: 0;
+    }
+    .counter {
+        margin-top: 0.5em;
+        margin-bottom: -0.5em;
+        .underlined {
+            text-decoration: underline;
+        }
+        .deck-count-learn-relearn {
+            color: #DB6B6C
+        }
+        .deck-count-review {
+            color: #419E6F
+        }
+        .deck-count-new {
+            color: #3E92CC;
+        }
+        .deck-count-previously-studied {
+            color: #DA8C22;
+        }
     }
     .bottom-container {
         position: absolute;
