@@ -1,3 +1,5 @@
+<img width="128" height="128" src="https://raw.githubusercontent.com/ray-pH/wenbun/refs/heads/main/static/favicon.png" alt="WenBun Icon">
+
 # Wenbun (文文)
 
 **Wenbun** is an open-source app for learning Chinese characters through interactive writing practice and spaced repetition. It combines flashcard-style review with stroke-by-stroke training and will be available on desktop, web, and mobile (Android, iOS).
@@ -18,6 +20,8 @@
 * Add support for Japanese Kanji (JLPT levels)
 * Add Chinese dictionary lookup
 * Add online profile and data backup
+* Manual/Freeform stroke input (no guidance)
+* Hear the word pronounced
 
 ## Development Credits
 
