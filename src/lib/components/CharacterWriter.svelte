@@ -18,8 +18,8 @@
         return parseFloat(getComputedStyle(document.documentElement).fontSize);
     }
     function updateWidth() {
-        const emPx = getEmInPx() * 5 * 2;
-        width = Math.min(window.innerWidth - emPx, 500);
+        const emPx = getEmInPx() * 3 * 2;
+        width = Math.min(document.documentElement.clientWidth - emPx, 500);
         height = width;
     }
     
