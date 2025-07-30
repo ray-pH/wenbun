@@ -47,9 +47,9 @@ export interface WenbunConfig {
     // learning
     newCardPerDay?: number;
     maxReviewsPerDay?: number;
-    newCardOrder?: NewCardOrder; //not implemented
+    newCardOrder?: NewCardOrder;
     newPreviouslyStudiedCardPerDay?: number;
-    newPreviouslyStudiedCardOrder?: NewCardOrder; //not implemented
+    newPreviouslyStudiedCardOrder?: NewCardOrder;
     
     // FSRS
     learningSteps?: FSRS.Steps;
@@ -314,6 +314,8 @@ export class App {
     
     getNextCard(deckId: string): number | undefined {
         // TODO: precalculate the next card on review
+        const config = this.getConfig();
+        
         const newCard = (this.getScheduledNewCardsCount(deckId) > 0) 
             ? this.getNewCard(deckId) : undefined;
         const previouslyStudiedCards = (this.getScheduledPreviouslyStudiedCardsCount(deckId) > 0) 
@@ -321,12 +323,28 @@ export class App {
         const todaysCards = (this.getScheduledReviewCardsCount(deckId) > 0)
             ? this.getTodaysScheduledCards(deckId)[0] : undefined;
         
-        // TODO: change new card position based on config
-        // currently, the order is: new card, previously studied card, today's card
-        if (newCard !== undefined) return newCard;
-        if (previouslyStudiedCards !== undefined) return previouslyStudiedCards;
-        if (todaysCards !== undefined) return todaysCards;
-        return undefined;
+        const head = [];
+        const mid = [todaysCards];
+        const tail = [];
+        
+        const newCardCount = this.getNewCardsCount(deckId);
+        const previouslyStudiedCardCount = this.deckData[deckId].previouslyStudied.length;
+        const todaysCardCount = this.getTodaysReviewCards(deckId).length;
+        if (config.newCardOrder === NewCardOrder.BeforeReviews) head.push(newCard);
+        if (config.newCardOrder === NewCardOrder.AfterReviews) tail.push(newCard);
+        if (config.newPreviouslyStudiedCardOrder === NewCardOrder.BeforeReviews) head.push(previouslyStudiedCards);
+        if (config.newPreviouslyStudiedCardOrder === NewCardOrder.AfterReviews) tail.push(previouslyStudiedCards);
+        if (config.newCardOrder === NewCardOrder.Mix) {
+            const prob = newCardCount / (newCardCount + todaysCardCount);
+            if (Math.random() < prob) mid.unshift(newCard); else mid.push(newCard);
+        }
+        if (config.newPreviouslyStudiedCardOrder === NewCardOrder.Mix) {
+            const prob = previouslyStudiedCardCount / (newCardCount + previouslyStudiedCardCount + todaysCardCount);
+            if (Math.random() < prob) mid.unshift(previouslyStudiedCards); else mid.push(previouslyStudiedCards);
+        }
+        
+        const arr = [...head, ...mid, ...tail];
+        return arr.reduce((a, b) => a ?? b, undefined);
     }
     
     getNewCard(deckId: string): number {
@@ -414,10 +432,15 @@ export class App {
         }
     }
     
-    getScheduledReviewCardsCount(deckId: string): number {
+    getTodaysReviewCards(deckId: string): number[] {
         const deckData = this.deckData[deckId];
         const todaysScheduledCards = this.getTodaysScheduledCards(deckId);
         const todaysReviewCards = todaysScheduledCards.filter((id) => deckData.schedule[id]?.state === FSRS.State.Review);
+        return todaysReviewCards;
+    }
+    getScheduledReviewCardsCount(deckId: string): number {
+        const deckData = this.deckData[deckId];
+        const todaysReviewCards = this.getTodaysReviewCards(deckId);
         const config = this.getConfig();
         const count = Math.min(todaysReviewCards.length, config.maxReviewsPerDay - deckData.doneTodayReviewCount);
         return Math.max(0, count);
@@ -465,6 +488,7 @@ export class App {
             const due = getDaysSinceEpochLocal(new Date(s.due));
             return due <= tomorrow
         });
+        // TODO: for learning cards, use exact time; for review cards, use date
         // sort by time
         todaysCards.sort((a, b) => new Date(a[1].due).getTime() - new Date(b[1].due).getTime());
         return todaysCards.map((s) => +s[0]);
