@@ -318,20 +318,18 @@ export class App {
         // TODO: precalculate the next card on review
         const config = this.getConfig();
         
-        const newCard = (this.getScheduledNewCardsCount(deckId) > 0) 
-            ? this.getNewCard(deckId) : undefined;
-        const previouslyStudiedCards = (this.getScheduledPreviouslyStudiedCardsCount(deckId) > 0) 
-            ? this.getPreviouslyStudiedCard(deckId) : undefined;
-        const todaysCards = (this.getScheduledReviewCardsCount(deckId) > 0)
-            ? this.getTodaysScheduledCards(deckId)[0] : undefined;
+        const newCardCount = this.getScheduledNewCardsCount(deckId);
+        const previouslyStudiedCardCount = this.getScheduledPreviouslyStudiedCardsCount(deckId);
+        const todaysCardCount = this.getScheduledReviewCardsCount(deckId);
+        
+        const newCard = (newCardCount > 0) ? this.getNewCard(deckId) : undefined;
+        const previouslyStudiedCards = (previouslyStudiedCardCount > 0) ? this.getPreviouslyStudiedCard(deckId) : undefined;
+        const todaysCards = (todaysCardCount > 0) ? this.getTodaysScheduledCards(deckId)[0] : undefined;
         
         const head = [];
         const mid = [todaysCards];
         const tail = [];
         
-        const newCardCount = this.getNewCardsCount(deckId);
-        const previouslyStudiedCardCount = this.deckData[deckId].previouslyStudied.length;
-        const todaysCardCount = this.getTodaysReviewCards(deckId).length;
         if (config.newCardOrder === NewCardOrder.BeforeReviews) head.push(newCard);
         if (config.newCardOrder === NewCardOrder.AfterReviews) tail.push(newCard);
         if (config.newPreviouslyStudiedCardOrder === NewCardOrder.BeforeReviews) head.push(previouslyStudiedCards);
@@ -371,6 +369,9 @@ export class App {
     
     getNewCardsCount(deckId: string): number {
         return this.getNewCards(deckId).length;
+    }
+    getPreviouslyStudiedCardCount(deckId: string): number {
+        return this.deckData[deckId]?.previouslyStudied.length ?? 0;
     }
     
     pushReviewLog(deckId: string, cardId: number, log: FSRS.ReviewLog): void {
@@ -453,12 +454,14 @@ export class App {
     getScheduledNewCardsCount(deckId: string): number {
         const config = this.getConfig();
         const deckData = this.deckData[deckId];
-        return Math.max(0, config.newCardPerDay - deckData.doneTodayNewCardCount);
+        const count = Math.min(this.getNewCardsCount(deckId), config.newCardPerDay - deckData.doneTodayNewCardCount);
+        return Math.max(0, count);
     }
     getScheduledPreviouslyStudiedCardsCount(deckId: string): number {
         const config = this.getConfig();
         const deckData = this.deckData[deckId];
-        return Math.max(0, config.newPreviouslyStudiedCardPerDay - deckData.doneTodayPreviouslyStudiedCardCount);
+        const count = Math.min(this.getPreviouslyStudiedCardCount(deckId), config.newPreviouslyStudiedCardPerDay - deckData.doneTodayPreviouslyStudiedCardCount);
+        return Math.max(0, count);
     }
     getLearningRelearningCardsCount(deckId: string): number {
         const deckData = this.deckData[deckId];
