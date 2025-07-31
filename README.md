@@ -23,6 +23,10 @@
 * Manual/Freeform stroke input (no guidance)
 * Hear the word pronounced
 
+## Community
+
+* Join us on [Discord](https://discord.gg/Ab25UgysDt)
+
 ## Development Credits
 
 * [hanzi-writer](https://hanziwriter.org/) — stroke animation and writing feedback
