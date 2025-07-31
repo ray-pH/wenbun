@@ -20,7 +20,6 @@ export interface CharacterWriterData {
 
 export interface CharacterWriterConfig {
     isFirstTime: boolean;
-    isQuiz: boolean;
 }
 
 export async function loadDeck(deckId: string): Promise<string[] | undefined> {

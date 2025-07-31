@@ -13,6 +13,7 @@
     // const correctSound = new Audio(`${base}/assets/sounds/rightanswer-95219.mp3`);
     const correctSound = new Audio(`${base}/assets/sounds/correct-choice-43861.mp3`);
     let isComplete = $state(false);
+    let unmounted = $state(false);
 
     function getEmInPx(): number {
         return parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -26,15 +27,12 @@
     interface Props {
 		onComplete: () => void;
 		characterData: CharacterWriterData | undefined;
+		cardConfig: CharacterWriterConfig;
 		app: App
 	}
-    let { onComplete, characterData, app }: Props = $props();
+    let { onComplete, characterData, app, cardConfig }: Props = $props();
     
     let completedCharCount: number = $state(0);
-    let cardConfig: CharacterWriterConfig = {
-        isFirstTime: false,
-        isQuiz: true
-    }
     let meaningStr = characterData?.meanings.join("; ");
     
     function getChineseTone(tags: string[]): number | undefined {
@@ -45,23 +43,33 @@
         }
     }
     function completeChar() {
-        correctSound.play();
-        completedCharCount = completedCharCount + 1;
-        if (completedCharCount == characterData?.characters.length) {
-            onComplete();
-            isComplete = true;
-        } else {
+        if (unmounted) return;
+        if (cardConfig.isFirstTime) {
+            completedCharCount = (completedCharCount + 1) % characterData!.characters.length;
             window.setTimeout(() => {
                 setupHanziWriter(completedCharCount);
                 // play sound
             }, NEXT_CHAR_DELAY);
+        } else {
+            correctSound.play();
+            completedCharCount = completedCharCount + 1;
+            if (completedCharCount == characterData?.characters.length) {
+                onComplete();
+                isComplete = true;
+            } else {
+                window.setTimeout(() => {
+                    setupHanziWriter(completedCharCount);
+                    // play sound
+                }, NEXT_CHAR_DELAY);
+            }
         }
     }
     let writer: HanziWriter;
     function setupHanziWriter(index: number) {
+        if (unmounted) return;
         if (!characterData) return;
         if (writer) {
-            writer.cancelQuiz();
+            if (!cardConfig.isFirstTime) writer.cancelQuiz();
             writer.hideCharacter();
         }
         const tone = getChineseTone(characterData.tags[index] ?? []);
@@ -69,15 +77,28 @@
             width: width,
             height: height,
             padding: 5,
-            showCharacter: false, showOutline: false,
+            showCharacter: false, 
+            showOutline: cardConfig.isFirstTime,
             highlightOnComplete: false,
             strokeColor: app.getChineseToneColor(tone) ?? "#555",
             onComplete: () => {
                 completeChar();
             }
         });
-        if (cardConfig.isQuiz) {
+        if (!cardConfig.isFirstTime) {
             writer.quiz();
+        } else {
+            setTimeout(() => {
+                writer.animateCharacter({
+                    onComplete: () => {
+                          setTimeout(() => {
+                              writer.hideOutline();
+                              writer.hideCharacter();
+                              completeChar();
+                          }, NEXT_CHAR_DELAY);
+                        }
+                });
+            },  NEXT_CHAR_DELAY);
         }
     }
     
@@ -86,6 +107,7 @@
         window.addEventListener('resize', updateWidth);
         setupHanziWriter(0);
         return () => {
+            unmounted = true;
             window.removeEventListener('resize', updateWidth);
         };
     });
@@ -123,8 +145,6 @@
         flex-direction: column;
     }
     .character-box-container {
-        margin-top: 0.5em;
-        padding-right: 0.5em;
         font-size: 2em;
         color: #00000090;
         align-self: end;
@@ -145,11 +165,27 @@
             pointer-events: none;
         }
     }
+    .bottom-container {
+        margin-top: 0.5em;
+        padding-right: 0.5em;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .new-element-indicator {
+        color: white;
+        background-color: #3E92CC;
+        padding: 0.5em 3em;
+        border-radius: 0.5rem;
+        &.is-hidden {
+            visibility: hidden;
+        }
+    }
 </style>
 
 <div class="character-writer">
     <div class="meaning">{meaningStr}</div>
-    <div class="reading" class:is-hidden={!app.getConfig().zh.alwaysShowReading && !isComplete}>
+    <div class="reading" class:is-hidden={!app.getConfig().zh.alwaysShowReading && !isComplete && !cardConfig.isFirstTime}>
         {characterData?.reading}
     </div>
     <div class="character-container">
@@ -161,16 +197,21 @@
             <line x1="0" y1={height/2} x2={width} y2={height/2} stroke={gridStroke} />
             </svg>
         </div>
-        {#if characterData?.characters}
-            <div class="character-box-container">
-                {#each characterData.characters as character, i}
-                    {#if i < completedCharCount}
-                        <span>{character}</span>
-                    {:else}
-                        <span class="empty-character-box">&#x3000;</span>
-                    {/if}
-                {/each}
-            </div>
-        {/if}
+        <div class="bottom-container">
+            {#if characterData?.characters}
+                <div class="new-element-indicator" class:is-hidden={!cardConfig.isFirstTime}>
+                    New Card
+                </div>
+                <div class="character-box-container">
+                    {#each characterData.characters as character, i}
+                        {#if i < completedCharCount || cardConfig.isFirstTime}
+                            <span>{character}</span>
+                        {:else}
+                            <span class="empty-character-box">&#x3000;</span>
+                        {/if}
+                    {/each}
+                </div>
+            {/if}
+        </div>
     </div>
 </div>

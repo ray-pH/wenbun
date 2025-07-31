@@ -4,7 +4,7 @@
     import CharacterWriter from "$lib/components/CharacterWriter.svelte";
     import * as FSRS from "ts-fsrs"
     import { onMount } from "svelte";
-    import { type CharacterWriterData } from "$lib/util";
+    import { type CharacterWriterConfig, type CharacterWriterData } from "$lib/util";
     import { ChineseCharacterWordlist } from "$lib/chinese";
     import TopBar from "$lib/components/TopBar.svelte";
 
@@ -25,12 +25,15 @@
     let isDoneToday = false;
     let wordlist = new ChineseCharacterWordlist();
     let cardState: WenBunCustomState | undefined = undefined;
+    let isNewCardInteractedWith = false;
+    $: isFirstTime = cardState === WenBunCustomState.New && !isNewCardInteractedWith;
     const reviewButtonsLabel = ['Fail', 'Hard', 'Good', 'Easy'];
     
     let currentCardId: number | undefined = undefined;
     let scheduledTimeStr: Record<FSRS.Grade, string> = {1: '', 2: '', 3: '', 4: ''};
     function nextCard() {
         isComplete = false;
+        isNewCardInteractedWith = false;
         const id = app.getNextCard(deckId);
         if (id === undefined) {
             // done for today
@@ -44,9 +47,20 @@
         cardState = app.getWenbunCustomState(deckId, id);
     }
     
+    function onNewCardInteracted() {
+        isNewCardInteractedWith = true;
+        currentCardId = currentCardId;
+        scheduledTimeStr = app.getRatingScheduledTimeStr(deckId, currentCardId!);
+    }
+    
     function characterWriterDataFromId(id: number): CharacterWriterData | undefined {
         const word = app.getCardWord(deckId, id);
         return wordlist.getCharacterWriterData(word);
+    }
+    function getCardConfig(_id: number): CharacterWriterConfig {
+        return {
+            isFirstTime: isFirstTime,
+        }
     }
     function onComplete() {
         isComplete = true;
@@ -88,24 +102,44 @@
             </span>
         </div>
         <div class="character-writer-container">
-            {#key currentCardId}
-                <CharacterWriter app={app} characterData={characterWriterDataFromId(currentCardId)} onComplete={() => onComplete()} />
+            {#key [currentCardId, isNewCardInteractedWith]}
+                <CharacterWriter 
+                    app={app} 
+                    characterData={characterWriterDataFromId(currentCardId)} 
+                    onComplete={() => onComplete()} 
+                    cardConfig={getCardConfig(currentCardId)}
+                />
             {/key}
         </div>
         <div class="bottom-container">
             <div class="review-button-container">
-                {#each reviewButtonsLabel as label, i}
+                {#if isFirstTime}
+                    <div class="review-button"><div class="review-time">&nbsp;</div><div class="review-label">&nbsp;</div></div>
+                    <div class="review-button"><div class="review-time">&nbsp;</div><div class="review-label">&nbsp;</div></div>
+                    <div class="review-button"><div class="review-time">&nbsp;</div><div class="review-label">&nbsp;</div></div>
                     <button 
-                        class={`review-button ${getReviewButtonClass(i+1)}`} 
-                        class:is-complete={isComplete}
-                        onclick={() => onReviewButtonClick(i+1)}
+                        class="review-button is-complete review-button-easy"
+                        onclick={() => onNewCardInteracted()}
                     >
                         <div class="review-button-inner">
-                            <div class="review-time">{scheduledTimeStr[(i+1) as FSRS.Grade]}</div>
-                            <div class="review-label">{label}</div>
+                            <div class="review-time">&nbsp;</div>
+                            <div class="review-label">Learn</div>
                         </div>
                     </button>
-                {/each}
+                {:else}
+                    {#each reviewButtonsLabel as label, i}
+                        <button 
+                            class={`review-button ${getReviewButtonClass(i+1)}`} 
+                            class:is-complete={isComplete}
+                            onclick={() => onReviewButtonClick(i+1)}
+                        >
+                            <div class="review-button-inner">
+                                <div class="review-time">{scheduledTimeStr[(i+1) as FSRS.Grade]}</div>
+                                <div class="review-label">{label}</div>
+                            </div>
+                        </button>
+                    {/each}
+                {/if}
             </div>
         </div>
     {/if}
