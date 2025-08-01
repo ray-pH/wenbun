@@ -78,6 +78,12 @@
             case FSRS.Rating.Again: return 'review-button-fail';
         }
     }
+    
+    async function ignoreCard() {
+        app.addIgnoredMark(deckId, currentCardId!);
+        await app.save();
+        nextCard();
+    }
 </script>
 
 
@@ -114,7 +120,15 @@
         <div class="bottom-container">
             <div class="review-button-container">
                 {#if isFirstTime}
-                    <div class="review-button"><div class="review-time">&nbsp;</div><div class="review-label">&nbsp;</div></div>
+                    <button 
+                        class="review-button is-complete review-button-fail"
+                        onclick={() => ignoreCard()}
+                    >
+                        <div class="review-button-inner">
+                            <div class="review-time">(Don't Learn)</div>
+                            <div class="review-label">Ignore</div>
+                        </div>
+                    </button>
                     <div class="review-button"><div class="review-time">&nbsp;</div><div class="review-label">&nbsp;</div></div>
                     <div class="review-button"><div class="review-time">&nbsp;</div><div class="review-label">&nbsp;</div></div>
                     <button 

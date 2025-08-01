@@ -48,6 +48,7 @@
             case WenBunCustomState.ReviewMature: return 'card-status-review-mature';
             case WenBunCustomState.Relearning: return 'card-status-relearning';
             case WenBunCustomState.PreviouslyStudied: return 'card-status-previously-studied';
+            case WenBunCustomState.Ignored: return 'card-status-ignored';
         }
     }
     
@@ -100,17 +101,25 @@
     }
     async function addPreviouslyStudiedMark() {
         if (selectModeGroup == null) return;
-        selections.forEach((id) => {
-            app.addPreviouslyStudiedMark(deckId, id);
-        });
+        selections.forEach((id) => { app.addPreviouslyStudiedMark(deckId, id); });
         await app.save();
         app = app;
     }
     async function removePreviouslyStudiedMark() {
         if (selectModeGroup == null) return;
-        selections.forEach((id) => {
-            app.removePreviouslyStudiedMark(deckId, id);
-        });
+        selections.forEach((id) => { app.removePreviouslyStudiedMark(deckId, id); });
+        await app.save();
+        app = app;
+    }
+    async function addIgnoredMark() {
+        if (selectModeGroup == null) return;
+        selections.forEach((id) => { app.addIgnoredMark(deckId, id); });
+        await app.save();
+        app = app;
+    }
+    async function removeIgnoredMark() {
+        if (selectModeGroup == null) return;
+        selections.forEach((id) => { app.removeIgnoredMark(deckId, id); });
         await app.save();
         app = app;
     }
@@ -141,7 +150,7 @@
                 {#if accordionState.get(group.label)}
                     {#if selectModeGroup == group.label}
                         <div style="display: flex; flex-direction: row; justify-content: space-between; width: 100%">
-                            <div class="group-buttons-container">
+                            <div class="group-buttons-container" style="align-items: flex-start;">
                                 <button class="button" onclick={() => stopSelectMode()}>
                                     <i class="fa-solid fa-xmark"></i>cancel selection
                                 </button>
@@ -149,12 +158,15 @@
                                     <i class="fa-solid fa-check-double"></i>select all
                                 </button>
                             </div>
-                            <div class="group-buttons-container" style="flex-direction: row-reverse;">
+                            <div class="group-buttons-container" style="align-items: flex-end;">
                                 <button class="button" disabled={selections.size == 0} onclick={() => addPreviouslyStudiedMark()}>
-                                    <i class="fa-solid fa-book-open"></i>mark as previously studied
-                                </button>
-                                <button class="button" disabled={selections.size == 0}
-                                    onclick={() => removePreviouslyStudiedMark()}>remove previously studied mark</button>
+                                    <i class="fa-solid fa-book-open"></i>mark as <b>previously studied</b></button>
+                                <button class="button" disabled={selections.size == 0} onclick={() => removePreviouslyStudiedMark()}>
+                                    <i class="fa-solid fa-book-open"></i>remove <b>previously studied</b> mark</button>
+                                <button class="button" disabled={selections.size == 0} onclick={() => addIgnoredMark()}>
+                                    <i class="fa-solid fa-square-xmark"></i>mark as <b>ignored</b></button>
+                                <button class="button" disabled={selections.size == 0} onclick={() => removeIgnoredMark()}>
+                                    <i class="fa-solid fa-square-xmark"></i>remove <b>ignored</b> mark</button>
                             </div>
                         </div>
                     {/if}
@@ -185,7 +197,7 @@
                                     <div class={`status ${getCardStatusClass(deckId, id, app)}`}>
                                         {app.getWenbunCustomState(deckId, id) ?? WenBunCustomState.New}
                                     </div>
-                                    <div class="due">
+                                    <div class={`due ${getCardStatusClass(deckId, id, app)}`}>
                                         {app.getCardDueFormatted(deckId, id)}
                                     </div>
                                 </div>
@@ -270,6 +282,9 @@
             align-items: center;
             gap: 0.5em;
             width: 100%;
+            .due.card-status-ignored {
+                display: none;
+            }
             .status{
                 background-color: white;
                 padding: 0.2em 0.6em;
@@ -294,8 +309,15 @@
                 &.card-status-previously-studied {
                     background-color: #DA8C22;
                 }
+                &.card-status-ignored {
+                    color: black;
+                    background-color: #FFFFFF;
+                }
             }
         }
+    }
+    .card.card-status-ignored {
+        opacity: 0.5;
     }
     .card-status-new {
         .due {
@@ -337,8 +359,7 @@
     }
     .group-buttons-container {
         display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
+        flex-direction: column;
         gap: 0.5em;
         margin: 0.5em 0;
     }
