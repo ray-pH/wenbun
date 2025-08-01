@@ -23,6 +23,7 @@ export enum WenBunCustomState {
     ReviewMature = "Mature",
     Relearning = "Relearning",
     PreviouslyStudied = "Previously Studied", // mark cards that are previously studied before this deck
+    Ignored = "Ignored", // skip
 }
 
 export enum NewCardOrder {
@@ -34,6 +35,7 @@ export enum NewCardOrder {
 export interface DeckData {
     deck: string[];
     previouslyStudied: number[]; // list of card ids that are marked as previously studied (i.e. previously studied before this deck)
+    ignoredIds?: number[]; // list of card ids that are marked as ignored
     groups: Array<{ label: string, cardIds: number[] }>
     schedule: Record<number, FSRS.Card>
     // scheduled cards
@@ -241,6 +243,7 @@ export class App {
             groups: [
                 { label: UNGROUPED_GROUP, cardIds: Array.from(deck.keys()) } // 0..(deck.length - 1)
             ],
+            ignoredIds: [],
             previouslyStudied: [],
             schedule: {},
             lastScheduleCheckDate: new Date(0).getTime(),
@@ -424,6 +427,9 @@ export class App {
         if (this.deckData[deckId]?.previouslyStudied?.includes(cardId)) {
             return WenBunCustomState.PreviouslyStudied;
         }
+        if (this.deckData[deckId]?.ignoredIds?.includes(cardId)) {
+            return WenBunCustomState.Ignored;
+        }
         const card = this.getCard(deckId, cardId);
         switch (card?.state) {
             case FSRS.State.Learning: return WenBunCustomState.Learning;
@@ -487,14 +493,36 @@ export class App {
         deckData.previouslyStudied.splice(index, 1);
     }
     
+    ensureIgnoreIdArray(deckId: string): void {
+        const deckData = this.deckData[deckId];
+        if (!deckData) return;
+        if (deckData.ignoredIds) return;
+        deckData.ignoredIds = [];
+    }
+    addIgnoredMark(deckId: string, cardId: number): void {
+        const deckData = this.deckData[deckId];
+        if (!deckData) return;
+        this.ensureIgnoreIdArray(deckId);
+        if (deckData.ignoredIds?.includes(cardId)) return;
+        deckData.ignoredIds?.push(cardId);
+    }
+    removeIgnoredMark(deckId: string, cardId: number): void {
+        const deckData = this.deckData[deckId];
+        if (!deckData) return;
+        const index = deckData.ignoredIds?.indexOf(cardId);
+        if (index == undefined || index < 0) return;
+        deckData.ignoredIds?.splice(index, 1);
+    }
+    
     getTodaysScheduledCards(deckId: string): number[] {
         const deckData = this.deckData[deckId];
         if (!deckData) return [];
         const today = getDaysSinceEpochLocal(new Date());
         const tomorrow = today + 1;
         const todaysCards = Object.entries(deckData.schedule).filter(([id, s]) => {
+            const isIgnored = !!deckData.ignoredIds?.includes(+id);
             const due = getDaysSinceEpochLocal(new Date(s.due));
-            return due <= tomorrow
+            return due <= tomorrow && !isIgnored;
         });
         // TODO: for learning cards, use exact time; for review cards, use date
         // sort by time
