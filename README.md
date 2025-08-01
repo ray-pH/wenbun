@@ -40,3 +40,20 @@
 
 * **Web:** Svelte
 * **Desktop/Mobile:** Tauri
+
+## Contributing & Development
+
+* **Stay Connected:** Follow updates, join discussions, give feedback, and report bugs on our [Discord server](https://discord.gg/Ab25UgysDt).  
+* **Develop:**  
+    - Install dependencies:  
+        ```bash
+            npm install
+        ```  
+    - Web version:  
+        ```bash
+            npm run dev
+        ```  
+    - Desktop/Mobile (Tauri):  
+        ```bash
+            npm run tauri dev
+        ```
