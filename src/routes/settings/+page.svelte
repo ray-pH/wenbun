@@ -8,6 +8,7 @@
     import * as FSRS from "ts-fsrs"
     import { type DeepRequired } from "$lib/util";
     import { ChineseToneColorPalette } from "$lib/constants";
+    import { ChineseMandarinReading } from '$lib/chinese';
     
     let app = new App();
     let config: DeepRequired<WenbunConfig>;
@@ -197,6 +198,13 @@
             <div class="section-container">
                 <SettingsItem key="zhAlwaysShowReading">
                     <input type="checkbox" bind:checked={config.zh.alwaysShowReading}>
+                </SettingsItem>
+                <SettingsItem key="zhMandarinReading">
+                    <select bind:value={config.zh.mandarinReading}>
+                        <option value={ChineseMandarinReading.Pinyin}>Pinyin (wén)</option>
+                        <option value={ChineseMandarinReading.PinyinNumeric}>Numeric (wen2)</option>
+                        <option value={ChineseMandarinReading.Zhuyin}>Zhuyin (ㄨㄣˊ)</option>
+                    </select>
                 </SettingsItem>
                 <SettingsItem key="zhIsColorBasedOnTone">
                     <input type="checkbox" bind:checked={config.zh.isColorBasedOnTone}>

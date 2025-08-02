@@ -125,5 +125,9 @@ export const SETTINGS_LABEL_DATA = {
     zhAlwaysShowReading: {
         label: "Always Show Reading",
         help: "When disabled, the reading will only be shown after the card is answered correctly.",
-    }
+    },
+    zhMandarinReading: {
+        label: "Mandarin Reading",
+        help: "Specifies which reading to show"
+    },
 }

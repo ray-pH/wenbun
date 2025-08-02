@@ -58,7 +58,10 @@
     
     function characterWriterDataFromId(id: number): CharacterWriterData | undefined {
         const word = app.getCardWord(deckId, id);
-        return wordlist.getCharacterWriterData(word, isZhTraditional);
+        return wordlist.getCharacterWriterData(word, {
+            convertToTraditional: isZhTraditional,
+            mandarinReading: app.getConfig().zh.mandarinReading,
+        });
     }
     function getCardConfig(_id: number): CharacterWriterConfig {
         return {
