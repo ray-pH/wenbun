@@ -19,6 +19,7 @@
         await wordlist.init();
         app = app;
         isZhTraditional = app.deckData[deckId]?.tags?.includes(DECK_TAGS.ZH_TRAD);
+        isZhCantonese = app.deckData[deckId]?.tags?.includes(DECK_TAGS.ZH_YUE);
         isPageReady = true;
         nextCard();
     })
@@ -29,6 +30,7 @@
     let cardState: WenBunCustomState | undefined = undefined;
     let isNewCardInteractedWith = false;
     let isZhTraditional = false;
+    let isZhCantonese = false;
     $: isFirstTime = cardState === WenBunCustomState.New && !isNewCardInteractedWith;
     const reviewButtonsLabel = ['Fail', 'Hard', 'Good', 'Easy'];
     
@@ -61,6 +63,7 @@
         return wordlist.getCharacterWriterData(word, {
             convertToTraditional: isZhTraditional,
             mandarinReading: app.getConfig().zh.mandarinReading,
+            isCantonese: isZhCantonese,
         });
     }
     function getCardConfig(_id: number): CharacterWriterConfig {
