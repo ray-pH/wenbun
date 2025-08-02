@@ -31,6 +31,9 @@
         await app.saveConfig(config);
         initialConfig = _.cloneDeep(config);
     }
+    function discardChanges() {
+        config = _.cloneDeep(initialConfig);
+    }
     
     async function resetDebugProfile(): Promise<void> {
         const confirm = window.confirm("Are you sure you want to reset to the debug profile?");
@@ -96,15 +99,26 @@
         }
     }
     
+    function backConfirmCallback(): Promise<boolean> {
+        return new Promise((resolve) => {
+            if (!isConfigChanged) {
+                resolve(true);
+            } else {
+                const confirm = window.confirm("You have unsaved changes. Are you sure you want to leave?");
+                resolve(confirm);
+            }
+        });
+    }
+    
 </script>
 
 <!-- TODO: setup proper backUrl -->
-<TopBar title="Settings" backUrl="{base}/" isSettings={true}></TopBar>
+<TopBar title="Settings" backUrl="{base}/" isSettings={true} backConfirmCallback={backConfirmCallback}></TopBar>
 <div class="main-container">
     {#if config}
-        <div class="settings-section">
-            <!-- TODO: improve the UI for this -->
+        <div class="top-settings-section">
             <button class="button" onclick={() => saveConfig()} disabled={!isConfigChanged}>Save</button>
+            <button class="button" onclick={() => discardChanges()} disabled={!isConfigChanged}>Discard Changes</button>
         </div>
         <div class="settings-section">
             <div class="section-title">Profile</div>
@@ -265,6 +279,15 @@
         width: 100%;
         margin: 1em 0;
         padding-top: 1em;
+    }
+    .top-settings-section {
+        width: 100%;
+        padding: 0 1em;
+        max-width: 25em;
+        box-sizing: border-box;
+        display: flex;
+        gap: 0.5em;
+        margin-bottom: 2em;
     }
     .settings-section {
         width: 100%;

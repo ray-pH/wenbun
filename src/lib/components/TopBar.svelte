@@ -1,20 +1,33 @@
 <script lang="ts">
     import { base } from '$app/paths';
+    import { goto } from '$app/navigation';
     interface Props {
 		title: string;
 		backUrl?: string
 		isSettings?: boolean
+		backConfirmCallback?: () => Promise<boolean>
 	}
-    let { title, backUrl, isSettings }: Props = $props();
+    let { title, backUrl, isSettings, backConfirmCallback }: Props = $props();
+    
+    function goBack() {
+        if (!backUrl) return;
+        if (backConfirmCallback) {
+            backConfirmCallback().then((confirmed) => {
+                if (confirmed) goto(backUrl);
+            });
+        } else {
+            goto(backUrl);
+        }
+    }
 </script>
 
 <div class="top-bar-placeholder">hello</div>
 <div class="top-bar">
     <div class="left">
         {#if backUrl}
-            <a class="icon-button" href={backUrl} title="Back" aria-label="Back">
+            <button class="icon-button" onclick={goBack} title="Back" aria-label="Back">
                 <i class="fa-solid fa-chevron-left"></i>
-            </a>
+            </button>
         {/if}
     </div>
     <div class="center">
