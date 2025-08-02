@@ -35,6 +35,7 @@
 * [complete-hsk-vocabulary](https://github.com/drkameleon/complete-hsk-vocabulary) — Chinese vocabulary data
 * [hskhsk.com](https://github.com/glxxyz/hskhsk.com) — HSK vocabulary data
 * [KanjiVG](https://kanjivg.tagaini.net/) — planned source for Kanji stroke data
+* [opencc-js](https://github.com/nk2028/opencc-js) — Chinese character conversion
 
 ## Tech Stack
 

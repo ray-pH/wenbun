@@ -7,6 +7,7 @@
     import { type CharacterWriterConfig, type CharacterWriterData } from "$lib/util";
     import { ChineseCharacterWordlist } from "$lib/chinese";
     import TopBar from "$lib/components/TopBar.svelte";
+    import { DECK_TAGS } from '$lib/constants';
 
     export let data: {deckId?: string};
     let deckId = data.deckId || '';
@@ -17,6 +18,7 @@
         await app.init();
         await wordlist.init();
         app = app;
+        isZhTraditional = app.deckData[deckId]?.tags?.includes(DECK_TAGS.ZH_TRAD);
         isPageReady = true;
         nextCard();
     })
@@ -26,6 +28,7 @@
     let wordlist = new ChineseCharacterWordlist();
     let cardState: WenBunCustomState | undefined = undefined;
     let isNewCardInteractedWith = false;
+    let isZhTraditional = false;
     $: isFirstTime = cardState === WenBunCustomState.New && !isNewCardInteractedWith;
     const reviewButtonsLabel = ['Fail', 'Hard', 'Good', 'Easy'];
     
@@ -55,7 +58,7 @@
     
     function characterWriterDataFromId(id: number): CharacterWriterData | undefined {
         const word = app.getCardWord(deckId, id);
-        return wordlist.getCharacterWriterData(word);
+        return wordlist.getCharacterWriterData(word, isZhTraditional);
     }
     function getCardConfig(_id: number): CharacterWriterConfig {
         return {

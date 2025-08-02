@@ -1,19 +1,51 @@
 import { base } from "$app/paths";
 
+export enum DECK_TAGS {
+    ZH_TRAD = "ZH_TRAD",
+    // ZH_YUE = "ZH_YUE"
+}
+
+export const MainDeckInfo = [
+    // {id: 'test', title: 'Test', subtitle: '', src: 'test.txt'},
+    {id: 'hsk1-v2.0', title: 'HSK 1', subtitle: '(v2.0)', src: 'hsk1-v2.0.txt'},
+    {id: 'hsk2-v2.0', title: 'HSK 2', subtitle: '(v2.0)', src: 'hsk2-v2.0.txt'},
+    {id: 'hsk3-v2.0', title: 'HSK 3', subtitle: '(v2.0)', src: 'hsk3-v2.0.txt'},
+    {id: 'hsk4-v2.0', title: 'HSK 4', subtitle: '(v2.0)', src: 'hsk4-v2.0.txt'},
+    {id: 'hsk5-v2.0', title: 'HSK 5', subtitle: '(v2.0)', src: 'hsk5-v2.0.txt'},
+    {id: 'hsk6-v2.0', title: 'HSK 6', subtitle: '(v2.0)', src: 'hsk6-v2.0.txt'},
+    {id: 'hsk1-v3.0', title: 'HSK 1', subtitle: '(v3.0)', src: 'hsk1-v3.0.txt'},
+    {id: 'hsk2-v3.0', title: 'HSK 2', subtitle: '(v3.0)', src: 'hsk2-v3.0.txt'},
+    {id: 'hsk3-v3.0', title: 'HSK 3', subtitle: '(v3.0)', src: 'hsk3-v3.0.txt'},
+    {id: 'hsk4-v3.0', title: 'HSK 4', subtitle: '(v3.0)', src: 'hsk4-v3.0.txt'},
+    {id: 'hsk5-v3.0', title: 'HSK 5', subtitle: '(v3.0)', src: 'hsk5-v3.0.txt'},
+    {id: 'hsk6-v3.0', title: 'HSK 6', subtitle: '(v3.0)', src: 'hsk6-v3.0.txt'},
+    {id: 'hsk7-v3.0', title: 'HSK 7', subtitle: '(v3.0)', src: 'hsk7-v3.0.txt'},
+]
+
 export const DeckInfo = [
-    {id: 'hsk1-v2.0', title: 'HSK 1', subtitle: '(v2.0)'},
-    {id: 'hsk2-v2.0', title: 'HSK 2', subtitle: '(v2.0)'},
-    {id: 'hsk3-v2.0', title: 'HSK 3', subtitle: '(v2.0)'},
-    {id: 'hsk4-v2.0', title: 'HSK 4', subtitle: '(v2.0)'},
-    {id: 'hsk5-v2.0', title: 'HSK 5', subtitle: '(v2.0)'},
-    {id: 'hsk6-v2.0', title: 'HSK 6', subtitle: '(v2.0)'},
-    {id: 'hsk1-v3.0', title: 'HSK 1', subtitle: '(v3.0)'},
-    {id: 'hsk2-v3.0', title: 'HSK 2', subtitle: '(v3.0)'},
-    {id: 'hsk3-v3.0', title: 'HSK 3', subtitle: '(v3.0)'},
-    {id: 'hsk4-v3.0', title: 'HSK 4', subtitle: '(v3.0)'},
-    {id: 'hsk5-v3.0', title: 'HSK 5', subtitle: '(v3.0)'},
-    {id: 'hsk6-v3.0', title: 'HSK 6', subtitle: '(v3.0)'},
-    {id: 'hsk7-v3.0', title: 'HSK 7', subtitle: '(v3.0)'},
+    // Simplified
+    // {subtitle: '(v#.0) - Simplified'},
+    ...MainDeckInfo.map(d => ({
+        ...d,
+        subtitle: d.subtitle + ' - Simplified',
+        tags: [] as DECK_TAGS[]
+    })),
+    // Traditional
+    // {id: 'hsk#-v#.0-trad', subtitle: '(v#.0) - Traditional'},
+    ...MainDeckInfo.map(d => ({
+        ...d,
+        id: d.id + '-trad',
+        subtitle: d.subtitle + ' - Traditional',
+        tags: [DECK_TAGS.ZH_TRAD],
+    })),
+    // Cantonese
+    // {id: 'hsk#-v#.0-yue', subtitle: '(v#.0) - Cantonese'},
+    // ...MainDeckInfo.map(d => ({
+    //     ...d,
+    //     id: d.id + '-yue',
+    //     subtitle: d.subtitle + ' - Cantonese',
+    //     tags: [DECK_TAGS.ZH_YUE],
+    // })),
 ]
 
 export const ChineseToneColorPalette = {

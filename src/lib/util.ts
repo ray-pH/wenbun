@@ -1,4 +1,5 @@
 import { base } from "$app/paths";
+import { DeckInfo } from "./constants";
 
 export type DeepRequired<T> =
   // Leave functions as-is
@@ -22,8 +23,8 @@ export interface CharacterWriterConfig {
     isFirstTime: boolean;
 }
 
-export async function loadDeck(deckId: string): Promise<string[] | undefined> {
-    const url = `${base}/assets/decks/${deckId}.txt`;
+export async function loadDeck(filename: string): Promise<string[] | undefined> {
+    const url = `${base}/assets/decks/${filename}`;
     try {
         const res = await fetch(url);
         const text = await res.text();
@@ -32,6 +33,10 @@ export async function loadDeck(deckId: string): Promise<string[] | undefined> {
         console.error(e);
         return undefined;
     }
+}
+
+export function getDeckFilename(deckId: string): string {
+    return DeckInfo.find(d => d.id === deckId)?.src ?? `${deckId}.txt`;
 }
 
 export function dateDiff(start: Date, end: Date): { days: number, hours: number, minutes: number, seconds: number, milliseconds: number } {

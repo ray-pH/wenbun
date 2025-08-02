@@ -1,8 +1,8 @@
 import * as FSRS from "ts-fsrs"
-import { dateDiffFormatted, getDaysSinceEpochLocal, loadDeck, type DeepRequired } from "./util"
+import { dateDiffFormatted, getDaysSinceEpochLocal, getDeckFilename, loadDeck, type DeepRequired } from "./util"
 import { BrowserIndexedDBStorage, type IStorage, TauriStorage } from "./storage";
 import _ from "lodash";
-import { ChineseToneColorPalette, DEFAULT_FSRS_PARAM } from "./constants";
+import { ChineseToneColorPalette, DeckInfo, DEFAULT_FSRS_PARAM } from "./constants";
 import { isTauri } from "@tauri-apps/api/core";
 import { WebFileManager, type IFileManager } from "./fileManager";
 const UNGROUPED_GROUP = "__ungrouped__"
@@ -34,6 +34,7 @@ export enum NewCardOrder {
 
 export interface DeckData {
     deck: string[];
+    tags: string[];
     previouslyStudied: number[]; // list of card ids that are marked as previously studied (i.e. previously studied before this deck)
     ignoredIds?: number[]; // list of card ids that are marked as ignored
     groups: Array<{ label: string, cardIds: number[] }>
@@ -236,10 +237,12 @@ export class App {
     }
     
     async getInitDeckData(deckId: string): Promise<DeckData | undefined> {
-        const deck = await loadDeck(deckId);
+        const deckInfo = DeckInfo.find(d => d.id === deckId);
+        const deck = await loadDeck(deckInfo?.src ?? `${deckId}.txt`);
         if (!deck) return undefined;
         return <DeckData>{
             deck,
+            tags: deckInfo?.tags ?? [],
             groups: [
                 { label: UNGROUPED_GROUP, cardIds: Array.from(deck.keys()) } // 0..(deck.length - 1)
             ],
