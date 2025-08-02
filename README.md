@@ -37,6 +37,7 @@
 * [KanjiVG](https://kanjivg.tagaini.net/) — planned source for Kanji stroke data
 * [opencc-js](https://github.com/nk2028/opencc-js) — Chinese character conversion
 * [pinyin-zhuyin](https://github.com/peterolson/pinyin-zhuyin) — pinyin to zhuyin/bopomofo conversion
+* [PyJyutping](https://github.com/MacroYau/PyJyutping) — Cantonese romanization conversion
 
 ## Tech Stack
 

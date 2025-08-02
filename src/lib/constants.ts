@@ -2,7 +2,7 @@ import { base } from "$app/paths";
 
 export enum DECK_TAGS {
     ZH_TRAD = "ZH_TRAD",
-    // ZH_YUE = "ZH_YUE"
+    ZH_YUE = "ZH_YUE"
 }
 
 export const MainDeckInfo = [
@@ -25,6 +25,7 @@ export const MainDeckInfo = [
 export const DeckFilters = [
     "Simplified",
     "Traditional",
+    "Cantonese"
 ]
 
 export const DeckInfo: {
@@ -52,12 +53,12 @@ export const DeckInfo: {
     })),
     // Cantonese
     // {id: 'hsk#-v#.0-yue', subtitle: '(v#.0) - Cantonese'},
-    // ...MainDeckInfo.map(d => ({
-    //     ...d,
-    //     id: d.id + '-yue',
-    //     subtitle: d.subtitle + ' - Cantonese',
-    //     tags: [DECK_TAGS.ZH_YUE],
-    // })),
+    ...MainDeckInfo.map(d => ({
+        ...d,
+        id: d.id + '-yue',
+        subtitle: d.subtitle + ' - Cantonese',
+        tags: [DECK_TAGS.ZH_YUE, DECK_TAGS.ZH_TRAD],
+    })),
 ]
 
 export const ChineseToneColorPalette = {

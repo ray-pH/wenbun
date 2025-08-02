@@ -28,6 +28,7 @@ type ChineseDict = Record<string, {
     meaning: string,
     pinyin_num: string,
     pinyin: string,
+    jyutping: string,
 }>
 
 export enum ChineseMandarinReading {
@@ -39,6 +40,7 @@ export enum ChineseMandarinReading {
 export interface CharacterWriterDataConfig {
     convertToTraditional?: boolean;
     mandarinReading?: ChineseMandarinReading;
+    isCantonese?: boolean;
 }
 
 export class ChineseCharacterWordlist {
@@ -71,7 +73,7 @@ export class ChineseCharacterWordlist {
         }
         
         const characters = config.convertToTraditional ? this.converter.convert(word) : word;
-        const reading = this.getReading(wordData, config.mandarinReading);
+        const reading = this.getReading(wordData, config.mandarinReading, config.isCantonese);
         const meanings = [wordData.meaning];
         const tags: string[][] = []
         
@@ -84,7 +86,14 @@ export class ChineseCharacterWordlist {
         return <CharacterWriterData>{ characters, reading, meanings, tags };
     }
     
-    getReading(wordData: ChineseDict[string], mandarinReading: ChineseMandarinReading = ChineseMandarinReading.Pinyin): string {
+    getReading(
+        wordData: ChineseDict[string], 
+        mandarinReading: ChineseMandarinReading = ChineseMandarinReading.Pinyin,
+        isCantonese: boolean = false
+    ): string {
+        if (isCantonese) {
+            return wordData.jyutping;
+        }
         switch (mandarinReading) {
             case ChineseMandarinReading.Pinyin: return wordData.pinyin;
             case ChineseMandarinReading.PinyinNumeric: return wordData.pinyin_num;
