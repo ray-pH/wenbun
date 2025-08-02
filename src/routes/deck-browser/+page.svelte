@@ -2,7 +2,7 @@
     import { base } from '$app/paths';
     import { onMount } from "svelte";
     import { App } from "$lib/app";
-    import { DeckInfo } from "$lib/constants";
+    import { DeckFilters, DeckInfo } from "$lib/constants";
     import TopBar from "$lib/components/TopBar.svelte";
     import { SvelteMap } from "svelte/reactivity";
     import { loadDeck } from "$lib/util";
@@ -14,6 +14,8 @@
     let app = new App();
     let deckDataMap: SvelteMap<string, DeckData> = new SvelteMap()
     let isLoaded = false;
+    let filterText = "";
+    let filteredDeckInfo = DeckInfo;
     onMount(async () => {
         await app.init();
         await populateDeckDataMap();
@@ -35,13 +37,35 @@
         await app.addDeck(deckId);
         app = app;
     }
+    
+    function filter(filterText: string) {
+        if (!filterText.trim()) {
+            filteredDeckInfo = DeckInfo;
+        } else {
+            filteredDeckInfo = DeckInfo.filter((info) => {
+                const str = `${info.title} ${info.subtitle}`.toLowerCase();
+                return str.includes(filterText.toLowerCase());
+            });
+        }
+    }
 </script>
 
 <TopBar title="Browse Decks" backUrl="{base}/"></TopBar>
 <div class="main-container">
     {#if isLoaded}
+        <div class="top-container">
+            <div class="filter-container">
+                <span class="filter-label">Filter:</span>
+                <select class="filter-select" bind:value={filterText} onchange={() => filter(filterText)}>
+                    <option value=""></option>
+                    {#each DeckFilters as filter}
+                        <option value={filter}>{filter}</option>
+                    {/each}
+                </select>
+            </div>
+        </div>
         <div class="deck-list-container">
-            {#each DeckInfo as info}
+            {#each filteredDeckInfo as info}
                 <div class="deck-card-container">
                     <div class="deck-card">
                         <div class="left">
@@ -75,6 +99,13 @@
         margin: 1em 0;
         padding-top: 1em;
     }
+    .top-container {
+        margin-bottom: 1em;
+    }
+    .filter-select {
+        padding: 0.5em;
+        border-radius: 0.5em;
+    }
     .deck-list-container {
         display: flex;
         flex-direction: column;
@@ -84,7 +115,7 @@
     }
     .deck-card-container {
         width: 90vw;
-        max-width: 25em;
+        max-width: 30em;
         display: flex;
         flex-direction: row;
         align-items: center;

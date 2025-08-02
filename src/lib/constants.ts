@@ -22,6 +22,11 @@ export const MainDeckInfo = [
     {id: 'hsk7-v3.0', title: 'HSK 7', subtitle: '(v3.0)', src: 'hsk7-v3.0.txt'},
 ]
 
+export const DeckFilters = [
+    "Simplified",
+    "Traditional",
+]
+
 export const DeckInfo = [
     // Simplified
     // {subtitle: '(v#.0) - Simplified'},
