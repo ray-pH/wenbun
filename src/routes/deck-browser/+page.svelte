@@ -70,7 +70,12 @@
                     <div class="deck-card">
                         <div class="left">
                             <span class="deck-card-title">{info.title}</span>
-                            <span class="deck-card-subtitle">{info.subtitle}</span>
+                            <span 
+                                class="deck-card-subtitle"
+                                style={`--subtitle-color: ${info.color ?? '#00000080'}`}
+                            >
+                                {info.subtitle}
+                            </span>
                         </div>
                         <div class="right">
                             <span class="deck-card-count">{deckDataMap.get(info.id)?.cardCount ?? 0} cards</span>
@@ -135,7 +140,8 @@
             font-weight: bold;
         }
         .deck-card-subtitle {
-            color: #00000080;
+            padding-left: 0.2em;
+            color: var(--subtitle-color, #00000080);
             font-size: 0.9em;
         }
         .deck-card-count {
