@@ -36,6 +36,7 @@
 * [hskhsk.com](https://github.com/glxxyz/hskhsk.com) — HSK vocabulary data
 * [KanjiVG](https://kanjivg.tagaini.net/) — planned source for Kanji stroke data
 * [opencc-js](https://github.com/nk2028/opencc-js) — Chinese character conversion
+* [pinyin-zhuyin](https://github.com/peterolson/pinyin-zhuyin) — pinyin to zhuyin/bopomofo conversion
 
 ## Tech Stack
 
