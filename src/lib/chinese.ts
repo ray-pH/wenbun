@@ -1,3 +1,4 @@
+import { pinyinToZhuyin } from "pinyin-zhuyin";
 import { CHINESE_DICT_SRC, SLUG_NO_DATA_IN_DICT } from "./constants";
 import { parseIntOrUndefined, type CharacterWriterData } from "./util";
 import * as OpenCC from 'opencc-js';
@@ -29,6 +30,17 @@ type ChineseDict = Record<string, {
     pinyin: string,
 }>
 
+export enum ChineseMandarinReading {
+    Pinyin = 'pinyin',
+    PinyinNumeric = 'pinyin_num',
+    Zhuyin = 'zhuyin',
+}
+
+export interface CharacterWriterDataConfig {
+    convertToTraditional?: boolean;
+    mandarinReading?: ChineseMandarinReading;
+}
+
 export class ChineseCharacterWordlist {
     private dict: ChineseDict = {};
     private converter!: ChineseCharacterConverter;
@@ -46,7 +58,7 @@ export class ChineseCharacterWordlist {
         this.initialized = true;
     }
     
-    getCharacterWriterData(word: string, convertToTraditional: boolean = false): CharacterWriterData | undefined {
+    getCharacterWriterData(word: string, config: CharacterWriterDataConfig = {}): CharacterWriterData | undefined {
         word = word.replace(/\r/g, '');
         const wordData = this.dict[word];
         if (!wordData) {
@@ -58,8 +70,8 @@ export class ChineseCharacterWordlist {
             }
         }
         
-        const characters = convertToTraditional ? this.converter.convert(word) : word;
-        const reading = wordData.pinyin;
+        const characters = config.convertToTraditional ? this.converter.convert(word) : word;
+        const reading = this.getReading(wordData, config.mandarinReading);
         const meanings = [wordData.meaning];
         const tags: string[][] = []
         
@@ -70,6 +82,14 @@ export class ChineseCharacterWordlist {
         });
         
         return <CharacterWriterData>{ characters, reading, meanings, tags };
+    }
+    
+    getReading(wordData: ChineseDict[string], mandarinReading: ChineseMandarinReading = ChineseMandarinReading.Pinyin): string {
+        switch (mandarinReading) {
+            case ChineseMandarinReading.Pinyin: return wordData.pinyin;
+            case ChineseMandarinReading.PinyinNumeric: return wordData.pinyin_num;
+            case ChineseMandarinReading.Zhuyin: return pinyinToZhuyin(wordData.pinyin_num);
+        }
     }
 }
 

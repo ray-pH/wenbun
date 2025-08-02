@@ -5,6 +5,7 @@ import _ from "lodash";
 import { ChineseToneColorPalette, DeckInfo, DEFAULT_FSRS_PARAM } from "./constants";
 import { isTauri } from "@tauri-apps/api/core";
 import { WebFileManager, type IFileManager } from "./fileManager";
+import { ChineseMandarinReading } from "./chinese";
 const UNGROUPED_GROUP = "__ungrouped__"
 
 const STORE_FILENAME = "profile.json"
@@ -67,6 +68,7 @@ export interface WenbunConfig {
         isColorBasedOnTone?: boolean;
         toneColors?: string[];
         alwaysShowReading?: boolean;
+        mandarinReading?: ChineseMandarinReading;
     }
 }
 
@@ -88,6 +90,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
         isColorBasedOnTone: true,
         toneColors: ChineseToneColorPalette.Default,
         alwaysShowReading: false,
+        mandarinReading: ChineseMandarinReading.Pinyin,
     },
 }
 
