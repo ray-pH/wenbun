@@ -20,6 +20,7 @@
     "hanzi-writer": "^3.7.2",
     "hanzi-writer-data": "^2.0.1",
     "lodash": "^4.17.21",
+    "opencc-js": "^1.0.5",
     "ts-fsrs": "^5.2.0"
   },
   "devDependencies": {
@@ -28,6 +29,7 @@
     "@sveltejs/vite-plugin-svelte": "^5.0.0",
     "@tauri-apps/cli": "^2",
     "@types/lodash": "^4.17.20",
+    "@types/opencc-js": "^1.0.3",
     "svelte": "^5.0.0",
     "svelte-check": "^4.0.0",
     "typescript": "~5.6.2",

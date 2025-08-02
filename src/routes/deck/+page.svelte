@@ -1,18 +1,24 @@
 <script lang="ts">
     import { base } from '$app/paths';
     import { App, DEFAULT_GROUP_CONTENT_COUNT, WenBunCustomState } from "$lib/app";
+    import { ChineseCharacterConverter } from '$lib/chinese';
     import TopBar from "$lib/components/TopBar.svelte";
+    import { DECK_TAGS } from '$lib/constants';
     import { onMount } from "svelte";
     import { SvelteMap, SvelteSet } from "svelte/reactivity";
     import * as FSRS from "ts-fsrs"
 
     export let data: {deckId?: string};
     let deckId = data.deckId || '';
+    let isZhTraditional = false;
+    let converter: ChineseCharacterConverter;
     
     let app = new App();
     onMount(async () => {
         await app.init();
         // debugRateCard();
+        isZhTraditional = app.deckData[deckId]?.tags?.includes(DECK_TAGS.ZH_TRAD);
+        converter = new ChineseCharacterConverter('cn', 'tw');
         app = app;
     })
     
@@ -50,6 +56,11 @@
             case WenBunCustomState.PreviouslyStudied: return 'card-status-previously-studied';
             case WenBunCustomState.Ignored: return 'card-status-ignored';
         }
+    }
+    
+    function getCardWord(deckId: string, cardId: number): string {
+        const word = app.getCardWord(deckId, cardId);
+        return isZhTraditional ? converter.convert(word) : word;
     }
     
     let groupContentCount = DEFAULT_GROUP_CONTENT_COUNT;
@@ -190,7 +201,7 @@
                                 {/if}
                                 <div class="card-word">
                                     <span class="word">
-                                        {app.getCardWord(deckId, id)}
+                                        {getCardWord(deckId, id)}
                                     </span>
                                 </div>
                                 <div class="card-details">

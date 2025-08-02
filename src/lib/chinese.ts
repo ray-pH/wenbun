@@ -1,5 +1,6 @@
 import { CHINESE_DICT_SRC, SLUG_NO_DATA_IN_DICT } from "./constants";
 import { parseIntOrUndefined, type CharacterWriterData } from "./util";
+import * as OpenCC from 'opencc-js';
 
 export const TONE_PREFIX = 'tone-';
 
@@ -30,6 +31,7 @@ type ChineseDict = Record<string, {
 
 export class ChineseCharacterWordlist {
     private dict: ChineseDict = {};
+    private converter!: ChineseCharacterConverter;
     public initialized = false;
     
     constructor() {
@@ -40,10 +42,11 @@ export class ChineseCharacterWordlist {
         const res = await fetch(CHINESE_DICT_SRC);
         const data = await res.json() as ChineseDict;
         this.dict = data;
+        this.converter = new ChineseCharacterConverter('cn', 'tw');
         this.initialized = true;
     }
     
-    getCharacterWriterData(word: string): CharacterWriterData | undefined {
+    getCharacterWriterData(word: string, convertToTraditional: boolean = false): CharacterWriterData | undefined {
         word = word.replace(/\r/g, '');
         const wordData = this.dict[word];
         if (!wordData) {
@@ -55,7 +58,7 @@ export class ChineseCharacterWordlist {
             }
         }
         
-        const characters = word;
+        const characters = convertToTraditional ? this.converter.convert(word) : word;
         const reading = wordData.pinyin;
         const meanings = [wordData.meaning];
         const tags: string[][] = []
@@ -67,5 +70,16 @@ export class ChineseCharacterWordlist {
         });
         
         return <CharacterWriterData>{ characters, reading, meanings, tags };
+    }
+}
+
+export class ChineseCharacterConverter {
+    converter: OpenCC.ConvertText;
+    
+    constructor(from: OpenCC.Locale, to: OpenCC.Locale) {
+        this.converter = OpenCC.Converter({from, to});
+    }
+    convert(text: string): string {
+        return this.converter(text);
     }
 }
