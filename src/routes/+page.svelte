@@ -29,6 +29,7 @@
 <TopBar title="WenBun"></TopBar>
 <div class="main-container">
     <div class="top-container">
+        <a class="a-button" style="background-color: #F0E68C;" href="{base}/about/">Changelog</a>
         <a class="a-button" href="{base}/deck-browser/">Add New Deck</a>
     </div>
     <div class="hr"></div>
@@ -156,6 +157,9 @@
     }
     .top-container {
         margin: 2em;
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
     }
     .a-button {
         all: unset;
