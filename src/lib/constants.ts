@@ -27,7 +27,14 @@ export const DeckFilters = [
     "Traditional",
 ]
 
-export const DeckInfo = [
+export const DeckInfo: {
+    id: string,
+    title: string,
+    subtitle: string,
+    src?: string,
+    color?: string,
+    tags?: DECK_TAGS[],
+}[] = [
     // Simplified
     // {subtitle: '(v#.0) - Simplified'},
     ...MainDeckInfo.map(d => ({
