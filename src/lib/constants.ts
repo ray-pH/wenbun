@@ -13,13 +13,13 @@ export const MainDeckInfo = [
     {id: 'hsk4-v2.0', title: 'HSK 4', subtitle: '(v2.0)', src: 'hsk4-v2.0.txt'},
     {id: 'hsk5-v2.0', title: 'HSK 5', subtitle: '(v2.0)', src: 'hsk5-v2.0.txt'},
     {id: 'hsk6-v2.0', title: 'HSK 6', subtitle: '(v2.0)', src: 'hsk6-v2.0.txt'},
-    {id: 'hsk1-v3.0', title: 'HSK 1', subtitle: '(v3.0)', src: 'hsk1-v3.0.txt'},
-    {id: 'hsk2-v3.0', title: 'HSK 2', subtitle: '(v3.0)', src: 'hsk2-v3.0.txt'},
-    {id: 'hsk3-v3.0', title: 'HSK 3', subtitle: '(v3.0)', src: 'hsk3-v3.0.txt'},
-    {id: 'hsk4-v3.0', title: 'HSK 4', subtitle: '(v3.0)', src: 'hsk4-v3.0.txt'},
-    {id: 'hsk5-v3.0', title: 'HSK 5', subtitle: '(v3.0)', src: 'hsk5-v3.0.txt'},
-    {id: 'hsk6-v3.0', title: 'HSK 6', subtitle: '(v3.0)', src: 'hsk6-v3.0.txt'},
-    {id: 'hsk7-v3.0', title: 'HSK 7', subtitle: '(v3.0)', src: 'hsk7-v3.0.txt'},
+    {id: 'hsk1-v3.0', title: 'HSK 1', subtitle: '(v3.0)', src: 'hsk1-v3.0.txt', color: '#3E92CC'},
+    {id: 'hsk2-v3.0', title: 'HSK 2', subtitle: '(v3.0)', src: 'hsk2-v3.0.txt', color: '#3E92CC'},
+    {id: 'hsk3-v3.0', title: 'HSK 3', subtitle: '(v3.0)', src: 'hsk3-v3.0.txt', color: '#3E92CC'},
+    {id: 'hsk4-v3.0', title: 'HSK 4', subtitle: '(v3.0)', src: 'hsk4-v3.0.txt', color: '#3E92CC'},
+    {id: 'hsk5-v3.0', title: 'HSK 5', subtitle: '(v3.0)', src: 'hsk5-v3.0.txt', color: '#3E92CC'},
+    {id: 'hsk6-v3.0', title: 'HSK 6', subtitle: '(v3.0)', src: 'hsk6-v3.0.txt', color: '#3E92CC'},
+    {id: 'hsk7-v3.0', title: 'HSK 7', subtitle: '(v3.0)', src: 'hsk7-v3.0.txt', color: '#3E92CC'},
 ]
 
 export const DeckFilters = [
