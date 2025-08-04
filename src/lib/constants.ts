@@ -75,6 +75,10 @@ export const DEFAULT_FSRS_PARAM =  [
     0.796, 1.4835, 0.0614, 0.2629, 1.6483, 0.6014, 1.8729, 0.5425, 0.0912, 0.0658, 0.1542, 
 ]
 
+export const WENBUN_AUDIO_URL = "https://github.com/ray-pH/wenbun-audio/raw/refs/heads/main"
+export const ZH_AUDIO_DICT_SRC = `${base}/assets/sounds/zh_audio_dict.json`;
+export const YUE_AUDIO_DICT_SRC = `${base}/assets/sounds/yue_audio_dict.json`;
+
 export const SETTINGS_LABEL_DATA = {
     newCardPerDay: {
         label: "New Card Per Day",
