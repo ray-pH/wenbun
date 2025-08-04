@@ -22,7 +22,7 @@
         <ul>
             <li>Add audio playback for Mandarin and Cantonese</li>
             <div class="note">
-                For Mandarin words that don't have an audio recording, we can generate per syllable audio. We haven't been able to find a good per-syllable dataset for Cantonese yet.
+                For Mandarin words without any audio recordings (the uncommon ones), we can still generate the audio by stitching together per-syllable audio. We haven't been able to find a good syllable dataset for Cantonese yet.
             </div>
         </ul>
         
