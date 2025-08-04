@@ -26,7 +26,7 @@
     }
 </script>
 
-<TopBar title="WenBun"></TopBar>
+<TopBar title="WenBun (beta)"></TopBar>
 <div class="main-container">
     <div class="top-container">
         <a class="a-button" style="background-color: #F0E68C;" href="{base}/about/">Changelog</a>
