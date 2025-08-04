@@ -69,6 +69,7 @@ export interface WenbunConfig {
         toneColors?: string[];
         alwaysShowReading?: boolean;
         mandarinReading?: ChineseMandarinReading;
+        playAudio?: boolean;
     }
 }
 
@@ -91,6 +92,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
         toneColors: ChineseToneColorPalette.Default,
         alwaysShowReading: false,
         mandarinReading: ChineseMandarinReading.Pinyin,
+        playAudio: true,
     },
 }
 

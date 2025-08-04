@@ -41,6 +41,7 @@ export interface CharacterWriterDataConfig {
     convertToTraditional?: boolean;
     mandarinReading?: ChineseMandarinReading;
     isCantonese?: boolean;
+    isPlayAudio?: boolean;
 }
 
 export class ChineseCharacterWordlist {
@@ -82,7 +83,7 @@ export class ChineseCharacterWordlist {
         const characters = config.convertToTraditional ? this.converter.convert(word) : word;
         const reading = this.getReading(wordData, config.mandarinReading, config.isCantonese);
         const meanings = [wordData.meaning];
-        const audioUrl = this.getAudioUrlArray(word);
+        const audioUrl = config.isPlayAudio ? this.getAudioUrlArray(word) : [];
         const tags: string[][] = []
         
         const numericReading = wordData.pinyin_num;
