@@ -1,7 +1,7 @@
 <script lang="ts">
     import HanziWriter from 'hanzi-writer';
     import { onMount } from 'svelte';
-    import { TONE_PREFIX } from '$lib/chinese';
+    import { getAudioUrl, TONE_PREFIX } from '$lib/chinese';
     import { type CharacterWriterData, type CharacterWriterConfig, parseIntOrUndefined } from '$lib/util';
     import type { App } from '$lib/app';
     import { base } from '$app/paths';
@@ -12,6 +12,7 @@
     const NEXT_CHAR_DELAY = 500;
     // const correctSound = new Audio(`${base}/assets/sounds/rightanswer-95219.mp3`);
     const correctSound = new Audio(`${base}/assets/sounds/correct-choice-43861.mp3`);
+    let audios: HTMLAudioElement[] = $state([]);
     let isComplete = $state(false);
     let unmounted = $state(false);
 
@@ -102,8 +103,29 @@
         }
     }
     
+    function setupAudios() {
+        const urls = characterData?.audioUrl;
+        if (!urls) return;
+        audios = urls.map(u => {
+            const url = getAudioUrl(cardConfig.lang, u);
+            const a = new Audio(url);
+            a.preload = 'auto';
+            a.load();
+            return a;
+        });
+    }
+    function playAudio() {
+        // random index
+        const index = Math.floor(Math.random() * audios.length);
+        const a = audios[index];
+        a.pause();
+        a.currentTime = 0;
+        a.play();
+    }
+    
     onMount(() => {
         updateWidth();
+        setupAudios();
         window.addEventListener('resize', updateWidth);
         setupHanziWriter(0);
         return () => {
@@ -125,14 +147,26 @@
         margin: 0.5em;
         font-size: 1.2em;
     }
+    .reading-container {
+        display: flex;
+        flex-direction: row;
+        gap: 0.5em;
+        margin-bottom: 0.5em;
+        &.is-hidden {
+            visibility: hidden;
+        }
+    }
     .reading {
         font-size: 1.2em;
-        margin-bottom: 0.5em;
         background-color: #FFFFFF90;
         padding: 0.2em 0.4em;
         border-radius: 0.5rem;
-        &.is-hidden {
-            visibility: hidden;
+    }
+    .audio-button {
+        all: unset;
+        cursor: pointer;
+        &:hover {
+            opacity: 0.5;
         }
     }
     .grid-background {
@@ -185,8 +219,15 @@
 
 <div class="character-writer">
     <div class="meaning">{meaningStr}</div>
-    <div class="reading" class:is-hidden={!app.getConfig().zh.alwaysShowReading && !isComplete && !cardConfig.isFirstTime}>
-        {characterData?.reading}
+    <div class="reading-container" class:is-hidden={!app.getConfig().zh.alwaysShowReading && !isComplete && !cardConfig.isFirstTime}>
+        <div class="reading">
+            {characterData?.reading}
+        </div>
+        {#if audios.length > 0}
+            <button class="audio-button" onclick={() => playAudio()} aria-label="Play Audio">
+                <i class="fa-solid fa-volume-low"></i>
+            </button>
+        {/if}
     </div>
     <div class="character-container">
         <div class="grid-background">

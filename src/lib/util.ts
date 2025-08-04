@@ -17,10 +17,12 @@ export interface CharacterWriterData {
     reading: string;
     meanings: string[];
     tags: string[][]; // separate tags for each character
+    audioUrl: string[];
 }
 
 export interface CharacterWriterConfig {
     isFirstTime: boolean;
+    lang: 'zh' | 'yue';
 }
 
 export async function loadDeck(filename: string): Promise<string[] | undefined> {

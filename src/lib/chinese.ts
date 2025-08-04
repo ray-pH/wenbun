@@ -1,5 +1,5 @@
 import { pinyinToZhuyin } from "pinyin-zhuyin";
-import { CHINESE_DICT_SRC, SLUG_NO_DATA_IN_DICT } from "./constants";
+import { CHINESE_DICT_SRC, SLUG_NO_DATA_IN_DICT, WENBUN_AUDIO_URL, YUE_AUDIO_DICT_SRC, ZH_AUDIO_DICT_SRC } from "./constants";
 import { parseIntOrUndefined, type CharacterWriterData } from "./util";
 import * as OpenCC from 'opencc-js';
 
@@ -46,16 +46,20 @@ export interface CharacterWriterDataConfig {
 export class ChineseCharacterWordlist {
     private dict: ChineseDict = {};
     private converter!: ChineseCharacterConverter;
+    private audioDict: Record<string, string[]> = {};
     public initialized = false;
     
     constructor() {
-        this.init();
     }
     
-    async init(): Promise<void> {
-        const res = await fetch(CHINESE_DICT_SRC);
-        const data = await res.json() as ChineseDict;
-        this.dict = data;
+    async init(lang: 'zh' | 'yue'): Promise<void> {
+        const dictP = fetch(CHINESE_DICT_SRC)
+            .then(res => res.json())
+            .then(dict => this.dict = dict);
+        const audioDictP = fetch(lang === 'zh' ? ZH_AUDIO_DICT_SRC : YUE_AUDIO_DICT_SRC)
+            .then(res => res.json())
+            .then(dict => this.audioDict = dict);
+        await Promise.allSettled([dictP, audioDictP]);
         this.converter = new ChineseCharacterConverter('cn', 'tw');
         this.initialized = true;
     }
@@ -68,6 +72,7 @@ export class ChineseCharacterWordlist {
                 characters: word,
                 reading: word,
                 meanings: [SLUG_NO_DATA_IN_DICT],
+                audioUrl: [],
                 tags: []
             }
         }
@@ -75,6 +80,7 @@ export class ChineseCharacterWordlist {
         const characters = config.convertToTraditional ? this.converter.convert(word) : word;
         const reading = this.getReading(wordData, config.mandarinReading, config.isCantonese);
         const meanings = [wordData.meaning];
+        const audioUrl = this.audioDict[word];
         const tags: string[][] = []
         
         const numericReading = wordData.pinyin_num;
@@ -83,7 +89,7 @@ export class ChineseCharacterWordlist {
             tags[i] = [`${TONE_PREFIX}${tone}`];
         });
         
-        return <CharacterWriterData>{ characters, reading, meanings, tags };
+        return <CharacterWriterData>{ characters, reading, meanings, audioUrl, tags };
     }
     
     getReading(
@@ -111,4 +117,13 @@ export class ChineseCharacterConverter {
     convert(text: string): string {
         return this.converter(text);
     }
+}
+
+const AUDIO_LANG_DIR = {
+    'zh': 'mandarin',
+    'yue': 'yue'
+}
+export function getAudioUrl(lang: 'zh' | 'yue', relativePath: string): string {
+    const dir = AUDIO_LANG_DIR[lang];
+    return `${WENBUN_AUDIO_URL}/${dir}/${encodeURI(relativePath)}`;
 }

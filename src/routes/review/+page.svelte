@@ -16,10 +16,10 @@
     let app = new App();
     onMount(async () => {
         await app.init();
-        await wordlist.init();
+        isZhCantonese = app.deckData[deckId]?.tags?.includes(DECK_TAGS.ZH_YUE);
+        await wordlist.init(isZhCantonese ? 'yue' : 'zh');
         app = app;
         isZhTraditional = app.deckData[deckId]?.tags?.includes(DECK_TAGS.ZH_TRAD);
-        isZhCantonese = app.deckData[deckId]?.tags?.includes(DECK_TAGS.ZH_YUE);
         isPageReady = true;
         nextCard();
     })
@@ -69,6 +69,7 @@
     function getCardConfig(_id: number): CharacterWriterConfig {
         return {
             isFirstTime: isFirstTime,
+            lang: isZhCantonese ? 'yue' : 'zh',
         }
     }
     function onComplete() {
