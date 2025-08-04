@@ -38,6 +38,8 @@
 * [opencc-js](https://github.com/nk2028/opencc-js) — Chinese character conversion
 * [pinyin-zhuyin](https://github.com/peterolson/pinyin-zhuyin) — pinyin to zhuyin/bopomofo conversion
 * [PyJyutping](https://github.com/MacroYau/PyJyutping) — Cantonese romanization conversion
+* [audio-cmn](https://github.com/hugolpz/audio-cmn) — Mandarin pronounciation recording data
+* [Lingua Libre](https://lingualibre.org/wiki/LinguaLibre:Main_Page) — Mandarin and Cantonese pronounciation recording data
 
 ## Tech Stack
 
