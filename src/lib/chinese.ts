@@ -1,5 +1,5 @@
 import { pinyinToZhuyin } from "pinyin-zhuyin";
-import { CHINESE_DICT_SRC, SLUG_NO_DATA_IN_DICT, WENBUN_AUDIO_URL, YUE_AUDIO_DICT_SRC, ZH_AUDIO_DICT_SRC } from "./constants";
+import { CHINESE_DICT_SRC, SLUG_NO_DATA_IN_DICT, WENBUN_AUDIO_URL, WENBUN_AUDIO_ZH_PREFIX_SRC, YUE_AUDIO_DICT_SRC, ZH_AUDIO_DICT_SRC } from "./constants";
 import { parseIntOrUndefined, type CharacterWriterData } from "./util";
 import * as OpenCC from 'opencc-js';
 
@@ -47,12 +47,14 @@ export class ChineseCharacterWordlist {
     private dict: ChineseDict = {};
     private converter!: ChineseCharacterConverter;
     private audioDict: Record<string, string[]> = {};
+    public lang: 'zh' | 'yue' = 'zh';
     public initialized = false;
     
     constructor() {
     }
     
     async init(lang: 'zh' | 'yue'): Promise<void> {
+        this.lang = lang;
         const dictP = fetch(CHINESE_DICT_SRC)
             .then(res => res.json())
             .then(dict => this.dict = dict);
@@ -80,7 +82,7 @@ export class ChineseCharacterWordlist {
         const characters = config.convertToTraditional ? this.converter.convert(word) : word;
         const reading = this.getReading(wordData, config.mandarinReading, config.isCantonese);
         const meanings = [wordData.meaning];
-        const audioUrl = this.audioDict[word].map(u => [u]);
+        const audioUrl = this.getAudioUrlArray(word);
         const tags: string[][] = []
         
         const numericReading = wordData.pinyin_num;
@@ -90,6 +92,22 @@ export class ChineseCharacterWordlist {
         });
         
         return <CharacterWriterData>{ characters, reading, meanings, audioUrl, tags };
+    }
+    
+    getAudioUrlArray(word: string): string[][] {
+        if (this.audioDict[word]) {
+            return this.audioDict[word].map(u => [u]);
+        } else if (this.lang == 'zh'){
+            // generate audio url from pinyin
+            const pinyin_num = this.dict[word].pinyin_num;
+            const syls = pinyin_num.split(' ');
+            return [syls.map(s => `${WENBUN_AUDIO_ZH_PREFIX_SRC}${s}.mp3`)];
+        } else if (this.lang == 'yue') {
+            return [];
+        } else {
+            return [];
+        }
+        // return this.audioDict[word]?.map(u => [u]) ?? [];
     }
     
     getReading(
