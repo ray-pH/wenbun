@@ -60,10 +60,12 @@
     
     function characterWriterDataFromId(id: number): CharacterWriterData | undefined {
         const word = app.getCardWord(deckId, id);
+        const config = app.getConfig();
         return wordlist.getCharacterWriterData(word, {
             convertToTraditional: isZhTraditional,
-            mandarinReading: app.getConfig().zh.mandarinReading,
+            mandarinReading: config.zh.mandarinReading,
             isCantonese: isZhCantonese,
+            isPlayAudio: config.zh.playAudio,
         });
     }
     function getCardConfig(_id: number): CharacterWriterConfig {

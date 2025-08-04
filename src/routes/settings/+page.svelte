@@ -220,6 +220,9 @@
                         <option value={ChineseMandarinReading.Zhuyin}>Zhuyin (ㄨㄣˊ)</option>
                     </select>
                 </SettingsItem>
+                <SettingsItem key="zhPlayAudio">
+                    <input type="checkbox" bind:checked={config.zh.playAudio}>
+                </SettingsItem>
                 <SettingsItem key="zhIsColorBasedOnTone">
                     <input type="checkbox" bind:checked={config.zh.isColorBasedOnTone}>
                 </SettingsItem>

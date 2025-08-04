@@ -149,4 +149,8 @@ export const SETTINGS_LABEL_DATA = {
         label: "Mandarin Reading",
         help: "Specifies which reading to show"
     },
+    zhPlayAudio: {
+        label: "Play Audio",
+        help: "Play audio when the card is answered correctly or when displaying a new card.",
+    }
 }
