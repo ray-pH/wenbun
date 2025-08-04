@@ -5,6 +5,7 @@
     import { type CharacterWriterData, type CharacterWriterConfig, parseIntOrUndefined } from '$lib/util';
     import type { App } from '$lib/app';
     import { base } from '$app/paths';
+    import { AudioSequence } from '$lib/audioSequence';
     
     let width = $state(500);
     let height = $state(500);
@@ -12,7 +13,7 @@
     const NEXT_CHAR_DELAY = 500;
     // const correctSound = new Audio(`${base}/assets/sounds/rightanswer-95219.mp3`);
     const correctSound = new Audio(`${base}/assets/sounds/correct-choice-43861.mp3`);
-    let audios: HTMLAudioElement[] = $state([]);
+    let audios: AudioSequence[] = $state([]);
     let isComplete = $state(false);
     let unmounted = $state(false);
 
@@ -105,21 +106,18 @@
     
     function setupAudios() {
         const urls = characterData?.audioUrl;
+        console.log(urls);
         if (!urls) return;
-        audios = urls.map(u => {
-            const url = getAudioUrl(cardConfig.lang, u);
-            const a = new Audio(url);
-            a.preload = 'auto';
-            a.load();
-            return a;
+        audios = urls.map(rawUs => {
+            const us = rawUs.map(u => getAudioUrl(cardConfig.lang, u));
+            return new AudioSequence(us);
         });
     }
     function playAudio() {
         // random index
         const index = Math.floor(Math.random() * audios.length);
         const a = audios[index];
-        a.pause();
-        a.currentTime = 0;
+        a.stop();
         a.play();
     }
     

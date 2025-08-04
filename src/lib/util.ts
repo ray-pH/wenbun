@@ -17,7 +17,7 @@ export interface CharacterWriterData {
     reading: string;
     meanings: string[];
     tags: string[][]; // separate tags for each character
-    audioUrl: string[];
+    audioUrl: string[][];
 }
 
 export interface CharacterWriterConfig {

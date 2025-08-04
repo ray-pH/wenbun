@@ -80,7 +80,7 @@ export class ChineseCharacterWordlist {
         const characters = config.convertToTraditional ? this.converter.convert(word) : word;
         const reading = this.getReading(wordData, config.mandarinReading, config.isCantonese);
         const meanings = [wordData.meaning];
-        const audioUrl = this.audioDict[word];
+        const audioUrl = this.audioDict[word].map(u => [u]);
         const tags: string[][] = []
         
         const numericReading = wordData.pinyin_num;
