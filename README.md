@@ -25,7 +25,7 @@
 
 ## Community
 
-* Join us on [Discord](https://discord.gg/Ab25UgysDt)
+* Join us on [Discord](https://discord.gg/pVUuqJqywt)
 
 ## Development Credits
 
@@ -46,7 +46,7 @@
 
 ## Contributing & Development
 
-* **Stay Connected:** Follow updates, join discussions, give feedback, and report bugs on our [Discord server](https://discord.gg/Ab25UgysDt).  
+* **Stay Connected:** Follow updates, join discussions, give feedback, and report bugs on our [Discord server](https://discord.gg/pVUuqJqywt).  
 * **Develop:**  
 
 Install dependencies:  

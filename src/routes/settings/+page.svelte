@@ -260,7 +260,7 @@
                     <i class="fa-brands fa-github"></i>&nbsp;
                     GitHub Repository
                 </a>
-                <a class="button" href="https://discord.gg/Ab25UgysDt" aria-label="GitHub Repository" target="_blank">
+                <a class="button" href="https://discord.gg/pVUuqJqywt" aria-label="GitHub Repository" target="_blank">
                     <i class="fa-brands fa-discord"></i>&nbsp;
                     Discord Community Server
                 </a>
