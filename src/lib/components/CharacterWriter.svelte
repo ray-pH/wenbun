@@ -58,6 +58,9 @@
             if (completedCharCount == characterData?.characters.length) {
                 onComplete();
                 isComplete = true;
+                window.setTimeout(() => {
+                    playAudio();
+                }, NEXT_CHAR_DELAY);
             } else {
                 window.setTimeout(() => {
                     setupHanziWriter(completedCharCount);
@@ -90,6 +93,9 @@
         if (!cardConfig.isFirstTime) {
             writer.quiz();
         } else {
+            setTimeout(() => {
+                playAudio();
+            }, NEXT_CHAR_DELAY);
             setTimeout(() => {
                 writer.animateCharacter({
                     onComplete: () => {
