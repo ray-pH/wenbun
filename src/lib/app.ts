@@ -6,6 +6,7 @@ import { ChineseToneColorPalette, DeckInfo, DEFAULT_FSRS_PARAM } from "./constan
 import { isTauri } from "@tauri-apps/api/core";
 import { WebFileManager, type IFileManager } from "./fileManager";
 import { ChineseMandarinReading } from "./chinese";
+import { AppExtraStudyHandler } from "./appExtraStudyHandler";
 const UNGROUPED_GROUP = "__ungrouped__"
 
 const STORE_FILENAME = "profile.json"
@@ -31,6 +32,20 @@ export enum NewCardOrder {
     Mix = "Mix",
     AfterReviews = "After Reviews",
     BeforeReviews = "Before Reviews",
+}
+
+export enum ExtraStudyType {
+    StudiedCards = "Studied Cards",
+    HardCards = "Hard Cards",
+    NewCards = "New Cards",
+    YoungCards = "Young Cards",
+    MatureCards = "Mature Cards",
+    Group = "Group",
+}
+export interface ExtraStudyConfig {
+    type: ExtraStudyType;
+    count: number;
+    group?: string; // for Group
 }
 
 export interface DeckData {
@@ -113,6 +128,7 @@ export class App {
 
     storage: IStorage;
     fileManager: IFileManager;
+    extraStudyHandler: AppExtraStudyHandler;
 
     constructor() {
         this.updateFSRS();
@@ -122,6 +138,7 @@ export class App {
             this.storage = new BrowserIndexedDBStorage(STORE_FILENAME);
         }
         this.fileManager = new WebFileManager();
+        this.extraStudyHandler = new AppExtraStudyHandler(this);
     }
     
     
@@ -148,8 +165,9 @@ export class App {
         this.fsrsPrevStudied = new FSRS.FSRS(prevStudiedParams);
     }
     
-    async init(debug = false): Promise<void> {
+    async init(): Promise<void> {
         await this.load();
+        this.extraStudyHandler.init();
         if (this.isNeedToProcessTodaySchedule()) {
             await this.processTodaySchedule();
         }
@@ -326,6 +344,11 @@ export class App {
     }
     
     getNextCard(deckId: string): number | undefined {
+        
+        if (this.extraStudyHandler.isExtraStudy()) {
+            return this.extraStudyHandler.getNextCard();
+        }
+        
         // TODO: precalculate the next card on review
         const config = this.getConfig();
         
@@ -560,6 +583,19 @@ export class App {
             });
         }
         deckData.groups = groups;
+    }
+    
+    getGroupLabels(deckId: string): string[] {
+        const deckData = this.deckData[deckId];
+        if (!deckData) return [];
+        return deckData.groups.map((g) => g.label);
+    }
+    
+    getAllNonIgnoredIds(deckId: string): number[] {
+        const deckData = this.deckData[deckId];
+        if (!deckData) return [];
+        const allIds = Array.from(deckData.deck.keys());
+        return allIds.filter((id) => !deckData.ignoredIds?.includes(id));
     }
     
     async downloadProfile(): Promise<void> {
