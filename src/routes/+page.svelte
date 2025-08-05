@@ -46,7 +46,7 @@
 </div>
 
 {#snippet deckCard(info: typeof DeckInfo[number])}
-    <a class="deck-card" href="{base}/review?id={info.id}">
+    <a class="deck-card" href="{base}/overview?id={info.id}">
         <div class="left">
             <span class="deck-card-title">{info.title}</span>
             <span class="deck-card-subtitle">{info.subtitle}</span>
