@@ -52,16 +52,16 @@
             <span class="deck-card-subtitle">{info.subtitle}</span>
         </div>
         <div class="right">
-            <span class="deck-count-learn-relearn">
+            <span class="deck-count-learn-relearn" title="learing">
                 {app.getLearningRelearningCardsCount(info.id) || ''}
             </span>
-            <span class="deck-count-review">
+            <span class="deck-count-review" title="review">
                 {app.getScheduledReviewCardsCount(info.id) || ''}
             </span>
-            <span class="deck-count-new">
+            <span class="deck-count-new" title="new">
                 {app.getScheduledNewCardsCount(info.id) || ''}
             </span>
-            <span class="deck-count-previously-studied">
+            <span class="deck-count-previously-studied" title="previously studied">
                 {app.getScheduledPreviouslyStudiedCardsCount(info.id) || ''}
             </span>
         </div>
