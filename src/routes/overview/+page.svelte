@@ -1,9 +1,11 @@
 <script lang="ts">
     import { base } from '$app/paths';
     import TopBar from "$lib/components/TopBar.svelte";
-    import { App } from "$lib/app";
+    import { App, ExtraStudyType, type ExtraStudyConfig } from "$lib/app";
     import { onMount } from "svelte";
     import { DeckInfo } from '$lib/constants';
+    import Popup from '$lib/components/Popup.svelte';
+    import { goto } from '$app/navigation';
     
     export let data: {deckId?: string};
     
@@ -13,6 +15,7 @@
     onMount(async () => {
         await app.init();
         app = app;
+        extraStudyGroup = app.deckData[data.deckId ?? '']?.groups[0]?.label ?? '';
         isInitialized = true;
         isTodayDone = app.getNextCard(data.deckId ?? '') === undefined;
     })
@@ -21,6 +24,21 @@
     
     function getDeckInfo(deckId: string): typeof DeckInfo[number] {
         return DeckInfo.find((s) => s.id === deckId) ?? { id: deckId, title: deckId, subtitle: ''};
+    }
+    
+    let extraStudyCount = 20;
+    let extraStudyType = ExtraStudyType.StudiedCards;
+    let extraStudyGroup = '';
+    $: extraStudyConfig = {
+        type: extraStudyType,
+        count: extraStudyCount,
+        group: extraStudyGroup,
+    }
+    $: extraStudyDesc = app.extraStudyHandler.getDescription(deckInfo.id, extraStudyConfig);
+    function startExtraStudy() {
+        const cardIds = app.extraStudyHandler.getCardIds(deckInfo.id, extraStudyConfig);
+        const cardIdsEncoded = encodeURIComponent(JSON.stringify(cardIds));
+        goto(`${base}/review?id=${deckInfo.id}&isExtraStudy=true&cardIds=${cardIdsEncoded}`);
     }
 </script>
 
@@ -50,6 +68,47 @@
                     <td class="count">{app.getScheduledReviewCardsCount(deckInfo.id)}</td>
                 </tr>
             </tbody></table>
+        </div>
+        <div class="extra-study-container" style="margin-top: 2em">
+            <div class="section-title">Extra Study</div>
+            <div class="extra-study-help">
+                Study more without affecting the SRS schedule
+            </div>
+            <div class="extra-study-row">
+                <div>Count :</div>
+                <div>
+                    <input type="number" bind:value={extraStudyCount}>
+                </div>
+            </div>
+            <div class="extra-study-row">
+                <div>Type :</div>
+                <div>
+                    <select bind:value={extraStudyType}>
+                        {#each Object.values(ExtraStudyType) as type}
+                            <option value={type}>{type}</option>
+                        {/each}
+                    </select>
+                </div>
+            </div>
+            {#if extraStudyType === ExtraStudyType.Group}
+                <div class="extra-study-row">
+                    <div>Group :</div>
+                    <div>
+                        <select bind:value={extraStudyGroup}>
+                            {#each app.getGroupLabels(deckInfo.id) as label}
+                                <option value={label}>{label}</option>
+                            {/each}
+                        </select>
+                    </div>
+                </div>
+            {/if}
+            <div class="extra-study-description">
+                <span class="desc">{extraStudyDesc.desc}</span>
+                <span class="subdesc">{extraStudyDesc.subdesc}</span>
+            </div>
+            <button class="button" onclick={() => startExtraStudy()}>
+                Extra Study
+            </button>
         </div>
     {/if}
 </div>
@@ -99,6 +158,33 @@
             --color: #DA8C22;
         }
     }
+    .section-title {
+        font-weight: bold;
+    }
+    
+    .extra-study-container {
+        padding: 1em;
+        .extra-study-row {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .extra-study-description {
+            max-width: 22em;
+        }
+        .extra-study-help {
+            color: #00000090;
+            margin-bottom: 0.6em;
+        }
+        .extra-study-description {
+            margin: 0.6em 0;
+            .subdesc {
+                color: #00000090;
+            }
+        }
+    }
+    
     .bottom-bar {
         position: fixed;
         width: 100vw;

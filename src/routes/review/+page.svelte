@@ -9,8 +9,11 @@
     import TopBar from "$lib/components/TopBar.svelte";
     import { DECK_TAGS } from '$lib/constants';
 
-    export let data: {deckId?: string};
+    export let data: {deckId?: string, isExtraStudy?: boolean, cardIds?: string};
     let deckId = data.deckId || '';
+    let cardIdsStr = data.cardIds || encodeURIComponent('[]');
+    let cardIds = JSON.parse(decodeURIComponent(cardIdsStr));
+    let title = data.isExtraStudy ? 'Extra Study' : 'Review';
     
     let isPageReady = false;
     let app = new App();
@@ -21,11 +24,13 @@
         app = app;
         isZhTraditional = app.deckData[deckId]?.tags?.includes(DECK_TAGS.ZH_TRAD);
         isPageReady = true;
+        if (data.isExtraStudy) app.extraStudyHandler.registerReviewCardIdsOverride(cardIds);
         nextCard();
     })
     
     let isComplete = false;
     let isDoneToday = false;
+    let isCardChanged = false;
     let wordlist = new ChineseCharacterWordlist();
     let cardState: WenBunCustomState | undefined = undefined;
     let isNewCardInteractedWith = false;
@@ -37,6 +42,7 @@
     let currentCardId: number | undefined = undefined;
     let scheduledTimeStr: Record<FSRS.Grade, string> = {1: '', 2: '', 3: '', 4: ''};
     function nextCard() {
+        isCardChanged = true;
         isComplete = false;
         isNewCardInteractedWith = false;
         const id = app.getNextCard(deckId);
@@ -47,6 +53,7 @@
         }
         const card = app.getCard(deckId, id, true);
         if (!card) return;
+        isCardChanged = false;
         currentCardId = id;
         scheduledTimeStr = app.getRatingScheduledTimeStr(deckId, id);
         cardState = app.getWenbunCustomState(deckId, id);
@@ -96,31 +103,51 @@
         await app.save();
         nextCard();
     }
+
+
+    function extraStudyAgain(): any {
+        app.extraStudyHandler.rateAgain(currentCardId!);
+        nextCard();
+    }
+    function extraStudyGood(): any {
+        app.extraStudyHandler.rateGood(currentCardId!);
+        nextCard();
+    }
 </script>
 
 
-<TopBar title="Review" backUrl="{base}/"></TopBar>
+<TopBar title={title} backUrl="{base}/"></TopBar>
 <div class="container">
     {#if isDoneToday} 
         <div>You have done today's review.</div>
     {/if}
     {#if isPageReady && (currentCardId !== undefined) && !isDoneToday}
-        <div class="counter">
-            <span class="deck-count-learn-relearn" class:underlined={cardState === WenBunCustomState.Learning || cardState === WenBunCustomState.Relearning}>
-                {app.getLearningRelearningCardsCount(deckId) || ''}
-            </span>
-            <span class="deck-count-review" class:underlined={cardState === WenBunCustomState.ReviewYoung || cardState === WenBunCustomState.ReviewMature}>
-                {app.getScheduledReviewCardsCount(deckId) || ''}
-            </span>
-            <span class="deck-count-new" class:underlined={cardState === WenBunCustomState.New}>
-                {app.getScheduledNewCardsCount(deckId) || ''}
-            </span>
-            <span class="deck-count-previously-studied" class:underlined={cardState === WenBunCustomState.PreviouslyStudied}>
-                {app.getScheduledPreviouslyStudiedCardsCount(deckId) || ''}
-            </span>
-        </div>
+        {#if data.isExtraStudy}
+            <div class="counter">
+                <span class="underlined">
+                    {#key currentCardId}
+                        {app.extraStudyHandler.getCardsCount() || ''}
+                    {/key}
+                </span>
+            </div>
+        {:else}
+            <div class="counter">
+                <span class="deck-count-learn-relearn" class:underlined={cardState === WenBunCustomState.Learning || cardState === WenBunCustomState.Relearning}>
+                    {app.getLearningRelearningCardsCount(deckId) || ''}
+                </span>
+                <span class="deck-count-review" class:underlined={cardState === WenBunCustomState.ReviewYoung || cardState === WenBunCustomState.ReviewMature}>
+                    {app.getScheduledReviewCardsCount(deckId) || ''}
+                </span>
+                <span class="deck-count-new" class:underlined={cardState === WenBunCustomState.New}>
+                    {app.getScheduledNewCardsCount(deckId) || ''}
+                </span>
+                <span class="deck-count-previously-studied" class:underlined={cardState === WenBunCustomState.PreviouslyStudied}>
+                    {app.getScheduledPreviouslyStudiedCardsCount(deckId) || ''}
+                </span>
+            </div>
+        {/if}
         <div class="character-writer-container">
-            {#key [currentCardId, isNewCardInteractedWith]}
+            {#key [currentCardId, isNewCardInteractedWith, isCardChanged]}
                 <CharacterWriter 
                     app={app} 
                     characterData={characterWriterDataFromId(currentCardId)} 
@@ -150,6 +177,29 @@
                         <div class="review-button-inner">
                             <div class="review-time">&nbsp;</div>
                             <div class="review-label">Learn</div>
+                        </div>
+                    </button>
+                {:else if data.isExtraStudy}
+                    <button 
+                        class="review-button is-complete review-button-fail"
+                        class:is-complete={isComplete}
+                        onclick={() => extraStudyAgain()}
+                    >
+                        <div class="review-button-inner">
+                            <div class="review-time">(Put Back)</div>
+                            <div class="review-label">Again</div>
+                        </div>
+                    </button>
+                    <div class="review-button"><div class="review-time">&nbsp;</div><div class="review-label">&nbsp;</div></div>
+                    <div class="review-button"><div class="review-time">&nbsp;</div><div class="review-label">&nbsp;</div></div>
+                    <button 
+                        class="review-button is-complete review-button-easy"
+                        class:is-complete={isComplete}
+                        onclick={() => extraStudyGood()}
+                    >
+                        <div class="review-button-inner">
+                            <div class="review-time">&nbsp;</div>
+                            <div class="review-label">Good</div>
                         </div>
                     </button>
                 {:else}
