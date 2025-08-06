@@ -15,6 +15,7 @@
     const correctSound = new Audio(`${base}/assets/sounds/correct-choice-43861.mp3`);
     let audios: AudioSequence[] = $state([]);
     let isComplete = $state(false);
+    let isStopPlayAudio = $state(false); // so we know to play audio only once
     let unmounted = $state(false);
 
     function getEmInPx(): number {
@@ -45,6 +46,7 @@
         }
     }
     function completeChar() {
+        isStopPlayAudio = true;
         if (unmounted) return;
         if (cardConfig.isFirstTime) {
             completedCharCount = (completedCharCount + 1) % characterData!.characters.length;
@@ -94,7 +96,7 @@
             writer.quiz();
         } else {
             setTimeout(() => {
-                playAudio();
+                if (!isStopPlayAudio) playAudio();
             }, NEXT_CHAR_DELAY);
             setTimeout(() => {
                 writer.animateCharacter({
