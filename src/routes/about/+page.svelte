@@ -18,6 +18,13 @@
     <div class="changelog-container">
         Change log
 
+        <h4>v0.4.0 (2025-08-06)</h4>
+        <ul>
+            <li>Add Extra Study feature with configurable study modes</li>
+            <li>Add deck progress tracking and visualize it with a progress bar on the overview page</li>
+            <li>Add text on hover for deck numbers on the main page</li>
+        </ul>
+        
         <h4>v0.3.0 (2025-08-04)</h4>
         <ul>
             <li>Add audio playback for Mandarin and Cantonese</li>
