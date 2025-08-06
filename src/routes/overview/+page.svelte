@@ -26,6 +26,11 @@
         return DeckInfo.find((s) => s.id === deckId) ?? { id: deckId, title: deckId, subtitle: ''};
     }
     
+    $: deckProgress = app.getDeckProgress(deckInfo.id);
+    $: progressBarData = app.getDeckProgressNormalized(deckInfo.id);
+    $: progress = deckProgress.youngCount + deckProgress.matureCount;
+    $: progressTotal = deckProgress.totalCount - deckProgress.ignoredCount;
+    
     let extraStudyCount = 20;
     let extraStudyType = ExtraStudyType.StudiedCards;
     let extraStudyGroup = '';
@@ -69,7 +74,22 @@
                 </tr>
             </tbody></table>
         </div>
-        <div class="extra-study-container" style="margin-top: 2em">
+        <div class="progress-container">
+            <div class="section-title">Progress</div>
+            <div class="progress-bar-container">
+                <div class="bar ignored" style="width: {progressBarData.ignored}%" title="Ignored"></div>
+                <div class="bar previously-studied" 
+                    style="width: {progressBarData.previouslyStudied}%" title="Previously Studied"></div>
+                <div class="bar young" style="width: {progressBarData.young}%" title="Young"></div>
+                <div class="bar mature" style="width: {progressBarData.mature}%" title="Mature"></div>
+                <div class="bar rest" style="width: {progressBarData.rest}%"></div>
+            </div>
+            <div>
+                <span>{progress}</span>
+                <span style="opacity: 0.5;"> / {progressTotal}</span>
+            </div>
+        </div>
+        <div class="extra-study-container">
             <div class="section-title">Extra Study</div>
             <div class="extra-study-help">
                 Study more without affecting the SRS schedule
@@ -129,7 +149,7 @@
         align-items: center;
         margin-top: 2em;
         gap: 1em;
-        margin-bottom: 2em;
+        margin-bottom: 5em;
     }
     .deck-info {
         font-size: 1.2em;
@@ -162,6 +182,26 @@
         font-weight: bold;
     }
     
+    .progress-container {
+        margin-top: 1em;
+    }
+    .progress-bar-container {
+        width: 90vw;
+        max-width: 22em;
+        display: flex;
+        margin: 0.5em 0;
+        .bar {
+            display: inline-block;
+            height: 0.7em;
+            background-color: var(--color);
+            &.ignored { --color: gray; }
+            &.previously-studied { --color: #DA8C22; }
+            &.young { --color: #419E6F; }
+            &.mature { --color: #3E92CC; }
+            &.rest { --color: #C0C0C0; }
+        }
+    }
+    
     .extra-study-container {
         padding: 1em;
         .extra-study-row {
@@ -190,6 +230,9 @@
         width: 100vw;
         bottom: 0;
         height: 5em;
+        padding: 0 1em;
+        box-sizing: border-box;
+        background-color: #E0E0E0;
         .button {
             height: 3em;
             max-width: 25em;
