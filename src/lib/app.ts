@@ -614,4 +614,32 @@ export class App {
         if (typeof payload.data !== "string") return false;
         return this.tryImportProfile(payload.data);
     }
+    
+    getDeckProgress(deckId: string) {
+        const deckData = this.deckData[deckId];
+        if (!deckData) return {
+            totalCount: 1, previouslyStudiedCount: 0,
+            youngCount: 0, matureCount: 0, ignoredCount: 0,
+        }
+        
+        const ids = this.getAllNonIgnoredIds(deckId);
+        const totalCount = deckData.deck.length;
+        const previouslyStudiedCount = deckData.previouslyStudied.length;
+        const youngCount = ids.filter((id) => 
+            this.getWenbunCustomState(deckId, id) === WenBunCustomState.ReviewYoung).length;
+        const matureCount = ids.filter((id) => 
+            this.getWenbunCustomState(deckId, id) === WenBunCustomState.ReviewMature).length;
+        const ignoredCount = deckData.ignoredIds?.length ?? 0;
+        return { totalCount, previouslyStudiedCount, youngCount, matureCount, ignoredCount }
+    }
+    getDeckProgressNormalized(deckId: string) {
+        const p = this.getDeckProgress(deckId);
+        return {
+            young: p.youngCount / p.totalCount * 100,
+            mature: p.matureCount / p.totalCount * 100,
+            previouslyStudied: p.previouslyStudiedCount / p.totalCount * 100,
+            ignored: p.ignoredCount / p.totalCount * 100,
+            rest: (p.totalCount - p.youngCount - p.matureCount - p.previouslyStudiedCount - p.ignoredCount) / p.totalCount * 100,
+        }
+    }
 }
