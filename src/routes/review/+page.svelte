@@ -105,11 +105,11 @@
     }
 
 
-    function extraStudyAgain(): any {
+    function extraStudyAgain() {
         app.extraStudyHandler.rateAgain(currentCardId!);
         nextCard();
     }
-    function extraStudyGood(): any {
+    function extraStudyGood() {
         app.extraStudyHandler.rateGood(currentCardId!);
         nextCard();
     }

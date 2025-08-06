@@ -105,7 +105,7 @@ export class AppExtraStudyHandler {
                 const actualCount = Math.min(allCount, config.count);
                 return {
                     desc:`Study ${actualCount} cards`,
-                    subdesc: `(out of ${allCount} cards that has been studied in this deck)`
+                    subdesc: `(out of ${allCount} cards that have been studied in this deck)`
                 }
             }
             case ExtraStudyType.NewCards: {
@@ -150,7 +150,7 @@ export class AppExtraStudyHandler {
                 const actualCount = Math.min(allCount, config.count);
                 return {
                     desc:`Study ${actualCount} hardest cards`,
-                    subdesc: `(out of ${allCount} cards that has been studied in this app)`
+                    subdesc: `(out of ${allCount} cards that have been studied in this app)`
                 }
             }
         }

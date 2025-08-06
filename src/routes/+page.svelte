@@ -52,7 +52,7 @@
             <span class="deck-card-subtitle">{info.subtitle}</span>
         </div>
         <div class="right">
-            <span class="deck-count-learn-relearn" title="learing">
+            <span class="deck-count-learn-relearn" title="learning">
                 {app.getLearningRelearningCardsCount(info.id) || ''}
             </span>
             <span class="deck-count-review" title="review">
