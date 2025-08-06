@@ -10,7 +10,7 @@
             Wenbun is currently in beta. We need your feedback to improve!<br>
             Please join our community server to share your thoughts, report bugs, and stay updated.
         </p>
-        <a class="button" href="https://discord.gg/Ab25UgysDt" aria-label="Discord Community Server" target="_blank">
+        <a class="button" href="https://discord.gg/pVUuqJqywt" aria-label="Discord Community Server" target="_blank">
             <i class="fa-brands fa-discord"></i>&nbsp;
             Discord Community Server
         </a>
