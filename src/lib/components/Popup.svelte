@@ -8,7 +8,6 @@
     }
     let { children, isOpen = $bindable(), onClose }: Props = $props();
     function closeBackdrop(e: Event) {
-        console.log(e.target, e.currentTarget);
         if (e.target === e.currentTarget) onClose();
     }
 </script>
