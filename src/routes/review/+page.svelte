@@ -9,6 +9,11 @@
     import TopBar from "$lib/components/TopBar.svelte";
     import { DECK_TAGS } from '$lib/constants';
     import { AutoReview, type AutoReviewData } from '$lib/autoReview';
+    import { fly, fade } from 'svelte/transition';
+    import { cubicOut } from 'svelte/easing';
+    
+    const inFlyParam = { delay: 100, y : -100, duration: 300, easing: cubicOut };
+    const outFadeParam = { duration: 200 };
 
     export let data: {deckId?: string, isExtraStudy?: boolean, cardIds?: string};
     let deckId = data.deckId || '';
@@ -130,8 +135,9 @@
         await app.save();
         nextCard();
     }
-    function requestManualGrade() {
-        isRequestManualGrade = true;
+    function onManualChangeToAutoGrade(grade: FSRS.Grade) {
+        autoGrade = grade;
+        isRequestManualGrade = false;
     }
 </script>
 
@@ -172,14 +178,14 @@
                     app={app} 
                     characterData={characterWriterDataFromId(currentCardId)} 
                     onComplete={(data) => onComplete(data)} 
-                    onRequestManualGrade={() => requestManualGrade()}
+                    bind:isRequestManualGrade={isRequestManualGrade}
                     cardConfig={getCardConfig(currentCardId)}
                     autoGrade={autoGrade}
                 />
             {/key}
         </div>
-        <div class="bottom-container">
-            {#if isFirstTime}
+        {#if isFirstTime}
+            <div class="bottom-container" in:fly={inFlyParam} out:fade={outFadeParam}>
                 <div class="review-button-container">
                     <button 
                         class="review-button is-complete review-button-fail"
@@ -202,7 +208,9 @@
                         </div>
                     </button>
                 </div>
-            {:else if data.isExtraStudy}
+            </div>
+        {:else if data.isExtraStudy}
+            <div class="bottom-container" in:fly={inFlyParam} out:fade={outFadeParam}>
                 <div class="review-button-container">
                     <button 
                         class="review-button is-complete review-button-fail"
@@ -227,18 +235,11 @@
                         </div>
                     </button>
                 </div>
-            {:else if isAutoGrading && !isRequestManualGrade}
+            </div>
+        {:else if isAutoGrading && !isRequestManualGrade}
+            <div class="bottom-container" in:fly={inFlyParam} out:fade={outFadeParam}>
                 <div class="review-button-container">
-                    <button 
-                        class="review-button is-complete review-button-fail"
-                        class:is-complete={isComplete}
-                        onclick={() => requestManualGrade()}
-                    >
-                        <div class="review-button-inner">
-                            <div class="review-time">Manual</div>
-                            <div class="review-label">Grade</div>
-                        </div>
-                    </button>
+                    <div class="review-button"><div class="review-time">&nbsp;</div><div class="review-label">&nbsp;</div></div>
                     <div class="review-button"><div class="review-time">&nbsp;</div><div class="review-label">&nbsp;</div></div>
                     <div class="review-button"><div class="review-time">&nbsp;</div><div class="review-label">&nbsp;</div></div>
                     <button 
@@ -252,7 +253,26 @@
                         </div>
                     </button>
                 </div>
-            {:else}
+            </div>
+        {:else if isAutoGrading && isRequestManualGrade}
+            <div class="bottom-container" in:fly={inFlyParam} out:fade={outFadeParam}>
+                <div class="review-button-container pulsing">
+                    {#each reviewButtonsLabel as label, i}
+                        <button 
+                            class={`review-button ${getReviewButtonClass(i+1)}`} 
+                            class:is-complete={isComplete}
+                            onclick={() => onManualChangeToAutoGrade(i+1)}
+                        >
+                            <div class="review-button-inner">
+                                <div class="review-time">{scheduledTimeStr[(i+1) as FSRS.Grade]}</div>
+                                <div class="review-label">{label}</div>
+                           </div>
+                        </button>
+                    {/each}
+                </div>
+            </div>
+        {:else}
+            <div class="bottom-container" in:fly={inFlyParam} out:fade={outFadeParam}>
                 <div class="review-button-container">
                     {#each reviewButtonsLabel as label, i}
                         <button 
@@ -263,12 +283,12 @@
                             <div class="review-button-inner">
                                 <div class="review-time">{scheduledTimeStr[(i+1) as FSRS.Grade]}</div>
                                 <div class="review-label">{label}</div>
-                            </div>
+                           </div>
                         </button>
                     {/each}
                 </div>
-            {/if}
-        </div>
+            </div>
+        {/if}
     {/if}
 </div>
 
@@ -377,5 +397,13 @@
         background-color: var(--color, #3E92CC); /* or any color */
         border-radius: 0.2em;
         z-index: 1;
+    }
+    .pulsing .review-button::after {
+        animation: pulsing 1s infinite;
+    }
+    @keyframes pulsing {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
     }
 </style>
