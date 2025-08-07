@@ -1,4 +1,5 @@
 <script lang="ts">
+    import * as FSRS from "ts-fsrs"
     import HanziWriter from 'hanzi-writer';
     import { onMount } from 'svelte';
     import { getAudioUrl, TONE_PREFIX } from '$lib/chinese';
@@ -6,6 +7,7 @@
     import type { App } from '$lib/app';
     import { base } from '$app/paths';
     import { AudioSequence } from '$lib/audioSequence';
+    import { AutoReviewGradeClass, AutoReviewGradeFAClass, AutoReviewGradeLabel, type AutoReviewData } from '$lib/autoReview';
     
     let width = $state(500);
     let height = $state(500);
@@ -17,6 +19,12 @@
     let isComplete = $state(false);
     let isStopPlayAudio = $state(false); // so we know to play audio only once
     let unmounted = $state(false);
+    
+    let autoReviewData: AutoReviewData  = $state({
+        correctStrokeCount: 0,
+        incorrectStrokeCount: 0,
+        totalStrokeCount: 0,
+    });
 
     function getEmInPx(): number {
         return parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -28,12 +36,17 @@
     }
     
     interface Props {
-		onComplete: () => void;
+		onComplete: (data: AutoReviewData) => void;
+		onRequestManualGrade: () => void;
 		characterData: CharacterWriterData | undefined;
 		cardConfig: CharacterWriterConfig;
+		autoGrade: FSRS.Grade | undefined;
 		app: App
 	}
-    let { onComplete, characterData, app, cardConfig }: Props = $props();
+    let { 
+        onComplete, onRequestManualGrade, 
+        characterData, app, cardConfig, autoGrade 
+    }: Props = $props();
     
     let completedCharCount: number = $state(0);
     let meaningStr = characterData?.meanings.join("; ");
@@ -58,7 +71,7 @@
             correctSound.play();
             completedCharCount = completedCharCount + 1;
             if (completedCharCount == characterData?.characters.length) {
-                onComplete();
+                onComplete({...autoReviewData});
                 isComplete = true;
                 window.setTimeout(() => {
                     playAudio();
@@ -93,7 +106,16 @@
             }
         });
         if (!cardConfig.isFirstTime) {
-            writer.quiz();
+            writer.quiz({
+                onMistake: () => { 
+                    autoReviewData.incorrectStrokeCount++; 
+                    autoReviewData.totalStrokeCount++;
+                },
+                onCorrectStroke: () => { 
+                    autoReviewData.correctStrokeCount++; 
+                    autoReviewData.totalStrokeCount++;
+                },
+            });
         } else {
             setTimeout(() => {
                 if (!isStopPlayAudio) playAudio();
@@ -181,6 +203,7 @@
         border-radius: 0.5em;
     }
     .character-container {
+        position: relative;
         display: flex;
         flex-direction: column;
     }
@@ -221,6 +244,30 @@
             visibility: hidden;
         }
     }
+    .auto-review-indicator-container {
+        all: unset;
+        cursor: pointer;
+        background-color : var(--color);
+        color: white;
+        width: 8em;
+        height: 8em;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5em;
+        justify-content: center;
+        align-items: center;
+        border-radius: 50%;
+        position: absolute;
+        top: -1em;
+        right: -1em;
+        .fa {
+            font-size: 3em;
+        }
+        &:hover { opacity: 0.8; }
+        &.good { --color: #419E6F;}
+        &.hard { --color: #DA8C22;}
+        &.again { --color: #DB6B6C;}
+    }
 </style>
 
 <div class="character-writer">
@@ -260,5 +307,14 @@
                 </div>
             {/if}
         </div>
+        {#if autoGrade}
+            <button 
+                class={`auto-review-indicator-container ${AutoReviewGradeClass[autoGrade]}`}
+                onclick={() => onRequestManualGrade()}
+            >
+                <i class={AutoReviewGradeFAClass[autoGrade]}></i>
+                <span>{AutoReviewGradeLabel[autoGrade]}</span>
+            </button>
+        {/if}
     </div>
 </div>
