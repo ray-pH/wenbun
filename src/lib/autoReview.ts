@@ -10,21 +10,21 @@ export const AutoReviewGradeLabel: Record<FSRS.Grade, string> = {
     [FSRS.Rating.Again]: "Fail",
     [FSRS.Rating.Hard]: "Hard",
     [FSRS.Rating.Good]: "Good",
-    [FSRS.Rating.Easy]: "",
+    [FSRS.Rating.Easy]: "Easy",
 }
 
 export const AutoReviewGradeClass: Record<FSRS.Grade, string> = {
     [FSRS.Rating.Again]: "again",
     [FSRS.Rating.Hard]: "hard",
     [FSRS.Rating.Good]: "good",
-    [FSRS.Rating.Easy]: "",
+    [FSRS.Rating.Easy]: "easy",
 }
 
 export const AutoReviewGradeFAClass: Record<FSRS.Grade, string> = {
     [FSRS.Rating.Again]: "fa fa-solid fa-face-frown",
     [FSRS.Rating.Hard]: "fa fa-solid fa-face-meh",
     [FSRS.Rating.Good]: "fa fa-solid fa-face-smile",
-    [FSRS.Rating.Easy]: "",
+    [FSRS.Rating.Easy]: "fa fa-solid fa-star",
 }
 
 export namespace AutoReview {

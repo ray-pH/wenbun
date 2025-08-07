@@ -37,14 +37,14 @@
     
     interface Props {
 		onComplete: (data: AutoReviewData) => void;
-		onRequestManualGrade: () => void;
+		isRequestManualGrade: boolean;
 		characterData: CharacterWriterData | undefined;
 		cardConfig: CharacterWriterConfig;
 		autoGrade: FSRS.Grade | undefined;
 		app: App
 	}
     let { 
-        onComplete, onRequestManualGrade, 
+        onComplete, isRequestManualGrade = $bindable(), 
         characterData, app, cardConfig, autoGrade 
     }: Props = $props();
     
@@ -148,6 +148,10 @@
         const a = audios[index];
         a.stop();
         a.play();
+    }
+    
+    function toggleRequestManualGrade() {
+        isRequestManualGrade = !isRequestManualGrade;
     }
     
     onMount(() => {
@@ -263,9 +267,35 @@
             font-size: 3em;
         }
         &:hover { opacity: 0.8; }
+        &.easy { --color: #3E92CC;}
         &.good { --color: #419E6F;}
         &.hard { --color: #DA8C22;}
         &.again { --color: #DB6B6C;}
+        &.blinking {
+            animation: blinking 1s ease-in-out infinite;
+        }
+        &.echo-once::after {
+            content: "";
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            border: 6px solid var(--color);
+            opacity: 0;
+            transform: scale(1);
+            z-index: -1;
+            animation: ring 1.6s ease-out 1;
+        }
+    }
+    @keyframes blinking {
+        0%   { opacity: 1; }
+        50%  { opacity: 0.6; }
+        100% { opacity: 1; }
+    }
+    @keyframes ring {
+        0%   { transform: scale(1);   opacity: 0; }
+        1%   { transform: scale(1);   opacity: 0.6; }
+        70%  { transform: scale(1.6); opacity: 0;   }
+        100% { transform: scale(1.6); opacity: 0;   }
     }
 </style>
 
@@ -309,7 +339,10 @@
         {#if autoGrade}
             <button 
                 class={`auto-review-indicator-container ${AutoReviewGradeClass[autoGrade]}`}
-                onclick={() => onRequestManualGrade()}
+                class:blinking={isRequestManualGrade}
+                class:animated={isRequestManualGrade}
+                class:echo-once={!isRequestManualGrade}
+                onclick={() => toggleRequestManualGrade()}
             >
                 <i class={AutoReviewGradeFAClass[autoGrade]}></i>
                 <span>{AutoReviewGradeLabel[autoGrade]}</span>
