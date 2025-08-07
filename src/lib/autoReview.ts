@@ -31,9 +31,9 @@ export namespace AutoReview {
     export function getGrade(data: AutoReviewData): FSRS.Grade {
         const mistakeRate = data.incorrectStrokeCount / data.totalStrokeCount;
         // for automatic review, never rate as easy
-        if (mistakeRate < 0.25 || data.incorrectStrokeCount <= 4) {
+        if (mistakeRate < 0.25 || data.incorrectStrokeCount <= 2) {
             return FSRS.Rating.Good;
-        } else if (mistakeRate < 0.5 || data.incorrectStrokeCount <= 6) {
+        } else if (mistakeRate < 0.5 || data.incorrectStrokeCount <= 4) {
             return FSRS.Rating.Hard;
         } else {
             return FSRS.Rating.Again;
