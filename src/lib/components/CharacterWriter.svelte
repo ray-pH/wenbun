@@ -136,7 +136,6 @@
     
     function setupAudios() {
         const urls = characterData?.audioUrl;
-        console.log(urls);
         if (!urls) return;
         audios = urls.map(rawUs => {
             const us = rawUs.map(u => getAudioUrl(cardConfig.lang, u));
