@@ -8,6 +8,7 @@
     import { ChineseCharacterWordlist } from "$lib/chinese";
     import TopBar from "$lib/components/TopBar.svelte";
     import { DECK_TAGS } from '$lib/constants';
+    import { AutoReview, type AutoReviewData } from '$lib/autoReview';
 
     export let data: {deckId?: string, isExtraStudy?: boolean, cardIds?: string};
     let deckId = data.deckId || '';
@@ -23,6 +24,7 @@
         await wordlist.init(isZhCantonese ? 'yue' : 'zh');
         app = app;
         isZhTraditional = app.deckData[deckId]?.tags?.includes(DECK_TAGS.ZH_TRAD);
+        isAutoGrading = app.isAutoGrading();
         isPageReady = true;
         if (data.isExtraStudy) app.extraStudyHandler.registerReviewCardIdsOverride(cardIds);
         nextCard();
@@ -36,15 +38,23 @@
     let isNewCardInteractedWith = false;
     let isZhTraditional = false;
     let isZhCantonese = false;
+    let isAutoGrading = false;
+    let autoGrade: FSRS.Grade | undefined = undefined;
+    let isRequestManualGrade = false;
     $: isFirstTime = cardState === WenBunCustomState.New && !isNewCardInteractedWith;
     const reviewButtonsLabel = ['Fail', 'Hard', 'Good', 'Easy'];
     
     let currentCardId: number | undefined = undefined;
     let scheduledTimeStr: Record<FSRS.Grade, string> = {1: '', 2: '', 3: '', 4: ''};
-    function nextCard() {
-        isCardChanged = true;
+    function resetState() {
         isComplete = false;
         isNewCardInteractedWith = false;
+        autoGrade = undefined;
+        isRequestManualGrade = false;
+    }
+    function nextCard() {
+        resetState();
+        isCardChanged = true;
         const id = app.getNextCard(deckId);
         if (id === undefined) {
             // done for today
@@ -81,8 +91,9 @@
             lang: isZhCantonese ? 'yue' : 'zh',
         }
     }
-    function onComplete() {
+    function onComplete(data: AutoReviewData) {
         isComplete = true;
+        if (isAutoGrading) autoGrade = AutoReview.getGrade(data);
     }
     async function onReviewButtonClick(grade: FSRS.Grade) {
         app.rateCard(deckId, currentCardId!, grade);
@@ -112,6 +123,15 @@
     function extraStudyGood() {
         app.extraStudyHandler.rateGood(currentCardId!);
         nextCard();
+    }
+    
+    async function acceptAutoGrade() {
+        app.rateCard(deckId, currentCardId!, autoGrade!);
+        await app.save();
+        nextCard();
+    }
+    function requestManualGrade() {
+        isRequestManualGrade = true;
     }
 </script>
 
@@ -151,14 +171,16 @@
                 <CharacterWriter 
                     app={app} 
                     characterData={characterWriterDataFromId(currentCardId)} 
-                    onComplete={() => onComplete()} 
+                    onComplete={(data) => onComplete(data)} 
+                    onRequestManualGrade={() => requestManualGrade()}
                     cardConfig={getCardConfig(currentCardId)}
+                    autoGrade={autoGrade}
                 />
             {/key}
         </div>
         <div class="bottom-container">
-            <div class="review-button-container">
-                {#if isFirstTime}
+            {#if isFirstTime}
+                <div class="review-button-container">
                     <button 
                         class="review-button is-complete review-button-fail"
                         onclick={() => ignoreCard()}
@@ -179,7 +201,9 @@
                             <div class="review-label">Learn</div>
                         </div>
                     </button>
-                {:else if data.isExtraStudy}
+                </div>
+            {:else if data.isExtraStudy}
+                <div class="review-button-container">
                     <button 
                         class="review-button is-complete review-button-fail"
                         class:is-complete={isComplete}
@@ -202,7 +226,34 @@
                             <div class="review-label">Good</div>
                         </div>
                     </button>
-                {:else}
+                </div>
+            {:else if isAutoGrading && !isRequestManualGrade}
+                <div class="review-button-container">
+                    <button 
+                        class="review-button is-complete review-button-fail"
+                        class:is-complete={isComplete}
+                        onclick={() => requestManualGrade()}
+                    >
+                        <div class="review-button-inner">
+                            <div class="review-time">Manual</div>
+                            <div class="review-label">Grade</div>
+                        </div>
+                    </button>
+                    <div class="review-button"><div class="review-time">&nbsp;</div><div class="review-label">&nbsp;</div></div>
+                    <div class="review-button"><div class="review-time">&nbsp;</div><div class="review-label">&nbsp;</div></div>
+                    <button 
+                        class="review-button is-complete review-button-easy"
+                        class:is-complete={isComplete}
+                        onclick={() => acceptAutoGrade()}
+                    >
+                        <div class="review-button-inner">
+                            <div class="review-time">&nbsp;</div>
+                            <div class="review-label">Next</div>
+                        </div>
+                    </button>
+                </div>
+            {:else}
+                <div class="review-button-container">
                     {#each reviewButtonsLabel as label, i}
                         <button 
                             class={`review-button ${getReviewButtonClass(i+1)}`} 
@@ -215,8 +266,8 @@
                             </div>
                         </button>
                     {/each}
-                {/if}
-            </div>
+                </div>
+            {/if}
         </div>
     {/if}
 </div>

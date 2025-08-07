@@ -1,0 +1,51 @@
+import * as FSRS from "ts-fsrs"
+
+export interface AutoReviewData {
+    correctStrokeCount: number;
+    incorrectStrokeCount: number;
+    totalStrokeCount: number;
+}
+
+export const AutoReviewGradeLabel: Record<FSRS.Grade, string> = {
+    [FSRS.Rating.Again]: "Fail",
+    [FSRS.Rating.Hard]: "Hard",
+    [FSRS.Rating.Good]: "Good",
+    [FSRS.Rating.Easy]: "",
+}
+
+export const AutoReviewGradeClass: Record<FSRS.Grade, string> = {
+    [FSRS.Rating.Again]: "again",
+    [FSRS.Rating.Hard]: "hard",
+    [FSRS.Rating.Good]: "good",
+    [FSRS.Rating.Easy]: "",
+}
+
+export const AutoReviewGradeFAClass: Record<FSRS.Grade, string> = {
+    [FSRS.Rating.Again]: "fa fa-solid fa-face-frown",
+    [FSRS.Rating.Hard]: "fa fa-solid fa-face-meh",
+    [FSRS.Rating.Good]: "fa fa-solid fa-face-smile",
+    [FSRS.Rating.Easy]: "",
+}
+
+export namespace AutoReview {
+    export function getGrade(data: AutoReviewData): FSRS.Grade {
+        const mistakeRate = data.incorrectStrokeCount / data.totalStrokeCount;
+        // for automatic review, never rate as easy
+        if (mistakeRate < 0.25 || data.incorrectStrokeCount <= 4) {
+            return FSRS.Rating.Good;
+        } else if (mistakeRate < 0.5 || data.incorrectStrokeCount <= 6) {
+            return FSRS.Rating.Hard;
+        } else {
+            return FSRS.Rating.Again;
+        }
+    }
+    
+    export function gradeToLabel(grade: FSRS.Grade): string {
+        switch (grade) {
+            case FSRS.Rating.Again: return "Again";
+            case FSRS.Rating.Hard: return "Hard";
+            case FSRS.Rating.Good: return "Good";
+            default: return "Unknown";
+        }
+    }
+}

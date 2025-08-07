@@ -70,6 +70,9 @@ export interface WenbunConfig {
     newPreviouslyStudiedCardPerDay?: number;
     newPreviouslyStudiedCardOrder?: NewCardOrder;
     
+    // Review
+    gradingMethod?: 'auto' | 'manual';
+    
     // FSRS
     learningSteps?: FSRS.Steps;
     previouslyStudiedLearningSteps?: FSRS.Steps;
@@ -95,10 +98,12 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     newPreviouslyStudiedCardPerDay: 20,
     newPreviouslyStudiedCardOrder: NewCardOrder.Mix,
     
+    gradingMethod: 'manual',
+    
     learningSteps: ["1m", "10m"],
     previouslyStudiedLearningSteps: ["1m", "5d"],
     desiredRetention: 0.9,
-    enableShortTerm: true,
+    enableShortTerm: false,
     enableFuzz: false,
     FSRSParams: DEFAULT_FSRS_PARAM,
     
@@ -168,6 +173,7 @@ export class App {
     async init(): Promise<void> {
         await this.load();
         this.extraStudyHandler.init();
+        this.updateFSRS();
         if (this.isNeedToProcessTodaySchedule()) {
             await this.processTodaySchedule();
         }
@@ -176,6 +182,8 @@ export class App {
     async debug() {
         this.decks = ['test'];
         this.deckData = {};
+        this.reviewLogs = [];
+        this.config = DEFAULT_CONFIG;
         await this.ensureDeckData();
         await this.save();
     }
@@ -641,5 +649,9 @@ export class App {
             ignored: p.ignoredCount / p.totalCount * 100,
             rest: (p.totalCount - p.youngCount - p.matureCount - p.previouslyStudiedCount - p.ignoredCount) / p.totalCount * 100,
         }
+    }
+    
+    isAutoGrading(): boolean {
+        return this.getConfig().gradingMethod === 'auto';
     }
 }

@@ -149,6 +149,12 @@
         <div class="settings-section">
             <div class="section-title">Learning</div>
             <div class="section-container">
+                <SettingsItem key="gradingMethod">
+                    <select bind:value={config.gradingMethod}>
+                        <option value="auto">auto</option>
+                        <option value="manual">manual</option>
+                    </select>
+                </SettingsItem>
                 <SettingsItem key="newCardPerDay">
                     <input type="number" bind:value={config.newCardPerDay}>
                 </SettingsItem>

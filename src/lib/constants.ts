@@ -127,6 +127,10 @@ export const SETTINGS_LABEL_DATA = {
         label: "FSRS Params",
         help: "Specifies advanced parameters for the FSRS review algorithm.",
     },
+    gradingMethod: {
+        label: "Grading Method",
+        help: "Whether the system will grade the cards automatically or let the user manually grade them.",
+    },
     
     zhIsColorBasedOnTone: {
         label: "Color Characters Based On Their Tone",
