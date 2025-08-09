@@ -1,0 +1,1 @@
+import{a1 as i,a2 as o,B as n,a3 as s}from"./CppPYvqM.js";import{a as c}from"./BgD2c6e2.js";function f(t){var _=s,e=n;i(null),o(null);try{return t()}finally{i(_),o(e)}}function l(t,_,e,r=e){t.addEventListener(_,()=>f(e));const a=t.__on_r;a?t.__on_r=()=>{a(),r(!0)}:t.__on_r=()=>r(!0),c()}export{l,f as w};
