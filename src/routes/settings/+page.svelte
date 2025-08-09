@@ -10,6 +10,8 @@
     import { ChineseToneColorPalette } from "$lib/constants";
     import { ChineseMandarinReading } from '$lib/chinese';
     
+    export let data: {leniency?: string};
+    
     let app = new App();
     let config: DeepRequired<WenbunConfig>;
     let initialConfig: DeepRequired<WenbunConfig>;
@@ -22,6 +24,9 @@
         fsrsParamsString = config.FSRSParams.join(",");
         profileStr = app.exportProfile();
         initialProfileStr = profileStr;
+        if (data.leniency) {
+            config.strokeLeniency = parseFloat(data.leniency);
+        }
         app = app;
     })
     
@@ -188,6 +193,20 @@
                 </SettingsItem>
             </div>
         </div>
+        
+        <div class="settings-section">
+            <div class="section-title">Character Writer</div>
+            <div class="section-container">
+                <SettingsItem key="strokeLeniency">
+                    <input type="number" step="0.01" bind:value={config.strokeLeniency}>
+                </SettingsItem>
+                <a class="button" href="{base}/settings/leniency-calibration" aria-label="Test Leniency Callibration">
+                    <i class="fa-solid fa-sliders"></i>&nbsp;
+                    Test Leniency
+                </a>
+            </div>
+        </div>
+        
         
         <div class="settings-section">
             <div class="section-title">FSRS</div>

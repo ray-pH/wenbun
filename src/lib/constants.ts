@@ -131,6 +131,10 @@ export const SETTINGS_LABEL_DATA = {
         label: "Grading Method",
         help: "Whether the system will grade the cards automatically or let the user manually grade them.",
     },
+    strokeLeniency: {
+        label: "Stroke Grading Leniency",
+        help: "(default 1.0) This can be set to make stroke grading more or less lenient. The closer this is to 0 the more strictly the quiz is graded."
+    },
     
     zhIsColorBasedOnTone: {
         label: "Color Characters Based On Their Tone",
