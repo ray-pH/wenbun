@@ -21,6 +21,14 @@
     let cardIds = JSON.parse(decodeURIComponent(cardIdsStr));
     let title = data.isExtraStudy ? 'Extra Study' : 'Review';
     
+    type ReviewButton = {
+    	label: string;
+    	sublabel?: string;
+    	className?: string;
+    	onclick?: () => void;
+    	isComplete?: boolean;
+    };
+    
     let isPageReady = false;
     let app = new App();
     onMount(async () => {
@@ -185,112 +193,74 @@
             {/key}
         </div>
         {#if isFirstTime}
-            <div class="bottom-container" in:fly={inFlyParam} out:fade={outFadeParam}>
-                <div class="review-button-container">
-                    <button 
-                        class="review-button is-complete review-button-fail"
-                        onclick={() => ignoreCard()}
-                    >
-                        <div class="review-button-inner">
-                            <div class="review-time">(Don't Learn)</div>
-                            <div class="review-label">Ignore</div>
-                        </div>
-                    </button>
-                    <div class="review-button"><div class="review-time">&nbsp;</div><div class="review-label">&nbsp;</div></div>
-                    <div class="review-button"><div class="review-time">&nbsp;</div><div class="review-label">&nbsp;</div></div>
-                    <button 
-                        class="review-button is-complete review-button-easy"
-                        onclick={() => onNewCardInteracted()}
-                    >
-                        <div class="review-button-inner">
-                            <div class="review-time">&nbsp;</div>
-                            <div class="review-label">Learn</div>
-                        </div>
-                    </button>
-                </div>
-            </div>
+            {@render ReviewButtons([
+          		{ label: "Ignore", sublabel: "(Don't Learn)", className: "review-button-fail", isComplete: true, 
+                    onclick: () => ignoreCard() },
+          		{ label: "" },
+          		{ label: "" },
+          		{ label: "Learn", className: "review-button-easy", isComplete: true,
+                    onclick: () => onLearnNewCard() }
+           	])}
         {:else if data.isExtraStudy}
-            <div class="bottom-container" in:fly={inFlyParam} out:fade={outFadeParam}>
-                <div class="review-button-container">
-                    <button 
-                        class="review-button is-complete review-button-fail"
-                        class:is-complete={isComplete}
-                        onclick={() => extraStudyAgain()}
-                    >
-                        <div class="review-button-inner">
-                            <div class="review-time">(Put Back)</div>
-                            <div class="review-label">Again</div>
-                        </div>
-                    </button>
-                    <div class="review-button"><div class="review-time">&nbsp;</div><div class="review-label">&nbsp;</div></div>
-                    <div class="review-button"><div class="review-time">&nbsp;</div><div class="review-label">&nbsp;</div></div>
-                    <button 
-                        class="review-button is-complete review-button-easy"
-                        class:is-complete={isComplete}
-                        onclick={() => extraStudyGood()}
-                    >
-                        <div class="review-button-inner">
-                            <div class="review-time">&nbsp;</div>
-                            <div class="review-label">Good</div>
-                        </div>
-                    </button>
-                </div>
-            </div>
+           	{@render ReviewButtons([
+          		{ label: "Again", sublabel: "(Put Back)", className: "review-button-fail", isComplete, 
+                    onclick: () => extraStudyAgain() },
+          		{ label: "" },
+          		{ label: "" },
+          		{ label: "Good", className: "review-button-easy",  isComplete,
+                    onclick: () => extraStudyGood() }
+           	])}
         {:else if isAutoGrading && !isRequestManualGrade}
-            <div class="bottom-container" in:fly={inFlyParam} out:fade={outFadeParam}>
-                <div class="review-button-container">
-                    <div class="review-button"><div class="review-time">&nbsp;</div><div class="review-label">&nbsp;</div></div>
-                    <div class="review-button"><div class="review-time">&nbsp;</div><div class="review-label">&nbsp;</div></div>
-                    <div class="review-button"><div class="review-time">&nbsp;</div><div class="review-label">&nbsp;</div></div>
-                    <button 
-                        class="review-button is-complete review-button-easy"
-                        class:is-complete={isComplete}
-                        onclick={() => acceptAutoGrade()}
-                    >
-                        <div class="review-button-inner">
-                            <div class="review-time">&nbsp;</div>
-                            <div class="review-label">Next</div>
-                        </div>
-                    </button>
-                </div>
-            </div>
+           	{@render ReviewButtons([
+                { label: "" },
+          		{ label: "" },
+          		{ label: "" },
+          		{ label: "Next", className: "review-button-easy",  isComplete,
+                    onclick: () => acceptAutoGrade() }
+           	])}
         {:else if isAutoGrading && isRequestManualGrade}
-            <div class="bottom-container" in:fly={inFlyParam} out:fade={outFadeParam}>
-                <div class="review-button-container pulsing">
-                    {#each reviewButtonsLabel as label, i}
-                        <button 
-                            class={`review-button ${getReviewButtonClass(i+1)}`} 
-                            class:is-complete={isComplete}
-                            onclick={() => onManualChangeToAutoGrade(i+1)}
-                        >
-                            <div class="review-button-inner">
-                                <div class="review-time">{scheduledTimeStr[(i+1) as FSRS.Grade]}</div>
-                                <div class="review-label">{label}</div>
-                           </div>
-                        </button>
-                    {/each}
-                </div>
-            </div>
+           	{@render ReviewButtons(
+          		reviewButtonsLabel.map((label, i) => ({
+         			label,
+         			sublabel: scheduledTimeStr[(i+1) as FSRS.Grade],
+         			className: getReviewButtonClass(i+1),
+                    isComplete,
+         			onclick: () => onManualChangeToAutoGrade(i+1)
+          		})),
+                "pulsing"
+           	)}
         {:else}
-            <div class="bottom-container" in:fly={inFlyParam} out:fade={outFadeParam}>
-                <div class="review-button-container">
-                    {#each reviewButtonsLabel as label, i}
-                        <button 
-                            class={`review-button ${getReviewButtonClass(i+1)}`} 
-                            class:is-complete={isComplete}
-                            onclick={() => onReviewButtonClick(i+1)}
-                        >
-                            <div class="review-button-inner">
-                                <div class="review-time">{scheduledTimeStr[(i+1) as FSRS.Grade]}</div>
-                                <div class="review-label">{label}</div>
-                           </div>
-                        </button>
-                    {/each}
-                </div>
-            </div>
+           	{@render ReviewButtons(
+          		reviewButtonsLabel.map((label, i) => ({
+         			label,
+         			sublabel: scheduledTimeStr[(i+1) as FSRS.Grade],
+         			className: getReviewButtonClass(i+1),
+                    isComplete,
+         			onclick: () => onReviewButtonClick(i+1)
+          		}))
+           	)}
         {/if}
     {/if}
 </div>
+
+{#snippet ReviewButtons(buttons: ReviewButton[], extraClass = "")}
+	<div class="bottom-container" in:fly={inFlyParam} out:fade={outFadeParam}>
+		<div class={`review-button-container ${extraClass}`}>
+			{#each buttons as b}
+				<button
+					class={`review-button ${b.className || ""}`}
+					class:is-complete={b.isComplete}
+					onclick={b.onclick}
+				>
+					<div class="review-button-inner">
+						<div class="review-time">{b.sublabel || '\u00A0'}</div>
+						<div class="review-label">{b.label || '\u00A0'}</div>
+					</div>
+				</button>
+			{/each}
+		</div>
+	</div>
+{/snippet}
 
 <style>
     .container {
