@@ -453,7 +453,11 @@ export class App {
         
         const newCardLength = this.getNewCardsCount(deckId);
         const warmUpCardLength = warmUpIds.length;
-        // randomy chose between new card and warm up card proportional to the number of the cards
+        // randomly choose between new card and warm up card proportional to the number of the cards
+        if (newCardLength + warmUpCardLength === 0) {
+            // No cards available, return a sentinel value (e.g., -1)
+            return -1;
+        }
         return Math.random() < newCardLength / (newCardLength + warmUpCardLength) ?
             newCard : warmUpId;
     }
