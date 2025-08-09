@@ -17,9 +17,11 @@ const STORE_KEY_REVIEW_LOGS = "reviewLogs"
 
 const FSRS_GRADES: FSRS.Grade[] = [FSRS.Rating.Again, FSRS.Rating.Hard, FSRS.Rating.Good, FSRS.Rating.Easy];
 export const DEFAULT_GROUP_CONTENT_COUNT = 30;
+const DEFAULT_WARMUP_MAX_COUNT = 3;
 
 export enum WenBunCustomState {
     New = "New",
+    WarmUp = "WarmUp",
     Learning = "Learning",
     ReviewYoung = "Young",
     ReviewMature = "Mature",
@@ -53,6 +55,7 @@ export interface DeckData {
     tags: string[];
     previouslyStudied: number[]; // list of card ids that are marked as previously studied (i.e. previously studied before this deck)
     ignoredIds?: number[]; // list of card ids that are marked as ignored
+    warmUpIds?: Record<number, number>; // <id, count>
     groups: Array<{ label: string, cardIds: number[] }>
     schedule: Record<number, FSRS.Card>
     // scheduled cards
@@ -321,6 +324,9 @@ export class App {
     }
     
     rateCard(deckId: string, cardId: number, grade: FSRS.Grade, date?: Date): void {
+        // if card is rated, remove from warm up
+        this.stopWarmUp(deckId, cardId);
+        
         const deckData = this.deckData[deckId];
         const card = this.getCard(deckId, cardId, true);
         if (!card) return;
@@ -351,6 +357,15 @@ export class App {
         // otherwise do nothing
     }
     
+    warmUpNext(deckId: string, cardId: number): void {
+        const deckData = this.deckData[deckId];
+        if (!deckData) return;
+        if (deckData.warmUpIds?.[cardId] !== undefined) {
+            deckData.warmUpIds[cardId]++;
+        }
+        // the handling of when the warm up is complete is done in the review component
+    }
+    
     getNextCard(deckId: string): number | undefined {
         
         if (this.extraStudyHandler.isExtraStudy()) {
@@ -360,11 +375,11 @@ export class App {
         // TODO: precalculate the next card on review
         const config = this.getConfig();
         
-        const newCardCount = this.getScheduledNewCardsCount(deckId);
+        const newOrWarmUpCardCount = this.getScheduledNewOrWarmUpCardsCount(deckId);
         const previouslyStudiedCardCount = this.getScheduledPreviouslyStudiedCardsCount(deckId);
         const todaysCardCount = this.getScheduledReviewCardsCount(deckId);
         
-        const newCard = (newCardCount > 0) ? this.getNewCard(deckId) : undefined;
+        const newOrWarmUp = (newOrWarmUpCardCount > 0) ? this.getNewOrWarmUpCard(deckId) : undefined;
         const previouslyStudiedCards = (previouslyStudiedCardCount > 0) ? this.getPreviouslyStudiedCard(deckId) : undefined;
         const todaysCards = (todaysCardCount > 0) ? this.getTodaysScheduledCards(deckId)[0] : undefined;
         
@@ -372,16 +387,16 @@ export class App {
         const mid = [todaysCards];
         const tail = [];
         
-        if (config.newCardOrder === NewCardOrder.BeforeReviews) head.push(newCard);
-        if (config.newCardOrder === NewCardOrder.AfterReviews) tail.push(newCard);
+        if (config.newCardOrder === NewCardOrder.BeforeReviews) head.push(newOrWarmUp);
+        if (config.newCardOrder === NewCardOrder.AfterReviews) tail.push(newOrWarmUp);
         if (config.newPreviouslyStudiedCardOrder === NewCardOrder.BeforeReviews) head.push(previouslyStudiedCards);
         if (config.newPreviouslyStudiedCardOrder === NewCardOrder.AfterReviews) tail.push(previouslyStudiedCards);
         if (config.newCardOrder === NewCardOrder.Mix) {
-            const prob = newCardCount / (newCardCount + todaysCardCount);
-            if (Math.random() < prob) mid.unshift(newCard); else mid.push(newCard);
+            const prob = newOrWarmUpCardCount / (newOrWarmUpCardCount + todaysCardCount);
+            if (Math.random() < prob) mid.unshift(newOrWarmUp); else mid.push(newOrWarmUp);
         }
         if (config.newPreviouslyStudiedCardOrder === NewCardOrder.Mix) {
-            const prob = previouslyStudiedCardCount / (newCardCount + previouslyStudiedCardCount + todaysCardCount);
+            const prob = previouslyStudiedCardCount / (newOrWarmUpCardCount + previouslyStudiedCardCount + todaysCardCount);
             if (Math.random() < prob) mid.unshift(previouslyStudiedCards); else mid.push(previouslyStudiedCards);
         }
         
@@ -389,8 +404,42 @@ export class App {
         return arr.reduce((a, b) => a ?? b, undefined);
     }
     
-    getNewCard(deckId: string): number {
+    startWarmUp(deckId: string, cardId: number): void {
         const deckData = this.deckData[deckId];
+        if (!deckData) return;
+        if (deckData.warmUpIds === undefined) deckData.warmUpIds = {};
+        deckData.warmUpIds[cardId] = 0;
+    }
+    stopWarmUp(deckId: string, cardId: number): void {
+        const warmUpIds = this.deckData[deckId]?.warmUpIds;
+        if (!warmUpIds) return;
+        delete warmUpIds[cardId];
+    }
+    
+    getWarmUpCount(deckId: string, cardId: number): number | undefined {
+        return this.deckData[deckId]?.warmUpIds?.[cardId];
+    }
+    getMaxWarmUpCount(): number {
+        return DEFAULT_WARMUP_MAX_COUNT;
+    }
+    
+    getNewOrWarmUpCard(deckId: string): number {
+        const newCard = this.getNewCard(deckId);
+        const deckData = this.deckData[deckId];
+        if (!deckData.warmUpIds) return newCard;
+        
+        // randomly pick a warm up card
+        const warmUpIds = Object.keys(deckData.warmUpIds);
+        const warmUpId = +warmUpIds[Math.floor(Math.random() * warmUpIds.length)];
+        
+        const newCardLength = this.getNewCardsCount(deckId);
+        const warmUpCardLength = warmUpIds.length;
+        // randomy chose between new card and warm up card proportional to the number of the cards
+        return Math.random() < newCardLength / (newCardLength + warmUpCardLength) ?
+            newCard : warmUpId;
+    }
+    
+    getNewCard(deckId: string): number {
         const newCards = this.getNewCards(deckId);
         const id = newCards[0];
         return id;
@@ -414,6 +463,10 @@ export class App {
     }
     getPreviouslyStudiedCardCount(deckId: string): number {
         return this.deckData[deckId]?.previouslyStudied.length ?? 0;
+    }
+    getWarmUpCardsCount(deckId: string): number {
+        if (!this.deckData[deckId]?.warmUpIds) return 0;
+        return Object.keys(this.deckData[deckId].warmUpIds).length;
     }
     
     pushReviewLog(deckId: string, cardId: number, log: FSRS.ReviewLog): void {
@@ -463,6 +516,9 @@ export class App {
         return ratingScheduledTimeStr;
     }
     getWenbunCustomState(deckId: string, cardId: number): WenBunCustomState {
+        if (this.deckData[deckId]?.warmUpIds?.[cardId] !== undefined) {
+            return WenBunCustomState.WarmUp;
+        }
         if (this.deckData[deckId]?.previouslyStudied?.includes(cardId)) {
             return WenBunCustomState.PreviouslyStudied;
         }
@@ -496,10 +552,12 @@ export class App {
         const count = Math.min(todaysReviewCards.length, config.maxReviewsPerDay - deckData.doneTodayReviewCount);
         return Math.max(0, count);
     }
-    getScheduledNewCardsCount(deckId: string): number {
+    getScheduledNewOrWarmUpCardsCount(deckId: string): number {
         const config = this.getConfig();
         const deckData = this.deckData[deckId];
-        const count = Math.min(this.getNewCardsCount(deckId), config.newCardPerDay - deckData.doneTodayNewCardCount);
+        const newCount = this.getNewCardsCount(deckId);
+        const warmUpCount = this.getWarmUpCardsCount(deckId);
+        const count = Math.min(newCount + warmUpCount, config.newCardPerDay - deckData.doneTodayNewCardCount);
         return Math.max(0, count);
     }
     getScheduledPreviouslyStudiedCardsCount(deckId: string): number {

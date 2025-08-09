@@ -22,6 +22,10 @@ export interface CharacterWriterData {
 
 export interface CharacterWriterConfig {
     isFirstTime: boolean;
+    isWarmUp: boolean;
+    warmUpCount: number | undefined;
+    warmUpMaxCount: number;
+    isShowOutline: boolean;
     lang: 'zh' | 'yue';
 }
 

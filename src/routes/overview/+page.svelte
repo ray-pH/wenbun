@@ -58,7 +58,7 @@
             <table class="count-table"><tbody>
                 <tr class="row-count-new">
                     <td>New</td>
-                    <td class="count">{app.getScheduledNewCardsCount(deckInfo.id)}</td>
+                    <td class="count">{app.getScheduledNewOrWarmUpCardsCount(deckInfo.id)}</td>
                 </tr>
                 <tr class="row-count-learn-relearn">
                     <td>Learning</td>

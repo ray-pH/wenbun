@@ -91,6 +91,7 @@
         if (writer) {
             if (!cardConfig.isFirstTime) writer.cancelQuiz();
             writer.hideCharacter();
+            writer.hideOutline();
         }
         const tone = getChineseTone(characterData.tags[index] ?? []);
         writer = HanziWriter.create('grid-background-target', characterData.characters[index], {
@@ -98,7 +99,7 @@
             height: height,
             padding: 5,
             showCharacter: false, 
-            showOutline: cardConfig.isFirstTime,
+            showOutline: cardConfig.isShowOutline,
             highlightOnComplete: false,
             strokeColor: app.getChineseToneColor(tone) ?? "#555",
             onComplete: () => {
@@ -151,7 +152,18 @@
     }
     
     function toggleRequestManualGrade() {
+        if (cardConfig.isWarmUp) {
+            window.alert("Can't change grade during warm up. As grade is not used for scheduling during warm up.");
+            return;
+        }
         isRequestManualGrade = !isRequestManualGrade;
+    }
+    
+    function warmUpProgressPercentStr(d = 0): string {
+        // d = 1 for nex progress
+        const warmUpCount = cardConfig.warmUpCount ?? 0;
+        const maxCount = cardConfig.warmUpMaxCount;
+        return `${Math.round((warmUpCount + d) / maxCount * 100)}%`;
     }
     
     onMount(() => {
@@ -238,15 +250,29 @@
         justify-content: space-between;
         align-items: center;
     }
+    @property --p {
+      syntax: '<percentage>';
+      inherits: false;
+      initial-value: 100%;
+    }
     .new-element-indicator {
+        --p: var(--progress, 100%);
+        &.is-complete { --p: var(--next-progress, 100%)}
+        transition: --p 300ms ease;
+        
         color: white;
-        background-color: #3E92CC;
+        background:
+          linear-gradient(#3E92CC 0 0) 0 / var(--p) 100% no-repeat,
+          #BBB;
         padding: 0.5em 3em;
         border-radius: 0.5rem;
         &.is-hidden {
             visibility: hidden;
         }
     }
+    /*.new-element-indicator.is-complete {
+      --p: var(--next-progress, 100%);
+    }*/
     .auto-review-indicator-container {
         all: unset;
         cursor: pointer;
@@ -322,9 +348,17 @@
         </div>
         <div class="bottom-container">
             {#if characterData?.characters}
-                <div class="new-element-indicator" class:is-hidden={!cardConfig.isFirstTime}>
-                    New Card
-                </div>
+                {#if cardConfig.isFirstTime}
+                    <div class="new-element-indicator">New Card</div>
+                {:else if cardConfig.isWarmUp}
+                    <div class="new-element-indicator" 
+                        class:is-complete={isComplete}
+                        style:--progress={warmUpProgressPercentStr()}
+                        style:--next-progress={warmUpProgressPercentStr(1)}
+                    >Warm Up</div>
+                {:else}
+                    <div class="new-element-indicator is-hidden"></div>
+                {/if}
                 <div class="character-box-container">
                     {#each characterData.characters as character, i}
                         {#if i < completedCharCount || cardConfig.isFirstTime}
