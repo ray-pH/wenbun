@@ -160,7 +160,7 @@
                 </button>
                 {#if accordionState.get(group.label)}
                     {#if selectModeGroup == group.label}
-                        <div style="display: flex; flex-direction: row; justify-content: space-between; width: 100%">
+                        <div style="display: flex; flex-direction: row; justify-content: space-between; width: 100%; gap: 0.5em;">
                             <div class="group-buttons-container" style="align-items: flex-start;">
                                 <button class="button" onclick={() => stopSelectMode()}>
                                     <i class="fa-solid fa-xmark"></i>cancel selection
@@ -171,13 +171,13 @@
                             </div>
                             <div class="group-buttons-container" style="align-items: flex-end;">
                                 <button class="button" disabled={selections.size == 0} onclick={() => addPreviouslyStudiedMark()}>
-                                    <i class="fa-solid fa-book-open"></i>mark as <b>previously studied</b></button>
+                                    <i class="fa-solid fa-book-open"></i><span>mark as <b>previously studied</b></span></button>
                                 <button class="button" disabled={selections.size == 0} onclick={() => removePreviouslyStudiedMark()}>
-                                    <i class="fa-solid fa-book-open"></i>remove <b>previously studied</b> mark</button>
+                                    <i class="fa-solid fa-book-open"></i><span>remove <b>previously studied</b> mark</span></button>
                                 <button class="button" disabled={selections.size == 0} onclick={() => addIgnoredMark()}>
-                                    <i class="fa-solid fa-square-xmark"></i>mark as <b>ignored</b></button>
+                                    <i class="fa-solid fa-square-xmark"></i><span>mark as <b>ignored</b></span></button>
                                 <button class="button" disabled={selections.size == 0} onclick={() => removeIgnoredMark()}>
-                                    <i class="fa-solid fa-square-xmark"></i>remove <b>ignored</b> mark</button>
+                                    <i class="fa-solid fa-square-xmark"></i><span>remove <b>ignored</b> mark</span></button>
                             </div>
                         </div>
                     {/if}
