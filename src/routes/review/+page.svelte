@@ -29,6 +29,7 @@
     	isComplete?: boolean;
     };
     
+    let autoReviewData: AutoReviewData;
     let isPageReady = false;
     let app = new App();
     onMount(async () => {
@@ -151,6 +152,7 @@
     }
     
     async function acceptAutoGrade() {
+        app.storeAutoGradeLog(autoReviewData.correctStrokeCount, autoReviewData.incorrectStrokeCount, autoGrade!);
         app.rateCard(deckId, currentCardId!, autoGrade!);
         await app.save();
         nextCard();
@@ -215,6 +217,7 @@
                     bind:isRequestManualGrade={isRequestManualGrade}
                     cardConfig={getCardConfig(currentCardId)}
                     autoGrade={autoGrade}
+                    bind:autoReviewData={autoReviewData}
                 />
             {/key}
         </div>

@@ -14,6 +14,7 @@ const STORE_KEY_DECKS = "decks"
 const STORE_KEY_DECK_DATA = "deckData"
 const STORE_KEY_CONFIG = "config"
 const STORE_KEY_REVIEW_LOGS = "reviewLogs"
+const STORE_KEY_AUTO_REVIEW_GRADE_LOG = "autoReviewGradeLog"
 
 const FSRS_GRADES: FSRS.Grade[] = [FSRS.Rating.Again, FSRS.Rating.Hard, FSRS.Rating.Good, FSRS.Rating.Easy];
 export const DEFAULT_GROUP_CONTENT_COUNT = 30;
@@ -125,11 +126,18 @@ type ReviewLog = {
     log: FSRS.ReviewLog;
 }
 
+type AutoReviewGradeLog = {
+    correctCount: number;
+    mistakeCount: number;
+    grade: FSRS.Grade;
+}
+
 export class App {
     decks: string[] = [];
     deckData: Record<string, DeckData> = {};
     config: WenbunConfig = DEFAULT_CONFIG;
     reviewLogs: ReviewLog[] = [];
+    autoReviewGradeLog: AutoReviewGradeLog[] = [];
     isLoadDone = false;
     fsrs!: FSRS.FSRS;
     fsrsPrevStudied!: FSRS.FSRS;
@@ -192,16 +200,18 @@ export class App {
     }
     
     async load() {
-        const [decks, deckData, config, reviewLogs] = await Promise.all([
+        const [decks, deckData, config, reviewLogs, autoReviewGradeLog] = await Promise.all([
             this.storage.load<string[]>(STORE_KEY_DECKS),
             this.storage.load<Record<string, DeckData>>(STORE_KEY_DECK_DATA),
             this.storage.load<WenbunConfig>(STORE_KEY_CONFIG),
             this.storage.load<ReviewLog[]>(STORE_KEY_REVIEW_LOGS),
+            this.storage.load<AutoReviewGradeLog[]>(STORE_KEY_AUTO_REVIEW_GRADE_LOG),
         ]);
         this.decks = decks || [];
         this.deckData = deckData || {};
         this.config = config || DEFAULT_CONFIG;
         this.reviewLogs = reviewLogs || [];
+        this.autoReviewGradeLog = autoReviewGradeLog || [];
         this.isLoadDone = true;
     }
     async save() {
@@ -210,6 +220,7 @@ export class App {
             this.storage.save(STORE_KEY_DECK_DATA, this.deckData),
             this.storage.save(STORE_KEY_CONFIG, this.config),
             this.storage.save(STORE_KEY_REVIEW_LOGS, this.reviewLogs),
+            this.storage.save(STORE_KEY_AUTO_REVIEW_GRADE_LOG, this.autoReviewGradeLog),
         ]);
     }
     
@@ -723,5 +734,9 @@ export class App {
     
     isAutoGrading(): boolean {
         return this.getConfig().gradingMethod === 'auto';
+    }
+    
+    storeAutoGradeLog(correctCount: number, mistakeCount: number, grade: FSRS.Grade) {
+        this.autoReviewGradeLog.push({correctCount, mistakeCount, grade});
     }
 }
