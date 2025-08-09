@@ -61,6 +61,8 @@ export const DeckInfo: {
     })),
 ]
 
+export const CHARACTER_WRITER_DRAWING_WIDTH = 25;
+
 export const ChineseToneColorPalette = {
     Default: ['#3E92CC', '#419E6F', '#7C3AED', '#DB6B6C', '#555555'],
     "Tofu Like": ['#DB6B6C','#419E6F', '#3E92CC', '#7C3AED', '#555555'],

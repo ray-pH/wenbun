@@ -7,7 +7,7 @@
     import { App, NewCardOrder, type WenbunConfig } from "$lib/app";
     import { type DeepRequired } from "$lib/util";
     import _ from "lodash";
-    import { SETTINGS_LABEL_DATA } from "$lib/constants";
+    import { CHARACTER_WRITER_DRAWING_WIDTH, SETTINGS_LABEL_DATA } from "$lib/constants";
     import { LENIENCY_CHARS } from "./leniency-chars";
     
     let width = $state(500);
@@ -33,6 +33,7 @@
             showOutline: false,
             highlightOnComplete: false,
             strokeColor: "#555",
+            drawingWidth: CHARACTER_WRITER_DRAWING_WIDTH,
         });
         resetHanziWriter(leniency, chara);
     }
