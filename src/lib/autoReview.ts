@@ -33,7 +33,7 @@ export namespace AutoReview {
         // for automatic review, never rate as easy
         if (mistakeRate < 0.25 || data.incorrectStrokeCount <= 2) {
             return FSRS.Rating.Good;
-        } else if (mistakeRate < 0.5 || data.incorrectStrokeCount <= 4) {
+        } else if (mistakeRate < 0.75 || data.incorrectStrokeCount <= 4) {
             return FSRS.Rating.Hard;
         } else {
             return FSRS.Rating.Again;
