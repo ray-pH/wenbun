@@ -18,6 +18,23 @@
     <div class="changelog-container">
         Change log
 
+        <h4>v0.5.0 (2025-08-09)</h4>
+        <div class="note">
+            It is advised for users to click "reset to default settings" in the settings. Or, if setting to auto grading mode, it's advised to disable short-term scheduling in FSRS settings.
+        </div>
+        <ul>
+            <li>Implement auto-grading for reviews</li>
+            <div class="note">
+                The grade can be overridden by clicking on the grade.<br>
+                "Easy" will not appear as an automatic grade.<br>
+                The parameters for auto-grading may change in the future.
+            </div>
+            <li>Add warm-up mode for new cards</li>
+            <li>Play audio only once in the new card view</li>
+            <li>Fix due-date filtering for review and learning/relearning cards</li>
+            <li>Various UI/UX improvements and bug fixes</li>
+        </ul>
+
         <h4>v0.4.0 (2025-08-06)</h4>
         <ul>
             <li>Add Extra Study feature with configurable study modes</li>
