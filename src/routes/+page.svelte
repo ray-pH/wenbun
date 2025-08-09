@@ -59,7 +59,7 @@
                 {app.getScheduledReviewCardsCount(info.id) || ''}
             </span>
             <span class="deck-count-new" title="new">
-                {app.getScheduledNewCardsCount(info.id) || ''}
+                {app.getScheduledNewOrWarmUpCardsCount(info.id) || ''}
             </span>
             <span class="deck-count-previously-studied" title="previously studied">
                 {app.getScheduledPreviouslyStudiedCardsCount(info.id) || ''}

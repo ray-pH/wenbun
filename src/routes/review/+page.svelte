@@ -54,7 +54,10 @@
     let isAutoGrading = false;
     let autoGrade: FSRS.Grade | undefined = undefined;
     let isRequestManualGrade = false;
-    $: isFirstTime = cardState === WenBunCustomState.New && !isNewCardInteractedWith;
+    let _changeCounter = 0;
+    $: isFirstTime = cardState === WenBunCustomState.New;
+    $: isWarmUp = cardState === WenBunCustomState.WarmUp;
+    
     const reviewButtonsLabel = ['Fail', 'Hard', 'Good', 'Easy'];
     
     let currentCardId: number | undefined = undefined;
@@ -80,12 +83,15 @@
         currentCardId = id;
         scheduledTimeStr = app.getRatingScheduledTimeStr(deckId, id);
         cardState = app.getWenbunCustomState(deckId, id);
+        _changeCounter++;
     }
     
-    function onNewCardInteracted() {
+    function onLearnNewCard() {
+        app.startWarmUp(deckId, currentCardId!);
         isNewCardInteractedWith = true;
         currentCardId = currentCardId;
         scheduledTimeStr = app.getRatingScheduledTimeStr(deckId, currentCardId!);
+        cardState = app.getWenbunCustomState(deckId, currentCardId!);
     }
     
     function characterWriterDataFromId(id: number): CharacterWriterData | undefined {
@@ -98,9 +104,15 @@
             isPlayAudio: config.zh.playAudio,
         });
     }
-    function getCardConfig(_id: number): CharacterWriterConfig {
+    function getCardConfig(id: number): CharacterWriterConfig {
+        const warmUpCount = app.getWarmUpCount(deckId, id);
+        const isFirstWarmUp = isWarmUp && warmUpCount === 0;
         return {
             isFirstTime: isFirstTime,
+            isWarmUp: isWarmUp && !isFinalWarmUp(id),
+            warmUpCount,
+            warmUpMaxCount: app.getMaxWarmUpCount(),
+            isShowOutline: isFirstTime || isFirstWarmUp,
             lang: isZhCantonese ? 'yue' : 'zh',
         }
     }
@@ -147,6 +159,18 @@
         autoGrade = grade;
         isRequestManualGrade = false;
     }
+    
+    async function warmUpNext() {
+        app.warmUpNext(deckId, currentCardId!);
+        await app.save();
+        nextCard();
+    }
+    
+    function isFinalWarmUp(id: number, _changeCounter?: number): boolean {
+        const warmUpCount = app.getWarmUpCount(deckId, id);
+        if (warmUpCount === undefined) return true;
+        return warmUpCount >= app.getMaxWarmUpCount();
+    }
 </script>
 
 
@@ -173,7 +197,7 @@
                     {app.getScheduledReviewCardsCount(deckId) || ''}
                 </span>
                 <span class="deck-count-new" class:underlined={cardState === WenBunCustomState.New}>
-                    {app.getScheduledNewCardsCount(deckId) || ''}
+                    {app.getScheduledNewOrWarmUpCardsCount(deckId) || ''}
                 </span>
                 <span class="deck-count-previously-studied" class:underlined={cardState === WenBunCustomState.PreviouslyStudied}>
                     {app.getScheduledPreviouslyStudiedCardsCount(deckId) || ''}
@@ -200,6 +224,14 @@
           		{ label: "" },
           		{ label: "Learn", className: "review-button-easy", isComplete: true,
                     onclick: () => onLearnNewCard() }
+           	])}
+        {:else if isWarmUp && !isFinalWarmUp(currentCardId, _changeCounter)}
+            {@render ReviewButtons([
+                { label: "" },
+          		{ label: "" },
+          		{ label: "" },
+          		{ label: "Next", className: "review-button-easy", isComplete,
+                    onclick: () => warmUpNext() }
            	])}
         {:else if data.isExtraStudy}
            	{@render ReviewButtons([
