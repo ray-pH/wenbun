@@ -8,6 +8,7 @@
     import { base } from '$app/paths';
     import { AudioSequence } from '$lib/audioSequence';
     import { AutoReviewGradeClass, AutoReviewGradeFAClass, AutoReviewGradeLabel, type AutoReviewData } from '$lib/autoReview';
+    import { CHARACTER_WRITER_DRAWING_WIDTH } from "$lib/constants";
     
     let width = $state(500);
     let height = $state(500);
@@ -98,6 +99,7 @@
             showOutline: cardConfig.isShowOutline,
             highlightOnComplete: false,
             strokeColor: app.getChineseToneColor(tone) ?? "#555",
+            drawingWidth: CHARACTER_WRITER_DRAWING_WIDTH,
             onComplete: () => {
                 completeChar();
             }
