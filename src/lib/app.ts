@@ -622,10 +622,18 @@ export class App {
         const tomorrow = today + 1;
         const todaysCards = Object.entries(deckData.schedule).filter(([id, s]) => {
             const isIgnored = !!deckData.ignoredIds?.includes(+id);
+            if (isIgnored) return false;
+            
             const due = getDaysSinceEpochLocal(new Date(s.due));
-            return due <= tomorrow && !isIgnored;
+            //TODO: make sure this is correct
+            if (s.state === FSRS.State.Review) {
+                // for review cards, use date
+                return due < tomorrow;
+            } else {
+                // learning and relearning cards is always valid
+                return true;
+            }
         });
-        // TODO: for learning cards, use exact time; for review cards, use date
         // sort by time
         todaysCards.sort((a, b) => new Date(a[1].due).getTime() - new Date(b[1].due).getTime());
         return todaysCards.map((s) => +s[0]);
