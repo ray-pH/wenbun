@@ -5,7 +5,6 @@
     import { onMount } from "svelte";
     import SettingsItem from "../SettingsItem.svelte";
     import { App } from "$lib/app";
-    import _ from "lodash";
     import { CHARACTER_WRITER_DRAWING_WIDTH, SETTINGS_LABEL_DATA } from "$lib/constants";
     import { LENIENCY_CHARS } from "./leniency-chars";
     
