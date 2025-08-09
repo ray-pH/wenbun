@@ -180,30 +180,32 @@
         <div>You have done today's review.</div>
     {/if}
     {#if isPageReady && (currentCardId !== undefined) && !isDoneToday}
-        {#if data.isExtraStudy}
-            <div class="counter">
-                <span class="underlined">
-                    {#key currentCardId}
-                        {app.extraStudyHandler.getCardsCount() || ''}
-                    {/key}
-                </span>
-            </div>
-        {:else}
-            <div class="counter">
-                <span class="deck-count-learn-relearn" class:underlined={cardState === WenBunCustomState.Learning || cardState === WenBunCustomState.Relearning}>
-                    {app.getLearningRelearningCardsCount(deckId) || ''}
-                </span>
-                <span class="deck-count-review" class:underlined={cardState === WenBunCustomState.ReviewYoung || cardState === WenBunCustomState.ReviewMature}>
-                    {app.getScheduledReviewCardsCount(deckId) || ''}
-                </span>
-                <span class="deck-count-new" class:underlined={cardState === WenBunCustomState.New}>
-                    {app.getScheduledNewOrWarmUpCardsCount(deckId) || ''}
-                </span>
-                <span class="deck-count-previously-studied" class:underlined={cardState === WenBunCustomState.PreviouslyStudied}>
-                    {app.getScheduledPreviouslyStudiedCardsCount(deckId) || ''}
-                </span>
-            </div>
-        {/if}
+        {#key _changeCounter}
+            {#if data.isExtraStudy}
+                <div class="counter">
+                    <span class="underlined">
+                        {#key currentCardId}
+                            {app.extraStudyHandler.getCardsCount() || ''}
+                        {/key}
+                    </span>
+                </div>
+            {:else}
+                <div class="counter">
+                    <span class="deck-count-learn-relearn" class:underlined={cardState === WenBunCustomState.Learning || cardState === WenBunCustomState.Relearning}>
+                        {app.getLearningRelearningCardsCount(deckId) || ''}
+                    </span>
+                    <span class="deck-count-review" class:underlined={cardState === WenBunCustomState.ReviewYoung || cardState === WenBunCustomState.ReviewMature}>
+                        {app.getScheduledReviewCardsCount(deckId) || ''}
+                    </span>
+                    <span class="deck-count-new" class:underlined={cardState === WenBunCustomState.New}>
+                        {app.getScheduledNewOrWarmUpCardsCount(deckId) || ''}
+                    </span>
+                    <span class="deck-count-previously-studied" class:underlined={cardState === WenBunCustomState.PreviouslyStudied}>
+                        {app.getScheduledPreviouslyStudiedCardsCount(deckId) || ''}
+                    </span>
+                </div>
+            {/if}
+        {/key}
         <div class="character-writer-container">
             {#key [currentCardId, isNewCardInteractedWith, isCardChanged]}
                 <CharacterWriter 
