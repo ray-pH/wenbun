@@ -153,7 +153,7 @@
     
     function toggleRequestManualGrade() {
         if (cardConfig.isWarmUp) {
-            window.alert("Can't change grade during warm up. As grade is not used for scheduling during warm up.");
+            window.alert("Can't change grade during warm-up, since grading doesn't affect scheduling in this phase.");
             return;
         }
         isRequestManualGrade = !isRequestManualGrade;
