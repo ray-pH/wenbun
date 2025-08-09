@@ -329,6 +329,11 @@ export class App {
         return _.merge({}, DEFAULT_CONFIG, this.config);
     }
     
+    async resetConfigToDefault(): Promise<void> {
+        this.config = _.cloneDeep(DEFAULT_CONFIG);
+        await this.save();
+    }
+    
     async saveConfig(config: WenbunConfig): Promise<void> {
         this.config = config;
         await this.save();
