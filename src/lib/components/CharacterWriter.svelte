@@ -270,9 +270,6 @@
             visibility: hidden;
         }
     }
-    /*.new-element-indicator.is-complete {
-      --p: var(--next-progress, 100%);
-    }*/
     .auto-review-indicator-container {
         all: unset;
         cursor: pointer;
