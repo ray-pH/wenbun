@@ -29,7 +29,9 @@ export const AutoReviewGradeFAClass: Record<FSRS.Grade, string> = {
 
 export namespace AutoReview {
     export function getGrade(data: AutoReviewData): FSRS.Grade {
-        const mistakeRate = data.incorrectStrokeCount / data.correctStrokeCount;
+        const mistakeRate = data.correctStrokeCount === 0
+            ? Infinity
+            : data.incorrectStrokeCount / data.correctStrokeCount;
         // for automatic review, never rate as easy
         if (mistakeRate < 0.25 || data.incorrectStrokeCount <= 2) {
             return FSRS.Rating.Good;
