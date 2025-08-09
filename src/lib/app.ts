@@ -422,6 +422,9 @@ export class App {
     getMaxWarmUpCount(): number {
         return DEFAULT_WARMUP_MAX_COUNT;
     }
+    isWarmUpCard(deckId: string, cardId: number): boolean {
+        return this.getWarmUpCount(deckId, cardId) !== undefined;
+    }
     
     getNewOrWarmUpCard(deckId: string): number {
         const newCard = this.getNewCard(deckId);
@@ -496,6 +499,7 @@ export class App {
         return this.getCard(deckId, cardId)?.due;
     }
     getCardDueFormatted(deckId: string, cardId: number): string {
+        if (this.isWarmUpCard(deckId, cardId)) return 'Warm Up';
         const due = this.getCardDue(deckId, cardId);
         if (!due) return 'Not Started';
         return dateDiffFormatted(new Date(), new Date(due));

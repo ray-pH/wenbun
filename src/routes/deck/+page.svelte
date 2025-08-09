@@ -49,6 +49,7 @@
     function getCardStatusClass(deckId: string, cardId: number, app: App): string {
         switch (app.getWenbunCustomState(deckId, cardId) ?? WenBunCustomState.New) {
             case WenBunCustomState.New: return 'card-status-new';
+            case WenBunCustomState.WarmUp: return 'card-status-new';
             case WenBunCustomState.Learning: return 'card-status-learning';
             case WenBunCustomState.ReviewYoung: return 'card-status-review-young';
             case WenBunCustomState.ReviewMature: return 'card-status-review-mature';
@@ -135,6 +136,11 @@
         app = app;
     }
     
+    function statusToLabel(status: WenBunCustomState): string {
+        if (status === WenBunCustomState.WarmUp) return WenBunCustomState.New;
+        return status;
+    }
+    
 </script>
 
 <TopBar title="Deck" backUrl="{base}/"></TopBar>
@@ -206,7 +212,7 @@
                                 </div>
                                 <div class="card-details">
                                     <div class={`status ${getCardStatusClass(deckId, id, app)}`}>
-                                        {app.getWenbunCustomState(deckId, id) ?? WenBunCustomState.New}
+                                        {statusToLabel(app.getWenbunCustomState(deckId, id) ?? WenBunCustomState.New)}
                                     </div>
                                     <div class={`due ${getCardStatusClass(deckId, id, app)}`}>
                                         {app.getCardDueFormatted(deckId, id)}
