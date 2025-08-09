@@ -29,7 +29,7 @@
 <TopBar title="WenBun (beta)"></TopBar>
 <div class="main-container">
     <div class="top-container">
-        <a class="a-button" style="background-color: #F0E68C;" href="{base}/about/">Changelog</a>
+        <a class="a-button" style="background-color: #A0D0F0;" href="{base}/about/">Changelog</a>
         <a class="a-button" href="{base}/deck-browser/">Add New Deck</a>
     </div>
     <div class="hr"></div>
