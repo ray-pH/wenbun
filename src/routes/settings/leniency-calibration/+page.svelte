@@ -53,7 +53,6 @@
         resetHanziWriter(leniency, chara);
     })
     
-    let app = new App();
     let leniency = $state(1.0);
     onMount(() => {
         updateWidth();
