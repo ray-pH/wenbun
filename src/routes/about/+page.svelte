@@ -18,6 +18,12 @@
     <div class="changelog-container">
         Change log
 
+        <h4>v0.5.1 (2025-08-10)</h4>
+        <ul>
+            <li>Added stroke grading leniency setting and calibration page</li>
+            <li>Update character writer user stroke width</li>
+        </ul>
+            
         <h4>v0.5.0 (2025-08-09)</h4>
         <div class="note">
             It is advised for users to click "reset to default settings" in the settings. Or, if setting to auto grading mode, it's advised to disable short-term scheduling in FSRS settings.
