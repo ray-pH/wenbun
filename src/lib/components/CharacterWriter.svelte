@@ -20,12 +20,6 @@
     let isStopPlayAudio = $state(false); // so we know to play audio only once
     let unmounted = $state(false);
     
-    let autoReviewData: AutoReviewData  = $state({
-        correctStrokeCount: 0,
-        incorrectStrokeCount: 0,
-        totalStrokeCount: 0,
-    });
-
     function getEmInPx(): number {
         return parseFloat(getComputedStyle(document.documentElement).fontSize);
     }
@@ -41,11 +35,13 @@
 		characterData: CharacterWriterData | undefined;
 		cardConfig: CharacterWriterConfig;
 		autoGrade: FSRS.Grade | undefined;
+		autoReviewData: AutoReviewData;
 		app: App
 	}
     let { 
         onComplete, isRequestManualGrade = $bindable(), 
-        characterData, app, cardConfig, autoGrade 
+        characterData, app, cardConfig, autoGrade,
+        autoReviewData = $bindable()
     }: Props = $props();
     
     let completedCharCount: number = $state(0);
@@ -167,6 +163,11 @@
     }
     
     onMount(() => {
+        autoReviewData = {
+            correctStrokeCount: 0,
+            incorrectStrokeCount: 0,
+            totalStrokeCount: 0,
+        };
         updateWidth();
         setupAudios();
         window.addEventListener('resize', updateWidth);
