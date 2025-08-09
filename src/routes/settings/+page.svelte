@@ -200,7 +200,7 @@
                 <SettingsItem key="strokeLeniency">
                     <input type="number" step="0.01" bind:value={config.strokeLeniency}>
                 </SettingsItem>
-                <a class="button" href="{base}/settings/leniency-calibration" aria-label="Test Leniency Callibration">
+                <a class="button" href="{base}/settings/leniency-calibration" aria-label="Test Leniency Calibration">
                     <i class="fa-solid fa-sliders"></i>&nbsp;
                     Test Leniency
                 </a>
