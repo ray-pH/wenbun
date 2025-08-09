@@ -4,7 +4,7 @@
     import HanziWriter from "hanzi-writer";
     import { onMount } from "svelte";
     import SettingsItem from "../SettingsItem.svelte";
-    import { App, NewCardOrder, type WenbunConfig } from "$lib/app";
+    import { App } from "$lib/app";
     import { type DeepRequired } from "$lib/util";
     import _ from "lodash";
     import { CHARACTER_WRITER_DRAWING_WIDTH, SETTINGS_LABEL_DATA } from "$lib/constants";
