@@ -2,7 +2,6 @@ import { defineConfig } from "vite";
 import { sveltekit } from "@sveltejs/kit/vite";
 
 const host = process.env.TAURI_DEV_HOST;
-const API_TARGET = process.env.VITE_WENBUN_SERVER_URL || "http://localhost:3000";
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
@@ -27,18 +26,6 @@ export default defineConfig(async () => ({
     watch: {
       // 3. tell vite to ignore watching `src-tauri`
       ignored: ["**/src-tauri/**"],
-    },
-    proxy: {
-      // Anything starting with /api will be forwarded to API_TARGET
-      // /api/auth    -> ${API_TARGET}/auth
-      // /api/profile -> ${API_TARGET}/profile
-      "^/api": {
-         target: API_TARGET,
-         changeOrigin: true,
-         secure: process.env.NODE_ENV === "development" ? false : true,
-         // @ts-ignore
-         rewrite: (path) => path.replace(/^\/api/, ""),
-      },
     },
   },
 }));

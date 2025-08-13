@@ -3,6 +3,7 @@ import type { App } from "./app";
 import { goto } from '$app/navigation';
 import { base } from "$app/paths";
 import { page } from '$app/state';
+import { ApiRoute, apiUrl, apiAuthUrl } from "./api";
 
 export enum SyncDecision {
     push = "push",
@@ -33,7 +34,7 @@ export class Profile {
     }
     
     async init() {
-        const res = await fetch("/api/profile", {
+        const res = await fetch(apiUrl(ApiRoute.Profile), {
             credentials: "include", // important if using cookies/session
         });
 
@@ -175,7 +176,7 @@ export class Profile {
     }
     
     async getProfileData(): Promise<ProfileData | null> {
-        const res = await fetch("/api/profiledata", {credentials: "include"});
+        const res = await fetch(apiUrl(ApiRoute.ProfileData), {credentials: "include"});
         if (res.status === 204) {
             return null;
         } else if (res.ok) {
@@ -188,7 +189,7 @@ export class Profile {
     
     async updateProfileData(profileData: ProfileData, decision: 'normal'|'pull'|'push' = 'normal'): Promise<boolean> {
         //TODO: check for conflict
-        const res = await fetch(`/api/profiledata?decision=${decision}`, {
+        const res = await fetch(apiUrl(ApiRoute.ProfileData, { decision }), {
             method: "POST",
             credentials: "include",
             headers: {
@@ -200,7 +201,7 @@ export class Profile {
     }
     
     async getLatestReviewLog(): Promise<ReviewLog | null> {
-        const res = await fetch("/api/reviewlog/mostrecent", {credentials: "include"});
+        const res = await fetch(apiUrl(ApiRoute.ReviewLogMostRecent), {credentials: "include"});
         if (res.status === 204) {
             return null;
         } else if (res.ok) {
@@ -214,7 +215,7 @@ export class Profile {
     async pushReviewLog(latestServerReviewLog: ReviewLog | null, localReviewLogs: ReviewLog[], force = false) {
         if (latestServerReviewLog === null || force) {
             // push all
-            const res = await fetch(`/api/reviewlog?force=${force}`, {
+            const res = await fetch(apiUrl(ApiRoute.ReviewLog, { force }), {
                 method: "POST",
                 credentials: "include",
                 headers: {
@@ -232,7 +233,7 @@ export class Profile {
                 return ms <= latestServerMs;
             });
             const localReviewLogsAfterLatestServerReviewLog = localReviewLogs.slice(cut + 1);
-            const res = await fetch("/api/reviewlog", {
+            const res = await fetch(apiUrl(ApiRoute.ReviewLog), {
                 method: "POST",
                 credentials: "include",
                 headers: {
@@ -264,7 +265,7 @@ export class Profile {
     async getReviewLogs(localReviewLogs: ReviewLog[], force = false): Promise<ReviewLog[] | null> {
         if (force) {
             const fromDate = new Date(0).toISOString();
-            const res = await fetch(`/api/reviewlog?from=${fromDate}`, {
+            const res = await fetch(apiUrl(ApiRoute.ReviewLog, { from: fromDate }), {
                 method: "GET",
                 credentials: "include",
             });
@@ -281,7 +282,7 @@ export class Profile {
             // pull only after latest local review log
             const latestLocalReviewLog = localReviewLogs[localReviewLogs.length - 1];
             const latestLocalDate = new Date(latestLocalReviewLog.log.review).toISOString();
-            const res = await fetch(`/api/reviewlog?from=${latestLocalDate}`, {
+            const res = await fetch(apiUrl(ApiRoute.ReviewLog, { from: latestLocalDate }), {
                 method: "GET",
                 credentials: "include",
             });
@@ -299,10 +300,10 @@ export class Profile {
     
     async loginGoogle(app: App) {
         await app.updateLastSyncTime(new Date(0));
-        window.location.assign("/api/auth/google");
+        window.location.assign(apiAuthUrl(ApiRoute.AuthGoogle));
     }
     async logout(app: App) {
         await app.updateLastSyncTime(new Date(0));
-        window.location.assign("/api/auth/logout");
+        window.location.assign(apiAuthUrl(ApiRoute.AuthLogout));
     }
 }
