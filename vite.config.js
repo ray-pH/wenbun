@@ -1,9 +1,7 @@
 import { defineConfig } from "vite";
 import { sveltekit } from "@sveltejs/kit/vite";
 
-// @ts-expect-error process is a nodejs global
 const host = process.env.TAURI_DEV_HOST;
-// @ts-expect-error process is a nodejs global
 const API_TARGET = process.env.VITE_WENBUN_SERVER_URL || "http://localhost:3000";
 
 // https://vitejs.dev/config/
