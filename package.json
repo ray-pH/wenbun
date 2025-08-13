@@ -30,6 +30,7 @@
     "@sveltejs/vite-plugin-svelte": "^5.0.0",
     "@tauri-apps/cli": "^2",
     "@types/lodash": "^4.17.20",
+    "@types/node": "^24.2.1",
     "@types/opencc-js": "^1.0.3",
     "svelte": "^5.0.0",
     "svelte-check": "^4.0.0",
