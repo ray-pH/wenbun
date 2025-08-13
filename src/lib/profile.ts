@@ -4,6 +4,7 @@ import { goto } from '$app/navigation';
 import { base } from "$app/paths";
 import { page } from '$app/state';
 import { ApiRoute, apiUrl, apiAuthUrl } from "./api";
+import _ from "lodash";
 
 export enum SyncDecision {
     push = "push",
@@ -56,11 +57,11 @@ export class Profile {
     async trySyncProfile(app: App) {
         if (!this.isLoggedIn) return;
         try {
-            const [profileData, latestServerReviewLog] = await Promise.all([
+            const [remoteProfileData, latestServerReviewLog] = await Promise.all([
                 this.getProfileData(),
                 this.getLatestReviewLog(),
             ]);
-            if (profileData === null) {
+            if (remoteProfileData === null) {
                 // upload profiledata and logs
                 const success = await Promise.all([
                     this.updateProfileData(app.exportProfile(false)),
@@ -73,9 +74,10 @@ export class Profile {
             } else {
                 // check
                 const localModifiedAt = new Date(app.meta.modifiedAt ?? 0);
-                const remoteModifiedAt = new Date(profileData.meta.modifiedAt ?? 0);;
+                const remoteModifiedAt = new Date(remoteProfileData.meta.modifiedAt ?? 0);;
                 const lastSyncTime = new Date(app.lastSyncTime ?? 0);
-                const syncDecision = this.getSyncDecision(localModifiedAt, remoteModifiedAt, lastSyncTime);
+                const syncDecisionFromTime = this.getSyncDecision(localModifiedAt, remoteModifiedAt, lastSyncTime);
+                const syncDecision = (_.isEqual(remoteProfileData, app.exportProfile(false))) ? SyncDecision.none : syncDecisionFromTime;
                 switch (syncDecision) {
                     case SyncDecision.conflict: {
                         this.syncConflictInfo = { localModifiedAt, remoteModifiedAt, lastSyncTime };
@@ -104,7 +106,7 @@ export class Profile {
                     } break;
                     case SyncDecision.pull: {
                         const success = await Promise.all([
-                            app.tryImportProfile(profileData, false, true),
+                            app.tryImportProfile(remoteProfileData, false, true),
                             this.pullReviewLog(app),
                         ])
                         if (success.every(s => s)) {
