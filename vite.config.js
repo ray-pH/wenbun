@@ -37,7 +37,7 @@ export default defineConfig(async () => ({
       "^/api": {
          target: API_TARGET,
          changeOrigin: true,
-         secure: false, // dev TODO
+         secure: process.env.NODE_ENV === "development" ? false : true,
          // @ts-ignore
          rewrite: (path) => path.replace(/^\/api/, ""),
       },
