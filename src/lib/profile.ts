@@ -135,7 +135,8 @@ export class Profile {
         const success2 = await app.tryImportProfile(remoteProfileData, false, true);
         if (success.every(s => s) && success2) {
             app.lastSyncTime = new Date().toISOString();
-            await app.updateLastSyncTime(); this.isSyncConflict = false;
+            await app.updateLastSyncTime();
+            this.isSyncConflict = false;
         } else {
             window.alert("Failed to pull profile data from server")
         }
