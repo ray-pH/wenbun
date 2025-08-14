@@ -71,6 +71,11 @@
                     <i class="fa-solid fa-triangle-exclamation"></i>
                     Sync Failed, conflict detected. <br>
                     Please select whether to use the remote or local version.
+                    <div class="note" style="font-size: 1em; margin-top: 0.5em;">
+                        <i class="fa-solid fa-circle-info"></i>
+                        If not sure, use the <b>Remote</b> version. <br>
+                        If this is happening too often, please report to the developer.
+                    </div>
                 </div>
                 {#if syncConflictInfo}
                     <div class="sync-conflict-info">
