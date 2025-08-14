@@ -5,12 +5,20 @@ import { base } from "$app/paths";
 import { page } from '$app/state';
 import { ApiRoute, apiUrl, apiAuthUrl } from "./api";
 import _ from "lodash";
+import type { IStorage } from "./storage";
+
+const STORE_KEY_LOGIN_STATUS = "loginStatus"
 
 export enum SyncDecision {
     push = "push",
     pull = "pull",
     none = "none",
     conflict = "conflict",
+}
+
+export enum LoginStatus {
+    loggedIn = "loggedIn",
+    loggedOut = "loggedOut",
 }
 
 export interface ProfileInfo {
@@ -30,11 +38,14 @@ export class Profile {
     isSyncConflict: boolean = false;
     syncConflictInfo: SyncConflictInfo | undefined;
     profileInfo: ProfileInfo | null = null;
+    storedLoginStatus: LoginStatus | undefined = undefined;
     
-    constructor() {
+    constructor(private storage: IStorage) {
     }
     
     async init() {
+        this.storedLoginStatus = await this.storage.load<LoginStatus>(STORE_KEY_LOGIN_STATUS);
+            
         const res = await fetch(apiUrl(ApiRoute.Profile), {
             credentials: "include", // important if using cookies/session
         });
@@ -51,6 +62,19 @@ export class Profile {
             // some other failure (e.g., server error)
             this.isLoggedIn = false;
             console.warn(`Unexpected status: ${res.status}`);
+        }
+        await this.checkAndUpdateLoginStatus();
+    }
+    
+    async updateLoginStatus(status: LoginStatus | undefined) {
+        await this.storage.save(STORE_KEY_LOGIN_STATUS, status);
+        this.storedLoginStatus = status;
+    }
+    async checkAndUpdateLoginStatus() {
+        // if currently undefined, store isLoggedIn
+        if (this.storedLoginStatus === undefined) {
+            const status = this.isLoggedIn ? LoginStatus.loggedIn : LoginStatus.loggedOut;
+            await this.updateLoginStatus(status);
         }
     }
     
@@ -301,11 +325,21 @@ export class Profile {
     }
     
     async loginGoogle(app: App) {
-        await app.updateLastSyncTime(new Date(0));
+        // TODO: compare with stored login info
         window.location.assign(apiAuthUrl(ApiRoute.AuthGoogle));
     }
     async logout(app: App) {
-        await app.updateLastSyncTime(new Date(0));
+        await this.updateLoginStatus(undefined),
+        await app.updateLastSyncTime(new Date(0)),
         window.location.assign(apiAuthUrl(ApiRoute.AuthLogout));
+    }
+   
+    /**
+     * Check if the user is automatically logged out,
+     * maybe because the session has expired or server issue
+     */
+    isAutomaticallyLoggedOut(): boolean {
+        // not currently logged in, but stored as logged in
+        return !this.isLoggedIn && this.storedLoginStatus === LoginStatus.loggedIn;
     }
 }

@@ -9,6 +9,7 @@
     
     let isSyncConflict = false;
     let syncConflictInfo: SyncConflictInfo | undefined;
+    let isAutomaticallyLoggedOut = false;
     
     onMount(() => {
         updateState();
@@ -19,6 +20,7 @@
             name = app.profile.getName();
             isSyncConflict = app.profile.isSyncConflict;
             syncConflictInfo = app.profile.syncConflictInfo;
+            isAutomaticallyLoggedOut = app.profile.isAutomaticallyLoggedOut();
         }
     }
     
@@ -37,6 +39,13 @@
     }
     function logout() {
         app.profile.logout(app);
+    }
+    
+    function stayLoggedOut() {
+        const confirm = window.confirm('Are you sure you want to stay logged out? You might need to sync manually later');
+        if (!confirm) return;
+        app.profile.updateLoginStatus(undefined);
+        isAutomaticallyLoggedOut = app.profile.isAutomaticallyLoggedOut();
     }
 </script>
 
@@ -86,6 +95,18 @@
             </div>
         {/if}
     {:else}
+        {#if isAutomaticallyLoggedOut}
+            <i class="fa-solid fa-circle-info" style="color: #3E92CC;"></i>
+            <p>
+                You are <b>unexpectedly logged out</b> due to session expiration or server issue.
+                Try logging in again.
+            </p>
+            <p class="note">(*Please report to the developer if this happens frequently.)</p>
+            <button class="button invert fullwidth" onclick={stayLoggedOut}>
+                <i class="fa-solid fa-ban"></i>&nbsp;
+                Dismiss (Stay Logged Out)
+            </button>
+        {/if}
         <button class="button fullwidth" onclick={loginGoogle}>
             <i class="fa-brands fa-google"></i>&nbsp;
             Log in with Google
@@ -153,6 +174,18 @@
             background-color: gray;
             pointer-events: none;
         }
+        &.invert {
+            border: #3E92CC solid 1px;
+            background-color: #FFFFFF90;
+            color: #3E92CC;
+            &:hover {
+                background-color: lightgray;
+            }
+        }
+    }
+    .note {
+        font-size: 0.9em;
+        color: #00000090;
     }
     .fullwidth {
         width: 100%;

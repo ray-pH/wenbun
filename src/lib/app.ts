@@ -166,7 +166,7 @@ export class App {
     fileManager: IFileManager;
     extraStudyHandler: AppExtraStudyHandler;
     
-    public profile: Profile = new Profile();
+    public profile: Profile;
 
     constructor() {
         this.updateFSRS();
@@ -177,6 +177,7 @@ export class App {
         }
         this.fileManager = new WebFileManager();
         this.extraStudyHandler = new AppExtraStudyHandler(this);
+        this.profile = new Profile(this.storage);
     }
     
     
