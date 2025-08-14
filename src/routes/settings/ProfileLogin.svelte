@@ -107,6 +107,13 @@
                 Dismiss (Stay Logged Out)
             </button>
         {/if}
+        <div>
+            <p class="note">
+                <i class="fa-solid fa-circle-info"></i>
+                In this early beta stage, before logging in, it is recommended to manually backup your save first 
+                by clicking on <b>export profile data</b> and storing it somewhere safe.
+            </p>
+        </div>
         <button class="button fullwidth" onclick={loginGoogle}>
             <i class="fa-brands fa-google"></i>&nbsp;
             Log in with Google
