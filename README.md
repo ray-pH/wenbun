@@ -19,9 +19,7 @@
 
 * Add support for Japanese Kanji (JLPT levels)
 * Add Chinese dictionary lookup
-* Add online profile and data backup
 * Manual/Freeform stroke input (no guidance)
-* Hear the word pronounced
 
 ## Community
 
