@@ -245,7 +245,7 @@ export class App {
         this.lastSyncTime = lastSyncTime || new Date(0).toISOString();
         this.isLoadDone = true;
     }
-    async save(skipSync = false) {
+    async save(skipSync = false, awaitSync = false) {
         const isChanged = await this.isDataChanged();
         if (!isChanged) return;
         
@@ -260,7 +260,10 @@ export class App {
             this.storage.save(STORE_KEY_META, this.meta),
             this.storage.save(STORE_KEY_LAST_SYNC_TIME, this.lastSyncTime),
         ]);
-        if (!skipSync) await this.profile.trySyncProfile(this);
+        if (!skipSync) {
+            if (awaitSync) await this.profile.trySyncProfile(this);
+            else this.profile.trySyncProfile(this);
+        }
     }
     async updateLastSyncTime(time = new Date()) {
         this.lastSyncTime = time.toISOString();
