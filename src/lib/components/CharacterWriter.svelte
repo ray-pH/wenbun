@@ -100,6 +100,7 @@
             highlightOnComplete: false,
             strokeColor: app.getChineseToneColor(tone) ?? "#555",
             drawingWidth: CHARACTER_WRITER_DRAWING_WIDTH,
+            drawingColor: "#555",
             onComplete: () => {
                 completeChar();
             }
