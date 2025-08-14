@@ -26,7 +26,7 @@
     async function populateDeckDataMap() {
       await Promise.allSettled(
         DeckInfo.map(async (info) => {
-          const deck = await loadDeck(info.src);
+          const deck = await loadDeck(info.src ?? `${info.id}.txt`);
           if (deck) {
             deckDataMap.set(info.id, { cardCount: deck.length });
           }
