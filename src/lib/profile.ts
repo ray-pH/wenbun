@@ -307,7 +307,7 @@ export class Profile {
         } else {
             // pull only after latest local review log
             const latestLocalReviewLog = localReviewLogs[localReviewLogs.length - 1];
-            const latestLocalDate = new Date(latestLocalReviewLog.log.review).toISOString();
+            const latestLocalDate = new Date(latestLocalReviewLog?.log?.review ?? 0).toISOString();
             const res = await fetch(apiUrl(ApiRoute.ReviewLog, { from: latestLocalDate }), {
                 method: "GET",
                 credentials: "include",
