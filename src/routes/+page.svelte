@@ -11,9 +11,15 @@
     $: locked = isAutomaticallyLoggedOut;
     onMount(async () => {
         await app.init();
-        isAutomaticallyLoggedOut = app.profile.isAutomaticallyLoggedOut();
         app = app;
+        registerSW();
         
+        const changed = await app.initProfile();
+        isAutomaticallyLoggedOut = app.profile.isAutomaticallyLoggedOut();
+        if (changed) app = app;
+    })
+    
+    function registerSW() {
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker
                 .register(`${base}/service-worker.js`)
@@ -22,7 +28,7 @@
                 })
                 .catch(err => console.error('SW registration failed:', err));
         }
-    })
+    }
     
     function getDeckInfo(deckId: string): typeof DeckInfo[number] {
         return DeckInfo.find((s) => s.id === deckId) ?? { id: deckId, title: deckId, subtitle: ''};

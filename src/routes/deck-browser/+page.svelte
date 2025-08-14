@@ -18,15 +18,21 @@
     let filteredDeckInfo = DeckInfo;
     onMount(async () => {
         await app.init();
+        initComponent();
+        const changed = await app.initProfile();
+        if (changed) initComponent();
+    })
+    
+    async function initComponent() {
         await populateDeckDataMap();
         app = app;
         isLoaded = true;
-    })
+    }
     
     async function populateDeckDataMap() {
       await Promise.allSettled(
         DeckInfo.map(async (info) => {
-          const deck = await loadDeck(info.src);
+          const deck = await loadDeck(info.src ?? `${info.id}.txt`);
           if (deck) {
             deckDataMap.set(info.id, { cardCount: deck.length });
           }

@@ -211,9 +211,18 @@ export class App {
         if (this.isNeedToProcessTodaySchedule()) {
             await this.processTodaySchedule();
         }
+    }
+    
+    /**
+     * @returns boolean: `true` if data changed
+     */
+    async initProfile(): Promise<boolean> {
         await this.profile.init();
         if (this.profile.isLoggedIn) {
-            await this.profile.trySyncProfile(this);
+            const changed = await this.profile.trySyncProfile(this);
+            return changed;
+        } else {
+            return false;
         }
     }
     
@@ -245,7 +254,7 @@ export class App {
         this.lastSyncTime = lastSyncTime || new Date(0).toISOString();
         this.isLoadDone = true;
     }
-    async save(skipSync = false) {
+    async save(skipSync = false, awaitSync = false) {
         const isChanged = await this.isDataChanged();
         if (!isChanged) return;
         
@@ -260,7 +269,10 @@ export class App {
             this.storage.save(STORE_KEY_META, this.meta),
             this.storage.save(STORE_KEY_LAST_SYNC_TIME, this.lastSyncTime),
         ]);
-        if (!skipSync) await this.profile.trySyncProfile(this);
+        if (!skipSync) {
+            if (awaitSync) await this.profile.trySyncProfile(this);
+            else this.profile.trySyncProfile(this).catch(console.error);
+        }
     }
     async updateLastSyncTime(time = new Date()) {
         this.lastSyncTime = time.toISOString();

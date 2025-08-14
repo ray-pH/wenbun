@@ -33,6 +33,7 @@
     let isPageReady = false;
     let app = new App();
     onMount(async () => {
+        // no need to sync in here
         await app.init();
         isZhCantonese = app.deckData[deckId]?.tags?.includes(DECK_TAGS.ZH_YUE);
         await wordlist.init(isZhCantonese ? 'yue' : 'zh');

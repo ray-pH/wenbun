@@ -78,8 +78,11 @@ export class Profile {
         }
     }
     
-    async trySyncProfile(app: App) {
-        if (!this.isLoggedIn) return;
+    /**
+     * @returns boolean: `true` if data changed
+     */
+    async trySyncProfile(app: App): Promise<boolean> {
+        if (!this.isLoggedIn) return false;
         try {
             const [remoteProfileData, latestServerReviewLog] = await Promise.all([
                 this.getProfileData(),
@@ -95,6 +98,7 @@ export class Profile {
                     app.lastSyncTime = new Date().toISOString();
                     await app.updateLastSyncTime();
                 }
+                return false;
             } else {
                 // check
                 const localModifiedAt = new Date(app.meta.modifiedAt ?? 0);
@@ -114,7 +118,8 @@ export class Profile {
                                 goto(`${base}/settings/`);
                             }
                         }
-                    } break;
+                        return false;
+                    }
                     case SyncDecision.push: {
                         const success = await Promise.all([
                             this.updateProfileData(app.exportProfile(false)),
@@ -127,7 +132,8 @@ export class Profile {
                             window.alert("Failed to push profile data to server")
                         }
                         this.isSyncConflict = false;
-                    } break;
+                        return false;
+                    }
                     case SyncDecision.pull: {
                         const success = await Promise.all([
                             app.tryImportProfile(remoteProfileData, false, true),
@@ -140,15 +146,19 @@ export class Profile {
                             window.alert("Failed to pull profile data from server")
                         }
                         this.isSyncConflict = false;
-                    } break;
+                        return true;
+                    }
                     case SyncDecision.none: {
                         // do nothing
                         this.isSyncConflict = false;
+                        return false;
                     }
                 }
             }
         } catch (e) {
             console.error(e);
+            //TODO: not sure if something went wrong whether to return true or false
+            return false;
         }
     }
     
@@ -307,7 +317,7 @@ export class Profile {
         } else {
             // pull only after latest local review log
             const latestLocalReviewLog = localReviewLogs[localReviewLogs.length - 1];
-            const latestLocalDate = new Date(latestLocalReviewLog.log.review).toISOString();
+            const latestLocalDate = new Date(latestLocalReviewLog?.log?.review ?? 0).toISOString();
             const res = await fetch(apiUrl(ApiRoute.ReviewLog, { from: latestLocalDate }), {
                 method: "GET",
                 credentials: "include",

@@ -18,6 +18,12 @@
     <div class="changelog-container">
         Change log
 
+        <h4>v0.6.1 (2025-08-15)</h4>
+        <ul>
+            <li>Improved online sync stability and error handling</li>
+            <li>Fixed a bug in the deck browser</li>
+        </ul>
+
         <h4>v0.6.0 (2025-08-14)</h4>
         <ul>
             <li>Add online sync (Google login)</li>

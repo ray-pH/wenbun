@@ -1,10 +1,12 @@
 <script lang="ts">
     import { type App} from "$lib/app";
+    import Loading from "$lib/components/Loading.svelte";
     import type { SyncConflictInfo } from "$lib/profile";
     import { onMount } from "svelte";
     
     export let app: App;
     export let isLoggedIn = false;
+    export let isOnlineProfileLoaded = false;
     let name: string = "";
     
     let isSyncConflict = false;
@@ -52,7 +54,9 @@
 <div class="container">
     <div class="title">Online Sync</div>
     <hr>
-    {#if isLoggedIn}
+    {#if !isOnlineProfileLoaded}
+        <Loading/>
+    {:else if isLoggedIn}
         <div>
             Logged in as <span class="name">{name}</span>
         </div>
@@ -67,6 +71,11 @@
                     <i class="fa-solid fa-triangle-exclamation"></i>
                     Sync Failed, conflict detected. <br>
                     Please select whether to use the remote or local version.
+                    <div class="note" style="font-size: 1em; margin-top: 0.5em;">
+                        <i class="fa-solid fa-circle-info"></i>
+                        If not sure, use the <b>Remote</b> version. <br>
+                        If this is happening too often, please report to the developer.
+                    </div>
                 </div>
                 {#if syncConflictInfo}
                     <div class="sync-conflict-info">
