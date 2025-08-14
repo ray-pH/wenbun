@@ -6,9 +6,12 @@
     import { DeckInfo } from "$lib/constants";
     
     let app = new App();
+    let isAutomaticallyLoggedOut = false;
     $: activeDeckIds = Object.keys(app.deckData);
+    $: locked = isAutomaticallyLoggedOut;
     onMount(async () => {
         await app.init();
+        isAutomaticallyLoggedOut = app.profile.isAutomaticallyLoggedOut();
         app = app;
         
         if ('serviceWorker' in navigator) {
@@ -24,25 +27,59 @@
     function getDeckInfo(deckId: string): typeof DeckInfo[number] {
         return DeckInfo.find((s) => s.id === deckId) ?? { id: deckId, title: deckId, subtitle: ''};
     }
+    function loginGoogle() {
+        app.profile.loginGoogle(app);
+    }
+    function stayLoggedOut() {
+        const confirm = window.confirm('Are you sure you want to stay logged out? You might need to sync manually later');
+        if (!confirm) return;
+        app.profile.updateLoginStatus(undefined);
+        isAutomaticallyLoggedOut = app.profile.isAutomaticallyLoggedOut();
+    }
 </script>
 
 <TopBar title="WenBun (beta)"></TopBar>
 <div class="main-container">
     <div class="top-container">
         <a class="a-button" style="background-color: #A0D0F0;" href="{base}/about/">Changelog</a>
-        <a class="a-button" href="{base}/deck-browser/">Add New Deck</a>
+        {#if !locked}
+            <a class="a-button" href="{base}/deck-browser/">Add New Deck</a>
+        {/if}
     </div>
     <div class="hr"></div>
-    <div class="deck-list-container">
-        {#each activeDeckIds as deckId}
-            <div class="deck-card-container">
-                {@render deckCard(getDeckInfo(deckId))}
-                <a class="deck-card-button" href="{base}/deck?id={deckId}" title="Deck Info" aria-label="Deck Info">
-                    <i class="fa-solid fa-list"></i>
-                </a>
+    {#if !locked}
+        <div class="deck-list-container">
+            {#each activeDeckIds as deckId}
+                <div class="deck-card-container">
+                    {@render deckCard(getDeckInfo(deckId))}
+                    <a class="deck-card-button" href="{base}/deck?id={deckId}" title="Deck Info" aria-label="Deck Info">
+                        <i class="fa-solid fa-list"></i>
+                    </a>
+                </div>
+            {/each} 
+        </div> 
+    {:else}
+        <div class="auto-logout-info-container">
+            <div>
+                <i class="fa-solid fa-circle-info" style="color: #3E92CC;"></i>
+                <p>
+                    You are <b>unexpectedly logged out</b> due to session expiration or server issue.
+                    Try logging in again.
+                </p>
+                <p class="note">(*Please report to the developer if this happens frequently.)</p>
+                <div>
+                    <button class="button" onclick={loginGoogle}>
+                        <i class="fa-brands fa-google"></i>&nbsp;
+                        Log in with Google
+                    </button>
+                    <button class="button invert" onclick={stayLoggedOut}>
+                        <i class="fa-solid fa-ban"></i>&nbsp;
+                        Stay Logged Out
+                    </button>
+                </div>
             </div>
-        {/each} 
-    </div> 
+        </div> 
+    {/if}
 </div>
 
 {#snippet deckCard(info: typeof DeckInfo[number])}
@@ -170,5 +207,48 @@
         border-radius: 0.5em;
         padding: 1em;
         cursor: pointer;
+    }
+    .auto-logout-info-container {
+        background-color: #FFFFFF90;
+        border-radius: 0.5em;
+        width: calc(100vw - 4em);
+        max-width: 30em;
+        margin-top: 1em;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2em;
+        .note {
+            font-size: 0.9em;
+            color: #00000090;
+        }
+    }
+    .button {
+        all: unset;
+        color: white;
+        background-color: #3E92CC;
+        border-radius: 0.5em;
+        font-size: 0.9em;
+        padding: 0.5em 1em;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        margin-top: 0.5em;
+        &.invert {
+            border: #3E92CC solid 1px;
+            background-color: #FFFFFF90;
+            color: #3E92CC;
+            &:hover {
+                background-color: lightgray;
+            }
+        }
+        &:hover {
+            opacity: 0.8;
+        }
+        &:disabled {
+            background-color: gray;
+            pointer-events: none;
+        }
     }
 </style>

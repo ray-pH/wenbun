@@ -7,6 +7,7 @@ import { isTauri } from "@tauri-apps/api/core";
 import { WebFileManager, type IFileManager } from "./fileManager";
 import { ChineseMandarinReading } from "./chinese";
 import { AppExtraStudyHandler } from "./appExtraStudyHandler";
+import { Profile } from "./profile";
 const UNGROUPED_GROUP = "__ungrouped__"
 
 const STORE_FILENAME = "profile.json"
@@ -15,6 +16,8 @@ const STORE_KEY_DECK_DATA = "deckData"
 const STORE_KEY_CONFIG = "config"
 const STORE_KEY_REVIEW_LOGS = "reviewLogs"
 const STORE_KEY_AUTO_REVIEW_GRADE_LOG = "autoReviewGradeLog"
+const STORE_KEY_META = "meta"
+const STORE_KEY_LAST_SYNC_TIME = "lastSyncTime"
 
 const FSRS_GRADES: FSRS.Grade[] = [FSRS.Rating.Again, FSRS.Rating.Hard, FSRS.Rating.Good, FSRS.Rating.Easy];
 export const DEFAULT_GROUP_CONTENT_COUNT = 30;
@@ -122,7 +125,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     },
 }
 
-type ReviewLog = {
+export type ReviewLog = {
     deckId: string;
     cardId: number;
     log: FSRS.ReviewLog;
@@ -134,12 +137,27 @@ type AutoReviewGradeLog = {
     grade: FSRS.Grade;
 }
 
+export interface ProfileDataMeta {
+    _profileVersion?: number,
+    modifiedAt?: string,
+}
+
+export interface ProfileData {
+    config: WenbunConfig,
+    decks: string[],
+    deckData: Record<string, DeckData>,
+    reviewLogs: ReviewLog[],
+    meta: ProfileDataMeta,
+}
+
 export class App {
     decks: string[] = [];
     deckData: Record<string, DeckData> = {};
     config: WenbunConfig = DEFAULT_CONFIG;
     reviewLogs: ReviewLog[] = [];
     autoReviewGradeLog: AutoReviewGradeLog[] = [];
+    meta: ProfileDataMeta = {};
+    lastSyncTime: string = new Date(0).toISOString();
     isLoadDone = false;
     fsrs!: FSRS.FSRS;
     fsrsPrevStudied!: FSRS.FSRS;
@@ -147,6 +165,8 @@ export class App {
     storage: IStorage;
     fileManager: IFileManager;
     extraStudyHandler: AppExtraStudyHandler;
+    
+    public profile: Profile;
 
     constructor() {
         this.updateFSRS();
@@ -157,6 +177,7 @@ export class App {
         }
         this.fileManager = new WebFileManager();
         this.extraStudyHandler = new AppExtraStudyHandler(this);
+        this.profile = new Profile(this.storage);
     }
     
     
@@ -190,6 +211,10 @@ export class App {
         if (this.isNeedToProcessTodaySchedule()) {
             await this.processTodaySchedule();
         }
+        await this.profile.init();
+        if (this.profile.isLoggedIn) {
+            await this.profile.trySyncProfile(this);
+        }
     }
     
     async debug() {
@@ -202,6 +227,47 @@ export class App {
     }
     
     async load() {
+        const [decks, deckData, config, reviewLogs, autoReviewGradeLog, meta, lastSyncTime] = await Promise.all([
+            this.storage.load<string[]>(STORE_KEY_DECKS),
+            this.storage.load<Record<string, DeckData>>(STORE_KEY_DECK_DATA),
+            this.storage.load<WenbunConfig>(STORE_KEY_CONFIG),
+            this.storage.load<ReviewLog[]>(STORE_KEY_REVIEW_LOGS),
+            this.storage.load<AutoReviewGradeLog[]>(STORE_KEY_AUTO_REVIEW_GRADE_LOG),
+            this.storage.load<ProfileDataMeta>(STORE_KEY_META),
+            this.storage.load<string>(STORE_KEY_LAST_SYNC_TIME),
+        ]);
+        this.decks = decks || [];
+        this.deckData = deckData || {};
+        this.config = config || DEFAULT_CONFIG;
+        this.reviewLogs = reviewLogs || [];
+        this.autoReviewGradeLog = autoReviewGradeLog || [];
+        this.meta = meta || {};
+        this.lastSyncTime = lastSyncTime || new Date(0).toISOString();
+        this.isLoadDone = true;
+    }
+    async save(skipSync = false) {
+        const isChanged = await this.isDataChanged();
+        if (!isChanged) return;
+        
+        this.meta.modifiedAt = new Date().toISOString();
+        this.meta._profileVersion = 1;
+        await Promise.all([
+            this.storage.save(STORE_KEY_DECKS, this.decks),
+            this.storage.save(STORE_KEY_DECK_DATA, this.deckData),
+            this.storage.save(STORE_KEY_CONFIG, this.config),
+            this.storage.save(STORE_KEY_REVIEW_LOGS, this.reviewLogs),
+            this.storage.save(STORE_KEY_AUTO_REVIEW_GRADE_LOG, this.autoReviewGradeLog),
+            this.storage.save(STORE_KEY_META, this.meta),
+            this.storage.save(STORE_KEY_LAST_SYNC_TIME, this.lastSyncTime),
+        ]);
+        if (!skipSync) await this.profile.trySyncProfile(this);
+    }
+    async updateLastSyncTime(time = new Date()) {
+        this.lastSyncTime = time.toISOString();
+        await this.storage.save(STORE_KEY_LAST_SYNC_TIME, this.lastSyncTime);
+    }
+    
+    async isDataChanged(): Promise<boolean> {
         const [decks, deckData, config, reviewLogs, autoReviewGradeLog] = await Promise.all([
             this.storage.load<string[]>(STORE_KEY_DECKS),
             this.storage.load<Record<string, DeckData>>(STORE_KEY_DECK_DATA),
@@ -209,46 +275,46 @@ export class App {
             this.storage.load<ReviewLog[]>(STORE_KEY_REVIEW_LOGS),
             this.storage.load<AutoReviewGradeLog[]>(STORE_KEY_AUTO_REVIEW_GRADE_LOG),
         ]);
-        this.decks = decks || [];
-        this.deckData = deckData || {};
-        this.config = config || DEFAULT_CONFIG;
-        this.reviewLogs = reviewLogs || [];
-        this.autoReviewGradeLog = autoReviewGradeLog || [];
-        this.isLoadDone = true;
-    }
-    async save() {
-        await Promise.all([
-            this.storage.save(STORE_KEY_DECKS, this.decks),
-            this.storage.save(STORE_KEY_DECK_DATA, this.deckData),
-            this.storage.save(STORE_KEY_CONFIG, this.config),
-            this.storage.save(STORE_KEY_REVIEW_LOGS, this.reviewLogs),
-            this.storage.save(STORE_KEY_AUTO_REVIEW_GRADE_LOG, this.autoReviewGradeLog),
-        ]);
+        return !_.isEqual(this.decks, decks) ||
+            !_.isEqual(this.deckData, deckData) ||
+            !_.isEqual(this.config, config) ||
+            !_.isEqual(this.reviewLogs, reviewLogs) ||
+            !_.isEqual(this.autoReviewGradeLog, autoReviewGradeLog);
     }
     
-    exportProfile(): string {
-        const profileData = {
+    exportProfileStr(includeReviewLogs = true): string {
+        return JSON.stringify(this.exportProfile(includeReviewLogs));
+    }
+    async tryImportProfileStr(jsonStr: string, includeReviewLogs = true): Promise<boolean> {
+        try {
+            const parsed = JSON.parse(jsonStr);
+            return this.tryImportProfile(parsed, includeReviewLogs);
+        } catch (e) {
+            return false;
+        }
+    }
+    exportProfile(includeReviewLogs = true): ProfileData {
+        return {
             config: this.config,
             decks: this.decks,
             deckData: this.deckData,
-            reviewLogs: this.reviewLogs,
-            meta: {
-                _profileVersion: 1,
-            }
+            reviewLogs: includeReviewLogs ? this.reviewLogs : [],
+            meta: this.meta
         }
-        return JSON.stringify(profileData);
     }
-    async tryImportProfile(jsonStr: string): Promise<boolean> {
+    async tryImportProfile(profileData: any, includeReviewLogs = true, skipSync = false): Promise<boolean> {
         // TODO: handle profile versioning
         // TODO: backup data
         // TODO: ensure structure
         try {
-            const {config, decks, deckData, reviewLogs, meta} = JSON.parse(jsonStr);
+            const {config, decks, deckData, reviewLogs, meta} = profileData;
             this.config = config;
             this.decks = decks;
             this.deckData = deckData;
-            this.reviewLogs = reviewLogs;
-            await this.save();
+            if (includeReviewLogs) {
+                this.reviewLogs = reviewLogs;
+            }
+            await this.save(skipSync);
             return true;
         } catch (e) {
             return false;
@@ -699,7 +765,7 @@ export class App {
     }
     
     async downloadProfile(): Promise<void> {
-        const profileStr = this.exportProfile();
+        const profileStr = this.exportProfileStr();
         const date = new Date().toLocaleDateString('en-CA');
         await this.fileManager.download({
             data: profileStr,
@@ -712,7 +778,7 @@ export class App {
         const payload = await this.fileManager.upload();
         if (payload === null) return false;
         if (typeof payload.data !== "string") return false;
-        return this.tryImportProfile(payload.data);
+        return this.tryImportProfileStr(payload.data);
     }
     
     getDeckProgress(deckId: string) {

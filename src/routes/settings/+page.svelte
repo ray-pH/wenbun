@@ -9,6 +9,7 @@
     import { type DeepRequired } from "$lib/util";
     import { ChineseToneColorPalette } from "$lib/constants";
     import { ChineseMandarinReading } from '$lib/chinese';
+    import ProfileLogin from './ProfileLogin.svelte';
     
     export let data: {leniency?: string};
     
@@ -22,7 +23,7 @@
         learningStepsString = config.learningSteps.join(" ");
         previouslyStudiedLearningStepsString = config.previouslyStudiedLearningSteps.join(" ");
         fsrsParamsString = config.FSRSParams.join(",");
-        profileStr = app.exportProfile();
+        profileStr = app.exportProfileStr();
         initialProfileStr = profileStr;
         if (data.leniency) {
             config.strokeLeniency = parseFloat(data.leniency);
@@ -136,6 +137,9 @@
         <div class="settings-section">
             <div class="section-title">Profile</div>
             <div class="section-container">
+                {#if app}
+                    <ProfileLogin app={app}/>
+                {/if}
                 {#if isShowProfileTextbox}
                     <textarea bind:value={profileStr} class="profile-textarea"></textarea>
                     <button class="button" onclick={() => importProfileData()} disabled={!isProfileStrChanged}>import</button>
