@@ -4,12 +4,21 @@ import { goto } from '$app/navigation';
 import { base } from "$app/paths";
 import { page } from '$app/state';
 import { ApiRoute, apiUrl, apiAuthUrl } from "./api";
+import _ from "lodash";
+import type { IStorage } from "./storage";
+
+const STORE_KEY_LOGIN_STATUS = "loginStatus"
 
 export enum SyncDecision {
     push = "push",
     pull = "pull",
     none = "none",
     conflict = "conflict",
+}
+
+export enum LoginStatus {
+    loggedIn = "loggedIn",
+    loggedOut = "loggedOut",
 }
 
 export interface ProfileInfo {
@@ -29,11 +38,14 @@ export class Profile {
     isSyncConflict: boolean = false;
     syncConflictInfo: SyncConflictInfo | undefined;
     profileInfo: ProfileInfo | null = null;
+    storedLoginStatus: LoginStatus | undefined = undefined;
     
-    constructor() {
+    constructor(private storage: IStorage) {
     }
     
     async init() {
+        this.storedLoginStatus = await this.storage.load<LoginStatus>(STORE_KEY_LOGIN_STATUS);
+            
         const res = await fetch(apiUrl(ApiRoute.Profile), {
             credentials: "include", // important if using cookies/session
         });
@@ -51,16 +63,29 @@ export class Profile {
             this.isLoggedIn = false;
             console.warn(`Unexpected status: ${res.status}`);
         }
+        await this.checkAndUpdateLoginStatus();
+    }
+    
+    async updateLoginStatus(status: LoginStatus | undefined) {
+        await this.storage.save(STORE_KEY_LOGIN_STATUS, status);
+        this.storedLoginStatus = status;
+    }
+    async checkAndUpdateLoginStatus() {
+        // if currently undefined, store isLoggedIn
+        if (this.storedLoginStatus === undefined) {
+            const status = this.isLoggedIn ? LoginStatus.loggedIn : LoginStatus.loggedOut;
+            await this.updateLoginStatus(status);
+        }
     }
     
     async trySyncProfile(app: App) {
         if (!this.isLoggedIn) return;
         try {
-            const [profileData, latestServerReviewLog] = await Promise.all([
+            const [remoteProfileData, latestServerReviewLog] = await Promise.all([
                 this.getProfileData(),
                 this.getLatestReviewLog(),
             ]);
-            if (profileData === null) {
+            if (remoteProfileData === null) {
                 // upload profiledata and logs
                 const success = await Promise.all([
                     this.updateProfileData(app.exportProfile(false)),
@@ -73,9 +98,10 @@ export class Profile {
             } else {
                 // check
                 const localModifiedAt = new Date(app.meta.modifiedAt ?? 0);
-                const remoteModifiedAt = new Date(profileData.meta.modifiedAt ?? 0);;
+                const remoteModifiedAt = new Date(remoteProfileData.meta.modifiedAt ?? 0);;
                 const lastSyncTime = new Date(app.lastSyncTime ?? 0);
-                const syncDecision = this.getSyncDecision(localModifiedAt, remoteModifiedAt, lastSyncTime);
+                const syncDecisionFromTime = this.getSyncDecision(localModifiedAt, remoteModifiedAt, lastSyncTime);
+                const syncDecision = (_.isEqual(remoteProfileData, app.exportProfile(false))) ? SyncDecision.none : syncDecisionFromTime;
                 switch (syncDecision) {
                     case SyncDecision.conflict: {
                         this.syncConflictInfo = { localModifiedAt, remoteModifiedAt, lastSyncTime };
@@ -104,7 +130,7 @@ export class Profile {
                     } break;
                     case SyncDecision.pull: {
                         const success = await Promise.all([
-                            app.tryImportProfile(profileData, false, true),
+                            app.tryImportProfile(remoteProfileData, false, true),
                             this.pullReviewLog(app),
                         ])
                         if (success.every(s => s)) {
@@ -299,11 +325,21 @@ export class Profile {
     }
     
     async loginGoogle(app: App) {
-        await app.updateLastSyncTime(new Date(0));
+        // TODO: compare with stored login info
         window.location.assign(apiAuthUrl(ApiRoute.AuthGoogle));
     }
     async logout(app: App) {
+        await this.updateLoginStatus(undefined);
         await app.updateLastSyncTime(new Date(0));
         window.location.assign(apiAuthUrl(ApiRoute.AuthLogout));
+    }
+   
+    /**
+     * Check if the user is automatically logged out,
+     * maybe because the session has expired or server issue
+     */
+    isAutomaticallyLoggedOut(): boolean {
+        // not currently logged in, but stored as logged in
+        return !this.isLoggedIn && this.storedLoginStatus === LoginStatus.loggedIn;
     }
 }

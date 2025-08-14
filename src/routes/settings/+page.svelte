@@ -147,7 +147,7 @@
                         To manually export the profile data, copy the text above and store it somewhere safe.<br>
                         To manually import the profile data, paste the text into the textbox and click the import button.
                     </div>
-                    <button class="button" onclick={() => resetDebugProfile()}>Reset Debug Profile</button>
+                    <!-- <button class="button" onclick={() => resetDebugProfile()}>Reset Debug Profile</button> -->
                 {/if}
                 <button class="button" onclick={() => isShowProfileTextbox = !isShowProfileTextbox}>
                     manual import/export
