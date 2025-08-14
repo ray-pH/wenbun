@@ -16,11 +16,17 @@
     let app = new App();
     onMount(async () => {
         await app.init();
+        initComponent();
+        const changed = await app.initProfile();
+        if (changed) initComponent();
         // debugRateCard();
+    })
+    
+    function initComponent() {
         isZhTraditional = app.deckData[deckId]?.tags?.includes(DECK_TAGS.ZH_TRAD);
         converter = new ChineseCharacterConverter('cn', 'tw');
         app = app;
-    })
+    }
     
     function debugRateCard() {
         app.getNextCard(deckId);

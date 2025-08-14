@@ -6,19 +6,28 @@
     import { DeckInfo } from '$lib/constants';
     import Popup from '$lib/components/Popup.svelte';
     import { goto } from '$app/navigation';
+    import Loading from '$lib/components/Loading.svelte';
     
     export let data: {deckId?: string};
     
     let app = new App();
     let isInitialized = false;
     let isTodayDone = false;
+    let isOnlineProfileLoaded = false;
     onMount(async () => {
         await app.init();
+        initComponent();
+        const changed = await app.initProfile();
+        isOnlineProfileLoaded = true;
+        if (changed) initComponent();
+    })
+    
+    function initComponent() {
         app = app;
         extraStudyGroup = app.deckData[data.deckId ?? '']?.groups[0]?.label ?? '';
         isInitialized = true;
         isTodayDone = app.getNextCard(data.deckId ?? '') === undefined;
-    })
+    }
     
     $: deckInfo = getDeckInfo(data.deckId ?? '');
     
@@ -53,6 +62,11 @@
         <div class="deck-info">
             <span class="deck-card-title">{deckInfo.title}</span>
             <span class="deck-card-subtitle">{deckInfo.subtitle}</span>
+            <div class="loading">
+                {#if !isOnlineProfileLoaded}
+                    <Loading/>
+                {/if}
+            </div>
         </div>
         <div class="table-container">
             <table class="count-table"><tbody>
@@ -152,6 +166,7 @@
         margin-bottom: 5em;
     }
     .deck-info {
+        position: relative;
         font-size: 1.2em;
         font-weight: bold;
         .deck-card-subtitle {
@@ -257,5 +272,10 @@
             background-color: gray;
             pointer-events: none;
         }
+    }
+    .loading {
+        position: absolute;
+        left: -3em;
+        top: 40%;
     }
 </style>

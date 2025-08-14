@@ -18,10 +18,16 @@
     let filteredDeckInfo = DeckInfo;
     onMount(async () => {
         await app.init();
+        initComponent();
+        const changed = await app.initProfile();
+        if (changed) initComponent();
+    })
+    
+    async function initComponent() {
         await populateDeckDataMap();
         app = app;
         isLoaded = true;
-    })
+    }
     
     async function populateDeckDataMap() {
       await Promise.allSettled(

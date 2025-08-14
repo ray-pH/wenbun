@@ -211,9 +211,18 @@ export class App {
         if (this.isNeedToProcessTodaySchedule()) {
             await this.processTodaySchedule();
         }
+    }
+    
+    /**
+     * @returns boolean: `true` if data changed
+     */
+    async initProfile(): Promise<boolean> {
         await this.profile.init();
         if (this.profile.isLoggedIn) {
-            await this.profile.trySyncProfile(this);
+            const changed = await this.profile.trySyncProfile(this);
+            return changed;
+        } else {
+            return false;
         }
     }
     
