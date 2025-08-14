@@ -271,7 +271,7 @@ export class App {
         ]);
         if (!skipSync) {
             if (awaitSync) await this.profile.trySyncProfile(this);
-            else this.profile.trySyncProfile(this);
+            else this.profile.trySyncProfile(this).catch(console.error);
         }
     }
     async updateLastSyncTime(time = new Date()) {
