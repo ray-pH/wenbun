@@ -16,8 +16,16 @@
     let app = new App();
     let config: DeepRequired<WenbunConfig>;
     let initialConfig: DeepRequired<WenbunConfig>;
+    let isOnlineProfileLoaded = false;
     onMount(async () => {
         await app.init();
+        initComponent();
+        const changed = await app.initProfile();
+        isOnlineProfileLoaded = true;
+        if (changed) initComponent();
+    })
+    
+    function initComponent() {
         config = _.cloneDeep(app.getConfig());
         initialConfig = _.cloneDeep(config);
         learningStepsString = config.learningSteps.join(" ");
@@ -29,7 +37,7 @@
             config.strokeLeniency = parseFloat(data.leniency);
         }
         app = app;
-    })
+    }
     
     $: isConfigChanged = !_.isEqual(config, initialConfig);
     
@@ -138,7 +146,9 @@
             <div class="section-title">Profile</div>
             <div class="section-container">
                 {#if app}
-                    <ProfileLogin app={app}/>
+                    {#key isOnlineProfileLoaded}
+                        <ProfileLogin app={app} isOnlineProfileLoaded={isOnlineProfileLoaded}/>
+                    {/key}
                 {/if}
                 {#if isShowProfileTextbox}
                     <textarea bind:value={profileStr} class="profile-textarea"></textarea>
