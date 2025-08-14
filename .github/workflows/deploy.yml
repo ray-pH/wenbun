@@ -28,6 +28,7 @@ jobs:
         run: npm run build
         env:
           BASE_PATH: /wenbun
+          VITE_WENBUN_SERVER_URL: ${{ vars.VITE_WENBUN_SERVER_URL }}
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
