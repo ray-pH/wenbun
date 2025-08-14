@@ -18,6 +18,17 @@
     <div class="changelog-container">
         Change log
 
+        <h4>v0.6.0 (2025-08-14)</h4>
+        <ul>
+            <li>Add online sync (Google login)</li>
+            <li>Update character writer drawing width and color</li>
+            <li>Various architecture improvements</li>
+        </ul>
+        <div class="note">
+            In this early beta stage, before logging in, it is recommended to manually backup your save first 
+            by clicking on <b>export profile data</b> and storing it somewhere safe.
+        </div>
+            
         <h4>v0.5.1 (2025-08-10)</h4>
         <ul>
             <li>Added stroke grading leniency setting and calibration page</li>
