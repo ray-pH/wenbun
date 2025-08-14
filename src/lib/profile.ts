@@ -329,8 +329,8 @@ export class Profile {
         window.location.assign(apiAuthUrl(ApiRoute.AuthGoogle));
     }
     async logout(app: App) {
-        await this.updateLoginStatus(undefined),
-        await app.updateLastSyncTime(new Date(0)),
+        await this.updateLoginStatus(undefined);
+        await app.updateLastSyncTime(new Date(0));
         window.location.assign(apiAuthUrl(ApiRoute.AuthLogout));
     }
    
