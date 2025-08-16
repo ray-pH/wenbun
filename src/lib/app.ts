@@ -531,7 +531,10 @@ export class App {
         return this.getWarmUpCount(deckId, cardId) !== undefined;
     }
     
-    getNewOrWarmUpCard(deckId: string): number {
+    getNewOrWarmUpCard(deckId: string): number | undefined {
+        const scheduledNewOrWarmUpCardsCount = this.getScheduledNewOrWarmUpCardsCount(deckId);
+        const scheduledNewCardsCount = scheduledNewOrWarmUpCardsCount - this.getWarmUpCardsCount(deckId);
+        
         const newCard = this.getNewCard(deckId);
         const deckData = this.deckData[deckId];
         if (!deckData.warmUpIds) return newCard;
@@ -540,12 +543,16 @@ export class App {
         const warmUpIds = Object.keys(deckData.warmUpIds);
         const warmUpId = +warmUpIds[Math.floor(Math.random() * warmUpIds.length)];
         
+        // if scheduled new cards count is 0, return the warm up card
+        if (scheduledNewCardsCount <= 0) {
+            return warmUpId;
+        }
+        
         const newCardLength = this.getNewCardsCount(deckId);
         const warmUpCardLength = warmUpIds.length;
         // randomly choose between new card and warm up card proportional to the number of the cards
         if (newCardLength + warmUpCardLength === 0) {
-            // No cards available, return a sentinel value (e.g., -1)
-            return -1;
+            return undefined;
         }
         return Math.random() < newCardLength / (newCardLength + warmUpCardLength) ?
             newCard : warmUpId;
