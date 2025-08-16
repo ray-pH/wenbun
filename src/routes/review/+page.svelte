@@ -397,9 +397,6 @@
             &.review-button-easy {
                 --color: #3E92CC;
             }
-            &.review-button-orange {
-                --color: #DA8C22;
-            }
         }
     }
     .review-button:hover {
