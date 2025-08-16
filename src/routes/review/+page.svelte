@@ -96,6 +96,12 @@
         cardState = app.getWenbunCustomState(deckId, currentCardId!);
     }
     
+    function onSkipWarmUp() {
+        app.skipWarmUp(deckId, currentCardId!);
+        isNewCardInteractedWith = true;
+        nextCard();
+    }
+    
     function characterWriterDataFromId(id: number): CharacterWriterData | undefined {
         const word = app.getCardWord(deckId, id);
         const config = app.getConfig();
@@ -226,7 +232,8 @@
             {@render ReviewButtons([
           		{ label: "Ignore", sublabel: "(Don't Learn)", className: "review-button-fail", isComplete: true, 
                     onclick: () => ignoreCard() },
-          		{ label: "" },
+          		{ label: "Learn*", sublabel: "(Skip Warm-Up)", className: "review-button-hard", isComplete: true,
+                    onclick: () => onSkipWarmUp() },
           		{ label: "" },
           		{ label: "Learn", className: "review-button-easy", isComplete: true,
                     onclick: () => onLearnNewCard() }
@@ -389,6 +396,9 @@
             }
             &.review-button-easy {
                 --color: #3E92CC;
+            }
+            &.review-button-orange {
+                --color: #DA8C22;
             }
         }
     }
