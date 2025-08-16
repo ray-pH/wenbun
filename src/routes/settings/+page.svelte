@@ -205,6 +205,9 @@
                         <option value={NewCardOrder.BeforeReviews}>Before Reviews</option>
                     </select>
                 </SettingsItem>
+                <SettingsItem key="startPreviouslyStudiedCardFromTheBack">
+                    <input type="checkbox" bind:checked={config.startPreviouslyStudiedCardFromTheBack}>
+                </SettingsItem>
             </div>
         </div>
         
