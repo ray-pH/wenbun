@@ -390,6 +390,15 @@ export class App {
         }
     }
     
+    async deleteDeck(deckId: string, confirmed = false): Promise<void> {
+        // confirmed optional parameter added as safety measure
+        if (!confirmed) return;
+        if (this.decks.includes(deckId)) {
+            this.decks = this.decks.filter(d => d != deckId);
+        }
+        delete this.deckData[deckId];
+    }
+    
     async ensureDeckData(): Promise<void> {
         const promises = this.decks.map(async (deckId) => {
             await this.ensureDeckDataById(deckId);

@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { goto } from '$app/navigation';
     import { base } from '$app/paths';
     import { App, DEFAULT_GROUP_CONTENT_COUNT, WenBunCustomState } from "$lib/app";
     import { ChineseCharacterConverter } from '$lib/chinese';
@@ -81,6 +82,16 @@
         }
     }
     
+    async function deleteDeck() {
+        const confirmed1 = window.confirm("Are you sure you want to delete this deck?");
+        if (!confirmed1) return;
+        const confirmed2 = window.confirm("Are you really sure you want to delete this deck? All data will be lost.");
+        if (!confirmed2) return;
+        app.deleteDeck(deckId, confirmed1 && confirmed2);
+        await app.save();
+        goto(`${base}/`);
+    }
+    
     let selectModeGroup: string | null = null;
     let selections: SvelteSet<number> = new SvelteSet();
     function startSelectMode(group: string, cardId?: number, e?: MouseEvent) {
@@ -152,8 +163,16 @@
 <TopBar title="Deck" backUrl="{base}/"></TopBar>
 <div class="container">
     <div class="top-container" style="display: flex; gap: 0.5em; margin-bottom: 2em">
-        <button class="button" onclick={() => splitIntoGroupsOf()}>Split into groups of</button>
-        <input class="input" type="number" bind:value={groupContentCount} min="1" max="100">
+        <div class="top-control-container">
+            <div style="display: flex; gap: 0.5em; align-items: center;">
+                <button class="button" onclick={() => splitIntoGroupsOf()}>Split into groups of</button>
+                <input class="input" type="number" bind:value={groupContentCount} min="1" max="100">
+            </div>
+            <button class="button delete-button" onclick={() => deleteDeck()}>
+                <i class="fa-solid fa-trash"></i>
+                Delete this Deck
+            </button>
+        </div>
     </div>
     <div class="group-container">
         {#each groups as group}
@@ -241,6 +260,11 @@
         justify-content: center;
         margin: 1em;
         padding-top: 1em;
+    }
+    .top-control-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5em;
     }
     .group-container {
         display: flex;
@@ -371,6 +395,9 @@
             background-color: gray;
             pointer-events: none;
         }
+    }
+    .delete-button {
+        background-color: #B75657;
     }
     .select-button {
         position: absolute;
