@@ -17,6 +17,16 @@
     </div>
     <div class="changelog-container">
         Change log
+        
+        <h4>v0.6.2 (2025-08-16)</h4>
+        <ul>
+            <li><b>(Major Fix)</b> Fix Warm-up Mode</li>
+            <li>Added a button to skip warm-up mode for new cards</li>
+        </ul>
+        <div class="note">
+            The latest updates apparently introduced a major bug for the new cards and the warm-up mode.
+            We are sorry for the inconvenience. It should be fixed now
+        </div>
 
         <h4>v0.6.1 (2025-08-15)</h4>
         <ul>
