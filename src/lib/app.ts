@@ -509,6 +509,12 @@ export class App {
         return arr.reduce((a, b) => a ?? b, undefined);
     }
     
+    skipWarmUp(deckId: string, cardId: number): void {
+        const deckData = this.deckData[deckId];
+        if (!deckData) return;
+        this.startWarmUp(deckId, cardId);
+        deckData.warmUpIds![cardId] = DEFAULT_WARMUP_MAX_COUNT;
+    }
     startWarmUp(deckId: string, cardId: number): void {
         const deckData = this.deckData[deckId];
         if (!deckData) return;
