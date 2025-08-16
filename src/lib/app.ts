@@ -76,6 +76,7 @@ export interface WenbunConfig {
     newCardOrder?: NewCardOrder;
     newPreviouslyStudiedCardPerDay?: number;
     newPreviouslyStudiedCardOrder?: NewCardOrder;
+    startPreviouslyStudiedCardFromTheBack?: boolean;
     
     // Review
     gradingMethod?: 'auto' | 'manual';
@@ -105,6 +106,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     newCardOrder: NewCardOrder.Mix,
     newPreviouslyStudiedCardPerDay: 20,
     newPreviouslyStudiedCardOrder: NewCardOrder.Mix,
+    startPreviouslyStudiedCardFromTheBack: true,
     
     gradingMethod: 'auto',
     strokeLeniency: 1.0,
@@ -580,7 +582,12 @@ export class App {
     
     getPreviouslyStudiedCard(deckId: string): number | undefined {
         const deckData = this.deckData[deckId];
-        return deckData?.previouslyStudied[0];
+        if (!deckData) return undefined;
+        if (this.getConfig().startPreviouslyStudiedCardFromTheBack) {
+            return deckData.previouslyStudied?.[deckData.previouslyStudied.length - 1];
+        } else {
+            return deckData.previouslyStudied[0];
+        }
     }
     
     getNewCardsCount(deckId: string): number {
