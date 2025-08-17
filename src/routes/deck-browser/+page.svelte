@@ -141,6 +141,7 @@
         flex-grow: 1;
         align-items: center;
         justify-content: space-between;
+        gap: 1em;
         
         .deck-card-title {
             font-weight: bold;
@@ -152,6 +153,9 @@
         }
         .deck-card-count {
             color: #3E92CC;
+        }
+        .right {
+            text-align: right;
         }
     }
     .deck-add-button {
