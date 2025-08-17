@@ -92,7 +92,10 @@
     <a class="deck-card" href="{base}/overview?id={info.id}">
         <div class="left">
             <span class="deck-card-title">{info.title}</span>
-            <span class="deck-card-subtitle">{info.subtitle}</span>
+            <span 
+                class="deck-card-subtitle"
+                style={`--subtitle-color: ${info.color ?? '#00000080'}`}
+            >{info.subtitle}</span>
         </div>
         <div class="right">
             <span class="deck-count-learn-relearn" title="learning">
@@ -151,12 +154,14 @@
         align-items: center;
         justify-content: space-between;
         cursor: pointer;
+        gap: 1em;
         
         .deck-card-title {
             font-weight: bold;
         }
         .deck-card-subtitle {
             color: #00000080;
+            color: var(--subtitle-color, #00000080);
             font-size: 0.9em;
         }
         .right {
