@@ -17,6 +17,19 @@
     </div>
     <div class="changelog-container">
         Change log
+
+        <h4>v0.6.3 (2025-08-17)</h4>
+        <ul>
+            <li><b>(Major Fix)</b> Updated Chinese dictionary and HSK decks</li>
+            <div class="note">
+                While the HSK 7 deck is still incomplete, this update is being pushed out to deliver fixes for other decks sooner.<br>
+                The previous dictionary's coverage for HSK v3.0 was only 70%.
+                If you have already added the HSK v3.0 deck, you may still find a few entries missing due to the removal of deprecated words.
+                An automatic fix for this issue will be included in a future update.
+            </div>
+            <li>Added an option to start reviews with the back of the card showing first</li>
+            <li>Added a health-check page for debugging</li>
+        </ul>
         
         <h4>v0.6.2 (2025-08-16)</h4>
         <ul>
