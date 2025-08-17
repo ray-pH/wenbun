@@ -360,7 +360,7 @@
                 {:else}
                     <div class="new-element-indicator is-hidden"></div>
                 {/if}
-                <div class="character-box-container">
+                <div class="character-box-container chinese-font">
                     {#each characterData.characters as character, i}
                         {#if i < completedCharCount || cardConfig.isFirstTime}
                             <span>{character}</span>
