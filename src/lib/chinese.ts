@@ -45,7 +45,7 @@ export interface CharacterWriterDataConfig {
 }
 
 export class ChineseCharacterWordlist {
-    private dict: ChineseDict = {};
+    public dict: ChineseDict = {};
     private converter!: ChineseCharacterConverter;
     private audioDict: Record<string, string[]> = {};
     public lang: 'zh' | 'yue' = 'zh';

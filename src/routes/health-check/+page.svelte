@@ -1,0 +1,79 @@
+<script lang="ts">
+    import { base } from "$app/paths";
+    import { ChineseCharacterWordlist } from "$lib/chinese";
+    import TopBar from "$lib/components/TopBar.svelte";
+    import { MainDeckInfo } from "$lib/constants";
+    import { loadDeck } from "$lib/util";
+    import { onMount } from "svelte";
+    
+    type DeckWords = {id: string, words: string[]};
+    
+    let decks: DeckWords[]= [];
+    let zhWordlist = new ChineseCharacterWordlist();
+    let dictionaryCheckResult: {
+        id: string;
+        totalWordCount: number;
+        totalWordsWithDictData: number;
+        isHealthy: boolean;
+        missingWords: string[];
+    }[] = []
+    
+    onMount(async() => {
+        await zhWordlist.init('zh');
+        await Promise.all(
+            MainDeckInfo.map(async d => {
+                const words = await loadDeck(d.src);
+                if (words) decks.push({id: d.id, words});
+            })
+        );
+        decks = decks.sort((a, b) => a.id.localeCompare(b.id));
+        checkDictionaryHealth(decks);
+    });
+    
+    function checkDictionaryHealth(deck: DeckWords[]) {
+        for (const d of deck) {
+            const missingWords = getMissingWordsFromDict(d.words);
+            const totalWordCount = d.words.length;
+            const totalWordsWithDictData = totalWordCount - missingWords.length;
+            const isHealthy = totalWordsWithDictData === totalWordCount;
+            dictionaryCheckResult.push({
+                id: d.id, 
+                totalWordCount, 
+                totalWordsWithDictData, 
+                isHealthy,
+                missingWords
+            });
+            dictionaryCheckResult = dictionaryCheckResult;
+        }
+    }
+    
+    function take<T>(arr: T[], n: number): T[] {
+        return arr.slice(0, n);
+    }
+    function getMissingWordsFromDict(words: string[]): string[] {
+        return words.filter(w => !zhWordlist.dict[w]);
+    }
+</script>
+
+<TopBar title="Health Check" backUrl="{base}/"></TopBar>
+<div class="container">
+    Word existence in the dictionary check
+    {#each dictionaryCheckResult as d}
+        <div class:is-healthy={d.isHealthy}>
+            {d.id}: {d.totalWordsWithDictData}/{d.totalWordCount} 
+            {#if !d.isHealthy}
+                [missing words: {take(d.missingWords, 5).join(', ')}, ...]
+            {/if}
+        </div>
+    {/each}
+</div>
+
+<style>
+    .container {
+        width: fit-content;
+        margin: auto
+    }
+    .is-healthy {
+        color: green;
+    }
+</style>
