@@ -235,7 +235,7 @@
           		{ label: "Learn*", sublabel: "(Skip Warm-Up)", className: "review-button-hard", isComplete: true,
                     onclick: () => onSkipWarmUp() },
           		{ label: "" },
-          		{ label: "Learn", className: "review-button-easy", isComplete: true,
+          		{ label: "Learn", className: "review-button-easy main-button", isComplete: true,
                     onclick: () => onLearnNewCard() }
            	])}
         {:else if isWarmUp && !isFinalWarmUp(currentCardId, _changeCounter)}
@@ -268,7 +268,7 @@
           		reviewButtonsLabel.map((label, i) => ({
          			label,
          			sublabel: scheduledTimeStr[(i+1) as FSRS.Grade],
-         			className: getReviewButtonClass(i+1),
+         			className: getReviewButtonClass(i+1) + " time",
                     isComplete,
          			onclick: () => onManualChangeToAutoGrade(i+1)
           		})),
@@ -279,7 +279,7 @@
           		reviewButtonsLabel.map((label, i) => ({
          			label,
          			sublabel: scheduledTimeStr[(i+1) as FSRS.Grade],
-         			className: getReviewButtonClass(i+1),
+         			className: getReviewButtonClass(i+1) + " time",
                     isComplete,
          			onclick: () => onReviewButtonClick(i+1)
           		}))
@@ -363,6 +363,13 @@
         flex-direction: column;
         align-items: center;
     }
+    @media (max-width: 600px) {
+        .review-button:not(.time) {
+            .review-time {
+                font-size: 0.8em;
+            }
+        }
+    }
     .review-button {
         all: unset;
         position: relative;
@@ -373,6 +380,10 @@
         max-width: 8.5em;
         border-radius: 0.5em;
         background-color: #E0E0E090;
+        text-align: center;
+        &.main-button {
+            min-width: min(8.5em, 35vw);
+        }
         &:not(.is-complete) {
             --color: gray;
             pointer-events: none;
