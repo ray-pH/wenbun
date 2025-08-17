@@ -231,7 +231,7 @@
                                     </button>
                                 {/if}
                                 <div class="card-word">
-                                    <span class="word">
+                                    <span class="word chinese-font">
                                         {getCardWord(deckId, id)}
                                     </span>
                                 </div>
