@@ -105,6 +105,9 @@
             <li>Warn user when they are about to lose unsaved changes from the settings page</li>
         </ul>
     </div>
+    <div class="privacy-policy-link">
+        <a href="{base}/privacy">Privacy Policy</a>
+    </div>
 </div>
 
 <style>
@@ -157,4 +160,13 @@
             pointer-events: none;
         }
     }
+
+    .privacy-policy-link {
+        margin-top: 2em;
+        font-size: 0.9em;
+    }
+    
+    a {
+		color: #3e92cc;
+	}
 </style>
