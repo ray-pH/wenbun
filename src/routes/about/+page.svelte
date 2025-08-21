@@ -21,7 +21,11 @@
         <h4>v0.7.0 (2025-08-21)</h4>
         <ul>
             <li>Added <b>UI scale</b> setting</li>
-            <li>Added <b>auto-resolve</b> strategies for sync conflicts</li>
+            <li>Added <b>auto-resolve</b> strategies for sync conflicts
+                <div class="note">
+                    These changes might break some saves for now, but it will improve the sync in the future. If any user is experiencing data loss, please contact the developer.
+                </div>
+            </li>
             <li>Improved <b>UI for smaller screens</b></li>
             <li>Changed default <b>stroke grading leniency</b> to 2.0</li>
             <li>Fixed <b>stroke grading leniency</b> setting not being applied properly</li>
