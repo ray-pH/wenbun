@@ -20,13 +20,13 @@
 
         <h4>v0.7.0 (2025-08-21)</h4>
         <ul>
-            <li>Added UI scale setting</li>
-            <li>Added auto-resolve strategies for sync conflicts</li>
-            <li>Improved UI for smaller screens</li>
-            <li>Changed default stroke grading leniency to 2.0</li>
-            <li>Fixed stroke grading leniency setting not being applied properly</li>
-            <li>Updated font for consistency across platforms</li>
-            <li>Added privacy policy page</li>
+            <li>Added <b>UI scale</b> setting</li>
+            <li>Added <b>auto-resolve</b> strategies for sync conflicts</li>
+            <li>Improved <b>UI for smaller screens</b></li>
+            <li>Changed default <b>stroke grading leniency</b> to 2.0</li>
+            <li>Fixed <b>stroke grading leniency</b> setting not being applied properly</li>
+            <li>Updated <b>font</b> for consistency across platforms</li>
+            <li>Added <b>privacy policy</b> page</li>
         </ul>
         <div class="note">
             For users who were using the old default stroke grading leniency (1.0), it is advised to change it to 2.0 in the settings.
@@ -34,21 +34,21 @@
 
         <h4>v0.6.3 (2025-08-17)</h4>
         <ul>
-            <li><b>(Major Fix)</b> Updated Chinese dictionary and HSK decks</li>
+            <li><b>(Major Fix)</b> Updated <b>Chinese dictionary</b> and <b>HSK decks</b></li>
             <div class="note">
                 While the HSK 7 deck is still incomplete, this update is being pushed out to deliver fixes for other decks sooner.<br>
                 The previous dictionary's coverage for HSK v3.0 was only 70%.
                 If you have already added the HSK v3.0 deck, you may still find a few entries missing due to the removal of deprecated words.
                 An automatic fix for this issue will be included in a future update.
             </div>
-            <li>Added an option to start reviews with the back of the card showing first</li>
-            <li>Added a health-check page for debugging</li>
+            <li>Added an option to start reviews with the <b>back of the card showing first</b></li>
+            <li>Added a <b>health-check page</b> for debugging</li>
         </ul>
         
         <h4>v0.6.2 (2025-08-16)</h4>
         <ul>
-            <li><b>(Major Fix)</b> Fix Warm-up Mode</li>
-            <li>Added a button to skip warm-up mode for new cards</li>
+            <li><b>(Major Fix)</b> Fix <b>Warm-up Mode</b></li>
+            <li>Added a button to <b>skip warm-up</b> for new cards</li>
         </ul>
         <div class="note">
             The latest updates apparently introduced a major bug for the new cards and the warm-up mode.
@@ -57,15 +57,15 @@
 
         <h4>v0.6.1 (2025-08-15)</h4>
         <ul>
-            <li>Improved online sync stability and error handling</li>
-            <li>Fixed a bug in the deck browser</li>
+            <li>Improved <b>online sync stability</b> and error handling</li>
+            <li>Fixed a bug in the <b>deck browser</b></li>
         </ul>
 
         <h4>v0.6.0 (2025-08-14)</h4>
         <ul>
-            <li>Add online sync (Google login)</li>
-            <li>Update character writer drawing width and color</li>
-            <li>Various architecture improvements</li>
+            <li>Add <b>online sync</b> (Google login)</li>
+            <li>Update <b>character writer</b> drawing width and color</li>
+            <li>Various <b>architecture improvements</b></li>
         </ul>
         <div class="note">
             In this early beta stage, before logging in, it is recommended to manually backup your save first 
@@ -74,8 +74,8 @@
             
         <h4>v0.5.1 (2025-08-10)</h4>
         <ul>
-            <li>Added stroke grading leniency setting and calibration page</li>
-            <li>Update character writer user stroke width</li>
+            <li>Added <b>stroke grading leniency</b> setting and <b>calibration page</b></li>
+            <li>Update <b>character writer</b> user stroke width</li>
         </ul>
             
         <h4>v0.5.0 (2025-08-09)</h4>
@@ -83,28 +83,28 @@
             It is advised for users to click "reset to default settings" in the settings. Or, if setting to auto grading mode, it's advised to disable short-term scheduling in FSRS settings.
         </div>
         <ul>
-            <li>Implement auto-grading for reviews</li>
+            <li>Implement <b>auto-grading</b> for reviews</li>
             <div class="note">
                 The grade can be overridden by clicking on the grade.<br>
                 "Easy" will not appear as an automatic grade.<br>
                 The parameters for auto-grading may change in the future.
             </div>
-            <li>Add warm-up mode for new cards</li>
-            <li>Play audio only once in the new card view</li>
-            <li>Fix due-date filtering for review and learning/relearning cards</li>
-            <li>Various UI/UX improvements and bug fixes</li>
+            <li>Add <b>warm-up mode</b> for new cards</li>
+            <li>Play audio only once in the <b>new card view</b></li>
+            <li>Fix <b>due-date filtering</b> for review and learning/relearning cards</li>
+            <li>Various <b>UI/UX improvements</b> and bug fixes</li>
         </ul>
 
         <h4>v0.4.0 (2025-08-06)</h4>
         <ul>
-            <li>Add Extra Study feature with configurable study modes</li>
-            <li>Add deck progress tracking and visualize it with a progress bar on the overview page</li>
-            <li>Add text on hover for deck numbers on the main page</li>
+            <li>Add <b>Extra Study</b> feature with configurable study modes</li>
+            <li>Add <b>deck progress tracking</b> and visualize it with a progress bar on the overview page</li>
+            <li>Add <b>text on hover</b> for deck numbers on the main page</li>
         </ul>
         
         <h4>v0.3.0 (2025-08-04)</h4>
         <ul>
-            <li>Add audio playback for Mandarin and Cantonese</li>
+            <li>Add <b>audio playback</b> for Mandarin and Cantonese</li>
             <div class="note">
                 For Mandarin words without any audio recordings (the uncommon ones), we can still generate the audio by stitching together per-syllable audio. We haven't been able to find a good syllable dataset for Cantonese yet.
             </div>
@@ -112,11 +112,11 @@
         
         <h4>v0.2.0 (2025-08-02)</h4>
         <ul>
-            <li>Add Mandarin alternative readings (numeric and zhuyin)</li>
-            <li>Add Cantonese support and Cantonese decks</li>
-            <li>Add support for Traditional characters and Chinese decks</li>
-            <li>Add a button to "Ignore" card in the new card view</li>
-            <li>Warn user when they are about to lose unsaved changes from the settings page</li>
+            <li>Add Mandarin <b>alternative readings</b> (numeric and zhuyin)</li>
+            <li>Add <b>Cantonese support</b> and Cantonese decks</li>
+            <li>Add support for <b>Traditional characters</b> and Chinese decks</li>
+            <li>Add a button to <b>"Ignore" card</b> in the new card view</li>
+            <li>Warn user when they are about to <b>lose unsaved changes</b> from the settings page</li>
         </ul>
     </div>
     <div class="privacy-policy-link">
