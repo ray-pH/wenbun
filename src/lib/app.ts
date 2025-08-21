@@ -78,6 +78,10 @@ export interface WenbunConfig {
     newPreviouslyStudiedCardOrder?: NewCardOrder;
     startPreviouslyStudiedCardFromTheBack?: boolean;
     
+    // UI
+    uiScale?: 'small' | 'normal' | 'custom'; // 10px, 16px
+    customFontSize?: number;
+    
     // Review
     gradingMethod?: 'auto' | 'manual';
     strokeLeniency?: number;
@@ -107,6 +111,9 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     newPreviouslyStudiedCardPerDay: 20,
     newPreviouslyStudiedCardOrder: NewCardOrder.Mix,
     startPreviouslyStudiedCardFromTheBack: true,
+    
+    uiScale: 'normal',
+    customFontSize: 16,
     
     gradingMethod: 'auto',
     strokeLeniency: 2.0,
@@ -208,6 +215,7 @@ export class App {
     
     async init(): Promise<void> {
         await this.load();
+        this.updateFontSize();
         this.extraStudyHandler.init();
         this.updateFSRS();
         if (this.isNeedToProcessTodaySchedule()) {
@@ -238,6 +246,22 @@ export class App {
         await this.save();
     }
     
+    updateFontSize() {
+        const fontSize = `${this.getFontSizePx()}px`;
+        document.body.style.fontSize = fontSize;
+    }
+    getCurrentUIScale(): number {
+        return this.getFontSizePx() / 16;
+    }
+    getFontSizePx(): number {
+        const config = this.getConfig();
+        switch (config.uiScale) {
+            case 'small': return 10;
+            case 'normal': return 16;
+            case 'custom': return _.clamp(config.customFontSize, 8, 32);
+        }
+    }
+    
     async load() {
         const [decks, deckData, config, reviewLogs, autoReviewGradeLog, meta, lastSyncTime] = await Promise.all([
             this.storage.load<string[]>(STORE_KEY_DECKS),
@@ -261,6 +285,7 @@ export class App {
         const isChanged = await this.isDataChanged();
         if (!isChanged) return;
         
+        this.updateFontSize();
         this.meta.modifiedAt = new Date().toISOString();
         this.meta._profileVersion = 1;
         await Promise.all([
