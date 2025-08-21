@@ -229,7 +229,9 @@ export class App {
     async initProfile(): Promise<boolean> {
         await this.profile.init();
         if (this.profile.isLoggedIn) {
-            const strategy = isTauri() ? SyncConflicAutoResolve.ask : SyncConflicAutoResolve.normalPull;
+            const strategy = isTauri() ? SyncConflicAutoResolve.ask : SyncConflicAutoResolve.forcePull;
+            // use force pull for now so that a backup will be created
+            // will change this to normal pull when everything is stable
             const changed = await this.profile.trySyncProfile(this, strategy);
             return changed;
         } else {
