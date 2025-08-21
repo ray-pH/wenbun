@@ -109,7 +109,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     startPreviouslyStudiedCardFromTheBack: true,
     
     gradingMethod: 'auto',
-    strokeLeniency: 1.0,
+    strokeLeniency: 2.0,
     
     learningSteps: ["1m", "10m"],
     previouslyStudiedLearningSteps: ["1m", "5d"],
