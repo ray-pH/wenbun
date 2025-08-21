@@ -6,16 +6,19 @@
     <meta name="theme-color" content="#3E92CC" />
     <link rel="icon" href="./favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <title>WenBun</title>
     
-		<link rel="modulepreload" href="./_app/immutable/entry/start.0OFBnj79.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/0thJK1pv.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/BzFAuoMn.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/BqfnsoT0.js">
-		<link rel="modulepreload" href="./_app/immutable/entry/app.DdqLHJsd.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/start.CXx5Yboi.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/Cq2_jRpj.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/3DT1RaQV.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/CvbXAzr3.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/app.Bq3uwzyB.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/CWj6FrbW.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/SbZFkT06.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/8f3Y1WCl.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/C7DlhgQh.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/CWd2qMjO.js">
   </head>
   <style>
     html {
@@ -29,12 +32,19 @@
         background-color: #E0E0E0;
         font-family: 'Noto Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
+    .chinese-font {
+        font-family: 'Noto Sans SC', 'Noto Sans', Helvetica, Arial, sans-serif;
+    }
+    input, select, textarea, button {
+        font-size: 0.8333333em; /* 14px/16px */
+        line-height: 1.2em;
+    }
   </style>
   <body data-sveltekit-preload-data="hover">
     <div style="display: contents">
 			<script>
 				{
-					__sveltekit_1vcbesd = {
+					__sveltekit_1tk16hj = {
 						base: new URL(".", location).pathname.slice(0, -1),
 						assets: "/wenbun"
 					};
@@ -42,8 +52,8 @@
 					const element = document.currentScript.parentElement;
 
 					Promise.all([
-						import("./_app/immutable/entry/start.0OFBnj79.js"),
-						import("./_app/immutable/entry/app.DdqLHJsd.js")
+						import("./_app/immutable/entry/start.CXx5Yboi.js"),
+						import("./_app/immutable/entry/app.Bq3uwzyB.js")
 					]).then(([kit, app]) => {
 						kit.start(app, element);
 					});
