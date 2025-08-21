@@ -7,7 +7,7 @@ import { isTauri } from "@tauri-apps/api/core";
 import { WebFileManager, type IFileManager } from "./fileManager";
 import { ChineseMandarinReading } from "./chinese";
 import { AppExtraStudyHandler } from "./appExtraStudyHandler";
-import { Profile } from "./profile";
+import { Profile, SyncConflicAutoResolve } from "./profile";
 const UNGROUPED_GROUP = "__ungrouped__"
 
 const STORE_FILENAME = "profile.json"
@@ -221,7 +221,8 @@ export class App {
     async initProfile(): Promise<boolean> {
         await this.profile.init();
         if (this.profile.isLoggedIn) {
-            const changed = await this.profile.trySyncProfile(this);
+            const strategy = isTauri() ? SyncConflicAutoResolve.ask : SyncConflicAutoResolve.normalPull;
+            const changed = await this.profile.trySyncProfile(this, strategy);
             return changed;
         } else {
             return false;
@@ -272,8 +273,9 @@ export class App {
             this.storage.save(STORE_KEY_LAST_SYNC_TIME, this.lastSyncTime),
         ]);
         if (!skipSync) {
-            if (awaitSync) await this.profile.trySyncProfile(this);
-            else this.profile.trySyncProfile(this).catch(console.error);
+            const strategy = isTauri() ? SyncConflicAutoResolve.ask : SyncConflicAutoResolve.normalPush;
+            if (awaitSync) await this.profile.trySyncProfile(this, strategy);
+            else this.profile.trySyncProfile(this, strategy).catch(console.error);
         }
     }
     async updateLastSyncTime(time = new Date()) {
