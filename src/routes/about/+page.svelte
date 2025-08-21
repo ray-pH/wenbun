@@ -18,6 +18,20 @@
     <div class="changelog-container">
         Change log
 
+        <h4>v0.7.0 (2025-08-21)</h4>
+        <ul>
+            <li>Added UI scale setting</li>
+            <li>Added auto-resolve strategies for sync conflicts</li>
+            <li>Improved UI for smaller screens</li>
+            <li>Changed default stroke grading leniency to 2.0</li>
+            <li>Fixed stroke grading leniency setting not being applied properly</li>
+            <li>Updated font for consistency across platforms</li>
+            <li>Added privacy policy page</li>
+        </ul>
+        <div class="note">
+            For users who were using the old default stroke grading leniency (1.0), it is advised to change it to 2.0 in the settings.
+        </div>
+
         <h4>v0.6.3 (2025-08-17)</h4>
         <ul>
             <li><b>(Major Fix)</b> Updated Chinese dictionary and HSK decks</li>
