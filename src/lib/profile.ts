@@ -16,6 +16,14 @@ export enum SyncDecision {
     conflict = "conflict",
 }
 
+export enum SyncConflicAutoResolve {
+    ask = "ask",
+    forcePull = "forcePull",
+    forcePush = "forcePush",
+    normalPull = "normalPull", // don't use conflict resolution, just pull
+    normalPush = "normalPush", // don't use conflict resolution, just push
+}
+
 export enum LoginStatus {
     loggedIn = "loggedIn",
     loggedOut = "loggedOut",
@@ -81,7 +89,7 @@ export class Profile {
     /**
      * @returns boolean: `true` if data changed
      */
-    async trySyncProfile(app: App): Promise<boolean> {
+    async trySyncProfile(app: App, syncConflictAutoResolveStrategy = SyncConflicAutoResolve.ask): Promise<boolean> {
         if (!this.isLoggedIn) return false;
         try {
             const [remoteProfileData, latestServerReviewLog] = await Promise.all([
@@ -105,7 +113,8 @@ export class Profile {
                 const remoteModifiedAt = new Date(remoteProfileData.meta.modifiedAt ?? 0);;
                 const lastSyncTime = new Date(app.lastSyncTime ?? 0);
                 const syncDecisionFromTime = this.getSyncDecision(localModifiedAt, remoteModifiedAt, lastSyncTime);
-                const syncDecision = (_.isEqual(remoteProfileData, app.exportProfile(false))) ? SyncDecision.none : syncDecisionFromTime;
+                let syncDecision = (_.isEqual(remoteProfileData, app.exportProfile(false))) ? SyncDecision.none : syncDecisionFromTime;
+                syncDecision = await this.autoResolveSyncConflict(syncDecision, syncConflictAutoResolveStrategy, app);
                 switch (syncDecision) {
                     case SyncDecision.conflict: {
                         this.syncConflictInfo = { localModifiedAt, remoteModifiedAt, lastSyncTime };
@@ -159,6 +168,29 @@ export class Profile {
             console.error(e);
             //TODO: not sure if something went wrong whether to return true or false
             return false;
+        }
+    }
+    
+    async autoResolveSyncConflict(decision: SyncDecision, strategy: SyncConflicAutoResolve, app: App): Promise<SyncDecision> {
+        if (decision !== SyncDecision.conflict) return decision;
+        switch (strategy) {
+            case SyncConflicAutoResolve.ask: {
+                return SyncDecision.conflict;
+            }
+            case SyncConflicAutoResolve.normalPull: {
+                return SyncDecision.pull;
+            }
+            case SyncConflicAutoResolve.normalPush: {
+                return SyncDecision.push;
+            }
+            case SyncConflicAutoResolve.forcePull: {
+                await this.tryForcePull(app);
+                return SyncDecision.pull;
+            }
+            case SyncConflicAutoResolve.forcePush: {
+                await this.tryForcePush(app);
+                return SyncDecision.push;
+            }
         }
     }
     
