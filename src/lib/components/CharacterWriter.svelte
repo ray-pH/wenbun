@@ -107,6 +107,7 @@
         });
         if (!cardConfig.isFirstTime) {
             writer.quiz({
+                leniency: app.getConfig().strokeLeniency,
                 onMistake: () => { 
                     autoReviewData.incorrectStrokeCount++; 
                     autoReviewData.totalStrokeCount++;
