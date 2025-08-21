@@ -109,6 +109,15 @@ export const SETTINGS_LABEL_DATA = {
         help: "When enabled, the previously studied card will be drawn from the back of the pool.",
     },
     
+    uiScale: {
+        label: "UI Scale",
+        help: "Specifies the UI scale.",
+    },
+    customFontSize: {
+        label: "Custom Font Size",
+        help: "Specifies the custom font size for the UI Scale. 'small' is 10px, 'normal' is 16px. (min 8, max 32)",
+    },
+    
     learningSteps: {
         label: "Learning Steps",
         help: "Defines the sequence of intervals used by FSRS during the initial learning phase before cards enter the long-term review schedule.",

@@ -212,6 +212,24 @@
         </div>
         
         <div class="settings-section">
+            <div class="section-title">UI</div>
+            <div class="section-container">
+                <SettingsItem key="uiScale">
+                    <select bind:value={config.uiScale}>
+                        <option value="small">small</option>
+                        <option value="normal">normal</option>
+                        <option value="custom">custom</option>
+                    </select>
+                </SettingsItem>
+                {#if config.uiScale === 'custom'}
+                    <SettingsItem key="customFontSize">
+                        <input type="number" step="1" min="8" max="32" bind:value={config.customFontSize}>
+                    </SettingsItem>
+                {/if}
+            </div>
+        </div>
+        
+        <div class="settings-section">
             <div class="section-title">Character Writer</div>
             <div class="section-container">
                 <SettingsItem key="strokeLeniency">
@@ -406,5 +424,8 @@
             background-color: gray;
             pointer-events: none;
         }
+    }
+    input:invalid {
+        background-color: #DB6B6C;
     }
 </style>

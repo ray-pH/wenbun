@@ -22,11 +22,15 @@
     let unmounted = $state(false);
     
     function getEmInPx(): number {
-        return parseFloat(getComputedStyle(document.documentElement).fontSize);
+        return parseFloat(getComputedStyle(document.body).fontSize);
+    }
+    function getUiScale(): number {
+        return parseFloat(getComputedStyle(document.body).fontSize) 
+            / parseFloat(getComputedStyle(document.documentElement).fontSize);
     }
     function updateWidth() {
         const emPx = getEmInPx() * 3 * 2;
-        width = Math.min(document.documentElement.clientWidth - emPx, 500);
+        width = Math.min(document.documentElement.clientWidth - emPx, 500) * getUiScale();
         height = width;
     }
     
