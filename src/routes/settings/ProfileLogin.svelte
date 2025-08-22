@@ -172,32 +172,7 @@
     }
     
     .button {
-        all: unset;
-        color: white;
-        background-color: #3E92CC;
-        border-radius: 0.5em;
-        font-size: 0.9em;
-        padding: 0.5em 1em;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
         margin-top: 0.5em;
-        &:hover {
-            opacity: 0.8;
-        }
-        &:disabled {
-            background-color: gray;
-            pointer-events: none;
-        }
-        &.invert {
-            border: #3E92CC solid 1px;
-            background-color: #FFFFFF90;
-            color: #3E92CC;
-            &:hover {
-                background-color: lightgray;
-            }
-        }
     }
     .note {
         font-size: 0.9em;

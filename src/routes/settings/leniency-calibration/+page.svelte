@@ -156,23 +156,4 @@
             max-width: 24em;
         }
     }
-    .button {
-        all: unset;
-        color: white;
-        background-color: #3E92CC;
-        border-radius: 0.5em;
-        font-size: 0.9em;
-        padding: 0.5em 1em;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        &:hover {
-            opacity: 0.8;
-        }
-        &:disabled {
-            background-color: gray;
-            pointer-events: none;
-        }
-    }
 </style>

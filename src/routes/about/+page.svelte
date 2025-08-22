@@ -159,32 +159,13 @@
         font-size: 0.9em;
         margin-top: 0.5em;
     }
-    .button {
-        all: unset;
-        color: white;
-        background-color: #3E92CC;
-        border-radius: 0.5em;
-        font-size: 0.9em;
-        padding: 0.5em 1em;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        &:hover {
-            opacity: 0.8;
-        }
-        &:disabled {
-            background-color: gray;
-            pointer-events: none;
-        }
-    }
 
     .privacy-policy-link {
         margin-top: 2em;
         font-size: 0.9em;
     }
     
-    a {
-		color: #3e92cc;
-	}
+    .privacy-policy-link a {
+        color: #3e92cc;
+    }
 </style>
