@@ -69,8 +69,12 @@ export const ChineseToneColorPalette = {
 }
 
 export const CHINESE_DICT_SRC = `${base}/assets/dict/zh_dict.json`;
+export const CHINESE_CC_CEDICT_SRC = `${base}/assets/dict/zh_cc_cedict_array.json`;
+export const HANZI_WRITER_DATA_CHARS_SRC = `${base}/assets/hanzi_writer_data_chars.txt`;
 
 export const SLUG_NO_DATA_IN_DICT = "ERROR: information about this word is not available in the dictionary. Please report this issue to the developer.";
+export const SLUG_NO_DATA_IN_HANZI_WRITER = "Characters in this word are not supported by Hanzi Writer. Please report this issue to the developer.";
+export const SLUG_NO_DATA_IN_DICT_PREVIEW = "This word doesn't exist in the dictionary, try enabling extra dictionary"
 
 export const DEFAULT_FSRS_PARAM =  [
     0.212, 1.2931, 2.3065, 8.2956, 6.4133, 0.8334, 3.0194, 0.001, 1.8722, 0.1666, 

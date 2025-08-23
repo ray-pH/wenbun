@@ -1,5 +1,5 @@
 import { pinyinToZhuyin } from "pinyin-zhuyin";
-import { CHINESE_DICT_SRC, SLUG_NO_DATA_IN_DICT, WENBUN_AUDIO_URL, WENBUN_AUDIO_ZH_PREFIX_SRC, YUE_AUDIO_DICT_SRC, ZH_AUDIO_DICT_SRC } from "./constants";
+import { CHINESE_CC_CEDICT_SRC, CHINESE_DICT_SRC, HANZI_WRITER_DATA_CHARS_SRC, SLUG_NO_DATA_IN_DICT, WENBUN_AUDIO_URL, WENBUN_AUDIO_ZH_PREFIX_SRC, YUE_AUDIO_DICT_SRC, ZH_AUDIO_DICT_SRC } from "./constants";
 import { parseIntOrUndefined, type CharacterWriterData } from "./util";
 import * as OpenCC from 'opencc-js';
 
@@ -24,7 +24,7 @@ export interface ChineseWordData {
     }[];
 }
 
-type ChineseDict = Record<string, {
+export type ChineseDict = Record<string, {
     meaning: string,
     pinyin_num: string,
     pinyin: string,
@@ -47,29 +47,56 @@ export interface CharacterWriterDataConfig {
 export class ChineseCharacterWordlist {
     public dict: ChineseDict = {};
     private converter!: ChineseCharacterConverter;
+    private simplifiedConverter!: ChineseCharacterConverter;
     private audioDict: Record<string, string[]> = {};
+    private hanziWriterDataChars: Set<string> = new Set();
     public lang: 'zh' | 'yue' = 'zh';
     public initialized = false;
     
     constructor() {
     }
     
-    async init(lang: 'zh' | 'yue'): Promise<void> {
+    async init(lang: 'zh' | 'yue', useExtraDict: boolean = false): Promise<void> {
         this.lang = lang;
-        const dictP = fetch(CHINESE_DICT_SRC)
-            .then(res => res.json())
-            .then(dict => this.dict = dict);
-        const audioDictP = fetch(lang === 'zh' ? ZH_AUDIO_DICT_SRC : YUE_AUDIO_DICT_SRC)
-            .then(res => res.json())
-            .then(dict => this.audioDict = dict);
-        await Promise.allSettled([dictP, audioDictP]);
-        this.converter = new ChineseCharacterConverter('cn', 'tw');
+        const dictP = async () => {
+            const res = await fetch(CHINESE_DICT_SRC)
+            const dict = await res.json();
+            this.dict = dict;
+            if(useExtraDict){
+                const res = await fetch(CHINESE_CC_CEDICT_SRC)
+                const dict = await res.json();
+                Object.entries(dict).forEach(([k, v]: [string, any]) => {
+                    // meaning, pinyin_num, pinyin, jyutping,
+                    if (this.dict[k] === undefined) {
+                        this.dict[k] = {
+                            meaning: v[0],
+                            pinyin_num: v[1],
+                            pinyin: v[2],
+                            jyutping: v[3],
+                        }
+                    }
+                });
+            }
+        } 
+        const audioDictP = async () => {
+            const res = await fetch(lang === 'zh' ? ZH_AUDIO_DICT_SRC : YUE_AUDIO_DICT_SRC)
+            const dict = await res.json();
+            this.audioDict = dict;
+        }
+        const hanziWriterDataCharsP = async () => {
+            const res = await fetch(HANZI_WRITER_DATA_CHARS_SRC);
+            const chars = await res.text();
+            this.hanziWriterDataChars = new Set(chars);
+        }
+        await Promise.allSettled([dictP(), audioDictP(), hanziWriterDataCharsP()]);
+        this.converter = new ChineseCharacterConverter('cn', 't');
+        this.simplifiedConverter = new ChineseCharacterConverter('t', 'cn');
         this.initialized = true;
     }
     
     getCharacterWriterData(word: string, config: CharacterWriterDataConfig = {}): CharacterWriterData | undefined {
         word = word.replace(/\r/g, '');
-        const wordData = this.dict[word];
+        const wordData = this.getWordData(word);
         if (!wordData) {
             return {
                 characters: word,
@@ -93,6 +120,10 @@ export class ChineseCharacterWordlist {
         });
         
         return <CharacterWriterData>{ characters, reading, meanings, audioUrl, tags };
+    }
+    
+    getWordData(word: string): ChineseDict[string] | undefined {
+        return this.dict[word] ?? this.dict[this.simplifiedConverter.convert(word)];
     }
     
     getAudioUrlArray(word: string): string[][] {
@@ -124,6 +155,15 @@ export class ChineseCharacterWordlist {
             case ChineseMandarinReading.PinyinNumeric: return wordData.pinyin_num;
             case ChineseMandarinReading.Zhuyin: return pinyinToZhuyin(wordData.pinyin_num);
         }
+    }
+    
+    isWordSupportedByHanziWriter(word: string): boolean {
+        word = word.replace(/\r/g, '');
+        return Array.from(word).every(c => this.isCharSupportedByHanziWriter(c));
+    }
+    
+    isCharSupportedByHanziWriter(char: string): boolean {
+        return this.hanziWriterDataChars.has(char);
     }
 }
 
