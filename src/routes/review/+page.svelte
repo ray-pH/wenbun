@@ -90,17 +90,19 @@
         _changeCounter++;
     }
     
-    function onLearnNewCard() {
+    async function onLearnNewCard() {
         app.startWarmUp(deckId, currentCardId!);
+        await app.save();
         isNewCardInteractedWith = true;
         currentCardId = currentCardId;
         scheduledTimeStr = app.getRatingScheduledTimeStr(deckId, currentCardId!);
         cardState = app.getWenbunCustomState(deckId, currentCardId!);
     }
     
-    function onSkipWarmUp() {
+    async function onSkipWarmUp() {
         app.skipWarmUp(deckId, currentCardId!);
         isNewCardInteractedWith = true;
+        await app.save();
         nextCard();
     }
     
