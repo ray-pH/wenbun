@@ -35,10 +35,12 @@
     onMount(async () => {
         // no need to sync in here
         await app.init();
-        isZhCantonese = app.deckData[deckId]?.tags?.includes(DECK_TAGS.ZH_YUE);
-        await wordlist.init(isZhCantonese ? 'yue' : 'zh');
+        const tags = app.deckData[deckId]?.tags;
+        isZhCantonese = tags?.includes(DECK_TAGS.ZH_YUE);
+        const isUseExtraDict = tags?.includes(DECK_TAGS.ZH_EXTRA_DICT);
+        await wordlist.init(isZhCantonese ? 'yue' : 'zh', isUseExtraDict);
         app = app;
-        isZhTraditional = app.deckData[deckId]?.tags?.includes(DECK_TAGS.ZH_TRAD);
+        isZhTraditional = tags?.includes(DECK_TAGS.ZH_TRAD);
         isAutoGrading = app.isAutoGrading();
         isPageReady = true;
         if (data.isExtraStudy) app.extraStudyHandler.registerReviewCardIdsOverride(cardIds);
@@ -88,17 +90,19 @@
         _changeCounter++;
     }
     
-    function onLearnNewCard() {
+    async function onLearnNewCard() {
         app.startWarmUp(deckId, currentCardId!);
+        await app.save();
         isNewCardInteractedWith = true;
         currentCardId = currentCardId;
         scheduledTimeStr = app.getRatingScheduledTimeStr(deckId, currentCardId!);
         cardState = app.getWenbunCustomState(deckId, currentCardId!);
     }
     
-    function onSkipWarmUp() {
+    async function onSkipWarmUp() {
         app.skipWarmUp(deckId, currentCardId!);
         isNewCardInteractedWith = true;
+        await app.save();
         nextCard();
     }
     
@@ -183,7 +187,7 @@
 </script>
 
 
-<TopBar title={title} backUrl="{base}/"></TopBar>
+<TopBar title={title}></TopBar>
 <div class="container">
     {#if isDoneToday} 
         <div>You have done today's review.</div>
@@ -207,7 +211,10 @@
                         {app.getScheduledReviewCardsCount(deckId) || ''}
                     </span>
                     <span class="deck-count-new" class:underlined={cardState === WenBunCustomState.New}>
-                        {app.getScheduledNewOrWarmUpCardsCount(deckId) || ''}
+                        {app.getScheduledNewCardsCount(deckId) || ''}
+                    </span>
+                    <span class="deck-count-new" class:underlined={cardState === WenBunCustomState.WarmUp}>
+                        {app.getWarmUpCardsCount(deckId) ? `(${app.getWarmUpCardsCount(deckId)})` : ''}
                     </span>
                     <span class="deck-count-previously-studied" class:underlined={cardState === WenBunCustomState.PreviouslyStudied}>
                         {app.getScheduledPreviouslyStudiedCardsCount(deckId) || ''}

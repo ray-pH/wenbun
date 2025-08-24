@@ -160,7 +160,7 @@
     
 </script>
 
-<TopBar title="Deck" backUrl="{base}/"></TopBar>
+<TopBar title="Deck"></TopBar>
 <div class="container">
     <div class="top-container" style="display: flex; gap: 0.5em; margin-bottom: 2em">
         <div class="top-control-container">
@@ -377,24 +377,7 @@
         }
     }
     .button {
-        all: unset;
-        color: white;
-        background-color: #3E92CC;
-        border-radius: 0.5em;
-        font-size: 0.9em;
-        padding: 0.5em 1em;
-        display: flex;
-        justify-content: center;
-        align-items: center;
         gap: 0.5em;
-        cursor: pointer;
-        &:hover {
-            opacity: 0.8;
-        }
-        &:disabled {
-            background-color: gray;
-            pointer-events: none;
-        }
     }
     .delete-button {
         background-color: #B75657;

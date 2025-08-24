@@ -3,7 +3,7 @@
 	import TopBar from '$lib/components/TopBar.svelte';
 </script>
 
-<TopBar title="Wenbun Privacy Policy" backUrl="{base}/about"></TopBar>
+<TopBar title="Wenbun Privacy Policy"></TopBar>
 <div class="container">
 	<div class="text-container">
 		<p>Last updated: August 17, 2025</p>

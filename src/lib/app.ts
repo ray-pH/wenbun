@@ -1,13 +1,14 @@
 import * as FSRS from "ts-fsrs"
-import { dateDiffFormatted, getDaysSinceEpochLocal, getDeckFilename, loadDeck, type DeepRequired } from "./util"
+import { dateDiffFormatted, getDaysSinceEpochLocal, getDeckFilename, loadDeck, semverBiggerThan, type DeepRequired } from "./util"
 import { BrowserIndexedDBStorage, type IStorage, TauriStorage } from "./storage";
 import _ from "lodash";
-import { ChineseToneColorPalette, DeckInfo, DEFAULT_FSRS_PARAM } from "./constants";
+import { ChineseToneColorPalette, DECK_TAGS, DeckInfo, DEFAULT_FSRS_PARAM } from "./constants";
 import { isTauri } from "@tauri-apps/api/core";
 import { WebFileManager, type IFileManager } from "./fileManager";
 import { ChineseMandarinReading } from "./chinese";
 import { AppExtraStudyHandler } from "./appExtraStudyHandler";
 import { Profile, SyncConflicAutoResolve } from "./profile";
+declare const __APP_VERSION__: string; // injected by vite
 const UNGROUPED_GROUP = "__ungrouped__"
 
 const STORE_FILENAME = "profile.json"
@@ -116,7 +117,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     customFontSize: 16,
     
     gradingMethod: 'auto',
-    strokeLeniency: 2.0,
+    strokeLeniency: 1.5,
     
     learningSteps: ["1m", "10m"],
     previouslyStudiedLearningSteps: ["1m", "5d"],
@@ -148,6 +149,7 @@ type AutoReviewGradeLog = {
 
 export interface ProfileDataMeta {
     _profileVersion?: number,
+    clientVersion?: string, // semver
     modifiedAt?: string,
 }
 
@@ -229,9 +231,7 @@ export class App {
     async initProfile(): Promise<boolean> {
         await this.profile.init();
         if (this.profile.isLoggedIn) {
-            const strategy = isTauri() ? SyncConflicAutoResolve.ask : SyncConflicAutoResolve.forcePull;
-            // use force pull for now so that a backup will be created
-            // will change this to normal pull when everything is stable
+            const strategy = isTauri() ? SyncConflicAutoResolve.ask : SyncConflicAutoResolve.normalPull;
             const changed = await this.profile.trySyncProfile(this, strategy);
             return changed;
         } else {
@@ -244,7 +244,6 @@ export class App {
         this.deckData = {};
         this.reviewLogs = [];
         this.config = DEFAULT_CONFIG;
-        await this.ensureDeckData();
         await this.save();
     }
     
@@ -279,7 +278,7 @@ export class App {
         this.config = config || DEFAULT_CONFIG;
         this.reviewLogs = reviewLogs || [];
         this.autoReviewGradeLog = autoReviewGradeLog || [];
-        this.meta = meta || {};
+        this.meta = meta || {clientVersion: __APP_VERSION__};
         this.lastSyncTime = lastSyncTime || new Date(0).toISOString();
         this.isLoadDone = true;
     }
@@ -290,6 +289,7 @@ export class App {
         this.updateFontSize();
         this.meta.modifiedAt = new Date().toISOString();
         this.meta._profileVersion = 1;
+        this.meta.clientVersion = __APP_VERSION__;
         await Promise.all([
             this.storage.save(STORE_KEY_DECKS, this.decks),
             this.storage.save(STORE_KEY_DECK_DATA, this.deckData),
@@ -392,15 +392,19 @@ export class App {
         await this.save();
     }
     
-    async getInitDeckData(deckId: string): Promise<DeckData | undefined> {
+    async getInitDeckDataById(deckId: string): Promise<DeckData | undefined> {
         const deckInfo = DeckInfo.find(d => d.id === deckId);
         const deck = await loadDeck(deckInfo?.src ?? `${deckId}.txt`);
         if (!deck) return undefined;
-        return <DeckData>{
-            deck,
-            tags: deckInfo?.tags ?? [],
+        return this.getInitDeckData(deck, deckInfo?.tags ?? []);
+    }
+    
+    getInitDeckData(words: string[], tags: DECK_TAGS[]): DeckData {
+        const deckData: DeckData = {
+            deck: words,
+            tags,
             groups: [
-                { label: UNGROUPED_GROUP, cardIds: Array.from(deck.keys()) } // 0..(deck.length - 1)
+                { label: UNGROUPED_GROUP, cardIds: Array.from(words.keys()) } // 0..(deck.length - 1)
             ],
             ignoredIds: [],
             previouslyStudied: [],
@@ -410,15 +414,22 @@ export class App {
             doneTodayPreviouslyStudiedCardCount: 0,
             doneTodayReviewCount: 0,
         }
+        return deckData;
     }
     
-    async addDeck(deckId: string): Promise<void> {
-        if (!this.decks.includes(deckId)) {
-            this.decks.push(deckId);
-            await this.ensureDeckDataById(deckId);
-            this.splitDeckIntoGroupOfN(deckId, DEFAULT_GROUP_CONTENT_COUNT)
-            await this.save();
-        }
+    async addDeckById(deckId: string): Promise<void> {
+        const deckData = await this.getInitDeckDataById(deckId);
+        if (!deckData) return Promise.reject(new Error("loading deck failed"))
+        await this.addDeck(deckId, deckData);
+    }
+    
+    async addDeck(deckId: string, deckData: DeckData): Promise<void> {
+        if (this.deckData[deckId]) return;
+        this.deckData[deckId] = deckData;
+        if (this.decks.includes(deckId)) return;
+        this.decks.push(deckId);
+        this.splitDeckIntoGroupOfN(deckId, DEFAULT_GROUP_CONTENT_COUNT)
+        await this.save();
     }
     
     async deleteDeck(deckId: string, confirmed = false): Promise<void> {
@@ -430,19 +441,8 @@ export class App {
         delete this.deckData[deckId];
     }
     
-    async ensureDeckData(): Promise<void> {
-        const promises = this.decks.map(async (deckId) => {
-            await this.ensureDeckDataById(deckId);
-        });
-        await Promise.all(promises);
-    }
-    
-    async ensureDeckDataById(deckId: string): Promise<void> {
-        if (!this.deckData[deckId]) {
-            const initDeckData = await this.getInitDeckData(deckId);
-            if (!initDeckData) return Promise.reject(new Error("loading deck failed"))
-            this.deckData[deckId] = initDeckData;
-        }
+    isDeckIdExists(deckId: string): boolean {
+        return this.decks.includes(deckId);
     }
     
     getConfig(): DeepRequired<WenbunConfig> {
@@ -722,6 +722,10 @@ export class App {
         const count = Math.min(newCount + warmUpCount, config.newCardPerDay - deckData.doneTodayNewCardCount);
         return Math.max(0, count);
     }
+    getScheduledNewCardsCount(deckId: string): number {
+        const scheduledOrWarmUpCount = this.getScheduledNewOrWarmUpCardsCount(deckId);
+        return scheduledOrWarmUpCount - this.getWarmUpCardsCount(deckId);
+    }
     getScheduledPreviouslyStudiedCardsCount(deckId: string): number {
         const config = this.getConfig();
         const deckData = this.deckData[deckId];
@@ -885,5 +889,12 @@ export class App {
     
     storeAutoGradeLog(correctCount: number, mistakeCount: number, grade: FSRS.Grade) {
         this.autoReviewGradeLog.push({correctCount, mistakeCount, grade});
+    }
+    
+    getCurrentAppVersion(): string {
+        return __APP_VERSION__;
+    }
+    isNewUpdateExist(): boolean {
+        return semverBiggerThan(__APP_VERSION__, this.meta.clientVersion ?? '0.0.0');
     }
 }

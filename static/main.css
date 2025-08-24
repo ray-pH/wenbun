@@ -1,0 +1,33 @@
+.button {
+    all: unset;
+    color: white;
+    background-color: #3E92CC;
+    border-radius: 0.5em;
+    font-size: 0.9em;
+    padding: 0.5em 1em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    &.invert {
+        border: #3E92CC solid 1px;
+        background-color: #FFFFFF90;
+        color: #3E92CC;
+        &:hover {
+            background-color: lightgray;
+        }
+    }
+    &:hover {
+        opacity: 0.8;
+    }
+    &.disabled,
+    &:disabled {
+        background-color: gray;
+        pointer-events: none;
+    }
+}
+
+input:invalid,
+input.invalid {
+    background-color: #DB6B6C;
+}

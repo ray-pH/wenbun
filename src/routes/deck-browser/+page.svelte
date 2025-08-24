@@ -40,7 +40,7 @@
       );
     }
     async function addDeck(deckId: string) {
-        await app.addDeck(deckId);
+        await app.addDeckById(deckId);
         app = app;
     }
     
@@ -56,7 +56,7 @@
     }
 </script>
 
-<TopBar title="Browse Decks" backUrl="{base}/"></TopBar>
+<TopBar title="Browse Decks"></TopBar>
 <div class="main-container">
     {#if isLoaded}
         <div class="top-container">
@@ -70,6 +70,14 @@
                 </select>
             </div>
         </div>
+        {#if filterText.trim() === ''}
+            <div class="custom-deck-upload-container">
+                <a class="button upload-deck-button" href="{base}/upload-custom-deck">
+                    <i class="fa-solid fa-file-import"></i>&nbsp;
+                    Upload custom deck
+                </a>
+            </div>
+        {/if}
         <div class="deck-list-container">
             {#each filteredDeckInfo as info}
                 <div class="deck-card-container">
@@ -172,5 +180,13 @@
         &.invisible {
             opacity: 0;
         }
+    }
+    .custom-deck-upload-container {
+        margin-bottom: 1em;
+    }
+    .upload-deck-button {
+        width: 90vw;
+        max-width: 30em;
+        padding: 1em;
     }
 </style>

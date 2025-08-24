@@ -14,7 +14,7 @@
         id: string;
         totalWordCount: number;
         totalWordsWithDictData: number;
-        isHealthy: boolean;
+        totalWordsSupportedByHanziWriter: number;
         missingWords: string[];
     }[] = []
     
@@ -35,12 +35,12 @@
             const missingWords = getMissingWordsFromDict(d.words);
             const totalWordCount = d.words.length;
             const totalWordsWithDictData = totalWordCount - missingWords.length;
-            const isHealthy = totalWordsWithDictData === totalWordCount;
+            const totalWordsSupportedByHanziWriterPromise = d.words.filter(w => zhWordlist.isWordSupportedByHanziWriter(w)).length;
             dictionaryCheckResult.push({
                 id: d.id, 
                 totalWordCount, 
                 totalWordsWithDictData, 
-                isHealthy,
+                totalWordsSupportedByHanziWriter: totalWordsSupportedByHanziWriterPromise,
                 missingWords
             });
             dictionaryCheckResult = dictionaryCheckResult;
@@ -55,15 +55,23 @@
     }
 </script>
 
-<TopBar title="Health Check" backUrl="{base}/"></TopBar>
+<TopBar title="Health Check"></TopBar>
 <div class="container">
     Word existence in the dictionary check
     {#each dictionaryCheckResult as d}
-        <div class:is-healthy={d.isHealthy}>
+        <div class:is-healthy={d.totalWordsWithDictData === d.totalWordCount}>
             {d.id}: {d.totalWordsWithDictData}/{d.totalWordCount} 
-            {#if !d.isHealthy}
+            {#if d.missingWords.length > 0}
                 [missing words: {take(d.missingWords, 5).join(', ')}, ...]
             {/if}
+        </div>
+    {/each}
+    
+    <br><br>
+    Word support by HanziWriter check
+    {#each dictionaryCheckResult as d}
+        <div class:is-healthy={d.totalWordsSupportedByHanziWriter === d.totalWordCount}>
+            {d.id}: {d.totalWordsSupportedByHanziWriter}/{d.totalWordCount} 
         </div>
     {/each}
 </div>

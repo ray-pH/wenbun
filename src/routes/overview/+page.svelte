@@ -56,7 +56,7 @@
     }
 </script>
 
-<TopBar title="Overview" backUrl="{base}/"></TopBar>
+<TopBar title="Overview"></TopBar>
 <div class="container">
     {#if isInitialized}
         <div class="deck-info">
@@ -252,25 +252,6 @@
             height: 3em;
             max-width: 25em;
             margin: auto;
-        }
-    }
-    .button {
-        all: unset;
-        color: white;
-        background-color: #3E92CC;
-        border-radius: 0.5em;
-        font-size: 0.9em;
-        padding: 0.5em 1em;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        &:hover {
-            opacity: 0.8;
-        }
-        &.disabled {
-            background-color: gray;
-            pointer-events: none;
         }
     }
     .loading {
