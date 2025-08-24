@@ -134,8 +134,7 @@
     
 </script>
 
-<!-- TODO: setup proper backUrl -->
-<TopBar title="Settings" backUrl="{base}/" isSettings={true} backConfirmCallback={backConfirmCallback}></TopBar>
+<TopBar title="Settings" isSettings={true} backConfirmCallback={backConfirmCallback}></TopBar>
 <div class="main-container">
     {#if config}
         <div class="top-settings-section">

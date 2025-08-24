@@ -3,7 +3,7 @@
     import { base } from "$app/paths";
 </script>
 
-<TopBar title="Custom Deck Help" backUrl="{base}/upload-custom-deck"></TopBar>
+<TopBar title="Custom Deck Help"></TopBar>
 <div class="container">
     <div class="help-content">
         <div class="section">

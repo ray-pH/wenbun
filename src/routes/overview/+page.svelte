@@ -56,7 +56,7 @@
     }
 </script>
 
-<TopBar title="Overview" backUrl="{base}/"></TopBar>
+<TopBar title="Overview"></TopBar>
 <div class="container">
     {#if isInitialized}
         <div class="deck-info">

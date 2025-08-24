@@ -86,7 +86,7 @@
     
 </script>
 
-<TopBar title="Upload Custom Deck" backUrl="{base}/deck-browser"></TopBar>
+<TopBar title="Upload Custom Deck"></TopBar>
 <div class="main-container">
     <div class="upload-container">
         <div class="section-title">Input</div>

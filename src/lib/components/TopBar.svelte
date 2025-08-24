@@ -1,22 +1,36 @@
 <script lang="ts">
     import { base } from '$app/paths';
     import { goto } from '$app/navigation';
+    import { get } from 'svelte/store';
+    import { navigationHistory, canGoBack } from '$lib/navigation';
+
     interface Props {
 		title: string;
-		backUrl?: string
-		isSettings?: boolean
-		backConfirmCallback?: () => Promise<boolean>
+		noBack?: boolean;
+		backUrl?: string; // override
+		isSettings?: boolean;
+		backConfirmCallback?: () => Promise<boolean>;
 	}
-    let { title, backUrl, isSettings, backConfirmCallback }: Props = $props();
+    let { title, noBack, backUrl, isSettings, backConfirmCallback }: Props = $props();
     
     function goBack() {
-        if (!backUrl) return;
+        const performBackNavigation = () => {
+            if (backUrl) {
+                navigationHistory.popWithoutGoingBack();
+                goto(backUrl);
+            } else if (get(canGoBack)) {
+                navigationHistory.back();
+            } else {
+                goto(base + '/');
+            }
+        };
+
         if (backConfirmCallback) {
             backConfirmCallback().then((confirmed) => {
-                if (confirmed) goto(backUrl);
+                if (confirmed) performBackNavigation();
             });
         } else {
-            goto(backUrl);
+            performBackNavigation();
         }
     }
 </script>
@@ -24,7 +38,7 @@
 <div class="top-bar-placeholder">hello</div>
 <div class="top-bar">
     <div class="left">
-        {#if backUrl}
+        {#if !noBack}
             <button class="icon-button" onclick={goBack} title="Back" aria-label="Back">
                 <i class="fa-solid fa-chevron-left"></i>
             </button>

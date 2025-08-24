@@ -160,7 +160,7 @@
     
 </script>
 
-<TopBar title="Deck" backUrl="{base}/"></TopBar>
+<TopBar title="Deck"></TopBar>
 <div class="container">
     <div class="top-container" style="display: flex; gap: 0.5em; margin-bottom: 2em">
         <div class="top-control-container">

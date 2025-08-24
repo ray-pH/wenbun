@@ -55,7 +55,7 @@
     }
 </script>
 
-<TopBar title="Health Check" backUrl="{base}/"></TopBar>
+<TopBar title="Health Check"></TopBar>
 <div class="container">
     Word existence in the dictionary check
     {#each dictionaryCheckResult as d}
