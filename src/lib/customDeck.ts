@@ -36,4 +36,11 @@ export class CustomDeckParser {
         const words = input.split("\n").filter(w => w.trim() !== '');
         return { words };
     }
+    
+    parseAnkiText(input: string, columnIndex: number): Partial<CustomDeck> {
+        const words = input.split("\n")
+            .filter(w => w.trim() !== '' && !w.startsWith("#"))
+            .map(w => w.split("\t")[columnIndex - 1]);
+        return { words };
+    }
 }
