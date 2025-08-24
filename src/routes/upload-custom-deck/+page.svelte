@@ -12,23 +12,32 @@
 
     let app = new App();
     let parser = new CustomDeckParser(app);
-    let input = "需\n看\n得\n起\n來\n祎\n𠮷";
+    let input = "";
     let customDeck: CustomDeck = DEFAULT_CUSTOM_DECK;
     let issueCount = 0;
     let issueIds: number[] = [];
     let isShowIssuesOnly = false;
+    
     let inputType = CUSTOM_DECK_INPUT_TYPE.Simple;
+    let ankiInputWordColumn: number = 1;
     
     let _updateCounter = 0;
     function update() { _updateCounter++ }
     
     function onInputChanged() {
         window.localStorage.setItem(LOCAL_STORAGE_KEY, input);
-        const newParsed = parser.parseSimple(input);
+        const newParsed = getParsed();
         if (newParsed) {
             customDeck = {...customDeck, ...newParsed};
         }
         update();
+    }
+    
+    function getParsed(): Partial<CustomDeck> {
+        switch (inputType) {
+            case CUSTOM_DECK_INPUT_TYPE.Simple: return parser.parseSimple(input);
+            case CUSTOM_DECK_INPUT_TYPE.AnkiText: return parser.parseAnkiText(input, ankiInputWordColumn);
+        }
     }
     
     async function uploadFile() {
@@ -83,12 +92,19 @@
         <div class="section-title">Input</div>
         <div>
             <label>Format:
-                <select bind:value={inputType}>
+                <select bind:value={inputType} onchange={onInputChanged}>
                     <option value={CUSTOM_DECK_INPUT_TYPE.Simple}>Simple</option>
                     <option value={CUSTOM_DECK_INPUT_TYPE.AnkiText}>Anki Text</option>
                 </select>
             </label>
         </div>
+        {#if inputType === CUSTOM_DECK_INPUT_TYPE.AnkiText}
+            <div>
+                <label> Column Index:
+                    <input type="number" bind:value={ankiInputWordColumn} step="1" min="0" oninput={onInputChanged}>
+                </label>
+            </div>
+        {/if}
         <textarea 
             bind:value={input} 
             oninput={onInputChanged}
