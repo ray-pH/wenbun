@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="theme-color" content="#3E92CC" />
+    <link rel="icon" href="./favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <title>WenBun</title>
+    <link rel="stylesheet" href="./main.css">
+    
+		<link rel="modulepreload" href="./_app/immutable/entry/start.BK5J6GHe.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/OJupb_Cg.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/D4HdPs5E.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/app.CDJ0SBRz.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/CWj6FrbW.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/Bw_0fAwL.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/un3tHoYv.js">
+  </head>
+  <style>
+    html {
+        overflow-x: hidden;
+    }
+    body {
+        max-width: 100vw;
+        overflow-x: hidden;
+        margin: 0;
+        padding: 0;
+        background-color: #E0E0E0;
+        font-family: 'Noto Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
+    .chinese-font {
+        font-family: 'Noto Sans SC', 'Noto Sans', Helvetica, Arial, sans-serif;
+    }
+    input, select, textarea, button {
+        font-size: 0.8333333em; /* 14px/16px */
+        line-height: 1.2em;
+    }
+  </style>
+  <body data-sveltekit-preload-data="hover">
+    <div style="display: contents">
+			<script>
+				{
+					__sveltekit_louzf = {
+						base: new URL(".", location).pathname.slice(0, -1),
+						assets: "/wenbun"
+					};
+
+					const element = document.currentScript.parentElement;
+
+					Promise.all([
+						import("./_app/immutable/entry/start.BK5J6GHe.js"),
+						import("./_app/immutable/entry/app.CDJ0SBRz.js")
+					]).then(([kit, app]) => {
+						kit.start(app, element);
+					});
+				}
+			</script>
+		</div>
+  </body>
+</html>
