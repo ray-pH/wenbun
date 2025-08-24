@@ -8,10 +8,11 @@
 		title: string;
 		noBack?: boolean;
 		backUrl?: string; // override
+		prohibitedBackUrl?: string;
 		isSettings?: boolean;
 		backConfirmCallback?: () => Promise<boolean>;
 	}
-    let { title, noBack, backUrl, isSettings, backConfirmCallback }: Props = $props();
+    let { title, noBack, backUrl, prohibitedBackUrl, isSettings, backConfirmCallback }: Props = $props();
     
     function goBack() {
         const performBackNavigation = () => {
@@ -19,7 +20,7 @@
                 navigationHistory.popWithoutGoingBack();
                 goto(backUrl);
             } else if (get(canGoBack)) {
-                navigationHistory.back();
+                navigationHistory.back(prohibitedBackUrl);
             } else {
                 goto(base + '/');
             }

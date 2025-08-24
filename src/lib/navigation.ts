@@ -1,5 +1,6 @@
 import { writable, derived, get } from 'svelte/store';
 import { goto } from '$app/navigation';
+import { base } from '$app/paths';
 
 const history = writable<string[]>([]);
 
@@ -11,7 +12,7 @@ export const navigationHistory = {
             history.update(h => [...h, path]);
         }
     },
-    back: () => {
+    back: (prohibitedBackUrl?: string) => {
         const currentHistory = get(history);
         if (currentHistory.length > 1) {
             // Pop current page from our history
@@ -21,8 +22,12 @@ export const navigationHistory = {
             // Get previous page
             const previousPage = newHistory[newHistory.length - 1];
             if (previousPage) {
-                // Navigate back. replaceState is used to not create a new entry in the browser's history.
-                goto(previousPage, { replaceState: true });
+                if (prohibitedBackUrl && new URL(previousPage, window.location.origin).pathname === prohibitedBackUrl) {
+                    goto(base + '/');
+                } else {
+                    // Navigate back. replaceState is used to not create a new entry in the browser's history.
+                    goto(previousPage, { replaceState: true });
+                }
             }
         }
     },
