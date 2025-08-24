@@ -116,7 +116,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     customFontSize: 16,
     
     gradingMethod: 'auto',
-    strokeLeniency: 2.0,
+    strokeLeniency: 1.5,
     
     learningSteps: ["1m", "10m"],
     previouslyStudiedLearningSteps: ["1m", "5d"],
