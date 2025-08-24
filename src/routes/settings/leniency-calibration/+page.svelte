@@ -51,7 +51,7 @@
         resetHanziWriter(leniency, chara);
     })
     
-    let leniency = $state(1.0);
+    let leniency = $state(1.5);
     onMount(() => {
         updateWidth();
         setupHanziWriter(leniency);
