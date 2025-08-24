@@ -108,7 +108,7 @@ export class ChineseCharacterWordlist {
         }
         
         const characters = config.convertToTraditional ? this.converter.convert(word) : word;
-        const reading = this.getReading(wordData, config.mandarinReading, config.isCantonese);
+        const reading = this.getReading(word, this.lang, config.mandarinReading);
         const meanings = [wordData.meaning];
         const audioUrl = config.isPlayAudio ? this.getAudioUrlArray(word) : [];
         const tags: string[][] = []
@@ -143,18 +143,25 @@ export class ChineseCharacterWordlist {
     }
     
     getReading(
-        wordData: ChineseDict[string], 
-        mandarinReading: ChineseMandarinReading = ChineseMandarinReading.Pinyin,
-        isCantonese: boolean = false
+        word: string,
+        lang: 'zh' | 'yue' = 'zh',
+        mandarinReading: ChineseMandarinReading = ChineseMandarinReading.Pinyin
     ): string {
-        if (isCantonese) {
-            return wordData.jyutping;
+        const wordData = this.getWordData(word);
+        if (!wordData) return '';
+        switch (lang) {
+            case 'yue': {
+                return wordData.jyutping;
+            }
+            case 'zh': {
+                switch (mandarinReading) {
+                    case ChineseMandarinReading.Pinyin: return wordData.pinyin;
+                    case ChineseMandarinReading.PinyinNumeric: return wordData.pinyin_num;
+                    case ChineseMandarinReading.Zhuyin: return pinyinToZhuyin(wordData.pinyin_num);
+                }
+            }
         }
-        switch (mandarinReading) {
-            case ChineseMandarinReading.Pinyin: return wordData.pinyin;
-            case ChineseMandarinReading.PinyinNumeric: return wordData.pinyin_num;
-            case ChineseMandarinReading.Zhuyin: return pinyinToZhuyin(wordData.pinyin_num);
-        }
+        return '';
     }
     
     isWordSupportedByHanziWriter(word: string): boolean {
