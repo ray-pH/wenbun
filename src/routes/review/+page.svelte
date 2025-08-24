@@ -211,7 +211,10 @@
                         {app.getScheduledReviewCardsCount(deckId) || ''}
                     </span>
                     <span class="deck-count-new" class:underlined={cardState === WenBunCustomState.New}>
-                        {app.getScheduledNewOrWarmUpCardsCount(deckId) || ''}
+                        {app.getScheduledNewCardsCount(deckId) || ''}
+                    </span>
+                    <span class="deck-count-new" class:underlined={cardState === WenBunCustomState.WarmUp}>
+                        {app.getWarmUpCardsCount(deckId) ? `(${app.getWarmUpCardsCount(deckId)})` : ''}
                     </span>
                     <span class="deck-count-previously-studied" class:underlined={cardState === WenBunCustomState.PreviouslyStudied}>
                         {app.getScheduledPreviouslyStudiedCardsCount(deckId) || ''}
