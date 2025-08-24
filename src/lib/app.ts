@@ -724,6 +724,10 @@ export class App {
         const count = Math.min(newCount + warmUpCount, config.newCardPerDay - deckData.doneTodayNewCardCount);
         return Math.max(0, count);
     }
+    getScheduledNewCardsCount(deckId: string): number {
+        const scheduledOrWarmUpCount = this.getScheduledNewOrWarmUpCardsCount(deckId);
+        return scheduledOrWarmUpCount - this.getWarmUpCardsCount(deckId);
+    }
     getScheduledPreviouslyStudiedCardsCount(deckId: string): number {
         const config = this.getConfig();
         const deckData = this.deckData[deckId];
