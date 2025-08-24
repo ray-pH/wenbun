@@ -282,14 +282,14 @@ export class App {
         this.lastSyncTime = lastSyncTime || new Date(0).toISOString();
         this.isLoadDone = true;
     }
-    async save(skipSync = false, awaitSync = false) {
+    async save(skipSync = false, awaitSync = false, updateMetaClientVersion = true) {
         const isChanged = await this.isDataChanged();
         if (!isChanged) return;
         
         this.updateFontSize();
         this.meta.modifiedAt = new Date().toISOString();
         this.meta._profileVersion = 1;
-        this.meta.clientVersion = __APP_VERSION__;
+        if (updateMetaClientVersion) this.meta.clientVersion = __APP_VERSION__;
         await Promise.all([
             this.storage.save(STORE_KEY_DECKS, this.decks),
             this.storage.save(STORE_KEY_DECK_DATA, this.deckData),
@@ -357,7 +357,8 @@ export class App {
             if (includeReviewLogs) {
                 this.reviewLogs = reviewLogs;
             }
-            await this.save(skipSync);
+            this.meta = meta;
+            await this.save(skipSync, undefined, false);
             return true;
         } catch (e) {
             return false;
