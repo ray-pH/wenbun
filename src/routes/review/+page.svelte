@@ -185,7 +185,7 @@
 </script>
 
 
-<TopBar title={title} backUrl="{base}/"></TopBar>
+<TopBar title={title}></TopBar>
 <div class="container">
     {#if isDoneToday} 
         <div>You have done today's review.</div>

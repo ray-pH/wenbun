@@ -56,7 +56,7 @@
     }
 </script>
 
-<TopBar title="Browse Decks" backUrl="{base}/"></TopBar>
+<TopBar title="Browse Decks"></TopBar>
 <div class="main-container">
     {#if isLoaded}
         <div class="top-container">

@@ -3,7 +3,7 @@
     import TopBar from '$lib/components/TopBar.svelte';
 </script>
 
-<TopBar title="About" backUrl="{base}/"></TopBar>
+<TopBar title="About"></TopBar>
 <div class="container">
     <div class="beta-notice">
         <p>

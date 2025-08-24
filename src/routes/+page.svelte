@@ -44,7 +44,7 @@
     }
 </script>
 
-<TopBar title="WenBun (beta)"></TopBar>
+<TopBar title="WenBun (beta)" noBack={true}></TopBar>
 <div class="main-container">
     <div class="top-container">
         <a class="a-button" style="background-color: #A0D0F0;" href="{base}/about/">Changelog</a>
