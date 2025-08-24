@@ -1,5 +1,5 @@
 import * as FSRS from "ts-fsrs"
-import { dateDiffFormatted, getDaysSinceEpochLocal, getDeckFilename, loadDeck, type DeepRequired } from "./util"
+import { dateDiffFormatted, getDaysSinceEpochLocal, getDeckFilename, loadDeck, semverBiggerThan, type DeepRequired } from "./util"
 import { BrowserIndexedDBStorage, type IStorage, TauriStorage } from "./storage";
 import _ from "lodash";
 import { ChineseToneColorPalette, DECK_TAGS, DeckInfo, DEFAULT_FSRS_PARAM } from "./constants";
@@ -8,6 +8,7 @@ import { WebFileManager, type IFileManager } from "./fileManager";
 import { ChineseMandarinReading } from "./chinese";
 import { AppExtraStudyHandler } from "./appExtraStudyHandler";
 import { Profile, SyncConflicAutoResolve } from "./profile";
+declare const __APP_VERSION__: string; // injected by vite
 const UNGROUPED_GROUP = "__ungrouped__"
 
 const STORE_FILENAME = "profile.json"
@@ -148,6 +149,7 @@ type AutoReviewGradeLog = {
 
 export interface ProfileDataMeta {
     _profileVersion?: number,
+    clientVersion?: string, // semver
     modifiedAt?: string,
 }
 
@@ -278,7 +280,7 @@ export class App {
         this.config = config || DEFAULT_CONFIG;
         this.reviewLogs = reviewLogs || [];
         this.autoReviewGradeLog = autoReviewGradeLog || [];
-        this.meta = meta || {};
+        this.meta = meta || {clientVersion: __APP_VERSION__};
         this.lastSyncTime = lastSyncTime || new Date(0).toISOString();
         this.isLoadDone = true;
     }
@@ -289,6 +291,7 @@ export class App {
         this.updateFontSize();
         this.meta.modifiedAt = new Date().toISOString();
         this.meta._profileVersion = 1;
+        this.meta.clientVersion = __APP_VERSION__;
         await Promise.all([
             this.storage.save(STORE_KEY_DECKS, this.decks),
             this.storage.save(STORE_KEY_DECK_DATA, this.deckData),
@@ -884,5 +887,12 @@ export class App {
     
     storeAutoGradeLog(correctCount: number, mistakeCount: number, grade: FSRS.Grade) {
         this.autoReviewGradeLog.push({correctCount, mistakeCount, grade});
+    }
+    
+    getCurrentAppVersion(): string {
+        return __APP_VERSION__;
+    }
+    isNewUpdateExist(): boolean {
+        return semverBiggerThan(__APP_VERSION__, this.meta.clientVersion ?? '0.0.0');
     }
 }

@@ -86,3 +86,21 @@ export function parseIntOrUndefined(value: string) {
     const n = parseInt(value, 10);
     return isNaN(n) ? undefined : n;
 }
+
+export function semverBiggerThan(a: string, b: string): boolean {
+    return compareSemver(a, b) > 0;
+}
+
+export function compareSemver(a: string, b: string): number {
+    const aParts = a.split('.').map(Number);
+    const bParts = b.split('.').map(Number);
+
+    for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+        const aNum = aParts[i] ?? 0; // default to 0 if missing
+        const bNum = bParts[i] ?? 0;
+
+        if (aNum > bNum) return 1;
+        if (aNum < bNum) return -1;
+    }
+    return 0; // equal
+}

@@ -7,16 +7,19 @@
     
     let app = new App();
     let isAutomaticallyLoggedOut = false;
+    let isNewUpdateExist = false;
     $: activeDeckIds = Object.keys(app.deckData);
     $: locked = isAutomaticallyLoggedOut;
     onMount(async () => {
         await app.init();
         app = app;
+        isNewUpdateExist = app.isNewUpdateExist();
         registerSW();
         
         const changed = await app.initProfile();
         isAutomaticallyLoggedOut = app.profile.isAutomaticallyLoggedOut();
         if (changed) app = app;
+        isNewUpdateExist = app.isNewUpdateExist();
     })
     
     function registerSW() {
@@ -47,7 +50,15 @@
 <TopBar title="WenBun (beta)" noBack={true}></TopBar>
 <div class="main-container">
     <div class="top-container">
-        <a class="a-button" style="background-color: #A0D0F0;" href="{base}/about/">Changelog</a>
+        <a class="a-button" style="background-color: #A0D0F0;" href="{base}/about/">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span>Changelog</span>
+                <span style="opacity: 0.4; font-weight: bold;">v{app.getCurrentAppVersion()}</span>
+            </div>
+            {#if isNewUpdateExist}
+                <span class="update-circle"></span>
+            {/if}
+        </a>
         {#if !locked}
             <a class="a-button" href="{base}/deck-browser/">Add New Deck</a>
         {/if}
@@ -211,6 +222,7 @@
     }
     .a-button {
         all: unset;
+        position: relative;
         display: block;
         background-color: #FFFFFF90;
         width: calc(100vw - 4em);
@@ -218,6 +230,15 @@
         border-radius: 0.5em;
         padding: 1em;
         cursor: pointer;
+    }
+    .update-circle {
+        position: absolute;
+        top: -0.3em;
+        right: -0.4em;
+        width: 1.5em;
+        height: 1.5em;
+        background-color: #DB6B6C;
+        border-radius: 50%;
     }
     .auto-logout-info-container {
         background-color: #FFFFFF90;
