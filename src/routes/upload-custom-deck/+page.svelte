@@ -104,13 +104,13 @@
         {#if inputType === CUSTOM_DECK_INPUT_TYPE.AnkiText}
             <div>
                 <label> Column Index:
-                    <input type="number" bind:value={ankiInputWordColumn} step="1" min="0" oninput={onInputChanged}>
+                    <input type="number" bind:value={ankiInputWordColumn} step="1" min="0" oninput={() => onInputChanged()}>
                 </label>
             </div>
         {/if}
         <textarea 
             bind:value={input} 
-            oninput={onInputChanged}
+            oninput={() => onInputChanged()}
             class="deck-textarea" placeholder="Enter deck text here"
         ></textarea>
         <button class="button" style="align-self: flex-end;" onclick={uploadFile}>
