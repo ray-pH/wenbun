@@ -89,8 +89,8 @@ export class ChineseCharacterWordlist {
             this.hanziWriterDataChars = new Set(chars);
         }
         await Promise.allSettled([dictP(), audioDictP(), hanziWriterDataCharsP()]);
-        this.converter = new ChineseCharacterConverter('cn', 't');
-        this.simplifiedConverter = new ChineseCharacterConverter('t', 'cn');
+        this.converter = new ChineseCharacterConverter('cn', 'tw');
+        this.simplifiedConverter = new ChineseCharacterConverter('tw', 'cn');
         this.initialized = true;
     }
     
