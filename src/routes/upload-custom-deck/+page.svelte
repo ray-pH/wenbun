@@ -97,6 +97,9 @@
                     <option value={CUSTOM_DECK_INPUT_TYPE.AnkiText}>Anki Text</option>
                 </select>
             </label>
+            <a href="{base}/upload-custom-deck/help" aria-label="Help" class="help-link">
+                <i class="fa-solid fa-circle-question"></i>
+            </a>
         </div>
         {#if inputType === CUSTOM_DECK_INPUT_TYPE.AnkiText}
             <div>
@@ -244,6 +247,9 @@
         display: flex;
         flex-direction: column;
         align-items: end;
+    }
+    .help-link {
+        color: #3e92cc;
     }
     
 </style>
