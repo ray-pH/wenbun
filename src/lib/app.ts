@@ -2,7 +2,7 @@ import * as FSRS from "ts-fsrs"
 import { dateDiffFormatted, getDaysSinceEpochLocal, getDeckFilename, loadDeck, type DeepRequired } from "./util"
 import { BrowserIndexedDBStorage, type IStorage, TauriStorage } from "./storage";
 import _ from "lodash";
-import { ChineseToneColorPalette, DeckInfo, DEFAULT_FSRS_PARAM } from "./constants";
+import { ChineseToneColorPalette, DECK_TAGS, DeckInfo, DEFAULT_FSRS_PARAM } from "./constants";
 import { isTauri } from "@tauri-apps/api/core";
 import { WebFileManager, type IFileManager } from "./fileManager";
 import { ChineseMandarinReading } from "./chinese";
@@ -244,7 +244,6 @@ export class App {
         this.deckData = {};
         this.reviewLogs = [];
         this.config = DEFAULT_CONFIG;
-        await this.ensureDeckData();
         await this.save();
     }
     
@@ -392,15 +391,19 @@ export class App {
         await this.save();
     }
     
-    async getInitDeckData(deckId: string): Promise<DeckData | undefined> {
+    async getInitDeckDataById(deckId: string): Promise<DeckData | undefined> {
         const deckInfo = DeckInfo.find(d => d.id === deckId);
         const deck = await loadDeck(deckInfo?.src ?? `${deckId}.txt`);
         if (!deck) return undefined;
-        return <DeckData>{
-            deck,
-            tags: deckInfo?.tags ?? [],
+        return this.getInitDeckData(deck, deckInfo?.tags ?? []);
+    }
+    
+    getInitDeckData(words: string[], tags: DECK_TAGS[]): DeckData {
+        const deckData: DeckData = {
+            deck: words,
+            tags,
             groups: [
-                { label: UNGROUPED_GROUP, cardIds: Array.from(deck.keys()) } // 0..(deck.length - 1)
+                { label: UNGROUPED_GROUP, cardIds: Array.from(words.keys()) } // 0..(deck.length - 1)
             ],
             ignoredIds: [],
             previouslyStudied: [],
@@ -410,15 +413,22 @@ export class App {
             doneTodayPreviouslyStudiedCardCount: 0,
             doneTodayReviewCount: 0,
         }
+        return deckData;
     }
     
-    async addDeck(deckId: string): Promise<void> {
-        if (!this.decks.includes(deckId)) {
-            this.decks.push(deckId);
-            await this.ensureDeckDataById(deckId);
-            this.splitDeckIntoGroupOfN(deckId, DEFAULT_GROUP_CONTENT_COUNT)
-            await this.save();
-        }
+    async addDeckById(deckId: string): Promise<void> {
+        const deckData = await this.getInitDeckDataById(deckId);
+        if (!deckData) return Promise.reject(new Error("loading deck failed"))
+        await this.addDeck(deckId, deckData);
+    }
+    
+    async addDeck(deckId: string, deckData: DeckData): Promise<void> {
+        if (this.deckData[deckId]) return;
+        this.deckData[deckId] = deckData;
+        if (this.decks.includes(deckId)) return;
+        this.decks.push(deckId);
+        this.splitDeckIntoGroupOfN(deckId, DEFAULT_GROUP_CONTENT_COUNT)
+        await this.save();
     }
     
     async deleteDeck(deckId: string, confirmed = false): Promise<void> {
@@ -430,19 +440,8 @@ export class App {
         delete this.deckData[deckId];
     }
     
-    async ensureDeckData(): Promise<void> {
-        const promises = this.decks.map(async (deckId) => {
-            await this.ensureDeckDataById(deckId);
-        });
-        await Promise.all(promises);
-    }
-    
-    async ensureDeckDataById(deckId: string): Promise<void> {
-        if (!this.deckData[deckId]) {
-            const initDeckData = await this.getInitDeckData(deckId);
-            if (!initDeckData) return Promise.reject(new Error("loading deck failed"))
-            this.deckData[deckId] = initDeckData;
-        }
+    isDeckIdExists(deckId: string): boolean {
+        return this.decks.includes(deckId);
     }
     
     getConfig(): DeepRequired<WenbunConfig> {

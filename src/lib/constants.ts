@@ -2,7 +2,8 @@ import { base } from "$app/paths";
 
 export enum DECK_TAGS {
     ZH_TRAD = "ZH_TRAD",
-    ZH_YUE = "ZH_YUE"
+    ZH_YUE = "ZH_YUE",
+    ZH_EXTRA_DICT = "ZH_EXTRA_DICT",
 }
 
 export const MainDeckInfo = [
@@ -73,7 +74,7 @@ export const CHINESE_CC_CEDICT_SRC = `${base}/assets/dict/zh_cc_cedict_array.jso
 export const HANZI_WRITER_DATA_CHARS_SRC = `${base}/assets/hanzi_writer_data_chars.txt`;
 
 export const SLUG_NO_DATA_IN_DICT = "ERROR: information about this word is not available in the dictionary. Please report this issue to the developer.";
-export const SLUG_NO_DATA_IN_HANZI_WRITER = "Characters in this word are not supported by Hanzi Writer. Please report this issue to the developer.";
+export const SLUG_NO_DATA_IN_HANZI_WRITER = "Character(s) in this word are not supported by Hanzi Writer. This word will be ignored";
 export const SLUG_NO_DATA_IN_DICT_PREVIEW = "This word doesn't exist in the dictionary, try enabling extra dictionary"
 
 export const DEFAULT_FSRS_PARAM =  [
@@ -179,5 +180,19 @@ export const SETTINGS_LABEL_DATA = {
     zhPlayAudio: {
         label: "Play Audio",
         help: "Play audio when the card is answered correctly or when displaying a new card.",
-    }
+    },
+    
+    // custom deck
+    deckName: {
+        label: "Deck Name",
+        help: "Specifies the name of the deck.",
+    },
+    deckLanguage: {
+        label: "Deck Language",
+        help: "Specifies the language of the deck.",
+    },
+    deckEnableCustomDictionary: {
+        label: "Enable Custom Dictionary",
+        help: "When enabled, the custom dictionary (CC-CEDICT) will be used to look up words in the deck. (initial loading may take a while)",
+    },
 }

@@ -26,3 +26,8 @@
         pointer-events: none;
     }
 }
+
+input:invalid,
+input.invalid {
+    background-color: #DB6B6C;
+}

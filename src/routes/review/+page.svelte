@@ -35,10 +35,12 @@
     onMount(async () => {
         // no need to sync in here
         await app.init();
-        isZhCantonese = app.deckData[deckId]?.tags?.includes(DECK_TAGS.ZH_YUE);
-        await wordlist.init(isZhCantonese ? 'yue' : 'zh');
+        const tags = app.deckData[deckId]?.tags;
+        isZhCantonese = tags?.includes(DECK_TAGS.ZH_YUE);
+        const isUseExtraDict = tags?.includes(DECK_TAGS.ZH_EXTRA_DICT);
+        await wordlist.init(isZhCantonese ? 'yue' : 'zh', isUseExtraDict);
         app = app;
-        isZhTraditional = app.deckData[deckId]?.tags?.includes(DECK_TAGS.ZH_TRAD);
+        isZhTraditional = tags?.includes(DECK_TAGS.ZH_TRAD);
         isAutoGrading = app.isAutoGrading();
         isPageReady = true;
         if (data.isExtraStudy) app.extraStudyHandler.registerReviewCardIdsOverride(cardIds);
