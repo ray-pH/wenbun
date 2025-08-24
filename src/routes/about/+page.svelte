@@ -18,6 +18,23 @@
     <div class="changelog-container">
         Change log
 
+        <h4>v0.8.0 (2025-08-24)</h4>
+        <ul>
+            <li><b>Custom Deck Upload</b>: Users can now upload their own decks in various formats, including Anki decks. A help page has been added for guidance.</li>
+            <li><b>Deck Preview</b>: A new component to preview deck contents has been implemented.</li>
+            <li>Improved <b>app navigation</b> with custom history for the back button.</li>
+            <li>Added a badge to notify users of new <b>changelogs</b>.</li>
+            <li>Updated default <b>stroke grading leniency</b> to 1.5.</li>
+            <li>Fixed a bug where new card buttons were not saving progress.</li>
+            <li>Behind the scenes:
+                <ul>
+                    <li>Added more character data for the character writer and an extra dictionary.</li>
+                    <li>Improved Chinese Traditional character handling.</li>
+                    <li>UI style improvements.</li>
+                </ul>
+            </li>
+        </ul>
+
         <h4>v0.7.0 (2025-08-21)</h4>
         <ul>
             <li>Added <b>UI scale</b> setting</li>
