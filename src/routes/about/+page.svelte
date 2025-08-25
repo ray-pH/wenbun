@@ -18,6 +18,14 @@
     <div class="changelog-container">
         Change log
 
+        <h4>v0.8.1 (2025-08-26)</h4>
+        <ul>
+            <li>Fixed an issue with audio retrieval for Traditional Chinese characters.</li>
+            <div class="note">
+                This should fix the issue with custom deck uploads that use Traditional Chinese characters.
+            </div>
+        </ul>
+
         <h4>v0.8.0 (2025-08-24)</h4>
         <ul>
             <li><b>Custom Deck Upload</b>: Users can now upload their own decks in various formats, including Anki decks. A help page has been added for guidance.</li>
