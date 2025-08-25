@@ -131,7 +131,7 @@ export class ChineseCharacterWordlist {
             return this.audioDict[word].map(u => [u]);
         } else if (this.lang == 'zh'){
             // generate audio url from pinyin
-            const pinyin_num = this.dict[word].pinyin_num;
+            const pinyin_num = this.getWordData(word)?.pinyin_num ?? '';
             const syls = pinyin_num.split(' ');
             return [syls.map(s => `${WENBUN_AUDIO_ZH_PREFIX_SRC}${s}.mp3`)];
         } else if (this.lang == 'yue') {
