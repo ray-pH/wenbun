@@ -247,6 +247,30 @@ export class App {
         await this.save();
     }
     
+    debugSimulate() {
+        let card = FSRS.createEmptyCard();
+        const fsrs = this.fsrs;
+        
+        const rateAndPrintDues = (grade: FSRS.Grade) => {
+            const schedule = fsrs.repeat(card, card.due) as FSRS.RecordLog;
+            let ratingScheduledTimeStr: Record<FSRS.Grade, any> = {1: '', 2: '', 3: '', 4: ''};
+            for (const grade of FSRS_GRADES) {
+                const now = schedule[grade].log.review;
+                const due = schedule[grade].card.due;
+                ratingScheduledTimeStr[grade] = dateDiffFormatted(now, due);
+            }
+            console.log(grade, ratingScheduledTimeStr);
+            card = schedule[grade].card;
+        };
+        
+        rateAndPrintDues(FSRS.Rating.Again);
+        rateAndPrintDues(FSRS.Rating.Again);
+        rateAndPrintDues(FSRS.Rating.Good);
+        rateAndPrintDues(FSRS.Rating.Good);
+        rateAndPrintDues(FSRS.Rating.Good);
+        rateAndPrintDues(FSRS.Rating.Again);
+    }
+    
     updateFontSize() {
         const fontSize = `${this.getFontSizePx()}px`;
         document.body.style.fontSize = fontSize;
