@@ -696,7 +696,7 @@ export class App {
         const fsrs = isPreviouslyStudied ? this.fsrsPrevStudied : this.fsrs;
         const schedulingCards = fsrs.repeat(card, new Date()) as FSRS.RecordLog;
         for (const grade of FSRS_GRADES) {
-            const now = schedulingCards[grade].log.due;
+            const now = schedulingCards[grade].log.review;
             const due = schedulingCards[grade].card.due;
             ratingScheduledTimeStr[grade] = dateDiffFormatted(now, due);
         }
