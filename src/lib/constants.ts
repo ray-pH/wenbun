@@ -109,6 +109,10 @@ export const SETTINGS_LABEL_DATA = {
         label: "New Previously Studied Card Order",
         help: "Specifies how cards from the “Previously Studied” pool are interleaved with review cards.",
     },
+    gradeWarmUpCards: {
+        label: "Grade New/Warm-Up Cards",
+        help: "When disabled, the system will always make sure that new cards will be studied again the next day. (internally grade the last warm-up as \"Fail/Again\")",
+    },
     startPreviouslyStudiedCardFromTheBack: {
         label: "Start Previously Studied Card From The Back",
         help: "When enabled, the previously studied card will be drawn from the back of the pool.",

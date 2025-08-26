@@ -204,6 +204,9 @@
                         <option value={NewCardOrder.BeforeReviews}>Before Reviews</option>
                     </select>
                 </SettingsItem>
+                <SettingsItem key="gradeWarmUpCards">
+                    <input type="checkbox" bind:checked={config.gradeWarmUpCards}>
+                </SettingsItem>
                 <SettingsItem key="startPreviouslyStudiedCardFromTheBack">
                     <input type="checkbox" bind:checked={config.startPreviouslyStudiedCardFromTheBack}>
                 </SettingsItem>

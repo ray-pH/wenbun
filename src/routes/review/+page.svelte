@@ -42,6 +42,7 @@
         app = app;
         isZhTraditional = tags?.includes(DECK_TAGS.ZH_TRAD);
         isAutoGrading = app.isAutoGrading();
+        isGradeWarmUpCards = app.getConfig().gradeWarmUpCards;
         isPageReady = true;
         if (data.isExtraStudy) app.extraStudyHandler.registerReviewCardIdsOverride(cardIds);
         nextCard();
@@ -56,6 +57,7 @@
     let isZhTraditional = false;
     let isZhCantonese = false;
     let isAutoGrading = false;
+    let isGradeWarmUpCards = false;
     let autoGrade: FSRS.Grade | undefined = undefined;
     let isRequestManualGrade = false;
     let _changeCounter = 0;
@@ -120,10 +122,12 @@
         const warmUpCount = app.getWarmUpCount(deckId, id);
         const isFirstWarmUp = isWarmUp && warmUpCount === 0;
         return {
-            isFirstTime: isFirstTime,
-            isWarmUp: isWarmUp && !isFinalWarmUp(id),
+            isFirstTime,
+            isWarmUp,
+            isFinalWarmUp: isFinalWarmUp(id),
             warmUpCount,
             warmUpMaxCount: app.getMaxWarmUpCount(),
+            isGradeWarmUpCards: app.getConfig().gradeWarmUpCards,
             isShowOutline: isFirstTime || isFirstWarmUp,
             lang: isZhCantonese ? 'yue' : 'zh',
         }
@@ -177,6 +181,11 @@
         app.warmUpNext(deckId, currentCardId!);
         await app.save();
         nextCard();
+    }
+    
+    async function finishWarmUp() {
+        // always rate "Again" when finishing warm-up
+        await onReviewButtonClick(FSRS.Rating.Again);
     }
     
     function isFinalWarmUp(id: number, _changeCounter?: number): boolean {
@@ -252,6 +261,15 @@
           		{ label: "" },
           		{ label: "Next", className: "review-button-easy", isComplete,
                     onclick: () => warmUpNext() }
+           	])}
+        {:else if isWarmUp && isFinalWarmUp(currentCardId, _changeCounter) && !isGradeWarmUpCards}
+            <!-- if isGradeWarmup, should go to the last (else) branch -->
+            {@render ReviewButtons([
+                { label: "" },
+          		{ label: "" },
+          		{ label: "" },
+          		{ label: "Next", className: "review-button-easy", isComplete,
+                    onclick: () => finishWarmUp() }
            	])}
         {:else if data.isExtraStudy}
            	{@render ReviewButtons([

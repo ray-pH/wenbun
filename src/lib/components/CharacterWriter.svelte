@@ -156,7 +156,7 @@
     }
     
     function toggleRequestManualGrade() {
-        if (cardConfig.isWarmUp) {
+        if (cardConfig.isWarmUp && (!cardConfig.isGradeWarmUpCards || !cardConfig.isFinalWarmUp)) {
             window.alert("Can't change grade during warm-up, since grading doesn't affect scheduling in this phase.");
             return;
         }
@@ -384,8 +384,13 @@
                 class:echo-once={!isRequestManualGrade}
                 onclick={() => toggleRequestManualGrade()}
             >
-                <i class={AutoReviewGradeFAClass[autoGrade]}></i>
-                <span>{AutoReviewGradeLabel[autoGrade]}</span>
+                {#if cardConfig.isWarmUp && !cardConfig.isGradeWarmUpCards}
+                    <i style="font-size: 2.4em" class="fa fa-solid fa-seedling"></i>
+                    <span>New</span>
+                {:else}
+                    <i class={AutoReviewGradeFAClass[autoGrade]}></i>
+                    <span>{AutoReviewGradeLabel[autoGrade]}</span>
+                {/if}
             </button>
         {/if}
     </div>

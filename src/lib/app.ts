@@ -77,6 +77,7 @@ export interface WenbunConfig {
     newCardOrder?: NewCardOrder;
     newPreviouslyStudiedCardPerDay?: number;
     newPreviouslyStudiedCardOrder?: NewCardOrder;
+    gradeWarmUpCards?: boolean;
     startPreviouslyStudiedCardFromTheBack?: boolean;
     
     // UI
@@ -112,6 +113,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     newPreviouslyStudiedCardPerDay: 20,
     newPreviouslyStudiedCardOrder: NewCardOrder.Mix,
     startPreviouslyStudiedCardFromTheBack: true,
+    gradeWarmUpCards: false,
     
     uiScale: 'normal',
     customFontSize: 16,
