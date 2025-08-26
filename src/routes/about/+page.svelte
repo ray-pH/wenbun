@@ -25,6 +25,9 @@
                 The calculation for the new card distribution previously didn't account for warm-up periods, causing new/warm-up cards to be grouped together at the end of a session. This has been fixed to ensure a more even distribution, while still supporting the option to skip the warm-up phase.
             </div>
             <li>Add an option to <b>not grade new/warm-up cards</b>.</li>
+            <div class="note">
+                When this option is disabled (which it is by default now), the system ensures that new and warm-up cards will be studied again the next day. Internally, this is achieved by automatically grading the <b>last</b> warm-up attempt as 'Fail/Again'.
+            </div>
             <li>Fix due interval display.</li>
             <div class="note">
                 Previously, the due interval display for failed cards was misleading (e.g., showing '2 days' after a second failure). This was a <b>display issue only</b>; the internal scheduling logic was already correctly set to 1 day. The fix corrects the displayed interval to <b>accurately reflect the scheduling</b>.
