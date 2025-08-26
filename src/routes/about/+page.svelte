@@ -18,6 +18,19 @@
     <div class="changelog-container">
         Change log
 
+        <h4>v0.8.2 (2025-08-27)</h4>
+        <ul>
+            <li>Take the warm-up phase into account when <b>calculating the distribution of the new cards</b>.</li>
+            <div class="note">
+                The calculation for the new card distribution previously didn't account for warm-up periods, causing new/warm-up cards to be grouped together at the end of a session. This has been fixed to ensure a more even distribution, while still supporting the option to skip the warm-up phase.
+            </div>
+            <li>Add an option to <b>not grade new/warm-up cards</b>.</li>
+            <li>Fix due interval display.</li>
+            <div class="note">
+                Previously, the due interval display for failed cards was misleading (e.g., showing '2 days' after a second failure). This was a <b>display issue only</b>; the internal scheduling logic was already correctly set to 1 day. The fix corrects the displayed interval to <b>accurately reflect the scheduling</b>.
+            </div>
+        </ul>
+
         <h4>v0.8.1 (2025-08-26)</h4>
         <ul>
             <li>Fixed an issue with audio retrieval for Traditional Chinese characters.</li>
