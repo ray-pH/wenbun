@@ -777,7 +777,8 @@ export class App {
         count += newCardsCount * (max + 1);
         if (this.deckData[deckId]?.warmUpIds) {
             Object.values(this.deckData[deckId].warmUpIds).forEach((c) => {
-                count += max - c + 1
+                const remainingWarmUpAppearances = max - c + 1;
+                count += remainingWarmUpAppearances;
             });
         }
         return count;
