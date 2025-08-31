@@ -106,3 +106,10 @@ export function compareSemver(a: string, b: string): number {
     }
     return 0; // equal
 }
+
+export function lerp(a: number, b: number, t: number): number {
+    return a * (1 - t) + b * t;
+}
+export function linmap(x: number, a1: number, a2: number, b1: number, b2: number): number {
+    return b1 + (x - a1) * (b2 - b1) / (a2 - a1);
+}

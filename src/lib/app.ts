@@ -19,6 +19,7 @@ const STORE_KEY_REVIEW_LOGS = "reviewLogs"
 const STORE_KEY_AUTO_REVIEW_GRADE_LOG = "autoReviewGradeLog"
 const STORE_KEY_META = "meta"
 const STORE_KEY_LAST_SYNC_TIME = "lastSyncTime"
+const LOCALSTORAGE_KEY_STROKE_SPEED = "strokeSpeed" // simple config, just store in local storage
 
 const FSRS_GRADES: FSRS.Grade[] = [FSRS.Rating.Again, FSRS.Rating.Hard, FSRS.Rating.Good, FSRS.Rating.Easy];
 export const DEFAULT_GROUP_CONTENT_COUNT = 30;
@@ -934,6 +935,13 @@ export class App {
     
     storeAutoGradeLog(correctCount: number, mistakeCount: number, grade: FSRS.Grade) {
         this.autoReviewGradeLog.push({correctCount, mistakeCount, grade});
+    }
+    
+    getStrokeSpeed(): number {
+        return +(window.localStorage.getItem(LOCALSTORAGE_KEY_STROKE_SPEED) ?? 1);
+    }
+    setStrokeSpeed(speed: number): void {
+        window.localStorage.setItem(LOCALSTORAGE_KEY_STROKE_SPEED, speed.toString());
     }
     
     getCurrentAppVersion(): string {

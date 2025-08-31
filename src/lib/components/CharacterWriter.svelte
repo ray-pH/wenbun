@@ -3,7 +3,7 @@
     import HanziWriter from 'hanzi-writer';
     import { onMount } from 'svelte';
     import { getAudioUrl, TONE_PREFIX } from '$lib/chinese';
-    import { type CharacterWriterData, type CharacterWriterConfig, parseIntOrUndefined } from '$lib/util';
+    import { type CharacterWriterData, type CharacterWriterConfig, parseIntOrUndefined, lerp, linmap } from '$lib/util';
     import type { App } from '$lib/app';
     import { base } from '$app/paths';
     import { AudioSequence } from '$lib/audioSequence';
@@ -103,8 +103,13 @@
             showOutline: cardConfig.isShowOutline,
             highlightOnComplete: false,
             strokeColor: app.getChineseToneColor(tone) ?? "#555",
+            // drawing
             drawingWidth: CHARACTER_WRITER_DRAWING_WIDTH,
             drawingColor: "#555",
+            // auto stroke animation
+            strokeAnimationSpeed: strokeSpeed,
+            delayBetweenStrokes: linmap(strokeSpeed, 1, MAX_STROKE_SPEED, 1000, 10),
+            delayBetweenLoops: linmap(strokeSpeed, 1, MAX_STROKE_SPEED, 2000, 10),
             onComplete: () => {
                 completeChar();
             }
@@ -179,6 +184,14 @@
         writer.showOutline();
     }
     
+    const MAX_STROKE_SPEED = 5;
+    let strokeSpeed = $state(1);
+    function toggleStrokeAnimationSpeed() {
+        const newSpeed = (strokeSpeed % MAX_STROKE_SPEED) + 1;
+        strokeSpeed = newSpeed;
+        app.setStrokeSpeed(newSpeed);
+    }
+    
     onMount(() => {
         autoReviewData = {
             correctStrokeCount: 0,
@@ -189,6 +202,7 @@
         updateWidth();
         setupAudios();
         window.addEventListener('resize', updateWidth);
+        strokeSpeed = app.getStrokeSpeed();
         setupHanziWriter(0);
         return () => {
             unmounted = true;
@@ -339,6 +353,16 @@
         70%  { transform: scale(1.6); opacity: 0;   }
         100% { transform: scale(1.6); opacity: 0;   }
     }
+    .stroke-speed-button {
+        all: unset;
+        cursor: pointer;
+        position: absolute;
+        top: 1em;
+        left: 1em;
+        background-color: #E0E0E0;
+        padding: 0.2em 0.5em;
+        border-radius: 0.5rem;
+    }
 </style>
 
 <div class="character-writer">
@@ -386,6 +410,19 @@
                 </div>
             {/if}
         </div>
+        {#if cardConfig.isFirstTime}
+            <button
+                class="stroke-speed-button"
+                onclick={() => toggleStrokeAnimationSpeed()}
+            >
+                {#if strokeSpeed <= 1}
+                    <i class="fa-solid fa-play"></i>
+                {:else}
+                    <i class="fa-solid fa-forward"></i>
+                {/if}
+                <span>{strokeSpeed}x</span>
+            </button>
+        {/if}
         {#if autoGrade}
             <button 
                 class={`auto-review-indicator-container ${AutoReviewGradeClass[autoGrade]}`}
