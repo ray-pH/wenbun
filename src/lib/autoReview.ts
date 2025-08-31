@@ -4,6 +4,7 @@ export interface AutoReviewData {
     correctStrokeCount: number;
     incorrectStrokeCount: number;
     totalStrokeCount: number;
+    isFailAndReveal: boolean;
 }
 
 export const AutoReviewGradeLabel: Record<FSRS.Grade, string> = {
@@ -29,6 +30,9 @@ export const AutoReviewGradeFAClass: Record<FSRS.Grade, string> = {
 
 export namespace AutoReview {
     export function getGrade(data: AutoReviewData): FSRS.Grade {
+        if (data.isFailAndReveal) {
+            return FSRS.Rating.Again;
+        }
         const mistakeRate = data.correctStrokeCount === 0
             ? Infinity
             : data.incorrectStrokeCount / data.correctStrokeCount;

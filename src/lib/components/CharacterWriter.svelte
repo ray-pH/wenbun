@@ -121,6 +121,9 @@
                     autoReviewData.totalStrokeCount++;
                 },
             });
+            if (autoReviewData.isFailAndReveal) {
+                writer.showOutline();
+            }
         } else {
             setTimeout(() => {
                 if (!isStopPlayAudio) playAudio();
@@ -170,11 +173,18 @@
         return `${Math.round((warmUpCount + d) / maxCount * 100)}%`;
     }
     
+    export function failAndReveal() {
+        if (!writer) return;
+        autoReviewData.isFailAndReveal = true;
+        writer.showOutline();
+    }
+    
     onMount(() => {
         autoReviewData = {
             correctStrokeCount: 0,
             incorrectStrokeCount: 0,
             totalStrokeCount: 0,
+            isFailAndReveal: false,
         };
         updateWidth();
         setupAudios();

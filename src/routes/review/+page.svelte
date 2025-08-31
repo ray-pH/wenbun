@@ -22,16 +22,18 @@
     let title = data.isExtraStudy ? 'Extra Study' : 'Review';
     
     type ReviewButton = {
-    	label: string;
-    	sublabel?: string;
-    	className?: string;
-    	onclick?: () => void;
-    	isComplete?: boolean;
+        label: string;
+        sublabel?: string;
+        className?: string;
+        onclick?: () => void;
+        isComplete?: boolean;
+        alternate?: Omit<ReviewButton, 'alternate'>;
     };
     
     let autoReviewData: AutoReviewData;
     let isPageReady = false;
     let app = new App();
+    let characterWriterRef: CharacterWriter;
     onMount(async () => {
         // no need to sync in here
         await app.init();
@@ -193,6 +195,21 @@
         if (warmUpCount === undefined) return true;
         return warmUpCount >= app.getMaxWarmUpCount();
     }
+    function isFirstWarmUp(id: number, _changeCounter?: number): boolean {
+        const warmUpCount = app.getWarmUpCount(deckId, id);
+        return warmUpCount === 0;
+    }
+    
+    $: failButtonAlternate = {
+        label: "Reveal", sublabel: "(Fail)", className: "review-button-fail", onclick: () => failAndReveal(),
+        isComplete: !autoReviewData?.isFailAndReveal,
+    }
+    function failAndReveal() {
+        if (characterWriterRef) {
+            characterWriterRef.failAndReveal();
+            autoGrade = AutoReview.getGrade(autoReviewData);
+        }
+    }
 </script>
 
 
@@ -235,6 +252,7 @@
             {#key [currentCardId, isNewCardInteractedWith, isCardChanged]}
                 <CharacterWriter 
                     app={app} 
+                    bind:this={characterWriterRef}
                     characterData={characterWriterDataFromId(currentCardId)} 
                     onComplete={(data) => onComplete(data)} 
                     bind:isRequestManualGrade={isRequestManualGrade}
@@ -256,7 +274,12 @@
            	])}
         {:else if isWarmUp && !isFinalWarmUp(currentCardId, _changeCounter)}
             {@render ReviewButtons([
-                { label: "" },
+                { label: "", 
+                    alternate: { 
+                        ...failButtonAlternate,
+                        isComplete: !autoReviewData?.isFailAndReveal && !isFirstWarmUp(currentCardId, _changeCounter),
+                    } 
+                },
           		{ label: "" },
           		{ label: "" },
           		{ label: "Next", className: "review-button-easy", isComplete,
@@ -265,7 +288,7 @@
         {:else if isWarmUp && isFinalWarmUp(currentCardId, _changeCounter) && !isGradeWarmUpCards}
             <!-- if isGradeWarmup, should go to the last (else) branch -->
             {@render ReviewButtons([
-                { label: "" },
+                { label: "", alternate: failButtonAlternate },
           		{ label: "" },
           		{ label: "" },
           		{ label: "Next", className: "review-button-easy", isComplete,
@@ -274,7 +297,8 @@
         {:else if data.isExtraStudy}
            	{@render ReviewButtons([
           		{ label: "Again", sublabel: "(Put Back)", className: "review-button-fail", isComplete, 
-                    onclick: () => extraStudyAgain() },
+                    onclick: () => extraStudyAgain(), alternate: failButtonAlternate
+                },
           		{ label: "" },
           		{ label: "" },
           		{ label: "Good", className: "review-button-easy",  isComplete,
@@ -282,7 +306,7 @@
            	])}
         {:else if isAutoGrading && !isRequestManualGrade}
            	{@render ReviewButtons([
-                { label: "" },
+                { label: "", alternate: failButtonAlternate },
           		{ label: "" },
           		{ label: "" },
           		{ label: "Next", className: "review-button-easy",  isComplete,
@@ -306,6 +330,7 @@
          			sublabel: scheduledTimeStr[(i+1) as FSRS.Grade],
          			className: getReviewButtonClass(i+1) + " time",
                     isComplete,
+                    alternate: i == 0 ? failButtonAlternate : undefined,
          			onclick: () => onReviewButtonClick(i+1)
           		}))
            	)}
@@ -317,16 +342,29 @@
 	<div class="bottom-container" in:fly={inFlyParam} out:fade={outFadeParam}>
 		<div class={`review-button-container ${extraClass}`}>
 			{#each buttons as b}
-				<button
-					class={`review-button ${b.className || ""}`}
-					class:is-complete={b.isComplete}
-					onclick={b.onclick}
-				>
-					<div class="review-button-inner">
-						<div class="review-time">{b.sublabel || '\u00A0'}</div>
-						<div class="review-label">{b.label || '\u00A0'}</div>
-					</div>
-				</button>
+			    {#if b.alternate && !b.isComplete && b.alternate.isComplete}
+					<button
+    					class={`review-button ${b.alternate.className || b.className || ""}`}
+    					class:is-complete={!b.isComplete}
+    					onclick={b.alternate.onclick}
+    				>
+    					<div class="review-button-inner">
+    						<div class="review-time">{b.alternate.sublabel || b.sublabel || '\u00A0'}</div>
+    						<div class="review-label">{b.alternate.label || b.label || '\u00A0'}</div>
+    					</div>
+    				</button>
+				{:else}
+    				<button
+    					class={`review-button ${b.className || ""}`}
+    					class:is-complete={b.isComplete}
+    					onclick={b.onclick}
+    				>
+    					<div class="review-button-inner">
+    						<div class="review-time">{b.sublabel || '\u00A0'}</div>
+    						<div class="review-label">{b.label || '\u00A0'}</div>
+    					</div>
+    				</button>
+				{/if}
 			{/each}
 		</div>
 	</div>
