@@ -52,8 +52,7 @@
     $: extraStudyDesc = app.extraStudyHandler.getDescription(deckInfo.id, extraStudyConfig);
     function startExtraStudy() {
         const cardIds = app.extraStudyHandler.getCardIds(deckInfo.id, extraStudyConfig);
-        const cardIdsEncoded = encodeURIComponent(JSON.stringify(cardIds));
-        goto(`${base}/review?id=${deckInfo.id}&isExtraStudy=true&cardIds=${cardIdsEncoded}`);
+        app.extraStudyHandler.startExtraStudy(deckInfo.id, cardIds);
     }
     
     let quickAdjustAccordionState = false;

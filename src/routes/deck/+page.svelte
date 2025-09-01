@@ -96,6 +96,8 @@
     
     let isSelecting = false;
     let selections: SvelteSet<number> = new SvelteSet();
+    $: isSelectionContainPreviouslyStudied = Array.from(selections).some(id => app.getWenbunCustomState(deckId, id) == WenBunCustomState.PreviouslyStudied);
+    $: isSelectionContainIgnored = Array.from(selections).some(id => app.getWenbunCustomState(deckId, id) == WenBunCustomState.Ignored);
     function startSelectMode(cardId?: number, e?: MouseEvent) {
         e?.stopPropagation();
         isSelecting = true;
@@ -163,6 +165,11 @@
         app.setDeckView(view);
     }
     
+    function startExtraStudy() {
+        if (!isSelecting || selections.size === 0) return;
+        app.extraStudyHandler.startExtraStudy(deckId, Array.from(selections));
+    }
+    
 </script>
 
 <TopBar title="Deck"></TopBar>
@@ -215,13 +222,17 @@
                                 </button>
                             </div>
                             <div class="group-buttons-container" style="align-items: flex-end;">
+                                <button class="button" disabled={selections.size == 0} onclick={() => startExtraStudy()}>
+                                    <i class="fa-solid fa-chalkboard-user"></i><span>start <b>extra study</b> from selection</span></button>
                                 <button class="button" disabled={selections.size == 0} onclick={() => addPreviouslyStudiedMark()}>
                                     <i class="fa-solid fa-book-open"></i><span>mark as <b>previously studied</b></span></button>
-                                <button class="button" disabled={selections.size == 0} onclick={() => removePreviouslyStudiedMark()}>
+                                <button class="button" disabled={selections.size == 0 || !isSelectionContainPreviouslyStudied} 
+                                    onclick={() => removePreviouslyStudiedMark()}>
                                     <i class="fa-solid fa-book-open"></i><span>remove <b>previously studied</b> mark</span></button>
                                 <button class="button" disabled={selections.size == 0} onclick={() => addIgnoredMark()}>
                                     <i class="fa-solid fa-square-xmark"></i><span>mark as <b>ignored</b></span></button>
-                                <button class="button" disabled={selections.size == 0} onclick={() => removeIgnoredMark()}>
+                                <button class="button" disabled={selections.size == 0 || !isSelectionContainIgnored} 
+                                    onclick={() => removeIgnoredMark()}>
                                     <i class="fa-solid fa-square-xmark"></i><span>remove <b>ignored</b> mark</span></button>
                             </div>
                         </div>

@@ -1,5 +1,7 @@
 import _ from "lodash";
 import { ExtraStudyType, WenBunCustomState, type App, type ExtraStudyConfig } from "./app";
+import { base } from "$app/paths";
+import { goto } from "$app/navigation";
 
 export class AppExtraStudyHandler {
     reviewCardIdsOverride: number[] | undefined = undefined;
@@ -10,6 +12,11 @@ export class AppExtraStudyHandler {
     
     init() {
         this.reviewCardIdsOverride = undefined;
+    }
+    
+    startExtraStudy(deckId: string, cardIds: number[]): void {
+        const cardIdsEncoded = encodeURIComponent(JSON.stringify(cardIds));
+        goto(`${base}/review?id=${deckId}&isExtraStudy=true&cardIds=${cardIdsEncoded}`);
     }
     
     registerReviewCardIdsOverride(cardIds: number[]): void {
