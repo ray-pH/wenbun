@@ -953,6 +953,14 @@ export class App {
         window.localStorage.setItem(LOCALSTORAGE_KEY_DECK_VIEW, view);
     }
     
+    adjustCardLimit(deckId: string, newc: number, previouslyc: number, reviewc: number): void {
+        const deckData = this.deckData[deckId];
+        if (!deckData) return;
+        deckData.doneTodayNewCardCount -= newc;
+        deckData.doneTodayPreviouslyStudiedCardCount -= previouslyc;
+        deckData.doneTodayReviewCount -= reviewc;
+    }
+    
     getCurrentAppVersion(): string {
         return __APP_VERSION__;
     }

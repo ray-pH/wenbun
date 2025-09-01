@@ -40,6 +40,7 @@
     $: progress = deckProgress.youngCount + deckProgress.matureCount;
     $: progressTotal = deckProgress.totalCount - deckProgress.ignoredCount;
     
+    let extraStudyAccordionState = false;
     let extraStudyCount = 20;
     let extraStudyType = ExtraStudyType.StudiedCards;
     let extraStudyGroup = '';
@@ -55,7 +56,18 @@
         goto(`${base}/review?id=${deckInfo.id}&isExtraStudy=true&cardIds=${cardIdsEncoded}`);
     }
     
-    let extraStudyAccordionState = false;
+    let quickAdjustAccordionState = false;
+    let quickAdjustNewCardLimit = 0;
+    let quickAdjustPreviouslyStudiedCardLimit = 0;
+    let quickAdjustReviewCardLimit = 0;
+    async function quickAdjust() {
+        app.adjustCardLimit(deckInfo.id, quickAdjustNewCardLimit, quickAdjustPreviouslyStudiedCardLimit, quickAdjustReviewCardLimit);
+        quickAdjustNewCardLimit = 0;
+        quickAdjustPreviouslyStudiedCardLimit = 0;
+        quickAdjustReviewCardLimit = 0;
+        await app.save();
+        app = app;
+    }
 </script>
 
 <TopBar title="Overview"></TopBar>
@@ -105,7 +117,41 @@
                 <span style="opacity: 0.5;"> / {progressTotal}</span>
             </div>
         </div>
-        <div class="extra-study-container">
+        <div class="section-container">
+            <button onclick={() => quickAdjustAccordionState = !quickAdjustAccordionState} class="section-title-button">
+                <div class="section-title">Quick Adjust</div>
+                <div>
+                    <i class="fa-solid" class:fa-chevron-down={quickAdjustAccordionState} class:fa-chevron-right={!quickAdjustAccordionState}></i>
+                </div>
+            </button>
+            {#if quickAdjustAccordionState}
+                <div class="section-help">
+                    *Adjustment can be negative
+                </div>
+                <div class="section-row">
+                    <div>Change today's <b>new card</b> limit by</div>
+                    <div>
+                        <input type="number" bind:value={quickAdjustNewCardLimit} class="short-input">
+                    </div>
+                </div>
+                <div class="section-row">
+                    <div>Change today's <b>previously studied</b> card limit by</div>
+                    <div>
+                        <input type="number" bind:value={quickAdjustPreviouslyStudiedCardLimit} class="short-input">
+                    </div>
+                </div>
+                <div class="section-row">
+                    <div>Change today's <b>review</b> limit by</div>
+                    <div>
+                        <input type="number" bind:value={quickAdjustReviewCardLimit} class="short-input">
+                    </div>
+                </div>
+                <button class="button" onclick={() => quickAdjust()}>
+                    Adjust
+                </button>
+            {/if}
+        </div>
+        <div class="section-container">
             <button onclick={() => extraStudyAccordionState = !extraStudyAccordionState} class="section-title-button">
                 <div class="section-title">Extra Study</div>
                 <div>
@@ -113,16 +159,14 @@
                 </div>
             </button>
             {#if extraStudyAccordionState}
-                <div class="extra-study-help">
+                <div class="section-help">
                     Study more without affecting the SRS schedule
                 </div>
-                <div class="extra-study-row">
+                <div class="section-row">
                     <div>Count :</div>
-                    <div>
-                        <input type="number" bind:value={extraStudyCount}>
-                    </div>
+                    <input type="number" bind:value={extraStudyCount}>
                 </div>
-                <div class="extra-study-row">
+                <div class="section-row">
                     <div>Type :</div>
                     <div>
                         <select bind:value={extraStudyType}>
@@ -133,7 +177,7 @@
                     </div>
                 </div>
                 {#if extraStudyType === ExtraStudyType.Group}
-                    <div class="extra-study-row">
+                    <div class="section-row">
                         <div>Group :</div>
                         <div>
                             <select bind:value={extraStudyGroup}>
@@ -144,7 +188,7 @@
                         </div>
                     </div>
                 {/if}
-                <div class="extra-study-description">
+                <div class="section-description">
                     <span class="desc">{extraStudyDesc.desc}</span>
                     <span class="subdesc">{extraStudyDesc.subdesc}</span>
                 </div>
@@ -238,22 +282,25 @@
         }
     }
     
-    .extra-study-container {
+    .section-container {
         padding: 1em;
-        .extra-study-row {
+        .section-row {
+            max-width: 22em;
+            gap: 0.5em;
+            margin-bottom: 0.2em;
             display: flex;
             flex-direction: row;
             align-items: center;
             justify-content: space-between;
         }
-        .extra-study-description {
+        .section-description {
             max-width: 22em;
         }
-        .extra-study-help {
+        .section-help {
             color: #00000090;
             margin-bottom: 0.6em;
         }
-        .extra-study-description {
+        .section-description {
             margin: 0.6em 0;
             .subdesc {
                 color: #00000090;
@@ -279,5 +326,9 @@
         position: absolute;
         left: -3em;
         top: 40%;
+    }
+    
+    .short-input {
+        width: 3em;
     }
 </style>
