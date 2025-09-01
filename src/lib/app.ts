@@ -223,9 +223,7 @@ export class App {
         this.updateFontSize();
         this.extraStudyHandler.init();
         this.updateFSRS();
-        if (this.isNeedToProcessTodaySchedule()) {
-            await this.processTodaySchedule();
-        }
+        await this.processTodaySchedule();
     }
     
     /**
@@ -392,22 +390,10 @@ export class App {
         }
     }
     
-    isNeedToProcessTodaySchedule(): boolean {
-        const today = new Date();
-        const todaysDate = getDaysSinceEpochLocal(today);
-        for (const deckId of Object.keys(this.deckData)) {
-            const deckData = this.deckData[deckId];
-            const lastScheduleCheckDate = getDaysSinceEpochLocal(new Date(deckData.lastScheduleCheckDate));
-            if (lastScheduleCheckDate < todaysDate) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
     async processTodaySchedule(): Promise<void> {
         const today = new Date();
         const todaysDate = getDaysSinceEpochLocal(today);
+        let changed = false;
         for (const deckId of Object.keys(this.deckData)) {
             const deckData = this.deckData[deckId];
             const lastScheduleCheckDate = getDaysSinceEpochLocal(new Date(deckData.lastScheduleCheckDate));
@@ -417,9 +403,10 @@ export class App {
                 deckData.doneTodayPreviouslyStudiedCardCount = 0;
                 deckData.doneTodayReviewCount = 0;
                 deckData.lastScheduleCheckDate = today.getTime();
+                changed = true;
             }
         }
-        await this.save();
+        if (changed) await this.save();
     }
     
     async getInitDeckDataById(deckId: string): Promise<DeckData | undefined> {
