@@ -54,6 +54,8 @@
         const cardIdsEncoded = encodeURIComponent(JSON.stringify(cardIds));
         goto(`${base}/review?id=${deckInfo.id}&isExtraStudy=true&cardIds=${cardIdsEncoded}`);
     }
+    
+    let extraStudyAccordionState = false;
 </script>
 
 <TopBar title="Overview"></TopBar>
@@ -104,45 +106,52 @@
             </div>
         </div>
         <div class="extra-study-container">
-            <div class="section-title">Extra Study</div>
-            <div class="extra-study-help">
-                Study more without affecting the SRS schedule
-            </div>
-            <div class="extra-study-row">
-                <div>Count :</div>
+            <button onclick={() => extraStudyAccordionState = !extraStudyAccordionState} class="section-title-button">
+                <div class="section-title">Extra Study</div>
                 <div>
-                    <input type="number" bind:value={extraStudyCount}>
+                    <i class="fa-solid" class:fa-chevron-down={extraStudyAccordionState} class:fa-chevron-right={!extraStudyAccordionState}></i>
                 </div>
-            </div>
-            <div class="extra-study-row">
-                <div>Type :</div>
-                <div>
-                    <select bind:value={extraStudyType}>
-                        {#each Object.values(ExtraStudyType) as type}
-                            <option value={type}>{type}</option>
-                        {/each}
-                    </select>
+            </button>
+            {#if extraStudyAccordionState}
+                <div class="extra-study-help">
+                    Study more without affecting the SRS schedule
                 </div>
-            </div>
-            {#if extraStudyType === ExtraStudyType.Group}
                 <div class="extra-study-row">
-                    <div>Group :</div>
+                    <div>Count :</div>
                     <div>
-                        <select bind:value={extraStudyGroup}>
-                            {#each app.getGroupLabels(deckInfo.id) as label}
-                                <option value={label}>{label}</option>
+                        <input type="number" bind:value={extraStudyCount}>
+                    </div>
+                </div>
+                <div class="extra-study-row">
+                    <div>Type :</div>
+                    <div>
+                        <select bind:value={extraStudyType}>
+                            {#each Object.values(ExtraStudyType) as type}
+                                <option value={type}>{type}</option>
                             {/each}
                         </select>
                     </div>
                 </div>
+                {#if extraStudyType === ExtraStudyType.Group}
+                    <div class="extra-study-row">
+                        <div>Group :</div>
+                        <div>
+                            <select bind:value={extraStudyGroup}>
+                                {#each app.getGroupLabels(deckInfo.id) as label}
+                                    <option value={label}>{label}</option>
+                                {/each}
+                            </select>
+                        </div>
+                    </div>
+                {/if}
+                <div class="extra-study-description">
+                    <span class="desc">{extraStudyDesc.desc}</span>
+                    <span class="subdesc">{extraStudyDesc.subdesc}</span>
+                </div>
+                <button class="button" onclick={() => startExtraStudy()}>
+                    Extra Study
+                </button>
             {/if}
-            <div class="extra-study-description">
-                <span class="desc">{extraStudyDesc.desc}</span>
-                <span class="subdesc">{extraStudyDesc.subdesc}</span>
-            </div>
-            <button class="button" onclick={() => startExtraStudy()}>
-                Extra Study
-            </button>
         </div>
     {/if}
 </div>
@@ -195,6 +204,18 @@
     }
     .section-title {
         font-weight: bold;
+    }
+    .section-title-button {
+        all: unset;
+        display: flex;
+        align-items: center;
+        padding-bottom: 0.5em;
+        margin-bottom: 0.5em;
+        width: 90vw;
+        max-width: 22em;
+        justify-content: space-between;
+        cursor: pointer;
+        border-bottom: 1px solid #00000020;
     }
     
     .progress-container {
