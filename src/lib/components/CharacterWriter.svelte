@@ -12,6 +12,8 @@
     
     let width = $state(500);
     let height = $state(500);
+    let gridLinePad = $state(30);
+    let p = $derived(gridLinePad);
     let gridStroke = "#DDD";
     const NEXT_CHAR_DELAY = 500;
     // const correctSound = new Audio(`${base}/assets/sounds/rightanswer-95219.mp3`);
@@ -29,9 +31,10 @@
             / parseFloat(getComputedStyle(document.documentElement).fontSize);
     }
     function updateWidth() {
-        const emPx = getEmInPx() * 3 * 2;
+        const emPx = getEmInPx() * 2 * 0.8;
         width = Math.min(document.documentElement.clientWidth - emPx, 500) * getUiScale();
         height = width;
+        gridLinePad = 0.5 * getEmInPx() * getUiScale();
     }
     
     interface Props {
@@ -246,7 +249,6 @@
         }
     }
     .grid-background {
-        padding: 2em;
         background-color: #FFFFFF90;
         border-radius: 0.5em;
         touch-action: none;
@@ -381,10 +383,10 @@
     <div class="character-container">
         <div class="grid-background">
             <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} id="grid-background-target">
-            <line x1="0" y1="0" x2={width} y2={height} stroke={gridStroke} />
-            <line x1={width} y1="0" x2="0" y2={height} stroke={gridStroke} />
-            <line x1={width/2} y1="0" x2={width/2} y2={height} stroke={gridStroke} />
-            <line x1="0" y1={height/2} x2={width} y2={height/2} stroke={gridStroke} />
+            <line x1={p} y1={p} x2={width - p} y2={height - p} stroke={gridStroke} />
+            <line x1={width - p} y1={p} x2={p} y2={height - p} stroke={gridStroke} />
+            <line x1={width/2} y1={p} x2={width/2} y2={height - p} stroke={gridStroke} />
+            <line x1={p} y1={height/2} x2={width - p} y2={height/2} stroke={gridStroke} />
             </svg>
         </div>
         <div class="bottom-container">
