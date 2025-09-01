@@ -15,10 +15,11 @@
         display: flex;
         flex-direction: row;
         justify-content: space-between;
+        gap: 1em;
         .settings-label-help {
             color: #00000090;
             font-size: 0.8em;
-            max-width: 15em;
+            max-width: 18em;
         }
     }
 </style>
