@@ -394,9 +394,11 @@ export class App {
     
     isNeedToProcessTodaySchedule(): boolean {
         const today = new Date();
+        const todaysDate = getDaysSinceEpochLocal(today);
         for (const deckId of Object.keys(this.deckData)) {
             const deckData = this.deckData[deckId];
-            if (new Date(deckData.lastScheduleCheckDate).getDate() < today.getDate()) {
+            const lastScheduleCheckDate = getDaysSinceEpochLocal(new Date(deckData.lastScheduleCheckDate));
+            if (lastScheduleCheckDate < todaysDate) {
                 return true;
             }
         }
