@@ -19,7 +19,10 @@ const STORE_KEY_REVIEW_LOGS = "reviewLogs"
 const STORE_KEY_AUTO_REVIEW_GRADE_LOG = "autoReviewGradeLog"
 const STORE_KEY_META = "meta"
 const STORE_KEY_LAST_SYNC_TIME = "lastSyncTime"
-const LOCALSTORAGE_KEY_STROKE_SPEED = "strokeSpeed" // simple config, just store in local storage
+
+// simple configs, store in local storage
+const LOCALSTORAGE_KEY_STROKE_SPEED = "strokeSpeed" 
+const LOCALSTORAGE_KEY_DECK_VIEW = "deckView"
 
 const FSRS_GRADES: FSRS.Grade[] = [FSRS.Rating.Again, FSRS.Rating.Hard, FSRS.Rating.Good, FSRS.Rating.Easy];
 export const DEFAULT_GROUP_CONTENT_COUNT = 30;
@@ -162,6 +165,11 @@ export interface ProfileData {
     deckData: Record<string, DeckData>,
     reviewLogs: ReviewLog[],
     meta: ProfileDataMeta,
+}
+
+export enum DeckView {
+    Normal = "Normal",
+    Small = "Small",
 }
 
 export class App {
@@ -682,6 +690,12 @@ export class App {
         if (!due) return 'Not Started';
         return dateDiffFormatted(new Date(), new Date(due));
     }
+    getShortCardDueFormatted(deckId: string, cardId: number): string {
+        if (this.isWarmUpCard(deckId, cardId)) return '';
+        const due = this.getCardDue(deckId, cardId);
+        if (!due) return '';
+        return dateDiffFormatted(new Date(), new Date(due));
+    }
     getRatingScheduledTimeStr(deckId: string, cardId: number): Record<FSRS.Grade, string> {
         const card = this.getCard(deckId, cardId, true);
         let ratingScheduledTimeStr: Record<FSRS.Grade, string> = {1: '', 2: '', 3: '', 4: ''};
@@ -931,6 +945,12 @@ export class App {
     }
     setStrokeSpeed(speed: number): void {
         window.localStorage.setItem(LOCALSTORAGE_KEY_STROKE_SPEED, speed.toString());
+    }
+    getDeckView(): DeckView {
+        return window.localStorage.getItem(LOCALSTORAGE_KEY_DECK_VIEW) as DeckView ?? DeckView.Normal;
+    }
+    setDeckView(view: DeckView): void {
+        window.localStorage.setItem(LOCALSTORAGE_KEY_DECK_VIEW, view);
     }
     
     getCurrentAppVersion(): string {

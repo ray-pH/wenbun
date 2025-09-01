@@ -1,7 +1,7 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
     import { base } from '$app/paths';
-    import { App, DEFAULT_GROUP_CONTENT_COUNT, WenBunCustomState } from "$lib/app";
+    import { App, DeckView, DEFAULT_GROUP_CONTENT_COUNT, WenBunCustomState } from "$lib/app";
     import { ChineseCharacterConverter } from '$lib/chinese';
     import TopBar from "$lib/components/TopBar.svelte";
     import { DECK_TAGS } from '$lib/constants';
@@ -13,6 +13,7 @@
     let deckId = data.deckId || '';
     let isZhTraditional = false;
     let converter: ChineseCharacterConverter;
+    let view: DeckView = DeckView.Normal;
     
     let app = new App();
     onMount(async () => {
@@ -26,6 +27,7 @@
     function initComponent() {
         isZhTraditional = app.deckData[deckId]?.tags?.includes(DECK_TAGS.ZH_TRAD);
         converter = new ChineseCharacterConverter('cn', 'tw');
+        view = app.getDeckView();
         app = app;
     }
     
@@ -109,7 +111,14 @@
     function isSelected(groupLabel: string, cardId: number, selections: SvelteSet<number>): boolean {
         return selectModeGroup == groupLabel && selections.has(cardId);
     }
-    function toggleSelect(groupLabel: string, cardId: number) {
+    function toggleSelect(groupLabel: string, cardId: number, force = false) {
+        if (force) {
+            if (selectModeGroup != groupLabel) {
+                startSelectMode(groupLabel, cardId);
+                return;
+            };
+        }
+        
         if (selectModeGroup != groupLabel) return;
         if (selections.has(cardId)) {
             selections.delete(cardId);
@@ -158,12 +167,25 @@
         return status;
     }
     
+    function changeView(view: DeckView) {
+        app.setDeckView(view);
+    }
+    
 </script>
 
 <TopBar title="Deck"></TopBar>
 <div class="container">
     <div class="top-container" style="display: flex; gap: 0.5em; margin-bottom: 2em">
         <div class="top-control-container">
+            <div>
+                <label style="display: flex; gap: 0.5em; align-items: center; justify-content: space-between;">
+                    View:
+                    <select bind:value={view} onchange={() => changeView(view)} style="flex-grow: 1;">
+                        <option value={DeckView.Normal}>Normal</option>
+                        <option value={DeckView.Small}>Small</option>
+                    </select>
+                </label>
+            </div>
             <div style="display: flex; gap: 0.5em; align-items: center;">
                 <button class="button" onclick={() => splitIntoGroupsOf()}>Split into groups of</button>
                 <input class="input" type="number" bind:value={groupContentCount} min="1" max="100">
@@ -214,36 +236,13 @@
                     {/if}
                     <div class="group-content">
                         {#each group.cardIds as id}
-                            <div 
-                                class={`card ${getCardStatusClass(deckId, id, app)}`} 
-                                class:selectable={selectModeGroup == group.label}
-                                class:selected={isSelected(group.label, id, selections)}
-                                onclick={() => toggleSelect(group.label, id)}
-                                onkeydown={(e) => {
-                                    if (e.key == 'Enter') toggleSelect(group.label, id);
-                                }}
-                                role="button"
-                                tabindex="0"
-                            >
-                                {#if selectModeGroup != group.label}
-                                    <button class="button select-button" onclick={(e) => startSelectMode(group.label, id, e)}>
-                                        select
-                                    </button>
-                                {/if}
-                                <div class="card-word">
-                                    <span class="word chinese-font">
-                                        {getCardWord(deckId, id)}
-                                    </span>
-                                </div>
-                                <div class="card-details">
-                                    <div class={`status ${getCardStatusClass(deckId, id, app)}`}>
-                                        {statusToLabel(app.getWenbunCustomState(deckId, id) ?? WenBunCustomState.New)}
-                                    </div>
-                                    <div class={`due ${getCardStatusClass(deckId, id, app)}`}>
-                                        {app.getCardDueFormatted(deckId, id)}
-                                    </div>
-                                </div>
-                            </div>
+                            {#if view == DeckView.Normal}
+                                {@render NormalCard(id, group)}
+                            {:else if view == DeckView.Small}
+                                {@render SmallCard(id, group)}
+                            {:else}
+                                {@render NormalCard(id, group)}
+                            {/if}
                         {/each}
                     </div>
                 {/if}
@@ -251,6 +250,64 @@
         {/each}
     </div>
 </div>
+
+{#snippet NormalCard(id: number, group: typeof groups[number])}
+    <div 
+        class={`card ${getCardStatusClass(deckId, id, app)}`} 
+        class:selectable={selectModeGroup == group.label}
+        class:selected={isSelected(group.label, id, selections)}
+        onclick={() => toggleSelect(group.label, id)}
+        onkeydown={(e) => {
+            if (e.key == 'Enter') toggleSelect(group.label, id);
+        }}
+        role="button"
+        tabindex="0"
+    >
+        {#if selectModeGroup != group.label}
+            <button class="button select-button" onclick={(e) => startSelectMode(group.label, id, e)}>
+                select
+            </button>
+        {/if}
+        <div class="card-word">
+            <span class="word chinese-font">
+                {getCardWord(deckId, id)}
+            </span>
+        </div>
+        <div class="card-details">
+            <div class={`status ${getCardStatusClass(deckId, id, app)}`}>
+                {statusToLabel(app.getWenbunCustomState(deckId, id) ?? WenBunCustomState.New)}
+            </div>
+            <div class={`due ${getCardStatusClass(deckId, id, app)}`}>
+                {app.getCardDueFormatted(deckId, id)}
+            </div>
+        </div>
+    </div>
+{/snippet}
+
+{#snippet SmallCard(id: number, group: typeof groups[number])}
+    <div 
+        class={`card-small ${getCardStatusClass(deckId, id, app)}`} 
+        class:selectable={selectModeGroup == group.label}
+        class:selected={isSelected(group.label, id, selections)}
+        onclick={() => toggleSelect(group.label, id, true)}
+        onkeydown={(e) => {
+            if (e.key == 'Enter') toggleSelect(group.label, id);
+        }}
+        role="button"
+        tabindex="0"
+    >
+        <div class="card-word">
+            <span class="word chinese-font">
+                {getCardWord(deckId, id)}
+            </span>
+        </div>
+        <div class="card-details">
+            <div class={`due ${getCardStatusClass(deckId, id, app)}`}>
+                {app.getShortCardDueFormatted(deckId, id)}
+            </div>
+        </div>
+    </div>
+{/snippet}
 
 <style>
     .container {
@@ -371,7 +428,7 @@
             color: #00000050;
         }
     }
-    .card-status-previously-studied {
+    .card.card-status-previously-studied {
         .due {
             display: none;
         }
@@ -395,5 +452,66 @@
         flex-direction: column;
         gap: 0.5em;
         margin: 0.5em 0;
+    }
+    .card-small {
+        display: flex;
+        flex-grow: 1;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5em;
+        padding: 0.5em;
+        background-color: #FFFFFF90;
+        width: fit-content;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        &.card-status-ignored {
+            opacity: 0.5;
+        }
+        &.selected {
+            outline: 5px solid #3E92CC;
+            outline-offset: -3px;
+        }
+        .card-word {
+            font-size: 1.5em;
+        }
+        .card-details {
+            color: white;
+            .due {
+                padding: 0.2em 0.2em;
+                min-width: 0.05em;
+                min-height: 0.5em;
+                border-radius: 0.5rem;
+                &.card-status-new {
+                    padding: 0;
+                    min-width: 0;
+                    min-height: 0;
+                    border-radius: 0;
+                    display: none;
+                }
+                &.card-status-learning {
+                    background-color: #DB6B6C;
+                }
+                &.card-status-review-young {
+                    background-color: #419E6F;
+                }
+                &.card-status-review-mature {
+                    background-color: #3E92CC;
+                }
+                &.card-status-relearning {
+                    background-color: #DB6B6C;
+                }
+                &.card-status-previously-studied {
+                    background-color: #DA8C22;
+                }
+                &.card-status-ignored {
+                    padding: 0;
+                    min-width: 0;
+                    min-height: 0;
+                    border-radius: 0;
+                    display: none;
+                }
+            }
+        }
     }
 </style>
