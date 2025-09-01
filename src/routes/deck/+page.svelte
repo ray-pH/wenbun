@@ -110,7 +110,7 @@
         selections.clear();
         selections = selections;
     }
-    function isSelected(groupLabel: string, cardId: number, selections: SvelteSet<number>): boolean {
+    function isSelected(cardId: number, selections: SvelteSet<number>): boolean {
         return selections.has(cardId);
     }
     function toggleSelect(cardId: number) {
@@ -258,7 +258,7 @@
     <div 
         class={`card ${getCardStatusClass(deckId, id, app)}`} 
         class:selectable={isSelecting}
-        class:selected={isSelected(group.label, id, selections)}
+        class:selected={isSelected(id, selections)}
         onclick={() => toggleSelect(id)}
         onkeydown={(e) => {
             if (e.key == 'Enter') toggleSelect(id);
@@ -290,7 +290,7 @@
 {#snippet SmallCard(id: number, group: typeof groups[number])}
     <div 
         class={`card-small ${getCardStatusClass(deckId, id, app)}`} 
-        class:selected={isSelected(group.label, id, selections)}
+        class:selected={isSelected(id, selections)}
         onclick={() => toggleSelect(id)}
         onkeydown={(e) => {
             if (e.key == 'Enter') toggleSelect(id);
