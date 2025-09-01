@@ -80,7 +80,7 @@
                 </tr>
                 <tr class="row-count-previously-studied">
                     <td>Previously Studied</td>
-                    <td class="count">{app.getPreviouslyStudiedCardCount(deckInfo.id)}</td>
+                    <td class="count">{app.getScheduledPreviouslyStudiedCardsCount(deckInfo.id)}</td>
                 </tr>
                 <tr class="row-count-review">
                     <td>Review</td>
