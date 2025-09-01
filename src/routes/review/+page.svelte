@@ -288,7 +288,7 @@
         {:else if isWarmUp && isFinalWarmUp(currentCardId, _changeCounter) && !isGradeWarmUpCards}
             <!-- if isGradeWarmup, should go to the last (else) branch -->
             {@render ReviewButtons([
-                { label: "", alternate: failButtonAlternate },
+                { label: "", alternate: {...failButtonAlternate, isComplete: !isComplete} },
           		{ label: "" },
           		{ label: "" },
           		{ label: "Next", className: "review-button-easy", isComplete,
@@ -306,7 +306,7 @@
            	])}
         {:else if isAutoGrading && !isRequestManualGrade}
            	{@render ReviewButtons([
-                { label: "", alternate: failButtonAlternate },
+                { label: "", alternate: {...failButtonAlternate, isComplete: !isComplete} },
           		{ label: "" },
           		{ label: "" },
           		{ label: "Next", className: "review-button-easy",  isComplete,
