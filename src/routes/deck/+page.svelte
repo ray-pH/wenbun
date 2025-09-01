@@ -94,32 +94,29 @@
         goto(`${base}/`);
     }
     
-    let selectModeGroup: string | null = null;
+    let isSelecting = false;
     let selections: SvelteSet<number> = new SvelteSet();
-    function startSelectMode(group: string, cardId?: number, e?: MouseEvent) {
+    function startSelectMode(cardId?: number, e?: MouseEvent) {
         e?.stopPropagation();
-        selectModeGroup = group;
+        isSelecting = true;
         selections.clear();
         if (cardId != undefined) selections.add(cardId);
         selections = selections;
     }
     function stopSelectMode() {
-        selectModeGroup = null;
+        isSelecting = false;
         selections.clear();
         selections = selections;
     }
     function isSelected(groupLabel: string, cardId: number, selections: SvelteSet<number>): boolean {
-        return selectModeGroup == groupLabel && selections.has(cardId);
+        return selections.has(cardId);
     }
-    function toggleSelect(groupLabel: string, cardId: number, force = false) {
-        if (force) {
-            if (selectModeGroup != groupLabel) {
-                startSelectMode(groupLabel, cardId);
-                return;
-            };
+    function toggleSelect(cardId: number) {
+        if (!isSelecting) {
+            startSelectMode(cardId);
+            return;
         }
         
-        if (selectModeGroup != groupLabel) return;
         if (selections.has(cardId)) {
             selections.delete(cardId);
         } else {
@@ -127,9 +124,8 @@
         }
         selections = selections;
     }
-    function selectAll() {
-        if (selectModeGroup == null) return;
-        const group = deckData.groups.find(g => g.label == selectModeGroup);
+    function selectAllInGroup(groupLabel: string) {
+        const group = deckData.groups.find(g => g.label == groupLabel);
         if (group == undefined) return;
         selections.clear();
         for (const id of group.cardIds) {
@@ -138,25 +134,21 @@
         selections = selections;
     }
     async function addPreviouslyStudiedMark() {
-        if (selectModeGroup == null) return;
         selections.forEach((id) => { app.addPreviouslyStudiedMark(deckId, id); });
         await app.save();
         app = app;
     }
     async function removePreviouslyStudiedMark() {
-        if (selectModeGroup == null) return;
         selections.forEach((id) => { app.removePreviouslyStudiedMark(deckId, id); });
         await app.save();
         app = app;
     }
     async function addIgnoredMark() {
-        if (selectModeGroup == null) return;
         selections.forEach((id) => { app.addIgnoredMark(deckId, id); });
         await app.save();
         app = app;
     }
     async function removeIgnoredMark() {
-        if (selectModeGroup == null) return;
         selections.forEach((id) => { app.removeIgnoredMark(deckId, id); });
         await app.save();
         app = app;
@@ -212,14 +204,14 @@
                     </div>
                 </button>
                 {#if accordionState.get(group.label)}
-                    {#if selectModeGroup == group.label}
+                    {#if isSelecting}
                         <div style="display: flex; flex-direction: row; justify-content: space-between; width: 100%; gap: 0.5em;">
                             <div class="group-buttons-container" style="align-items: flex-start;">
                                 <button class="button" onclick={() => stopSelectMode()}>
                                     <i class="fa-solid fa-xmark"></i>cancel selection
                                 </button>
-                                <button class="button" onclick={() => selectAll()}>
-                                    <i class="fa-solid fa-check-double"></i>select all
+                                <button class="button" onclick={() => selectAllInGroup(group.label)}>
+                                    <i class="fa-solid fa-check-double"></i>select all in this group
                                 </button>
                             </div>
                             <div class="group-buttons-container" style="align-items: flex-end;">
@@ -254,17 +246,17 @@
 {#snippet NormalCard(id: number, group: typeof groups[number])}
     <div 
         class={`card ${getCardStatusClass(deckId, id, app)}`} 
-        class:selectable={selectModeGroup == group.label}
+        class:selectable={isSelecting}
         class:selected={isSelected(group.label, id, selections)}
-        onclick={() => toggleSelect(group.label, id)}
+        onclick={() => toggleSelect(id)}
         onkeydown={(e) => {
-            if (e.key == 'Enter') toggleSelect(group.label, id);
+            if (e.key == 'Enter') toggleSelect(id);
         }}
         role="button"
         tabindex="0"
     >
-        {#if selectModeGroup != group.label}
-            <button class="button select-button" onclick={(e) => startSelectMode(group.label, id, e)}>
+        {#if !isSelecting}
+            <button class="button select-button" onclick={(e) => startSelectMode(id, e)}>
                 select
             </button>
         {/if}
@@ -287,11 +279,10 @@
 {#snippet SmallCard(id: number, group: typeof groups[number])}
     <div 
         class={`card-small ${getCardStatusClass(deckId, id, app)}`} 
-        class:selectable={selectModeGroup == group.label}
         class:selected={isSelected(group.label, id, selections)}
-        onclick={() => toggleSelect(group.label, id, true)}
+        onclick={() => toggleSelect(id)}
         onkeydown={(e) => {
-            if (e.key == 'Enter') toggleSelect(group.label, id);
+            if (e.key == 'Enter') toggleSelect(id);
         }}
         role="button"
         tabindex="0"
