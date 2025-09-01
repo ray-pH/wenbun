@@ -18,6 +18,29 @@
     <div class="changelog-container">
         Change log
 
+        <h4>v0.9.0 (2025-09-01)</h4>
+        <ul>
+            <li><b>Mark/Reveal Buttons</b>: Added buttons to mark a card as unsuccessful or reveal it during a review.</li>
+            <li><b>Stroke Speed</b>: Added an option to control the animation speed for the character writer.</li>
+            <li><b>Quick Adjust for Daily Limits</b>: Added a feature to quickly adjust today's card limits directly from the overview page.</li>
+            <li><b>Extra Study from Deck Selection</b>: Users can now initiate an "Extra Study" session directly from the deck selection/browser page.</li>
+            <li><b>Multi-Group Selection</b>: Enabled card selection across different groups within the deck browser.</li>
+            <li><b>UI/UX Improvements</b>:
+                <ul>
+                    <li>The "Extra Study" section on the overview page is now an accordion to save space.</li>
+                    <li>Implemented a new, more compact view for the deck browser.</li>
+                    <li>Fixed an issue on iOS where the browser would auto-zoom on input fields.</li>
+                    <li>Improved touch interactions for the character writer on mobile.</li>
+                </ul>
+            </li>
+            <li><b>Bug Fixes</b>:
+                <ul>
+                    <li>Fixed the "Previously Studied" count display on the overview page.</li>
+                    <li>Fixed an issue with the review schedule check logic.</li>
+                </ul>
+            </li>
+        </ul>
+
         <h4>v0.8.2 (2025-08-27)</h4>
         <ul>
             <li>Take the warm-up phase into account when <b>calculating the distribution of the new cards</b>.</li>
