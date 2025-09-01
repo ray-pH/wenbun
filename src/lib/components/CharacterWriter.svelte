@@ -249,6 +249,7 @@
         padding: 2em;
         background-color: #FFFFFF90;
         border-radius: 0.5em;
+        touch-action: none;
     }
     .character-container {
         position: relative;
