@@ -176,7 +176,7 @@
             font-size: 0.9em;
         }
         .right {
-            color: #3E92CC;
+            color: var(--wenbun-blue);
         }
     }
     .deck-card {
@@ -186,26 +186,26 @@
             grid-template-columns: 1.5em 1.5em 1.5em 1.5em;
             .deck-count-learn-relearn {
                 place-self: center;
-                color: #DB6B6C
+                color: var(--wenbun-red)
             }
             .deck-count-review {
                 place-self: center;
-                color: #419E6F
+                color: var(--wenbun-green)
             }
             .deck-count-new {
                 place-self: center;
-                color: #3E92CC;
+                color: var(--wenbun-blue);
             }
             .deck-count-previously-studied {
                 place-self: center;
-                color: #DA8C22;
+                color: var(--wenbun-orange);
             }
         }
     }
     .deck-card-button {
         all: unset;
         color: white;
-        background-color: #3E92CC;
+        background-color: var(--wenbun-blue);
         cursor: pointer;
         border-radius: 0.5em;
         width: 2.5em;
@@ -237,7 +237,7 @@
         right: -0.4em;
         width: 1.5em;
         height: 1.5em;
-        background-color: #DB6B6C;
+        background-color: var(--wenbun-red);
         border-radius: 50%;
     }
     .auto-logout-info-container {

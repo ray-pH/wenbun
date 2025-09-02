@@ -409,6 +409,6 @@
         word-break: break-all;
     }
     input:invalid {
-        background-color: #DB6B6C;
+        background-color: var(--wenbun-red);
     }
 </style>

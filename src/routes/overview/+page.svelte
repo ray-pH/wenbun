@@ -233,16 +233,16 @@
             color: var(--color);
         }
         .row-count-learn-relearn {
-            --color: #DB6B6C;
+            --color: var(--wenbun-red);
         }
         .row-count-review {
-            --color: #419E6F;
+            --color: var(--wenbun-green);
         }
         .row-count-new {
-            --color: #3E92CC;
+            --color: var(--wenbun-blue);
         }
         .row-count-previously-studied {
-            --color: #DA8C22;
+            --color: var(--wenbun-orange);
         }
     }
     .section-title {
@@ -274,9 +274,9 @@
             height: 0.7em;
             background-color: var(--color);
             &.ignored { --color: gray; }
-            &.previously-studied { --color: #DA8C22; }
-            &.young { --color: #419E6F; }
-            &.mature { --color: #3E92CC; }
+            &.previously-studied { --color: var(--wenbun-orange); }
+            &.young { --color: var(--wenbun-green); }
+            &.mature { --color: var(--wenbun-blue); }
             &.rest { --color: #C0C0C0; }
         }
     }

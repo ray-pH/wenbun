@@ -105,7 +105,7 @@
         {/if}
     {:else}
         {#if isAutomaticallyLoggedOut}
-            <i class="fa-solid fa-circle-info" style="color: #3E92CC;"></i>
+            <i class="fa-solid fa-circle-info" style="color: var(--wenbun-blue);"></i>
             <p>
                 You are <b>unexpectedly logged out</b> due to session expiration or server issue.
                 Try logging in again.

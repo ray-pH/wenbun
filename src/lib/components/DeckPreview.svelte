@@ -96,7 +96,7 @@
             background-color: #FFFFFF50;
         }
         &:has(.not-supported) {
-            background-color: #DB6B6C;
+            background-color: var(--wenbun-red);
         }
         &:has(.no-dict) {
             background-color: #DA8C2250;

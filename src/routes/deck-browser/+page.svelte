@@ -160,7 +160,7 @@
             font-size: 0.9em;
         }
         .deck-card-count {
-            color: #3E92CC;
+            color: var(--wenbun-blue);
         }
         .right {
             text-align: right;
@@ -168,7 +168,7 @@
     }
     .deck-add-button {
         all: unset;
-        background-color: #3E92CC;
+        background-color: var(--wenbun-blue);
         color: white;
         border-radius: 0.5em;
         padding: 0.5em 0.8em;

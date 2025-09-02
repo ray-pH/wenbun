@@ -71,7 +71,7 @@
         align-items: center;
         width: 100%;
         height: 2em;
-        background-color: #3E92CC;
+        background-color: var(--wenbun-blue);
         padding: 0.5em;
         color: white;
     }

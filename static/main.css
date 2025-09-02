@@ -1,7 +1,14 @@
+:root {
+    --wenbun-blue: #3E92CC;
+    --wenbun-green: #419E6F;
+    --wenbun-orange: #DA8C22;
+    --wenbun-red: #DB6B6C;
+}
+
 .button {
     all: unset;
     color: white;
-    background-color: #3E92CC;
+    background-color: var(--wenbun-blue);
     border-radius: 0.5em;
     font-size: 0.9em;
     padding: 0.5em 1em;
@@ -10,9 +17,9 @@
     align-items: center;
     cursor: pointer;
     &.invert {
-        border: #3E92CC solid 1px;
+        border: var(--wenbun-blue) solid 1px;
         background-color: #FFFFFF90;
-        color: #3E92CC;
+        color: var(--wenbun-blue);
         &:hover {
             background-color: lightgray;
         }
@@ -29,5 +36,5 @@
 
 input:invalid,
 input.invalid {
-    background-color: #DB6B6C;
+    background-color: var(--wenbun-red);
 }

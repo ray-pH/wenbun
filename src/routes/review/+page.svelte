@@ -388,16 +388,16 @@
             text-decoration: underline;
         }
         .deck-count-learn-relearn {
-            color: #DB6B6C
+            color: var(--wenbun-red)
         }
         .deck-count-review {
-            color: #419E6F
+            color: var(--wenbun-green)
         }
         .deck-count-new {
-            color: #3E92CC;
+            color: var(--wenbun-blue);
         }
         .deck-count-previously-studied {
-            color: #DA8C22;
+            color: var(--wenbun-orange);
         }
     }
     .bottom-container {
@@ -460,16 +460,16 @@
         }
         &.is-complete {
             &.review-button-fail {
-                --color: #DB6B6C;
+                --color: var(--wenbun-red);
             }
             &.review-button-hard {
                 --color: black;
             }
             &.review-button-good {
-                --color: #419E6F;
+                --color: var(--wenbun-green);
             }
             &.review-button-easy {
-                --color: #3E92CC;
+                --color: var(--wenbun-blue);
             }
         }
     }
@@ -483,7 +483,7 @@
         bottom: 0;
         width: 80%;
         height: 0.3em;
-        background-color: var(--color, #3E92CC); /* or any color */
+        background-color: var(--color, var(--wenbun-blue)); /* or any color */
         border-radius: 0.2em;
         z-index: 1;
     }

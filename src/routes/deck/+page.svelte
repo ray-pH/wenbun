@@ -348,7 +348,7 @@
     .group-header {
         all: unset;
         cursor: pointer;
-        background-color: #3E92CC;
+        background-color: var(--wenbun-blue);
         padding: 1em;
         color: white;
         border-radius: 0.5em;
@@ -374,7 +374,7 @@
             cursor: pointer;
         }
         &.selected {
-            outline: 5px solid #3E92CC;
+            outline: 5px solid var(--wenbun-blue);
             outline-offset: -3px;
         }
         .card-word {
@@ -401,19 +401,19 @@
                     background-color: gray;
                 }
                 &.card-status-learning {
-                    background-color: #DB6B6C;
+                    background-color: var(--wenbun-red);
                 }
                 &.card-status-review-young {
-                    background-color: #419E6F;
+                    background-color: var(--wenbun-green);
                 }
                 &.card-status-review-mature {
-                    background-color: #3E92CC;
+                    background-color: var(--wenbun-blue);
                 }
                 &.card-status-relearning {
-                    background-color: #DB6B6C;
+                    background-color: var(--wenbun-red);
                 }
                 &.card-status-previously-studied {
-                    background-color: #DA8C22;
+                    background-color: var(--wenbun-orange);
                 }
                 &.card-status-ignored {
                     color: black;
@@ -471,7 +471,7 @@
             opacity: 0.5;
         }
         &.selected {
-            outline: 5px solid #3E92CC;
+            outline: 5px solid var(--wenbun-blue);
             outline-offset: -3px;
         }
         .card-word {
@@ -492,19 +492,19 @@
                     display: none;
                 }
                 &.card-status-learning {
-                    background-color: #DB6B6C;
+                    background-color: var(--wenbun-red);
                 }
                 &.card-status-review-young {
-                    background-color: #419E6F;
+                    background-color: var(--wenbun-green);
                 }
                 &.card-status-review-mature {
-                    background-color: #3E92CC;
+                    background-color: var(--wenbun-blue);
                 }
                 &.card-status-relearning {
-                    background-color: #DB6B6C;
+                    background-color: var(--wenbun-red);
                 }
                 &.card-status-previously-studied {
-                    background-color: #DA8C22;
+                    background-color: var(--wenbun-orange);
                 }
                 &.card-status-ignored {
                     padding: 0;

@@ -249,7 +249,7 @@
         align-items: end;
     }
     .help-link {
-        color: #3e92cc;
+        color: var(--wenbun-blue);
     }
     
 </style>

@@ -53,6 +53,6 @@
 		max-width: 32em;
 	}
 	a {
-		color: #3e92cc;
+		color: var(--wenbun-blue);
 	}
 </style>

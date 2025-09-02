@@ -298,7 +298,7 @@
         
         color: white;
         background:
-          linear-gradient(#3E92CC 0 0) 0 / var(--p) 100% no-repeat,
+          linear-gradient(var(--wenbun-blue) 0 0) 0 / var(--p) 100% no-repeat,
           #BBB;
         padding: 0.5em 3em;
         border-radius: 0.5rem;
@@ -326,10 +326,10 @@
             font-size: 3em;
         }
         &:hover { opacity: 0.8; }
-        &.easy { --color: #3E92CC;}
-        &.good { --color: #419E6F;}
-        &.hard { --color: #DA8C22;}
-        &.again { --color: #DB6B6C;}
+        &.easy { --color: var(--wenbun-blue);}
+        &.good { --color: var(--wenbun-green);}
+        &.hard { --color: var(--wenbun-orange);}
+        &.again { --color: var(--wenbun-red);}
         &.blinking {
             animation: blinking 1s ease-in-out infinite;
         }

@@ -111,9 +111,9 @@
         margin-right: 0.5em;
     }
     .fa-triangle-exclamation {
-        color: #DB6B6C;
+        color: var(--wenbun-red);
     }
     .fa-circle-exclamation {
-        color: #DA8C22;
+        color: var(--wenbun-orange);
     }
 </style>

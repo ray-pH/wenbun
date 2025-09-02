@@ -240,6 +240,6 @@
     }
     
     .privacy-policy-link a {
-        color: #3e92cc;
+        color: var(--wenbun-blue);
     }
 </style>
