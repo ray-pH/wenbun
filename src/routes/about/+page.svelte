@@ -18,6 +18,16 @@
     <div class="changelog-container">
         Change log
 
+        <h4>v0.9.1 (2025-09-02)</h4>
+        <ul>
+            <li><b>Character Writer</b>: The drawing area has been updated to remove the outer padding, making the entire white region drawable.</li>
+            <li><b>Bug Fixes</b>:
+                <ul>
+                    <li>Fixed an issue where the "Reveal" button would still be visible after a word was completed in a review.</li>
+                </ul>
+            </li>
+        </ul>
+
         <h4>v0.9.0 (2025-09-01)</h4>
         <ul>
             <li><b>Mark/Reveal Buttons</b>: Added buttons to mark a card as unsuccessful or reveal it during a review.</li>
