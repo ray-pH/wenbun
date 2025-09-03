@@ -32,7 +32,7 @@ export interface CharacterWriterConfig {
 }
 
 export async function loadDeck(filename: string): Promise<string[] | undefined> {
-    const url = `${base}/assets/decks/${filename}`;
+    const url = `${base}/wenbun-assets/decks/${filename}`;
     try {
         const res = await fetch(url);
         const text = await res.text();

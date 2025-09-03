@@ -1,0 +1,3 @@
+[submodule "static/wenbun-assets"]
+	path = static/wenbun-assets
+	url = git@github.com:ray-pH/wenbun-assets.git
