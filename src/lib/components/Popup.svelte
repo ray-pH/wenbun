@@ -7,9 +7,6 @@
         onClose: () => void;
     }
     let { children, isOpen = $bindable(), onClose }: Props = $props();
-    function closeBackdrop(e: Event) {
-        if (e.target === e.currentTarget) onClose();
-    }
 </script>
 
 {#if isOpen}
@@ -53,7 +50,7 @@
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         width: 90vw;
         max-width: 40em;
-        max-height: calc(100vh - 2em);
+        max-height: calc(100vh - 5em);
         overflow: auto;
     }
 

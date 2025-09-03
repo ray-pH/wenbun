@@ -39,6 +39,7 @@
     
     interface Props {
 		onComplete: (data: AutoReviewData) => void;
+		onOpenDict: () => void;
 		isRequestManualGrade: boolean;
 		characterData: CharacterWriterData | undefined;
 		cardConfig: CharacterWriterConfig;
@@ -47,7 +48,8 @@
 		app: App
 	}
     let { 
-        onComplete, isRequestManualGrade = $bindable(), 
+        onComplete, onOpenDict,
+        isRequestManualGrade = $bindable(), 
         characterData, app, cardConfig, autoGrade,
         autoReviewData = $bindable()
     }: Props = $props();
@@ -286,6 +288,18 @@
         justify-content: space-between;
         align-items: center;
     }
+    .right-side {
+        display: flex;
+        flex-direction: row;
+        gap: 0.5em;
+        align-items: center;
+    }
+    .dict-button {
+        background-color: #FFFFFF90;
+        height: fit-content;
+        color: black;
+    }
+    
     @property --p {
       syntax: '<percentage>';
       inherits: false;
@@ -402,14 +416,20 @@
                 {:else}
                     <div class="new-element-indicator is-hidden"></div>
                 {/if}
-                <div class="character-box-container chinese-font">
-                    {#each characterData.characters as character, i}
-                        {#if i < completedCharCount || cardConfig.isFirstTime}
-                            <span>{character}</span>
-                        {:else}
-                            <span class="empty-character-box">&#x3000;</span>
-                        {/if}
-                    {/each}
+                <div class="right-side">
+                    <button class="button dict-button" onclick={() => onOpenDict()}>
+                        <i class="fa-solid fa-book"></i>
+                        Dict
+                    </button>
+                    <div class="character-box-container chinese-font">
+                        {#each characterData.characters as character, i}
+                            {#if i < completedCharCount || cardConfig.isFirstTime}
+                                <span>{character}</span>
+                            {:else}
+                                <span class="empty-character-box">&#x3000;</span>
+                            {/if}
+                        {/each}
+                    </div>
                 </div>
             {/if}
         </div>

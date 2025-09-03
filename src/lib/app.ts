@@ -857,6 +857,9 @@ export class App {
         const colors = config.zh.toneColors;
         return colors[tone - 1];
     }
+    getChineseToneColorArray(): string[] {
+        return [1,2,3,4,5].map(i => this.getChineseToneColor(i) ?? '');
+    }
     
     splitDeckIntoGroupOfN(deckId: string, groupContentCount: number): void {
         const deckData = this.deckData[deckId];

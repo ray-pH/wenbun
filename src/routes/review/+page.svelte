@@ -11,6 +11,8 @@
     import { AutoReview, type AutoReviewData } from '$lib/autoReview';
     import { fly, fade } from 'svelte/transition';
     import { cubicOut } from 'svelte/easing';
+    import Popup from '$lib/components/Popup.svelte';
+    import ZhDict from '$lib/components/ZhDict.svelte';
     
     const inFlyParam = { delay: 100, y : -100, duration: 300, easing: cubicOut };
     const outFadeParam = { duration: 200 };
@@ -34,6 +36,7 @@
     let isPageReady = false;
     let app = new App();
     let characterWriterRef: CharacterWriter;
+    let showDictModal = true;
     onMount(async () => {
         // no need to sync in here
         await app.init();
@@ -210,6 +213,10 @@
             autoGrade = AutoReview.getGrade(autoReviewData);
         }
     }
+    
+    function openDict() {
+        showDictModal = true;
+    }
 </script>
 
 
@@ -255,6 +262,7 @@
                     bind:this={characterWriterRef}
                     characterData={characterWriterDataFromId(currentCardId)} 
                     onComplete={(data) => onComplete(data)} 
+                    onOpenDict={() => openDict()}
                     bind:isRequestManualGrade={isRequestManualGrade}
                     cardConfig={getCardConfig(currentCardId)}
                     autoGrade={autoGrade}
@@ -337,6 +345,16 @@
         {/if}
     {/if}
 </div>
+
+<Popup bind:isOpen={showDictModal} onClose={() => (showDictModal = false)}>
+    {#if currentCardId !== undefined}
+        <ZhDict
+            word={app.getCardWord(deckId, currentCardId)}
+            wordlist={wordlist}
+            toneColors={app.getChineseToneColorArray()}
+        ></ZhDict>
+    {/if}
+</Popup>
 
 {#snippet ReviewButtons(buttons: ReviewButton[], extraClass = "")}
 	<div class="bottom-container" in:fly={inFlyParam} out:fade={outFadeParam}>

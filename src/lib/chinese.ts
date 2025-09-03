@@ -1,5 +1,5 @@
 import { pinyinToZhuyin } from "pinyin-zhuyin";
-import { CHINESE_CC_CEDICT_SRC, CHINESE_DICT_SRC, HANZI_WRITER_DATA_CHARS_SRC, SLUG_NO_DATA_IN_DICT, WENBUN_AUDIO_URL, WENBUN_AUDIO_ZH_PREFIX_SRC, YUE_AUDIO_DICT_SRC, ZH_AUDIO_DICT_SRC } from "./constants";
+import { CHINESE_CC_CEDICT_SRC, CHINESE_DICT_SRC, CHINESE_MAKEMEAHANZI_SRC, HANZI_WRITER_DATA_CHARS_SRC, SLUG_NO_DATA_IN_DICT, WENBUN_AUDIO_URL, WENBUN_AUDIO_ZH_PREFIX_SRC, YUE_AUDIO_DICT_SRC, ZH_AUDIO_DICT_SRC } from "./constants";
 import { parseIntOrUndefined, type CharacterWriterData } from "./util";
 import * as OpenCC from 'opencc-js';
 
@@ -31,6 +31,22 @@ export type ChineseDict = Record<string, {
     jyutping: string,
 }>
 
+// https://github.com/skishore/makemeahanzi
+export interface IChineseCharDecomposition {
+    character: string,
+    definition?: string,
+    pinyin: string[],
+    decomposition: string,
+    etymology?: {
+        type: "ideographic" | "pictographic" | "pictophonetic",
+        hint: string,
+        phonetic?: string,
+        semantic?: string,
+    },
+    radical: string,
+    // matches: 
+}
+
 export enum ChineseMandarinReading {
     Pinyin = 'pinyin',
     PinyinNumeric = 'pinyin_num',
@@ -50,6 +66,7 @@ export class ChineseCharacterWordlist {
     private simplifiedConverter!: ChineseCharacterConverter;
     private audioDict: Record<string, string[]> = {};
     private hanziWriterDataChars: Set<string> = new Set();
+    private charDecompositionDict: Record<string, IChineseCharDecomposition> = {};
     public lang: 'zh' | 'yue' = 'zh';
     public initialized = false;
     
@@ -88,7 +105,22 @@ export class ChineseCharacterWordlist {
             const chars = await res.text();
             this.hanziWriterDataChars = new Set(chars);
         }
-        await Promise.allSettled([dictP(), audioDictP(), hanziWriterDataCharsP()]);
+        const charDecompositionDictP = async () => {
+            const res = await fetch(CHINESE_MAKEMEAHANZI_SRC);
+            const text = await res.text();
+            const dict: any = {};
+            // jsonl
+            text.split('\n').forEach(line => {
+                try {
+                    const data = JSON.parse(line);
+                    dict[data.character] = data;
+                } catch (e) {
+                    console.error(e);
+                }
+            });
+            this.charDecompositionDict = dict;
+        }
+        await Promise.allSettled([dictP(), audioDictP(), hanziWriterDataCharsP(), charDecompositionDictP()]);
         this.converter = new ChineseCharacterConverter('cn', 'tw');
         this.simplifiedConverter = new ChineseCharacterConverter('tw', 'cn');
         this.initialized = true;
@@ -164,6 +196,14 @@ export class ChineseCharacterWordlist {
         return '';
     }
     
+    getCharDecompData(char: string): IChineseCharDecomposition | undefined {
+        return this.charDecompositionDict[char];
+    }
+    
+    getWordDecompData(word: string): IChineseCharDecomposition[] {
+        return word.split('').map(c => this.getCharDecompData(c)).filter(d => d) as IChineseCharDecomposition[];
+    }
+    
     isWordSupportedByHanziWriter(word: string): boolean {
         word = word.replace(/\r/g, '');
         return Array.from(word).every(c => this.isCharSupportedByHanziWriter(c));
@@ -171,6 +211,26 @@ export class ChineseCharacterWordlist {
     
     isCharSupportedByHanziWriter(char: string): boolean {
         return this.hanziWriterDataChars.has(char);
+    }
+    
+    toTraditional(char: string): string {
+        return this.converter.convert(char);
+    }
+    toSimplified(char: string): string {
+        return this.simplifiedConverter.convert(char);
+    }
+    toneFromPinyin(pinyin: string): number {
+        // number form (e.g., "ma3")
+        const m = pinyin.match(/[1-5]$/);
+        if (m) return +m[0];
+    
+        // handle precomposed + decomposed + uppercase + ü (u + U+0308)
+        const nfd = pinyin.normalize('NFD');
+        if (nfd.includes('\u0304')) return 1; // macron
+        if (nfd.includes('\u0301')) return 2; // acute
+        if (nfd.includes('\u030C')) return 3; // caron
+        if (nfd.includes('\u0300')) return 4; // grave
+        return 5; // neutral
     }
 }
 
