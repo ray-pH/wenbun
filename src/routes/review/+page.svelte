@@ -36,7 +36,7 @@
     let isPageReady = false;
     let app = new App();
     let characterWriterRef: CharacterWriter;
-    let showDictModal = true;
+    let showDictModal = false;
     onMount(async () => {
         // no need to sync in here
         await app.init();
