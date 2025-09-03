@@ -1,16 +1,59 @@
 <script lang="ts">
-    import type { ChineseCharacterWordlist, IChineseCharDecomposition } from "$lib/chinese";
+    import { ChineseMandarinReading, TONE_PREFIX, type ChineseCharacterWordlist, type IChineseCharDecomposition } from "$lib/chinese";
+    import { parseIntOrUndefined, type CharacterWriterData } from "$lib/util";
+    import { pinyinToZhuyin } from "pinyin-zhuyin";
 
     interface Props {
-        word: string;
+        characterData?: CharacterWriterData;
         wordlist: ChineseCharacterWordlist
         toneColors: string[];
+        zhReading: ChineseMandarinReading;
     }
-    let { word, wordlist, toneColors }: Props = $props();
+    let { characterData, wordlist, toneColors, zhReading }: Props = $props();
+    let word = characterData?.characters ?? "";
+    let wordColors = characterData?.tags.map(tags => getChineseTone(tags) ?? 5).map(tone => toneColors[tone-1]) ?? [];
     let wordData = $derived(wordlist.getWordDecompData(word));
+    let isComposite = word.length > 1;
+    
+    function reading(pinyin: string, zhReading: ChineseMandarinReading): string {
+        if (zhReading === ChineseMandarinReading.Zhuyin) {
+            return pinyinToZhuyin(pinyin);
+        } else {
+            return pinyin;
+        }
+    }
+    function getChineseTone(tags: string[]): number | undefined {
+        for (const tag of tags) {
+            if (tag.startsWith(TONE_PREFIX)) {
+                return parseIntOrUndefined(tag.substring(TONE_PREFIX.length));
+            }
+        }
+    }
 </script>
 
 <div class="dict-container">
+    {#if isComposite}
+        <div class="row">
+            <div class="label">Simplified</div>
+            <div class="value chinese-font">
+                {@render ColoredString(wordlist.toSimplified(word), wordColors)}
+            </div>
+        </div>
+        <div class="row">
+            <div class="label">Traditional</div>
+            <div class="value chinese-font">
+                {@render ColoredString(wordlist.toTraditional(word), wordColors)}
+            </div>
+        </div>
+        <div class="row">
+            <div class="label">Definition</div>
+            <div class="value">{characterData?.meanings[0] ?? ''}</div>
+        </div>
+        <div class="sep"></div>
+        <div style="margin-bottom: 0.5em">
+            <b>Components</b> :
+        </div>
+    {/if}
     {#each wordData as data}
         <div class="char-decomp" style="--tone-color: {toneColors[wordlist.toneFromPinyin(data.pinyin?.[0] ?? '')-1]}">
             <div class="char-container">
@@ -18,7 +61,7 @@
                     {data.character}
                 </div>
                 <div class="char-pinyin">
-                    {data.pinyin?.[0] ?? ''}
+                    {reading(data.pinyin?.[0] ?? '', zhReading)}
                 </div>
             </div>
             <div class="char-info">
@@ -63,19 +106,6 @@
                         </div>
                     {/if}
                 {/if}
-                <!-- export interface IChineseCharDecomposition {
-                    character: string,
-                    definition?: string,
-                    // pinyin: string[],
-                    decomposition: string,
-                    etymology?: {
-                        type: "ideographic" | "pictographic" | "pictophonetic",
-                        hint: string,
-                        phonetic?: string,
-                        semantic?: string,
-                    },
-                    radical: string,
-                    // matches:  -->
             </div>
         </div>
     {/each}
@@ -85,11 +115,17 @@
     {#if decomp}
         <div class="simple-decomp" style="--tone-color: {toneColors[wordlist.toneFromPinyin(decomp.pinyin?.[0] ?? '')-1]}">
             <span class="simple-char chinese-font">{decomp.character}</span>
-            <span class="simple-pinyin">{decomp.pinyin?.[0] ?? ''}</span>
+            <span class="simple-pinyin">{reading(decomp.pinyin?.[0] ?? '', zhReading)}</span>
             <span class="simple-sep">&mdash;</span>
             <span class="simple-def">{decomp.definition ?? ''}</span>
         </div>
     {/if}
+{/snippet}
+
+{#snippet ColoredString(string: string, colors: string[])}
+    {#each string as char, i}
+        <span style="color: {colors[i]}">{char}</span>
+    {/each}
 {/snippet}
 
 <style>

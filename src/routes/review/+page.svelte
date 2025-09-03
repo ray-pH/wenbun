@@ -5,7 +5,7 @@
     import * as FSRS from "ts-fsrs"
     import { onMount } from "svelte";
     import { type CharacterWriterConfig, type CharacterWriterData } from "$lib/util";
-    import { ChineseCharacterWordlist } from "$lib/chinese";
+    import { ChineseCharacterWordlist, ChineseMandarinReading } from "$lib/chinese";
     import TopBar from "$lib/components/TopBar.svelte";
     import { DECK_TAGS } from '$lib/constants';
     import { AutoReview, type AutoReviewData } from '$lib/autoReview';
@@ -349,9 +349,10 @@
 <Popup bind:isOpen={showDictModal} onClose={() => (showDictModal = false)}>
     {#if currentCardId !== undefined}
         <ZhDict
-            word={app.getCardWord(deckId, currentCardId)}
+            characterData={characterWriterDataFromId(currentCardId)} 
             wordlist={wordlist}
             toneColors={app.getChineseToneColorArray()}
+            zhReading={app.getConfig().zh.mandarinReading}
         ></ZhDict>
     {/if}
 </Popup>
