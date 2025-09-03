@@ -286,13 +286,20 @@
         padding-right: 0.5em;
         display: flex;
         justify-content: space-between;
+        gap: 1em;
         align-items: center;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1em;
+        min-width: 0;
     }
     .right-side {
         display: flex;
         flex-direction: row;
         gap: 0.5em;
         align-items: center;
+        flex: 0 0 auto;         /* keep natural width; indicator shrinks first */
+        min-width: 0;           /* safety for inner flex items */
     }
     .dict-button {
         background-color: #FFFFFF90;
@@ -314,11 +321,19 @@
         background:
           linear-gradient(var(--wenbun-blue) 0 0) 0 / var(--p) 100% no-repeat,
           #BBB;
-        padding: 0.5em 3em;
         border-radius: 0.5rem;
         &.is-hidden {
             visibility: hidden;
         }
+        
+        box-sizing: border-box; /* width includes padding */
+        padding: 0.5em 1em;
+        white-space: nowrap;    /* keep it one line */
+        text-align: center;
+        /* target width = 12em, can shrink but never grow past it */
+        flex: 0 1 12em;         /* grow:0, shrink:1, basis:12em */
+        max-inline-size: 12em;  /* don’t exceed target */
+        min-inline-size: 6.5em; /* reasonable floor so it doesn’t collapse */
     }
     .auto-review-indicator-container {
         all: unset;
