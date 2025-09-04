@@ -15,8 +15,13 @@
             Discord Community Server
         </a>
     </div>
+    <div style="margin-bottom: 1em">
+        <a class="button" href="{base}/credits" aria-label="Credits" style="padding-left: 8em; padding-right: 8em">
+            Credits
+        </a>
+    </div>
     <div class="changelog-container">
-        Change log
+        Changelog
 
         <h4>v0.9.1 (2025-09-02)</h4>
         <ul>
@@ -217,7 +222,7 @@
         flex-direction: column;
         align-items: center;
         text-align: center;
-        margin-bottom: 2em;
+        margin-bottom: 1em;
         gap: 0.5em;
         background-color: #FFFFFF90;
         padding: 2em;
