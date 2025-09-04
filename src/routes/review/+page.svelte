@@ -11,8 +11,8 @@
     import { AutoReview, type AutoReviewData } from '$lib/autoReview';
     import { fly, fade } from 'svelte/transition';
     import { cubicOut } from 'svelte/easing';
-    import Popup from '$lib/components/Popup.svelte';
     import ZhDict from '$lib/components/ZhDict.svelte';
+    import SlideablePopup from '$lib/components/SlideablePopup.svelte';
     
     const inFlyParam = { delay: 100, y : -100, duration: 300, easing: cubicOut };
     const outFadeParam = { duration: 200 };
@@ -346,7 +346,7 @@
     {/if}
 </div>
 
-<Popup bind:isOpen={showDictModal} onClose={() => (showDictModal = false)}>
+<SlideablePopup bind:isOpen={showDictModal} onClose={() => (showDictModal = false)}>
     {#if currentCardId !== undefined}
         <ZhDict
             characterData={characterWriterDataFromId(currentCardId)} 
@@ -355,7 +355,7 @@
             zhReading={app.getConfig().zh.mandarinReading}
         ></ZhDict>
     {/if}
-</Popup>
+</SlideablePopup>
 
 {#snippet ReviewButtons(buttons: ReviewButton[], extraClass = "")}
 	<div class="bottom-container" in:fly={inFlyParam} out:fade={outFadeParam}>
