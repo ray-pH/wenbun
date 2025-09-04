@@ -11,6 +11,7 @@
     import { AutoReview, type AutoReviewData } from '$lib/autoReview';
     import { fly, fade } from 'svelte/transition';
     import { cubicOut } from 'svelte/easing';
+    import { navigationHistory } from '$lib/navigation';
     import ZhDict from '$lib/components/ZhDict.svelte';
     import SlideablePopup from '$lib/components/SlideablePopup.svelte';
     
@@ -223,7 +224,14 @@
 <TopBar title={title}></TopBar>
 <div class="container">
     {#if isDoneToday} 
-        <div>You have done today's review.</div>
+        <div style="margin-top: 2em">You have done today's review.</div>
+        <div class="bottom-container">
+            <div class="review-button-container">
+                <button class="button big-button" onclick={() => navigationHistory.goHomeAndClearHistory()}>
+                    Go Back
+                </button>
+            </div>
+        </div>
     {/if}
     {#if isPageReady && (currentCardId !== undefined) && !isDoneToday}
         {#key _changeCounter}
@@ -513,5 +521,11 @@
         0% { opacity: 1; }
         50% { opacity: 0.5; }
         100% { opacity: 1; }
+    }
+    
+    .big-button {
+        padding: 1.5em 5em;
+        max-width: 25em;
+        margin: auto;
     }
 </style>

@@ -38,6 +38,10 @@ export const navigationHistory = {
             const newHistory = currentHistory.slice(0, -1);
             history.set(newHistory);
         }
+    },
+    goHomeAndClearHistory: () => {
+        history.set([]);
+        goto(base + '/');
     }
 };
 
