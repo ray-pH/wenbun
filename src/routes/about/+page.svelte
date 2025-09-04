@@ -23,6 +23,20 @@
     <div class="changelog-container">
         Changelog
 
+        <h4>v0.10.0 (2025-09-04)</h4>
+        <ul>
+            <li><b>Dictionary</b>: Initial implementation of the in-app dictionary.</li>
+            <div class="note">
+                We are still considering the best way to implement additional fields, such as example sentences.
+            </div>
+            <li><b>Credits Page</b>: Added a new page to acknowledge contributors.</li>
+            <li><b>UI/UX Improvements</b>:
+                <ul>
+                    <li>Updated the UI for when a review session is completed.</li>
+                </ul>
+            </li>
+        </ul>
+
         <h4>v0.9.1 (2025-09-02)</h4>
         <ul>
             <li><b>Character Writer</b>: The drawing area has been updated to remove the outer padding, making the entire white region drawable.</li>
