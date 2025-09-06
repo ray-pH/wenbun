@@ -23,6 +23,30 @@
     <div class="changelog-container">
         Changelog
 
+        <h4>v0.11.0 (2025-09-06)</h4>
+        <ul>
+            <li><b>Dictionary</b>:
+                <ul>
+                    <li>Allowed <b>clicking on characters</b> within the dictionary.</li>
+                    <li>Added a <b>components</b> field to dictionary entries.</li>
+                    <li>Added <b>notes</b> for some components.</li>
+                </ul>
+            </li>
+            <li><b>Deck</b>:
+                <ul>
+                    <li>Added the ability to <b>rename custom decks</b>.</li>
+                    <li>Added the ability to <b>move cards</b> between groups within decks.</li>
+                    <li>Added the ability to create <b>custom groups</b> within decks.</li>
+                </ul>
+            </li>
+            <li><b>Review</b>:
+                <ul>
+                    <li>Fixed a UI bug where the <b>bottom buttons were pushed up</b>.</li>
+                    <li>Fixed an issue where the "Fail" pop-up would <b>block strokes</b>.</li>
+                </ul>
+            </li>
+        </ul>
+
         <h4>v0.10.1 (2025-09-04)</h4>
         <ul>
             <li>Updated the credits page</li>
