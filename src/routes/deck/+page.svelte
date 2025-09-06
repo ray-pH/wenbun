@@ -190,13 +190,13 @@
         isEditingName = false;
         app = app;
     }
-    function cancelRename(): any {
+    function cancelRename(): void {
         isEditingName = false;
         nameInputStr = app.getDeckInfo(deckId).title;
     }
     
     async function moveCardsIntoGroup() {
-        const grouplabel = window.prompt('Enter target group name: *(new group will be created if name does not exists)');
+        const grouplabel = window.prompt('Enter target group name: *(new group will be created if the name does not exist)');
         if (!grouplabel) return;
         app.moveCardsIntoGroup(deckId, Array.from(selections), grouplabel);
         await app.save();
