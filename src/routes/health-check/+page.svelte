@@ -16,6 +16,7 @@
         totalWordsWithDictData: number;
         totalWordsSupportedByHanziWriter: number;
         missingWords: string[];
+        missingWordsFromHanziWriter: string[];
     }[] = []
     
     onMount(async() => {
@@ -35,13 +36,15 @@
             const missingWords = getMissingWordsFromDict(d.words);
             const totalWordCount = d.words.length;
             const totalWordsWithDictData = totalWordCount - missingWords.length;
-            const totalWordsSupportedByHanziWriterPromise = d.words.filter(w => zhWordlist.isWordSupportedByHanziWriter(w)).length;
+            const missingWordsFromHanziWriter = getMissingWordsFromHanziWriter(missingWords);
+            const totalWordsSupportedByHanziWriter =  totalWordsWithDictData - missingWordsFromHanziWriter.length;
             dictionaryCheckResult.push({
                 id: d.id, 
                 totalWordCount, 
                 totalWordsWithDictData, 
-                totalWordsSupportedByHanziWriter: totalWordsSupportedByHanziWriterPromise,
-                missingWords
+                totalWordsSupportedByHanziWriter,
+                missingWords,
+                missingWordsFromHanziWriter
             });
             dictionaryCheckResult = dictionaryCheckResult;
         }
@@ -51,7 +54,13 @@
         return arr.slice(0, n);
     }
     function getMissingWordsFromDict(words: string[]): string[] {
-        return words.filter(w => !zhWordlist.dict[w]);
+        return words.filter(w => !isWordExist(w));
+    }
+    function getMissingWordsFromHanziWriter(words: string[]): string[] {
+        return words.filter(w => !zhWordlist.isWordSupportedByHanziWriter(w));
+    }
+    function isWordExist(word: string): boolean {
+        return !!zhWordlist.dict[word] || !!zhWordlist.dict[zhWordlist.toSimplified(word)];
     }
 </script>
 
@@ -72,6 +81,9 @@
     {#each dictionaryCheckResult as d}
         <div class:is-healthy={d.totalWordsSupportedByHanziWriter === d.totalWordCount}>
             {d.id}: {d.totalWordsSupportedByHanziWriter}/{d.totalWordCount} 
+            {#if d.missingWordsFromHanziWriter.length > 0}
+                [missing words: {take(d.missingWordsFromHanziWriter, 5).join(', ')}, ...]
+            {/if}
         </div>
     {/each}
 </div>
