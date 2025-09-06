@@ -404,6 +404,7 @@
         align-items: center;
         justify-content: center;
         width: 100%;
+        margin-bottom: 5em;
     }
     .character-writer-container {
         margin: 0;
@@ -428,10 +429,11 @@
         }
     }
     .bottom-container {
-        position: absolute;
+        position: fixed;
         bottom: 0;
         padding-bottom: 3em;
         box-sizing: border-box;
+        background-color: #E0E0E0;
         width: 100vw;
         @media (max-width: 600px) {
             padding-bottom: 0.6em;
