@@ -72,6 +72,7 @@ export const ChineseToneColorPalette = {
 export const CHINESE_DICT_SRC = `${base}/wenbun-assets/zh/zh_dict.json`;
 export const CHINESE_CC_CEDICT_SRC = `${base}/wenbun-assets/zh/zh_cc_cedict_array.json`;
 export const CHINESE_MAKEMEAHANZI_SRC = `${base}/wenbun-assets/zh/zh_makemeahanzi.jsonl`;
+export const CHINESE_CUSTOM_NOTES_SRC = `${base}/wenbun-assets/zh/zh_note.jsonl`;
 export const HANZI_WRITER_DATA_CHARS_SRC = `${base}/wenbun-assets/hanzi_writer_data_chars.txt`;
 
 export const SLUG_NO_DATA_IN_DICT = "ERROR: information about this word is not available in the dictionary. Please report this issue to the developer.";

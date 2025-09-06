@@ -1,5 +1,5 @@
 import { pinyinToZhuyin } from "pinyin-zhuyin";
-import { CHINESE_CC_CEDICT_SRC, CHINESE_DICT_SRC, CHINESE_MAKEMEAHANZI_SRC, HANZI_WRITER_DATA_CHARS_SRC, SLUG_NO_DATA_IN_DICT, WENBUN_AUDIO_URL, WENBUN_AUDIO_ZH_PREFIX_SRC, YUE_AUDIO_DICT_SRC, ZH_AUDIO_DICT_SRC } from "./constants";
+import { CHINESE_CC_CEDICT_SRC, CHINESE_CUSTOM_NOTES_SRC, CHINESE_DICT_SRC, CHINESE_MAKEMEAHANZI_SRC, HANZI_WRITER_DATA_CHARS_SRC, SLUG_NO_DATA_IN_DICT, WENBUN_AUDIO_URL, WENBUN_AUDIO_ZH_PREFIX_SRC, YUE_AUDIO_DICT_SRC, ZH_AUDIO_DICT_SRC } from "./constants";
 import { parseIntOrUndefined, type CharacterWriterData } from "./util";
 import * as OpenCC from 'opencc-js';
 
@@ -67,6 +67,7 @@ export class ChineseCharacterWordlist {
     private audioDict: Record<string, string[]> = {};
     private hanziWriterDataChars: Set<string> = new Set();
     private charDecompositionDict: Record<string, IChineseCharDecomposition> = {};
+    private customNotes: Record<string, string> = {};
     public lang: 'zh' | 'yue' = 'zh';
     public initialized = false;
     
@@ -120,7 +121,22 @@ export class ChineseCharacterWordlist {
             });
             this.charDecompositionDict = dict;
         }
-        await Promise.allSettled([dictP(), audioDictP(), hanziWriterDataCharsP(), charDecompositionDictP()]);
+        const notesDictP = async () => {
+            const res = await fetch(CHINESE_CUSTOM_NOTES_SRC);
+            const text = await res.text();
+            const dict: any = {};
+            // jsonl
+            text.split('\n').forEach(line => {
+                try {
+                    const data = JSON.parse(line);
+                    dict[data.char] = data.note;
+                } catch (e) {
+                    console.error(e);
+                }
+            });
+            this.customNotes = dict;
+        }
+        await Promise.allSettled([dictP(), audioDictP(), hanziWriterDataCharsP(), charDecompositionDictP(), notesDictP()]);
         this.converter = new ChineseCharacterConverter('cn', 'tw');
         this.simplifiedConverter = new ChineseCharacterConverter('tw', 'cn');
         this.initialized = true;
@@ -218,6 +234,10 @@ export class ChineseCharacterWordlist {
     }
     toSimplified(char: string): string {
         return this.simplifiedConverter.convert(char);
+    }
+    
+    getCustomNote(char: string): string | undefined {
+        return this.customNotes[char];
     }
 }
 

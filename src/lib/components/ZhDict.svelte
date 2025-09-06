@@ -139,6 +139,14 @@
                     <div class="label">Definition</div>
                     <div class="value">{data.definition ?? ''}</div>
                 </div>
+                {#if wordlist.getCustomNote(word)}
+                    <div class="row">
+                        <div class="label">Note</div>
+                        <div class="value">
+                            {@render TaggedChunkSpans(tagChineseChars(wordlist.getCustomNote(word) ?? ''))}
+                        </div>
+                    </div>
+                {/if}
                 <!-- <div class="row">
                     <div class="label">Radical</div>
                     <div class="value">{@render SimpleExpand(wordlist.getCharDecompData(data.radical))}</div>
