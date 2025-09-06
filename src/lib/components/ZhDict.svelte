@@ -136,6 +136,12 @@
                         <div class="label">Etymology</div>
                         <div class="value">{data.etymology.type}</div>
                     </div>
+                    {#if data.etymology.hint && data.etymology.type !== 'pictophonetic'}
+                        <div class="row">
+                            <div class="label">Hint</div>
+                            <div class="value">{data.etymology.hint}</div>
+                        </div>
+                    {/if}
                     {#if data.etymology.semantic}
                         <div class="row">
                             <div class="label">Semantic</div>
