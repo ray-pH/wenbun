@@ -219,19 +219,6 @@ export class ChineseCharacterWordlist {
     toSimplified(char: string): string {
         return this.simplifiedConverter.convert(char);
     }
-    toneFromPinyin(pinyin: string): number {
-        // number form (e.g., "ma3")
-        const m = pinyin.match(/[1-5]$/);
-        if (m) return +m[0];
-    
-        // handle precomposed + decomposed + uppercase + ü (u + U+0308)
-        const nfd = pinyin.normalize('NFD');
-        if (nfd.includes('\u0304')) return 1; // macron
-        if (nfd.includes('\u0301')) return 2; // acute
-        if (nfd.includes('\u030C')) return 3; // caron
-        if (nfd.includes('\u0300')) return 4; // grave
-        return 5; // neutral
-    }
 }
 
 export class ChineseCharacterConverter {
@@ -252,4 +239,21 @@ const AUDIO_LANG_DIR = {
 export function getAudioUrl(lang: 'zh' | 'yue', relativePath: string): string {
     const dir = AUDIO_LANG_DIR[lang];
     return `${WENBUN_AUDIO_URL}/${dir}/${encodeURI(relativePath)}`;
+}
+export function toneFromPinyin(pinyin: string): number {
+    // number form (e.g., "ma3")
+    const m = pinyin.match(/[1-5]$/);
+    if (m) return +m[0];
+
+    // handle precomposed + decomposed + uppercase + ü (u + U+0308)
+    const nfd = pinyin.normalize('NFD');
+    if (nfd.includes('\u0304')) return 1; // macron
+    if (nfd.includes('\u0301')) return 2; // acute
+    if (nfd.includes('\u030C')) return 3; // caron
+    if (nfd.includes('\u0300')) return 4; // grave
+    return 5; // neutral
+}
+// U+2FF0–U+2FFB (⿰ ⿱ ⿲ ⿳ ⿴ ⿵ ⿶ ⿷ ⿸ ⿹ ⿺ ⿻).
+export function stripIDC(s: string): string {
+    return s.replace(/[\u2FF0-\u2FFB]/gu, "");
 }

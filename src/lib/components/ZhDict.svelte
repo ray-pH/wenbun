@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { ChineseMandarinReading, TONE_PREFIX, type ChineseCharacterWordlist, type IChineseCharDecomposition } from "$lib/chinese";
+    import { ChineseMandarinReading, stripIDC, TONE_PREFIX, toneFromPinyin, type ChineseCharacterWordlist, type IChineseCharDecomposition } from "$lib/chinese";
     import { parseIntOrUndefined, type CharacterWriterData } from "$lib/util";
     import { pinyinToZhuyin } from "pinyin-zhuyin";
 
@@ -29,6 +29,15 @@
             }
         }
     }
+    function getComponentsFromDecomposition(decompStr: string): string[] {
+        let str = stripIDC(decompStr);
+        // remove full-width question mark '？' (U+FF1F)
+        str = str.replace(/\uFF1F/gu, "");
+        return str.split('');
+    }
+    function hasComponents(decompStr: string): boolean {
+        return getComponentsFromDecomposition(decompStr).length > 0;
+    }
 </script>
 
 <div class="dict-container">
@@ -55,7 +64,7 @@
         </div>
     {/if}
     {#each wordData as data}
-        <div class="char-decomp" style="--tone-color: {toneColors[wordlist.toneFromPinyin(data.pinyin?.[0] ?? '')-1]}">
+        <div class="char-decomp" style="--tone-color: {toneColors[toneFromPinyin(data.pinyin?.[0] ?? '')-1]}">
             <div class="char-container">
                 <div class="char chinese-font">
                     {data.character}
@@ -79,19 +88,15 @@
                     <div class="value">{data.definition ?? ''}</div>
                 </div>
                 <div class="sep"></div>
-                <div class="row">
+                <!-- <div class="row">
                     <div class="label">Radical</div>
                     <div class="value">{@render SimpleExpand(wordlist.getCharDecompData(data.radical))}</div>
                 </div>
-                <div class="sep"></div>
+                <div class="sep"></div> -->
                 {#if data.etymology}
                     <div class="row">
                         <div class="label">Etymology</div>
                         <div class="value">{data.etymology.type}</div>
-                    </div>
-                    <div class="row">
-                        <div class="label">Hint</div>
-                        <div class="value">{data.etymology.hint}</div>
                     </div>
                     {#if data.etymology.semantic}
                         <div class="row">
@@ -106,6 +111,17 @@
                         </div>
                     {/if}
                 {/if}
+                {#if hasComponents(data.decomposition)}
+                    <div class="sep"></div>
+                    <div class="row">
+                        <div class="label">Components</div>
+                        <div class="value">
+                            {#each getComponentsFromDecomposition(data.decomposition) as char}
+                                {@render SimpleExpand(wordlist.getCharDecompData(char))}
+                            {/each}
+                        </div>
+                    </div>
+                {/if}
             </div>
         </div>
     {/each}
@@ -113,7 +129,7 @@
 
 {#snippet SimpleExpand(decomp?: IChineseCharDecomposition)}
     {#if decomp}
-        <div class="simple-decomp" style="--tone-color: {toneColors[wordlist.toneFromPinyin(decomp.pinyin?.[0] ?? '')-1]}">
+        <div class="simple-decomp" style="--tone-color: {toneColors[toneFromPinyin(decomp.pinyin?.[0] ?? '')-1]}">
             <span class="simple-char chinese-font">{decomp.character}</span>
             <span class="simple-pinyin">{reading(decomp.pinyin?.[0] ?? '', zhReading)}</span>
             <span class="simple-sep">&mdash;</span>
