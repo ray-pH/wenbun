@@ -68,7 +68,7 @@
         <div class="deck-list-container">
             {#each activeDeckIds as deckId}
                 <div class="deck-card-container">
-                    {@render deckCard(getDeckInfo(deckId))}
+                    {@render deckCard(app.getDeckInfo(deckId))}
                     <a class="deck-card-button" href="{base}/deck?id={deckId}" title="Deck Info" aria-label="Deck Info">
                         <i class="fa-solid fa-list"></i>
                     </a>

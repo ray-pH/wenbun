@@ -1,5 +1,5 @@
 import * as FSRS from "ts-fsrs"
-import { dateDiffFormatted, getDaysSinceEpochLocal, getDeckFilename, loadDeck, semverBiggerThan, type DeepRequired } from "./util"
+import { dateDiffFormatted, generateRandomString, getDaysSinceEpochLocal, getDeckFilename, loadDeck, semverBiggerThan, type DeepRequired } from "./util"
 import { BrowserIndexedDBStorage, type IStorage, TauriStorage } from "./storage";
 import _ from "lodash";
 import { ChineseToneColorPalette, DECK_TAGS, DeckInfo, DEFAULT_FSRS_PARAM } from "./constants";
@@ -27,6 +27,7 @@ const LOCALSTORAGE_KEY_DECK_VIEW = "deckView"
 const FSRS_GRADES: FSRS.Grade[] = [FSRS.Rating.Again, FSRS.Rating.Hard, FSRS.Rating.Good, FSRS.Rating.Easy];
 export const DEFAULT_GROUP_CONTENT_COUNT = 30;
 const DEFAULT_WARMUP_MAX_COUNT = 3;
+const GENERATED_DECK_ID_LENGTH = 8;
 
 export enum WenBunCustomState {
     New = "New",
@@ -60,6 +61,7 @@ export interface ExtraStudyConfig {
 }
 
 export interface DeckData {
+    label?: string;
     deck: string[];
     tags: string[];
     previouslyStudied: number[]; // list of card ids that are marked as previously studied (i.e. previously studied before this deck)
@@ -448,8 +450,9 @@ export class App {
         await this.addDeck(deckId, deckData);
     }
     
-    async addDeck(deckId: string, deckData: DeckData): Promise<void> {
-        if (this.deckData[deckId]) return;
+    async addDeck(deckLabel: string, deckData: DeckData): Promise<void> {
+        const deckId = this.generateNewDeckId();
+        deckData.label = deckLabel;
         this.deckData[deckId] = deckData;
         if (this.decks.includes(deckId)) return;
         this.decks.push(deckId);
@@ -466,8 +469,12 @@ export class App {
         delete this.deckData[deckId];
     }
     
-    isDeckIdExists(deckId: string): boolean {
-        return this.decks.includes(deckId);
+    generateNewDeckId(): string {
+        let id: string;
+        do {
+            id = generateRandomString(GENERATED_DECK_ID_LENGTH);
+        } while (this.decks.includes(id));
+        return id;
     }
     
     getConfig(): DeepRequired<WenbunConfig> {
@@ -967,7 +974,22 @@ export class App {
     getCurrentAppVersion(): string {
         return __APP_VERSION__;
     }
+    getDeckInfo(deckId: string): typeof DeckInfo[number] {
+        const deckData = this.deckData[deckId];
+        return DeckInfo.find((s) => s.id === deckId) ?? { 
+            id: deckId, 
+            title: deckData?.label ?? deckId, 
+            subtitle: '',
+            tags: (deckData?.tags as DECK_TAGS[]) ?? [],
+        };
+    }
     isNewUpdateExist(): boolean {
         return semverBiggerThan(__APP_VERSION__, this.meta.clientVersion ?? '0.0.0');
+    }
+    
+    renameDeck(deckId: string, newName: string) {
+        const deckData = this.deckData[deckId];
+        if (!deckData) return;
+        deckData.label = newName;
     }
 }

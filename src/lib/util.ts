@@ -47,6 +47,13 @@ export function getDeckFilename(deckId: string): string {
     return DeckInfo.find(d => d.id === deckId)?.src ?? `${deckId}.txt`;
 }
 
+export function getDefaultDeckInfo(deckId: string): typeof DeckInfo[number] {
+    return DeckInfo.find((s) => s.id === deckId) ?? { id: deckId, title: deckId, subtitle: ''};
+}
+export function isBuiltinDeck(deckId: string): boolean {
+    return DeckInfo.map(d => d.id).includes(deckId);
+}
+
 export function dateDiff(start: Date, end: Date): { days: number, hours: number, minutes: number, seconds: number, milliseconds: number } {
     let delta = end.getTime() - start.getTime();
     const milliseconds = delta % 1000;
@@ -112,4 +119,12 @@ export function lerp(a: number, b: number, t: number): number {
 }
 export function linmap(x: number, a1: number, a2: number, b1: number, b2: number): number {
     return b1 + (x - a1) * (b2 - b1) / (a2 - a1);
+}
+
+export function generateRandomString(length: number): string {
+    let id = "";
+    while (id.length < length) {
+        id += Math.random().toString(36).slice(2);
+    }
+    return id.slice(0, length);
 }

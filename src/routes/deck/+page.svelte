@@ -5,6 +5,7 @@
     import { ChineseCharacterConverter } from '$lib/chinese';
     import TopBar from "$lib/components/TopBar.svelte";
     import { DECK_TAGS } from '$lib/constants';
+    import { getDefaultDeckInfo, isBuiltinDeck } from '$lib/util';
     import { onMount } from "svelte";
     import { SvelteMap, SvelteSet } from "svelte/reactivity";
     import * as FSRS from "ts-fsrs"
@@ -28,6 +29,7 @@
         isZhTraditional = app.deckData[deckId]?.tags?.includes(DECK_TAGS.ZH_TRAD);
         converter = new ChineseCharacterConverter('cn', 'tw');
         view = app.getDeckView();
+        nameInputStr = app.getDeckInfo(deckId).title;
         app = app;
     }
     
@@ -48,6 +50,7 @@
     }
     
     $: deckData = app.deckData[deckId];
+    $: deckInfo = app.getDeckInfo(data.deckId ?? '');
     $: groups = deckData?.groups ?? [];
     
     let accordionState = new SvelteMap<string, boolean>();
@@ -170,11 +173,66 @@
         app.extraStudyHandler.startExtraStudy(deckId, Array.from(selections));
     }
     
+    $: isNameEditable = !isBuiltinDeck(deckId);
+    let isEditingName = false;
+    let nameInputStr = '';
+    let inputEl: HTMLInputElement | null = null;
+    $: if (isEditingName && inputEl) {
+        inputEl.focus();
+    }
+    async function renameDeck() {
+        if (nameInputStr.trim() === '') {
+            window.alert('Deck name cannot be empty.');
+            return;
+        }
+        app.renameDeck(deckId, nameInputStr);
+        await app.save();
+        isEditingName = false;
+        app = app;
+    }
+    function cancelRename(): any {
+        isEditingName = false;
+        nameInputStr = app.getDeckInfo(deckId).title;
+    }
 </script>
 
 <TopBar title="Deck"></TopBar>
 <div class="container">
-    <div class="top-container" style="display: flex; gap: 0.5em; margin-bottom: 2em">
+    <div class="top-container">
+        <div class="deck-name-container">
+            {#if isEditingName}
+                <form onsubmit={(e) => {e.preventDefault(); renameDeck()}}>
+                    <input class="name-input" type="text" bind:value={nameInputStr} bind:this={inputEl}>
+                    <button class="button-name-edit"
+                        type="submit"
+                        aria-label="Save deck name"
+                    >
+                        <i class="fa-solid fa-square-check"></i>
+                    </button>
+                    <button class="button-name-edit"
+                        onclick={() => cancelRename()}
+                        aria-label="Cancel"
+                    >
+                        <i class="fa-solid fa-square-xmark"></i>
+                    </button>
+                </form>
+            {:else}
+                <div class="deck-info">
+                    <span class="deck-card-title">{deckInfo.title}</span>
+                    <span class="deck-card-subtitle">{deckInfo.subtitle}</span>
+                    <div class="loading">
+                    </div>
+                </div>
+                {#if isNameEditable}
+                    <button class="button-name-edit" 
+                        onclick={() => isEditingName = true}
+                        aria-label="Edit deck name"
+                    >
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+                {/if}
+            {/if}
+        </div>
         <div class="top-control-container">
             <div>
                 <label style="display: flex; gap: 0.5em; align-items: center; justify-content: space-between;">
@@ -320,10 +378,39 @@
         margin: 1em;
         padding-top: 1em;
     }
+    .top-container {
+         display: flex;
+         gap: 2em; 
+         margin-bottom: 2em; 
+         flex-direction: column;
+         align-items: center;
+    }
     .top-control-container {
         display: flex;
         flex-direction: column;
         gap: 0.5em;
+    }
+    .deck-info {
+        position: relative;
+        font-size: 1.2em;
+        font-weight: bold;
+        .deck-card-subtitle {
+            font-weight: normal;
+            color: #00000080;
+        }
+    }
+    .deck-name-container {
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+    }
+    .button-name-edit {
+        all: unset;
+        color: gray;
+        cursor: pointer;
+        &:hover {
+            color: unset;
+        }
     }
     .group-container {
         display: flex;

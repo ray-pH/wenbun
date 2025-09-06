@@ -7,6 +7,7 @@
     import Popup from '$lib/components/Popup.svelte';
     import { goto } from '$app/navigation';
     import Loading from '$lib/components/Loading.svelte';
+    import { getDefaultDeckInfo } from '$lib/util';
     
     export let data: {deckId?: string};
     
@@ -29,11 +30,7 @@
         isTodayDone = app.getNextCard(data.deckId ?? '') === undefined;
     }
     
-    $: deckInfo = getDeckInfo(data.deckId ?? '');
-    
-    function getDeckInfo(deckId: string): typeof DeckInfo[number] {
-        return DeckInfo.find((s) => s.id === deckId) ?? { id: deckId, title: deckId, subtitle: ''};
-    }
+    $: deckInfo = app.getDeckInfo(data.deckId ?? '');
     
     $: deckProgress = app.getDeckProgress(deckInfo.id);
     $: progressBarData = app.getDeckProgressNormalized(deckInfo.id);

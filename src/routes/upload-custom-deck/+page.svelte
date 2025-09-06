@@ -55,10 +55,6 @@
             window.alert("Deck name cannot be empty.");
             return;
         }
-        if (app.isDeckIdExists(customDeck.name)) {
-            window.alert("Deck with this name already exists. Please choose another name.");
-            return;
-        }
         if (issueCount > 0) {
             const confirm = window.confirm("You have issues in your deck. Card with issues will be ignored. Are you sure you want to add this deck?");
             if (!confirm) return;
@@ -150,10 +146,7 @@
         <div class="config-items">
             <SettingsItem key="deckName">
                 <div style="text-align: right;">
-                    <input type="text" bind:value={customDeck.name} class:invalid={app.isDeckIdExists(customDeck.name)}>
-                    <div class="warning-text" style="color: #A64547;" class:hidden={!app.isDeckIdExists(customDeck.name)}>
-                        Deck with this name already exists. Please choose another name.
-                    </div>
+                    <input type="text" bind:value={customDeck.name}>
                     <div class="warning-text" style="color: #A64547;" class:hidden={customDeck.name.trim()}>
                         Deck name cannot be empty.
                     </div>
