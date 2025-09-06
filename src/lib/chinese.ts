@@ -257,3 +257,19 @@ export function toneFromPinyin(pinyin: string): number {
 export function stripIDC(s: string): string {
     return s.replace(/[\u2FF0-\u2FFB]/gu, "");
 }
+export type TaggedChunk = { text: string; isChineseChar?: true };
+export function tagChineseChars(input: string): TaggedChunk[] {
+    const out: TaggedChunk[] = [];
+    let buf = "";
+    for (const ch of input) {
+        const isHan = /\p{Script=Han}/u.test(ch); // covers all CJK Unified Ideographs (incl. extensions, compat)
+        if (isHan) {
+            if (buf) { out.push({ text: buf }); buf = ""; }
+            out.push({ text: ch, isChineseChar: true });
+        } else {
+            buf += ch;
+        }
+    }
+    if (buf) out.push({ text: buf });
+    return out;
+}

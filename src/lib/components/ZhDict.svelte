@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { ChineseMandarinReading, stripIDC, TONE_PREFIX, toneFromPinyin, type ChineseCharacterWordlist, type IChineseCharDecomposition } from "$lib/chinese";
+    import { ChineseMandarinReading, stripIDC, tagChineseChars, TONE_PREFIX, toneFromPinyin, type ChineseCharacterWordlist, type IChineseCharDecomposition, type TaggedChunk } from "$lib/chinese";
     import { parseIntOrUndefined, type CharacterWriterData } from "$lib/util";
     import { pinyinToZhuyin } from "pinyin-zhuyin";
     import ZhDict from "$lib/components/ZhDict.svelte";
@@ -44,6 +44,7 @@
     let childrenCharData: Props['charData'] | undefined = $state(undefined);
     let isNestedChildrenDictOpen = $state(false);
     function setChildrenChar(char: string) {
+        if (char === word) return;
         const charData = wordlist.getCharDecompData(char);
         childrenCharData = {
             characters: char,
@@ -55,6 +56,15 @@
     function removeChildrenChar() {
         childrenCharData = undefined;
         isOpenChildrenDict = false;
+    }
+    
+    function getTone(char: string): number {
+        const charData = wordlist.getCharDecompData(char);
+        return toneFromPinyin(charData?.pinyin?.[0] ?? "");
+    }
+    function getToneBasedColor(char: string): string {
+        const tone = getTone(char);
+        return toneColors[tone-1];
     }
 </script>
 
@@ -114,24 +124,28 @@
             <div class="char-info">
                 <div class="row">
                     <div class="label">Simplified</div>
-                    <div class="value chinese-font colored">{wordlist.toSimplified(data.character)}</div>
+                    <div class="value chinese-font colored">
+                        {@render ClickableChar(wordlist.toSimplified(data.character))}
+                    </div>
                 </div>
                 <div class="row">
                     <div class="label">Traditional</div>
-                    <div class="value chinese-font colored">{wordlist.toTraditional(data.character)}</div>
+                    <div class="value chinese-font colored">
+                        {@render ClickableChar(wordlist.toTraditional(data.character))}
+                    </div>
                 </div>
                 <div class="sep"></div>
                 <div class="row">
                     <div class="label">Definition</div>
                     <div class="value">{data.definition ?? ''}</div>
                 </div>
-                <div class="sep"></div>
                 <!-- <div class="row">
                     <div class="label">Radical</div>
                     <div class="value">{@render SimpleExpand(wordlist.getCharDecompData(data.radical))}</div>
                 </div>
                 <div class="sep"></div> -->
                 {#if data.etymology}
+                    <div class="sep"></div>
                     <div class="row">
                         <div class="label">Etymology</div>
                         <div class="value">{data.etymology.type}</div>
@@ -139,7 +153,9 @@
                     {#if data.etymology.hint && data.etymology.type !== 'pictophonetic'}
                         <div class="row">
                             <div class="label">Hint</div>
-                            <div class="value">{data.etymology.hint}</div>
+                            <div class="value">
+                                {@render TaggedChunkSpans(tagChineseChars(data.etymology.hint))}
+                            </div>
                         </div>
                     {/if}
                     {#if data.etymology.semantic}
@@ -186,8 +202,26 @@
 
 {#snippet ColoredString(string: string, colors: string[])}
     {#each string as char, i}
-        <span style="color: {colors[i]}">{char}</span>
+        <span style="color: {colors[i]}">
+            {@render ClickableChar(char)}
+        </span>
     {/each}
+{/snippet}
+
+{#snippet TaggedChunkSpans(chunks: TaggedChunk[])}
+    {#each chunks as c}
+        {#if c.isChineseChar}
+            <span style="color: {getToneBasedColor(c.text)}" class="chinese-font">
+                {@render ClickableChar(c.text)}
+            </span>
+        {:else}
+            <span>{c.text}</span>
+        {/if}
+    {/each}
+{/snippet}
+
+{#snippet ClickableChar(char: string)}
+    <button onclick={() => setChildrenChar(char)} class="simple-char-button">{char}</button>
 {/snippet}
 
 <style>
