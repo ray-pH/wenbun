@@ -194,6 +194,15 @@
         isEditingName = false;
         nameInputStr = app.getDeckInfo(deckId).title;
     }
+    
+    async function moveCardsIntoGroup() {
+        const grouplabel = window.prompt('Enter target group name: *(new group will be created if name does not exists)');
+        if (!grouplabel) return;
+        app.moveCardsIntoGroup(deckId, Array.from(selections), grouplabel);
+        await app.save();
+        selections.clear();
+        app = app;
+    }
 </script>
 
 <TopBar title="Deck"></TopBar>
@@ -282,6 +291,8 @@
                             <div class="group-buttons-container" style="align-items: flex-end;">
                                 <button class="button" disabled={selections.size == 0} onclick={() => startExtraStudy()}>
                                     <i class="fa-solid fa-chalkboard-user"></i><span>start <b>extra study</b> from selection</span></button>
+                                <button class="button" disabled={selections.size == 0} onclick={() => moveCardsIntoGroup()}>
+                                    <i class="fa-solid fa-right-left"></i><span>move to another group</span></button>
                                 <button class="button" disabled={selections.size == 0} onclick={() => addPreviouslyStudiedMark()}>
                                     <i class="fa-solid fa-book-open"></i><span>mark as <b>previously studied</b></span></button>
                                 <button class="button" disabled={selections.size == 0 || !isSelectionContainPreviouslyStudied} 

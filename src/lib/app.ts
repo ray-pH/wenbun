@@ -992,4 +992,19 @@ export class App {
         if (!deckData) return;
         deckData.label = newName;
     }
+    moveCardsIntoGroup(deckId: string, cardIds: number[], grouplabel: string) {
+        const deckData = this.deckData[deckId];
+        if (!deckData) return;
+        if (deckData.groups.find(g => g.label == grouplabel) == undefined) {
+            // create group if not exists
+            deckData.groups.push({ label: grouplabel, cardIds: [] });
+        }
+        
+        // remove from all groups (prevent duplicate)
+        deckData.groups.forEach(g => {
+            g.cardIds = g.cardIds.filter(id => !cardIds.includes(id));
+        });
+        const group = deckData.groups.find(g => g.label == grouplabel);
+        group?.cardIds.push(...cardIds);
+    }
 }
