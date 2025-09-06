@@ -2,16 +2,25 @@
     import { ChineseMandarinReading, stripIDC, TONE_PREFIX, toneFromPinyin, type ChineseCharacterWordlist, type IChineseCharDecomposition } from "$lib/chinese";
     import { parseIntOrUndefined, type CharacterWriterData } from "$lib/util";
     import { pinyinToZhuyin } from "pinyin-zhuyin";
+    import ZhDict from "$lib/components/ZhDict.svelte";
 
     interface Props {
-        characterData?: CharacterWriterData;
+        charData: {
+            characters: string;
+            tones: number[];
+            meaning: string;
+        }
         wordlist: ChineseCharacterWordlist
         toneColors: string[];
         zhReading: ChineseMandarinReading;
+        isOpenChildrenDict?: boolean;
     }
-    let { characterData, wordlist, toneColors, zhReading }: Props = $props();
-    let word = characterData?.characters ?? "";
-    let wordColors = characterData?.tags.map(tags => getChineseTone(tags) ?? 5).map(tone => toneColors[tone-1]) ?? [];
+    let { 
+        charData, wordlist, toneColors, zhReading,
+        isOpenChildrenDict = $bindable()
+    }: Props = $props();
+    let word = charData.characters ?? "";
+    let wordColors = charData.tones.map(tone => toneColors[tone-1]) ?? [];
     let wordData = $derived(wordlist.getWordDecompData(word));
     let isComposite = word.length > 1;
     
@@ -20,13 +29,6 @@
             return pinyinToZhuyin(pinyin);
         } else {
             return pinyin;
-        }
-    }
-    function getChineseTone(tags: string[]): number | undefined {
-        for (const tag of tags) {
-            if (tag.startsWith(TONE_PREFIX)) {
-                return parseIntOrUndefined(tag.substring(TONE_PREFIX.length));
-            }
         }
     }
     function getComponentsFromDecomposition(decompStr: string): string[] {
@@ -38,9 +40,45 @@
     function hasComponents(decompStr: string): boolean {
         return getComponentsFromDecomposition(decompStr).length > 0;
     }
+    
+    let childrenCharData: Props['charData'] | undefined = $state(undefined);
+    let isNestedChildrenDictOpen = $state(false);
+    function setChildrenChar(char: string) {
+        const charData = wordlist.getCharDecompData(char);
+        childrenCharData = {
+            characters: char,
+            tones: [toneFromPinyin(charData?.pinyin?.[0] ?? "")],
+            meaning: charData?.definition ?? "",
+        }
+        isOpenChildrenDict = true;
+    }
+    function removeChildrenChar() {
+        childrenCharData = undefined;
+        isOpenChildrenDict = false;
+    }
 </script>
 
 <div class="dict-container">
+    {#if childrenCharData}
+        {#if !isNestedChildrenDictOpen}
+            <button onclick={() => removeChildrenChar()} class="dict-back-button">
+                <i class="fa-solid fa-angle-left"></i>
+                {word}
+            </button>
+        {/if}
+        <ZhDict
+            charData={childrenCharData} 
+            wordlist={wordlist}
+            toneColors={toneColors}
+            zhReading={zhReading}
+            bind:isOpenChildrenDict={isNestedChildrenDictOpen}
+        />
+    {:else}
+        {@render DictMainContent()}
+    {/if}
+</div>
+    
+{#snippet DictMainContent()}
     {#if isComposite}
         <div class="row">
             <div class="label">Simplified</div>
@@ -56,7 +94,7 @@
         </div>
         <div class="row">
             <div class="label">Definition</div>
-            <div class="value">{characterData?.meanings[0] ?? ''}</div>
+            <div class="value">{charData.meaning ?? ''}</div>
         </div>
         <div class="sep"></div>
         <div style="margin-bottom: 0.5em">
@@ -125,13 +163,15 @@
             </div>
         </div>
     {/each}
-</div>
+{/snippet}
 
 {#snippet SimpleExpand(decomp?: IChineseCharDecomposition)}
     {#if decomp}
         <div class="simple-decomp" style="--tone-color: {toneColors[toneFromPinyin(decomp.pinyin?.[0] ?? '')-1]}">
-            <span class="simple-char chinese-font">{decomp.character}</span>
-            <span class="simple-pinyin">{reading(decomp.pinyin?.[0] ?? '', zhReading)}</span>
+            <button onclick={() => setChildrenChar(decomp.character)} class="simple-char-button">
+                <span class="simple-char chinese-font">{decomp.character}</span>
+                <span class="simple-pinyin">{reading(decomp.pinyin?.[0] ?? '', zhReading)}</span>
+            </button>
             <span class="simple-sep">&mdash;</span>
             <span class="simple-def">{decomp.definition ?? ''}</span>
         </div>
@@ -163,6 +203,9 @@
     .char {
         font-size: 2em !important;
     }
+    .char-info {
+        flex-grow: 1;
+    }
     .row {
         display: flex;
         .label {
@@ -193,6 +236,25 @@
         }
         .simple-sep {
             color: gray;
+        }
+    }
+    
+    .simple-char-button {
+        all: unset;
+        cursor: pointer;
+        &:hover {
+            opacity: 0.5;
+        }
+    }
+    .dict-back-button {
+        all: unset;
+        margin-bottom: 0.5em;
+        background-color: #E0E0E0;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        padding: 0.2em 0.5em;
+        &:hover {
+            opacity: 0.5;
         }
     }
     
