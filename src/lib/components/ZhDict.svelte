@@ -1,6 +1,5 @@
 <script lang="ts">
     import { ChineseMandarinReading, stripIDC, tagChineseChars, TONE_PREFIX, toneFromPinyin, type ChineseCharacterWordlist, type IChineseCharDecomposition, type TaggedChunk } from "$lib/chinese";
-    import { parseIntOrUndefined, type CharacterWriterData } from "$lib/util";
     import { pinyinToZhuyin } from "pinyin-zhuyin";
     import ZhDict from "$lib/components/ZhDict.svelte";
 
