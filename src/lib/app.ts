@@ -232,6 +232,10 @@ export class App {
         await this.load();
         this.updateFontSize();
         this.extraStudyHandler.init();
+        await this.afterInitRoutine();
+    }
+    
+    async afterInitRoutine(): Promise<void> {
         this.updateFSRS();
         await this.processTodaySchedule();
     }
@@ -244,6 +248,7 @@ export class App {
         if (this.profile.isLoggedIn) {
             const strategy = isTauri() ? SyncConflicAutoResolve.ask : SyncConflicAutoResolve.normalPull;
             const changed = await this.profile.trySyncProfile(this, strategy);
+            if (changed) await this.afterInitRoutine();
             return changed;
         } else {
             return false;
