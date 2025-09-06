@@ -16,6 +16,7 @@
     let p = $derived(gridLinePad);
     let gridStroke = "#DDD";
     const NEXT_CHAR_DELAY = 500;
+    const INDICATOR_FLASH_MS = 1600; // show indicator briefly after fail+reveal
     // const correctSound = new Audio(`${base}/assets/sounds/rightanswer-95219.mp3`);
     const correctSound = new Audio(`${base}/assets/sounds/correct-choice-43861.mp3`);
     let audios: AudioSequence[] = $state([]);
@@ -77,8 +78,10 @@
             correctSound.play();
             completedCharCount = completedCharCount + 1;
             if (completedCharCount == characterData?.characters.length) {
+                // done;
                 onComplete({...autoReviewData});
                 isComplete = true;
+                surpressGradeIndicator = false;
                 window.setTimeout(() => {
                     playAudio();
                 }, NEXT_CHAR_DELAY);
@@ -184,10 +187,14 @@
         return `${Math.round((warmUpCount + d) / maxCount * 100)}%`;
     }
     
+    let surpressGradeIndicator = $state(false);
     export function failAndReveal() {
         if (!writer) return;
         autoReviewData.isFailAndReveal = true;
         writer.showOutline();
+        window.setTimeout(() => {
+            surpressGradeIndicator = true;
+        }, INDICATOR_FLASH_MS);
     }
     
     const MAX_STROKE_SPEED = 5;
@@ -462,7 +469,7 @@
                 <span>{strokeSpeed}x</span>
             </button>
         {/if}
-        {#if autoGrade}
+        {#if autoGrade && !surpressGradeIndicator}
             <button 
                 class={`auto-review-indicator-container ${AutoReviewGradeClass[autoGrade]}`}
                 class:blinking={isRequestManualGrade}
