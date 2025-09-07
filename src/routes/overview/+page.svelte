@@ -1,13 +1,9 @@
 <script lang="ts">
     import { base } from '$app/paths';
     import TopBar from "$lib/components/TopBar.svelte";
-    import { App, ExtraStudyType, type ExtraStudyConfig } from "$lib/app";
+    import { App, ExtraStudyType } from "$lib/app";
     import { onMount } from "svelte";
-    import { DeckInfo } from '$lib/constants';
-    import Popup from '$lib/components/Popup.svelte';
-    import { goto } from '$app/navigation';
     import Loading from '$lib/components/Loading.svelte';
-    import { getDefaultDeckInfo } from '$lib/util';
     
     export let data: {deckId?: string};
     
