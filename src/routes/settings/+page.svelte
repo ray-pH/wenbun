@@ -228,6 +228,11 @@
                         <input type="number" step="1" min="8" max="32" bind:value={config.customFontSize}>
                     </SettingsItem>
                 {/if}
+                {#if config.gradingMethod === 'auto'}
+                    <SettingsItem key="showHealthBar">
+                        <input type="checkbox" bind:checked={config.showAutoGradingBar}>
+                    </SettingsItem>
+                {/if}
             </div>
         </div>
         

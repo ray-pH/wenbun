@@ -283,6 +283,7 @@
             {#key [currentCardId, isNewCardInteractedWith, isCardChanged]}
                 <CharacterWriter 
                     app={app} 
+                    isShowHealthBar={isAutoGrading && app.getConfig().showAutoGradingBar}
                     bind:this={characterWriterRef}
                     characterData={characterWriterDataFromId(currentCardId)} 
                     onComplete={(data) => onComplete(data)} 

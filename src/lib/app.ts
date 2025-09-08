@@ -92,6 +92,7 @@ export interface WenbunConfig {
     // Review
     gradingMethod?: 'auto' | 'manual';
     strokeLeniency?: number;
+    showAutoGradingBar?: boolean;
     
     // FSRS
     learningSteps?: FSRS.Steps;
@@ -125,6 +126,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     
     gradingMethod: 'auto',
     strokeLeniency: 1.5,
+    showAutoGradingBar: false,
     
     learningSteps: ["1m", "10m"],
     previouslyStudiedLearningSteps: ["1m", "5d"],

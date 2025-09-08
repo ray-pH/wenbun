@@ -54,4 +54,27 @@ export namespace AutoReview {
             default: return "Unknown";
         }
     }
+    
+    export function getGradeMistakeCountLimits(totalCharStrokeCount: number): {hard: number, again: number} {
+        let hard = -1;
+        let again = -1;
+        // use for loop to make this more generic. 
+        // Because in the future, the scoring logic can be changed to be more complex
+        for (let i = 0; i < totalCharStrokeCount; i++) {
+            const grade = getGrade({
+                correctStrokeCount: totalCharStrokeCount,
+                incorrectStrokeCount: i,
+                totalStrokeCount: totalCharStrokeCount + i,
+                isFailAndReveal: false
+            });
+            if (hard === - 1 && grade === FSRS.Rating.Hard) {
+                hard = i;
+            }
+            if (again === - 1 && grade === FSRS.Rating.Again) {
+                again = i;
+                break;
+            }
+        }
+        return {hard, again};
+    }
 }

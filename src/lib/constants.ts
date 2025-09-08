@@ -161,6 +161,10 @@ export const SETTINGS_LABEL_DATA = {
         label: "Stroke Grading Leniency",
         help: "(default 1.5) This can be set to make stroke grading more or less lenient. The closer this is to 0 the more strictly the quiz is graded."
     },
+    showHealthBar: {
+        label: "Show Health Bar",
+        help: "Displays a progress bar above the character grid that drains as you make stroke mistakes, indicating the auto-graded grade."
+    },
     
     zhIsColorBasedOnTone: {
         label: "Color Characters Based On Their Tone",

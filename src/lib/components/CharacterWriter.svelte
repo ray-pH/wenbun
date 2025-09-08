@@ -7,7 +7,7 @@
     import type { App } from '$lib/app';
     import { base } from '$app/paths';
     import { AudioSequence } from '$lib/audioSequence';
-    import { AutoReviewGradeClass, AutoReviewGradeFAClass, AutoReviewGradeLabel, type AutoReviewData } from '$lib/autoReview';
+    import { AutoReview, AutoReviewGradeClass, AutoReviewGradeFAClass, AutoReviewGradeLabel, type AutoReviewData } from '$lib/autoReview';
     import { CHARACTER_WRITER_DRAWING_WIDTH } from "$lib/constants";
     
     let width = $state(500);
@@ -46,12 +46,14 @@
 		cardConfig: CharacterWriterConfig;
 		autoGrade: FSRS.Grade | undefined;
 		autoReviewData: AutoReviewData;
-		app: App
+		isShowHealthBar: boolean;
+		app: App;
 	}
     let { 
         onComplete, onOpenDict,
         isRequestManualGrade = $bindable(), 
         characterData, app, cardConfig, autoGrade,
+        isShowHealthBar = false,
         autoReviewData = $bindable()
     }: Props = $props();
     
@@ -205,6 +207,20 @@
         app.setStrokeSpeed(newSpeed);
     }
     
+    
+    let healthBarAgainLimit = $state(0);
+    let healthBarHardLimit = $state(0);
+    async function setupHealthBarCssVar() {
+        let total = 0;
+        for (const char of characterData?.characters ?? "") {
+            const charData = await HanziWriter.loadCharacterData(char);
+            if (charData) total += charData.strokes.length;
+        }
+        const {hard, again} = AutoReview.getGradeMistakeCountLimits(total);
+        healthBarAgainLimit = again;
+        healthBarHardLimit = hard;
+    }
+    
     onMount(() => {
         autoReviewData = {
             correctStrokeCount: 0,
@@ -212,6 +228,7 @@
             totalStrokeCount: 0,
             isFailAndReveal: false,
         };
+        setupHealthBarCssVar();
         updateWidth();
         setupAudios();
         window.addEventListener('resize', updateWidth);
@@ -403,6 +420,25 @@
         padding: 0.2em 0.5em;
         border-radius: 0.5rem;
     }
+    .auto-grade-health-bar {
+        position: absolute;
+        border-radius: 0.8rem;
+        width: 97%;
+        top: 1.5%;
+        left: 1.5%;
+        height: 1%;
+        --mistake-count: 10;
+        --limit-hard: 20;
+        --limit-again: 40;
+        --rel-mistake: calc(var(--mistake-count) / var(--limit-again) * 100%);
+        --rel-cutoff: calc(var(--limit-hard) / var(--limit-again) * 100%);
+        background: linear-gradient(
+          to left,
+          #00000000 var(--rel-mistake),
+          var(--wenbun-green) var(--rel-mistake) var(--rel-cutoff),
+          var(--wenbun-orange) max(var(--rel-mistake),var(--rel-cutoff))
+        );
+    }
 </style>
 
 <div class="character-writer">
@@ -419,6 +455,11 @@
     </div>
     <div class="character-container">
         <div class="grid-background">
+                {#if autoReviewData && isShowHealthBar}
+                    <div class="auto-grade-health-bar"
+                        style={`--mistake-count: ${autoReviewData.incorrectStrokeCount}; --limit-hard: ${healthBarHardLimit}; --limit-again: ${healthBarAgainLimit}`}
+                    ></div>
+                {/if}
             <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} id="grid-background-target">
             <line x1={p} y1={p} x2={width - p} y2={height - p} stroke={gridStroke} />
             <line x1={width - p} y1={p} x2={p} y2={height - p} stroke={gridStroke} />
