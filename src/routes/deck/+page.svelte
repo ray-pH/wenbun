@@ -5,10 +5,11 @@
     import { ChineseCharacterConverter } from '$lib/chinese';
     import TopBar from "$lib/components/TopBar.svelte";
     import { DECK_TAGS } from '$lib/constants';
-    import { getDefaultDeckInfo, isBuiltinDeck } from '$lib/util';
+    import { isBuiltinDeck } from '$lib/util';
     import { onMount } from "svelte";
     import { SvelteMap, SvelteSet } from "svelte/reactivity";
-    import * as FSRS from "ts-fsrs"
+    
+    const LOCALSTORAGE_KEY_DECK_VIEW = "deckView"
 
     export let data: {deckId?: string};
     let deckId = data.deckId || '';
@@ -28,7 +29,7 @@
     function initComponent() {
         isZhTraditional = app.deckData[deckId]?.tags?.includes(DECK_TAGS.ZH_TRAD);
         converter = new ChineseCharacterConverter('cn', 'tw');
-        view = app.getDeckView();
+        view = loadDeckView();
         nameInputStr = app.getDeckInfo(deckId).title;
         app = app;
     }
@@ -164,8 +165,14 @@
         return status;
     }
     
+    function loadDeckView(): DeckView {
+        return window.localStorage.getItem(LOCALSTORAGE_KEY_DECK_VIEW) as DeckView ?? DeckView.Normal;
+    }
+    function saveDeckView(view: DeckView): void {
+        window.localStorage.setItem(LOCALSTORAGE_KEY_DECK_VIEW, view);
+    }
     function changeView(view: DeckView) {
-        app.setDeckView(view);
+        saveDeckView(view);
     }
     
     function startExtraStudy() {

@@ -22,7 +22,6 @@ const STORE_KEY_LAST_SYNC_TIME = "lastSyncTime"
 
 // simple configs, store in local storage
 const LOCALSTORAGE_KEY_STROKE_SPEED = "strokeSpeed" 
-const LOCALSTORAGE_KEY_DECK_VIEW = "deckView"
 
 const FSRS_GRADES: FSRS.Grade[] = [FSRS.Rating.Again, FSRS.Rating.Hard, FSRS.Rating.Good, FSRS.Rating.Easy];
 export const DEFAULT_GROUP_CONTENT_COUNT = 30;
@@ -960,12 +959,6 @@ export class App {
     }
     setStrokeSpeed(speed: number): void {
         window.localStorage.setItem(LOCALSTORAGE_KEY_STROKE_SPEED, speed.toString());
-    }
-    getDeckView(): DeckView {
-        return window.localStorage.getItem(LOCALSTORAGE_KEY_DECK_VIEW) as DeckView ?? DeckView.Normal;
-    }
-    setDeckView(view: DeckView): void {
-        window.localStorage.setItem(LOCALSTORAGE_KEY_DECK_VIEW, view);
     }
     
     adjustCardLimit(deckId: string, newc: number, previouslyc: number, reviewc: number): void {
