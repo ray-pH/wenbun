@@ -128,6 +128,7 @@ export class ChineseCharacterWordlist {
             // jsonl
             text.split('\n').forEach(line => {
                 try {
+                    if (line.trim().length == 0) return;
                     const data = JSON.parse(line);
                     dict[data.char] = data.note;
                 } catch (e) {
