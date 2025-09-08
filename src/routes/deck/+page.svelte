@@ -8,6 +8,7 @@
     import { isBuiltinDeck } from '$lib/util';
     import { onMount } from "svelte";
     import { SvelteMap, SvelteSet } from "svelte/reactivity";
+    import TableEditView from './TableEditView.svelte';
     
     const LOCALSTORAGE_KEY_DECK_VIEW = "deckView"
 
@@ -256,6 +257,8 @@
                     <select bind:value={view} onchange={() => changeView(view)} style="flex-grow: 1;">
                         <option value={DeckView.Normal}>Normal</option>
                         <option value={DeckView.Small}>Small</option>
+                        <option value={DeckView.Table}>Table</option>
+                        <option value={DeckView.TableEdit}>Table (edit deck)</option>
                     </select>
                 </label>
             </div>
@@ -269,6 +272,16 @@
             </button>
         </div>
     </div>
+    {#if view == DeckView.Table || view == DeckView.TableEdit}
+        {#key app}
+            <TableEditView
+                app={app}
+                deckId={deckId}
+                isEditDeck={view == DeckView.TableEdit}
+            >
+            </TableEditView>
+        {/key}
+    {:else}
     <div class="group-container">
         {#each groups as group}
             <div class="group">
@@ -328,6 +341,7 @@
             </div>
         {/each}
     </div>
+    {/if}
 </div>
 
 {#snippet NormalCard(id: number, group: typeof groups[number])}

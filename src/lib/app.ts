@@ -173,6 +173,8 @@ export interface ProfileData {
 export enum DeckView {
     Normal = "Normal",
     Small = "Small",
+    Table = "Table",
+    TableEdit = "TableEdit",
 }
 
 export class App {

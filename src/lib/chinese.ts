@@ -69,12 +69,14 @@ export class ChineseCharacterWordlist {
     private charDecompositionDict: Record<string, IChineseCharDecomposition> = {};
     private customNotes: Record<string, string> = {};
     public lang: 'zh' | 'yue' = 'zh';
+    public initializing = false;
     public initialized = false;
     
     constructor() {
     }
     
     async init(lang: 'zh' | 'yue', useExtraDict: boolean = false): Promise<void> {
+        this.initializing = true;
         this.lang = lang;
         const dictP = async () => {
             const res = await fetch(CHINESE_DICT_SRC)
