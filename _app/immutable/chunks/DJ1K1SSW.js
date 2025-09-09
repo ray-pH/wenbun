@@ -1,1 +1,0 @@
-import"./CWj6FrbW.js";import"./SiSAkwjt.js";import{f as o,b as r}from"./C2k6CbEI.js";var p=o('<div class="loading svelte-o9ruzu"><span class="svelte-o9ruzu"></span> <span class="svelte-o9ruzu"></span> <span class="svelte-o9ruzu"></span></div>');function l(s){var a=p();r(s,a)}export{l as L};
