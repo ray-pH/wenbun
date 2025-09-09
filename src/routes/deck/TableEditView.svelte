@@ -4,15 +4,17 @@
     import Loading from "$lib/components/Loading.svelte";
     import { DECK_TAGS } from "$lib/constants";
     import { onMount } from "svelte";
-    import { SvelteMap } from "svelte/reactivity";
+    import { SvelteMap, SvelteSet } from "svelte/reactivity";
     
     interface Props {
         app: App;
         deckId: string;
         isEditDeck: boolean;
+        toggleSelection: (id: number) => void;
+        selections: SvelteSet<number>;
     }
     let { 
-        app, deckId, isEditDeck
+        app, deckId, isEditDeck, toggleSelection, selections
     }: Props = $props();
     
     let wordlist = new ChineseCharacterWordlist();
@@ -76,6 +78,7 @@
             <thead>
                 <tr>
                     <td class="id">id</td>
+                    <td class="selection"></td>
                     <td class="word">word</td>
                     <td class="reading">reading</td>
                     <td class="meaning">meaning</td>
@@ -83,7 +86,7 @@
             </thead>
             {#each deckData.groups as g}
                 <tbody class="group-header">
-                    <tr><td colspan="3"><button
+                    <tr><td colspan="4"><button
                             class="accordion-button"
                             onclick={() => toggleAccordion(g.label)}
                         >
@@ -98,8 +101,17 @@
                 {#if accordionState.get(g.label)}
                     <tbody>
                         {#each g.cardIds as id}
-                            <tr>
+                            <tr class:selected={selections.has(id)}>
                                 <td class="id">{id}</td>
+                                <td class="selection">
+                                    <button class="edit-button" onclick={() => toggleSelection(id)}>
+                                        {#if selections.has(id)}
+                                            <i class="fa-solid fa-square-check"></i>
+                                        {:else}
+                                            <i class="fa-regular fa-square"></i>
+                                        {/if}
+                                    </button>
+                                </td>
                                 <td class="word chinese-font">{deckData.deck[id]}</td>
                                 <td class="reading">
                                     {#if isInit}
@@ -256,6 +268,16 @@
         cursor: pointer;
         &:hover {
             color: black;
+        }
+    }
+    tr.selected {
+        background-color: var(--wenbun-blue);
+        color: white !important;
+        .not-custom {
+            color: #FFF6;
+        }
+        .edit-button {
+            color: white;
         }
     }
 </style>
