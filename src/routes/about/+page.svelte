@@ -23,6 +23,20 @@
     <div class="changelog-container">
         Changelog
 
+        <h4>v0.12.0 (2025-09-09)</h4>
+        <ul>
+            <li>Allow <b>custom dictionary entry</b> per deck</li>
+            <div class="note">
+                <b>Reading</b> and <b>Meaning</b> can be edited in deck page by selecting the <b>table edit</b> view.
+            </div>
+            <li>Implemented <b>table view</b> for decks.</li>
+            <li>Implemented <b>table edit view</b> for decks.</li>
+            <div class="note">
+                Currently it's still limited. Ability to add/remove will be added in the future.
+            </div>
+            <li>Add option to enable <b>"health bar"</b> in review.</li>
+        </ul>
+
         <h4>v0.11.0 (2025-09-06)</h4>
         <ul>
             <li><b>Dictionary</b>:
