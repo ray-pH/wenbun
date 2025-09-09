@@ -73,6 +73,8 @@ export interface DeckData {
     doneTodayNewCardCount: number;
     doneTodayPreviouslyStudiedCardCount: number;
     doneTodayReviewCount: number;
+    // custom entry
+    customEntry?: Record<number, {r?: string, m?: string}> // reading and meaning
 }
 
 export interface WenbunConfig {
@@ -1008,5 +1010,29 @@ export class App {
         });
         const group = deckData.groups.find(g => g.label == grouplabel);
         group?.cardIds.push(...cardIds);
+    }
+    
+    setCustomEntry(deckId: string, cardId: number, value: string, type: 'reading' | 'meaning'): void {
+        const deckData = this.deckData[deckId];
+        if (!deckData) return;
+        if (!deckData.customEntry) deckData.customEntry = {};
+        if (!deckData.customEntry[cardId]) deckData.customEntry[cardId] = {};
+        if (type === 'reading') deckData.customEntry[cardId].r = value;
+        if (type === 'meaning') deckData.customEntry[cardId].m = value;
+        // cleanup
+        if (!deckData.customEntry[cardId].r && !deckData.customEntry[cardId].m) {
+            delete deckData.customEntry[cardId];
+        }
+    }
+    getCustomEntryDict(deckId: string) {
+        let res: Record<string, {reading?: string, meaning?: string}> = {};
+        const deckData = this.deckData[deckId];
+        if (!deckData) return {};
+        if (!deckData.customEntry) return {};
+        Object.entries(deckData.customEntry).forEach(([id, entry]) => {
+            const word = deckData.deck[+id];
+            res[word] = {reading: entry.r, meaning: entry.m};
+        });
+        return res;
     }
 }

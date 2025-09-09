@@ -45,6 +45,7 @@
         isZhCantonese = tags?.includes(DECK_TAGS.ZH_YUE);
         const isUseExtraDict = tags?.includes(DECK_TAGS.ZH_EXTRA_DICT);
         await wordlist.init(isZhCantonese ? 'yue' : 'zh', isUseExtraDict);
+        wordlist.registerCustomEntryDict(app.getCustomEntryDict(deckId));
         app = app;
         isZhTraditional = tags?.includes(DECK_TAGS.ZH_TRAD);
         isAutoGrading = app.isAutoGrading();
