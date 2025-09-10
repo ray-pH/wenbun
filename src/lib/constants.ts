@@ -128,6 +128,10 @@ export const SETTINGS_LABEL_DATA = {
         label: "Custom Font Size",
         help: "Specifies the custom font size for the UI Scale. 'small' is 10px, 'normal' is 16px. (min 8, max 32)",
     },
+    playSuccessSound: {
+        label: "Play Success Sound",
+        help: "Play a 'ding' sound when a character is answered correctly.",
+    },
     
     learningSteps: {
         label: "Learning Steps",

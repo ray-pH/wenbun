@@ -214,7 +214,7 @@
         </div>
         
         <div class="settings-section">
-            <div class="section-title">UI</div>
+            <div class="section-title">UI & Audio</div>
             <div class="section-container">
                 <SettingsItem key="uiScale">
                     <select bind:value={config.uiScale}>
@@ -233,6 +233,9 @@
                         <input type="checkbox" bind:checked={config.showAutoGradingBar}>
                     </SettingsItem>
                 {/if}
+                <SettingsItem key="playSuccessSound">
+                    <input type="checkbox" bind:checked={config.playSuccessSound}>
+                </SettingsItem>
             </div>
         </div>
         

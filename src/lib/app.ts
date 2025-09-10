@@ -87,9 +87,10 @@ export interface WenbunConfig {
     gradeWarmUpCards?: boolean;
     startPreviouslyStudiedCardFromTheBack?: boolean;
     
-    // UI
+    // UI & Audio
     uiScale?: 'small' | 'normal' | 'custom'; // 10px, 16px
     customFontSize?: number;
+    playSuccessSound?: boolean;
     
     // Review
     gradingMethod?: 'auto' | 'manual';
@@ -126,6 +127,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     
     uiScale: 'normal',
     customFontSize: 16,
+    playSuccessSound: true,
     
     gradingMethod: 'auto',
     strokeLeniency: 1.5,
