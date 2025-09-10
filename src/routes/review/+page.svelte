@@ -38,6 +38,7 @@
     let app = new App();
     let characterWriterRef: CharacterWriter;
     let showDictModal = false;
+    let forceStopAudioOnNextCard = false;
     onMount(async () => {
         // no need to sync in here
         await app.init();
@@ -52,6 +53,7 @@
         isGradeWarmUpCards = app.getConfig().gradeWarmUpCards;
         isPageReady = true;
         if (data.isExtraStudy) app.extraStudyHandler.registerReviewCardIdsOverride(cardIds);
+        forceStopAudioOnNextCard = app.getConfig().zh.forceStopAudioOnNextCard;
         nextCard();
     })
     
@@ -89,7 +91,7 @@
     }
 
     function nextCard() {
-        stopAudio();
+        if (forceStopAudioOnNextCard) stopAudio();
         resetState();
         isCardChanged = true;
         const id = app.getNextCard(deckId);

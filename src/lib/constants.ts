@@ -191,6 +191,10 @@ export const SETTINGS_LABEL_DATA = {
         label: "Play Audio",
         help: "Play audio when the card is answered correctly or when displaying a new card.",
     },
+    zhForceStopAudioOnNextCard: {
+        label: "Force Stop Audio On Next Card",
+        help: "When enabled, the audio will be stopped when the next card is displayed.",
+    },
     
     // custom deck
     deckName: {

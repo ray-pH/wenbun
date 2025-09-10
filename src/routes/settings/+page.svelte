@@ -298,6 +298,9 @@
                 <SettingsItem key="zhPlayAudio">
                     <input type="checkbox" bind:checked={config.zh.playAudio}>
                 </SettingsItem>
+                <SettingsItem key="zhForceStopAudioOnNextCard">
+                    <input type="checkbox" bind:checked={config.zh.forceStopAudioOnNextCard}>
+                </SettingsItem>
                 <SettingsItem key="zhIsColorBasedOnTone">
                     <input type="checkbox" bind:checked={config.zh.isColorBasedOnTone}>
                 </SettingsItem>
