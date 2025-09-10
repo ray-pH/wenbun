@@ -3,6 +3,7 @@
     import { ChineseCharacterWordlist } from "$lib/chinese";
     import Loading from "$lib/components/Loading.svelte";
     import { DECK_TAGS } from "$lib/constants";
+    import { isBuiltinDeck } from "$lib/util";
     import { onMount } from "svelte";
     import { SvelteMap, SvelteSet } from "svelte/reactivity";
     
@@ -59,10 +60,16 @@
         editId = -1;
     }
     
+    function getIsUseExtraDict(tags: string[] | undefined): boolean {
+        // due to backward compatibility, we need to manually make HSK7 deck to use extra dictionary 
+        if (isBuiltinDeck(deckId) && deckId.startsWith('hsk7-v3.0')) return true;
+        return !!tags?.includes(DECK_TAGS.ZH_EXTRA_DICT);
+    }
+    
     onMount(async () => {
         const tags = app.deckData[deckId]?.tags;
         isZhCantonese = tags?.includes(DECK_TAGS.ZH_YUE);
-        const isUseExtraDict = tags?.includes(DECK_TAGS.ZH_EXTRA_DICT);
+        const isUseExtraDict = getIsUseExtraDict(tags);
         await wordlist.init(lang, isUseExtraDict);
         wordlist.registerCustomEntryDict(app.getCustomEntryDict(deckId));
         isInit = true;

@@ -20,7 +20,7 @@ export const MainDeckInfo = [
     {id: 'hsk4-v3.0', title: 'HSK 4', subtitle: '(v3.0)', src: 'hsk4-v3.0.txt', color: '#3E92CC'},
     {id: 'hsk5-v3.0', title: 'HSK 5', subtitle: '(v3.0)', src: 'hsk5-v3.0.txt', color: '#3E92CC'},
     {id: 'hsk6-v3.0', title: 'HSK 6', subtitle: '(v3.0)', src: 'hsk6-v3.0.txt', color: '#3E92CC'},
-    {id: 'hsk7-v3.0', title: 'HSK 7', subtitle: '(v3.0)', src: 'hsk7-v3.0.txt', color: '#3E92CC'},
+    {id: 'hsk7-v3.0', title: 'HSK 7 - 9', subtitle: '(v3.0)', src: 'hsk7-v3.0.txt', color: '#3E92CC'},
 ]
 
 export const DeckFilters = [

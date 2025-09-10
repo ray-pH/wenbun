@@ -4,7 +4,7 @@
     import CharacterWriter from "$lib/components/CharacterWriter.svelte";
     import * as FSRS from "ts-fsrs"
     import { onMount } from "svelte";
-    import { parseIntOrUndefined, type CharacterWriterConfig, type CharacterWriterData } from "$lib/util";
+    import { isBuiltinDeck, parseIntOrUndefined, type CharacterWriterConfig, type CharacterWriterData } from "$lib/util";
     import { ChineseCharacterWordlist, ChineseMandarinReading, TONE_PREFIX } from "$lib/chinese";
     import TopBar from "$lib/components/TopBar.svelte";
     import { DECK_TAGS } from '$lib/constants';
@@ -44,7 +44,7 @@
         await app.init();
         const tags = app.deckData[deckId]?.tags;
         isZhCantonese = tags?.includes(DECK_TAGS.ZH_YUE);
-        const isUseExtraDict = tags?.includes(DECK_TAGS.ZH_EXTRA_DICT);
+        const isUseExtraDict = getIsUseExtraDict(tags);
         await wordlist.init(isZhCantonese ? 'yue' : 'zh', isUseExtraDict);
         wordlist.registerCustomEntryDict(app.getCustomEntryDict(deckId));
         app = app;
@@ -56,6 +56,12 @@
         forceStopAudioOnNextCard = app.getConfig().zh.forceStopAudioOnNextCard;
         nextCard();
     })
+    
+    function getIsUseExtraDict(tags: string[] | undefined): boolean {
+        // due to backward compatibility, we need to manually make HSK7 deck to use extra dictionary 
+        if (isBuiltinDeck(deckId) && deckId.startsWith('hsk7-v3.0')) return true;
+        return !!tags?.includes(DECK_TAGS.ZH_EXTRA_DICT);
+    }
     
     let isComplete = false;
     let isDoneToday = false;

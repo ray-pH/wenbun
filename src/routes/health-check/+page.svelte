@@ -20,7 +20,7 @@
     }[] = []
     
     onMount(async() => {
-        await zhWordlist.init('zh');
+        await zhWordlist.init('zh', true);
         await Promise.all(
             MainDeckInfo.map(async d => {
                 const words = await loadDeck(d.src);
@@ -79,8 +79,8 @@
     <br><br>
     Word support by HanziWriter check
     {#each dictionaryCheckResult as d}
-        <div class:is-healthy={d.totalWordsSupportedByHanziWriter === d.totalWordCount}>
-            {d.id}: {d.totalWordsSupportedByHanziWriter}/{d.totalWordCount} 
+        <div class:is-healthy={d.totalWordsSupportedByHanziWriter === d.totalWordsWithDictData}>
+            {d.id}: {d.totalWordsSupportedByHanziWriter}/{d.totalWordsWithDictData} 
             {#if d.missingWordsFromHanziWriter.length > 0}
                 [missing words: {take(d.missingWordsFromHanziWriter, 5).join(', ')}, ...]
             {/if}
