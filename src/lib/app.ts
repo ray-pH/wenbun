@@ -1031,6 +1031,13 @@ export class App {
             g.cardIds = g.cardIds.filter(id => id != cardId);
         });
     }
+    modifyCardWord(deckId: string, cardId: number, newWord: string) {
+        // only allowed for custom decks
+        if (isBuiltinDeck(deckId)) return;
+        const deckData = this.deckData[deckId];
+        if (!deckData) return;
+        deckData.deck[cardId] = newWord;
+    }
     
     setCustomEntry(deckId: string, cardId: number, value: string, type: 'reading' | 'meaning'): void {
         const deckData = this.deckData[deckId];

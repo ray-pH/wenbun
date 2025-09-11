@@ -24,6 +24,7 @@
     let isInit = $state(false);
     let deckData = app.deckData[deckId];
     let lang = $derived(isZhCantonese ? 'yue' : 'zh') as 'zh' | 'yue';
+    let _refresh = $state(0);
     
     let accordionState = $state(new SvelteMap<string, boolean>());
     function toggleAccordion(id: string) {
@@ -31,31 +32,48 @@
         accordionState = accordionState;
     }
     
+    type EditType = 'reading' | 'meaning' | 'word';
     let editId = $state(-1);
-    let editType: 'reading' | 'meaning' = $state('reading');
+    let editType: EditType = $state('reading');
     let originalEditStr = $state('');
     let editStr = $state('');
-    function isEditing(id: number, typ: 'reading' | 'meaning') {
+    function isEditing(id: number, typ: EditType) {
         return editId == id && editType == typ;
     }
-    function startEditing(id: number, typ: 'reading' | 'meaning') {
+    function startEditing(id: number, typ: EditType) {
         if (typ == 'reading') {
             editStr = wordlist.getReading(deckData.deck[id], lang);
             originalEditStr = editStr;
         } else if (typ == 'meaning') {
             editStr = wordlist.getMeaning(deckData.deck[id]);
             originalEditStr = editStr;
+        } else if (typ == 'word') {
+            editStr = deckData.deck[id];
+            originalEditStr = editStr;
         }
         editId = id;
         editType = typ;
     }
-    async function stopEditing() {
+    async function cancelEdit() {
+        editId = -1;
+    }
+    async function saveEdit() {
         if (editStr !== originalEditStr) {
-            app.setCustomEntry(deckId, editId, editStr, editType);
-            await app.save();
-            
-            wordlist.resetCustomEntryDict();
-            wordlist.registerCustomEntryDict(app.getCustomEntryDict(deckId));
+            if (editType == 'word') {
+                if (editStr.trim().length > 0) {
+                    app.modifyCardWord(deckId, editId, editStr);
+                    await app.save();
+                    _refresh++;
+                } else {
+                    window.alert('Word cannot be empty');
+                }
+            } else {
+                app.setCustomEntry(deckId, editId, editStr, editType);
+                await app.save();
+                
+                wordlist.resetCustomEntryDict();
+                wordlist.registerCustomEntryDict(app.getCustomEntryDict(deckId));
+            }
         }
         editId = -1;
     }
@@ -119,17 +137,36 @@
                                         {/if}
                                     </button>
                                 </td>
-                                <td class="word chinese-font">{deckData.deck[id]}</td>
+                                <td class="word">
+                                    {#if isEditing(id, 'word')}
+                                        <input type="text" style="width: 3em" bind:value={editStr}>
+                                        <button onclick={() => saveEdit()} aria-label="save word" class="edit-button">
+                                            <i class="fa-solid fa-square-check"></i>
+                                        </button>
+                                        <button onclick={() => cancelEdit()} aria-label="cancel edit" class="edit-button">
+                                            <i class="fa-solid fa-square-xmark"></i>
+                                        </button>
+                                    {:else}
+                                        <span class="chinese-font">
+                                            {deckData.deck[id]}
+                                        </span>
+                                        <button onclick={() => startEditing(id, 'word')} aria-label="edit word" class="edit-button">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
+                                    {/if}
+                                </td>
                                 <td class="reading">
                                     {#if isInit}
                                         {#if isEditing(id, 'reading')}
-                                            <input type="text" bind:value={editStr}>
-                                            <button onclick={() => stopEditing()} aria-label="save reading" class="edit-button">
+                                            <input type="text" bind:value={editStr} style="width: 5em">
+                                            <button onclick={() => saveEdit()} aria-label="save reading" class="edit-button">
                                                 <i class="fa-solid fa-square-check"></i>
                                             </button>
                                         {:else}
                                             <span class:not-custom={!wordlist.isCustomEntry(deckData.deck[id]).reading}>
-                                                {wordlist.getReading(deckData.deck[id], lang)}
+                                                {#key _refresh}
+                                                    {wordlist.getReading(deckData.deck[id], lang)}
+                                                {/key}
                                             </span>
                                             <button onclick={() => startEditing(id, 'reading')} aria-label="edit reading" class="edit-button">
                                                 <i class="fa-solid fa-pen-to-square"></i>
@@ -143,12 +180,14 @@
                                     {#if isInit}
                                         {#if isEditing(id, 'meaning')}
                                             <textarea bind:value={editStr}></textarea>
-                                            <button onclick={() => stopEditing()} aria-label="save meaning" class="edit-button">
+                                            <button onclick={() => saveEdit()} aria-label="save meaning" class="edit-button">
                                                 <i class="fa-solid fa-square-check"></i>
                                             </button>
                                         {:else}
                                             <span class:not-custom={!wordlist.isCustomEntry(deckData.deck[id]).meaning}>
-                                                {wordlist.getMeaning(deckData.deck[id])}
+                                                {#key _refresh}
+                                                    {wordlist.getMeaning(deckData.deck[id])}
+                                                {/key}
                                             </span>
                                             <button onclick={() => startEditing(id, 'meaning')} aria-label="edit reading" class="edit-button">
                                                 <i class="fa-solid fa-pen-to-square"></i>
