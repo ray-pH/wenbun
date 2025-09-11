@@ -3,6 +3,11 @@ import { ExtraStudyType, WenBunCustomState, type App, type ExtraStudyConfig } fr
 import { base } from "$app/paths";
 import { goto } from "$app/navigation";
 
+export enum ExtraStudyMode {
+    Normal = "Normal",
+    Dictation = "Dictation", // EXPERIMENTAL, play audio instead of show meaning
+}
+
 export class AppExtraStudyHandler {
     reviewCardIdsOverride: number[] | undefined = undefined;
     extraStudyLastCardId: number | undefined = undefined;
@@ -14,9 +19,13 @@ export class AppExtraStudyHandler {
         this.reviewCardIdsOverride = undefined;
     }
     
-    startExtraStudy(deckId: string, cardIds: number[]): void {
-        const cardIdsEncoded = encodeURIComponent(JSON.stringify(cardIds));
-        goto(`${base}/review?id=${deckId}&isExtraStudy=true&cardIds=${cardIdsEncoded}`);
+    startExtraStudy(deckId: string, cardIds: number[], mode: ExtraStudyMode): void {
+        const url = new URL(`${base}/review`, window.location.origin);
+        url.searchParams.set("id", deckId);
+        url.searchParams.set("isExtraStudy", "true");
+        if (mode !== ExtraStudyMode.Normal) url.searchParams.set("mode", mode);
+        url.searchParams.set("cardIds", JSON.stringify(cardIds));
+        goto(url.pathname + url.search);
     }
     
     registerReviewCardIdsOverride(cardIds: number[]): void {

@@ -14,15 +14,17 @@
     import { navigationHistory } from '$lib/navigation';
     import ZhDict from '$lib/components/ZhDict.svelte';
     import SlideablePopup from '$lib/components/SlideablePopup.svelte';
+    import { ExtraStudyMode } from '$lib/appExtraStudyHandler';
     
     const inFlyParam = { delay: 100, y : -100, duration: 300, easing: cubicOut };
     const outFadeParam = { duration: 200 };
 
-    export let data: {deckId?: string, isExtraStudy?: boolean, cardIds?: string};
+    export let data: {deckId?: string, isExtraStudy?: boolean, cardIds?: string, mode?: string};
     let deckId = data.deckId || '';
     let cardIdsStr = data.cardIds || encodeURIComponent('[]');
     let cardIds = JSON.parse(decodeURIComponent(cardIdsStr));
     let title = data.isExtraStudy ? 'Extra Study' : 'Review';
+    let isDictationMode = data.mode === ExtraStudyMode.Dictation;
     
     type ReviewButton = {
         label: string;
@@ -304,6 +306,7 @@
                     app={app} 
                     isShowHealthBar={isAutoGrading && app.getConfig().showAutoGradingBar}
                     isSupportedByHanziWriter={isWordSupportedByHanziWriter}
+                    isDictationMode={isDictationMode}
                     bind:this={characterWriterRef}
                     characterData={characterWriterDataFromId(currentCardId)} 
                     onComplete={(data) => onComplete(data)} 

@@ -4,12 +4,14 @@
     import { App, ExtraStudyType } from "$lib/app";
     import { onMount } from "svelte";
     import Loading from '$lib/components/Loading.svelte';
+    import { ExtraStudyMode } from '$lib/appExtraStudyHandler';
     
     export let data: {deckId?: string};
     
     const LOCALSTORAGE_KEY_EXTRA_STUDY_COUNT_PREFIX = 'extraStudyCount-';
     const LOCALSTORAGE_KEY_EXTRA_STUDY_TYPE_PREFIX = 'extraStudyType-';
     const LOCALSTORAGE_KEY_EXTRA_STUDY_GROUP_PREFIX = 'extraStudyGroup-';
+    const LOCALSTORAGE_KEY_EXTRA_STUDY_MODE_PREFIX = 'extraStudyMode-';
     
     let app = new App();
     let isInitialized = false;
@@ -42,26 +44,30 @@
     let extraStudyCount = 20;
     let extraStudyType = ExtraStudyType.StudiedCards;
     let extraStudyGroup = '';
+    let extraStudyMode = ExtraStudyMode.Normal;
     function loadExtrastudyParams() {
         extraStudyCount = parseInt(localStorage.getItem(LOCALSTORAGE_KEY_EXTRA_STUDY_COUNT_PREFIX+data.deckId) ?? '20');
         extraStudyType = localStorage.getItem(LOCALSTORAGE_KEY_EXTRA_STUDY_TYPE_PREFIX+data.deckId) as ExtraStudyType ?? ExtraStudyType.StudiedCards;
         extraStudyGroup = localStorage.getItem(LOCALSTORAGE_KEY_EXTRA_STUDY_GROUP_PREFIX+data.deckId) ?? '';
+        extraStudyMode = localStorage.getItem(LOCALSTORAGE_KEY_EXTRA_STUDY_MODE_PREFIX+data.deckId) as ExtraStudyMode ?? ExtraStudyMode.Normal;
     }
     function storeExtrastudyParams() {
         localStorage.setItem(LOCALSTORAGE_KEY_EXTRA_STUDY_COUNT_PREFIX+data.deckId, extraStudyCount.toString());
         localStorage.setItem(LOCALSTORAGE_KEY_EXTRA_STUDY_TYPE_PREFIX+data.deckId, extraStudyType);
         localStorage.setItem(LOCALSTORAGE_KEY_EXTRA_STUDY_GROUP_PREFIX+data.deckId, extraStudyGroup);
+        localStorage.setItem(LOCALSTORAGE_KEY_EXTRA_STUDY_MODE_PREFIX+data.deckId, extraStudyMode);
     }
     $: extraStudyConfig = {
         type: extraStudyType,
         count: extraStudyCount,
         group: extraStudyGroup,
+        mode: extraStudyMode,
     }
     $: extraStudyDesc = app.extraStudyHandler.getDescription(deckInfo.id, extraStudyConfig);
     function startExtraStudy() {
         storeExtrastudyParams();
         const cardIds = app.extraStudyHandler.getCardIds(deckInfo.id, extraStudyConfig);
-        app.extraStudyHandler.startExtraStudy(deckInfo.id, cardIds);
+        app.extraStudyHandler.startExtraStudy(deckInfo.id, cardIds, extraStudyConfig.mode);
     }
     
     let quickAdjustAccordionState = false;
@@ -196,6 +202,15 @@
                         </div>
                     </div>
                 {/if}
+                <div class="section-row">
+                    <div>Mode :</div>
+                    <div>
+                        <select bind:value={extraStudyMode}>
+                            <option value={ExtraStudyMode.Normal}>Normal</option>
+                            <option value={ExtraStudyMode.Dictation}>Dictation (experimental)</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="section-description">
                     <span class="desc">{extraStudyDesc.desc}</span>
                     <span class="subdesc">{extraStudyDesc.subdesc}</span>
