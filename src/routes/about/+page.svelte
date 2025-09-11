@@ -22,7 +22,39 @@
     </div>
     <div class="changelog-container">
         Changelog
-        
+
+        <h4>v0.13.0 (2025-09-11)</h4>
+        <ul>
+            <li><b>Deck Management</b>:
+                <ul>
+                    <li>Added the ability to <b>add new empty cards</b> to custom decks from the table edit view.</li>
+                    <li>Added the ability to <b>modify words</b> in custom decks from the table edit view.</li>
+                    <li>Added the ability to <b>delete cards</b> from custom decks.</li>
+                </ul>
+            </li>
+            <li>Implemented experimental <b>dictation mode</b> for extra study sessions.</li>
+            <div class="note">
+                In this mode, the audio is played instead of the meaning being shown.
+            </div>
+            <li>Updated the <b>audio dictionary</b> to remove some bad quality audio files.</li>
+            <li>Fixed the "HSK 7" deck label to be "HSK 7-9".</li>
+            <li><b>Settings</b>:
+                <ul>
+                    <li>Added an option to <b>disable the 'ding' sound</b> when a character is answered correctly.</li>
+                    <li>Added an option to <b>force stop the audio</b> of the current card when moving to the next one.</li>
+                    <div class="note">
+                        The new default behavior is audio can still "bleed" into the next card, but user can disable it if they want.
+                    </div>
+                </ul>
+            </li>
+            <li><b>Bug Fixes</b>:
+                <ul>
+                    <li>Fixed an issue where manually importing a profile from a string would fail.</li>
+                    <li>Character Writer Now shows a warning if a word contains characters not supported by the writer, and allows the user to ignore the card.</li>
+                </ul>
+            </li>
+        </ul>
+
         <h4>v0.12.2 (2025-09-09)</h4>
         <ul>
             <li>
