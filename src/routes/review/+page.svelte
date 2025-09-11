@@ -39,6 +39,7 @@
     let characterWriterRef: CharacterWriter;
     let showDictModal = false;
     let forceStopAudioOnNextCard = false;
+    let isWordSupportedByHanziWriter = true;
     onMount(async () => {
         // no need to sync in here
         await app.init();
@@ -112,6 +113,7 @@
         currentCardId = id;
         scheduledTimeStr = app.getRatingScheduledTimeStr(deckId, id);
         cardState = app.getWenbunCustomState(deckId, id);
+        isWordSupportedByHanziWriter = wordlist.isWordSupportedByHanziWriter(app.deckData[deckId]?.deck[id]);
         _changeCounter++;
     }
     
@@ -301,6 +303,7 @@
                 <CharacterWriter 
                     app={app} 
                     isShowHealthBar={isAutoGrading && app.getConfig().showAutoGradingBar}
+                    isSupportedByHanziWriter={isWordSupportedByHanziWriter}
                     bind:this={characterWriterRef}
                     characterData={characterWriterDataFromId(currentCardId)} 
                     onComplete={(data) => onComplete(data)} 
@@ -312,7 +315,15 @@
                 />
             {/key}
         </div>
-        {#if isFirstTime}
+        {#if !isWordSupportedByHanziWriter}
+            {@render ReviewButtons([
+          		{ label: "Ignore", sublabel: "", className: "review-button-fail", isComplete: true, 
+                    onclick: () => ignoreCard() },
+          		{ label: "" },
+          		{ label: "" },
+          		{ label: "" },
+           	])}
+        {:else if isFirstTime}
             {@render ReviewButtons([
           		{ label: "Ignore", sublabel: "(Don't Learn)", className: "review-button-fail", isComplete: true, 
                     onclick: () => ignoreCard() },

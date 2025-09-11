@@ -8,7 +8,7 @@
     import { base } from '$app/paths';
     import { AudioSequence } from '$lib/audioSequence';
     import { AutoReview, AutoReviewGradeClass, AutoReviewGradeFAClass, AutoReviewGradeLabel, type AutoReviewData } from '$lib/autoReview';
-    import { CHARACTER_WRITER_DRAWING_WIDTH } from "$lib/constants";
+    import { CHARACTER_WRITER_DRAWING_WIDTH, SLUG_WORD_NOT_SUPPORTED_BY_HANZI_WRITER } from "$lib/constants";
     
     let width = $state(500);
     let height = $state(500);
@@ -47,6 +47,7 @@
 		autoGrade: FSRS.Grade | undefined;
 		autoReviewData: AutoReviewData;
 		isShowHealthBar: boolean;
+		isSupportedByHanziWriter: boolean;
 		app: App;
 	}
     let { 
@@ -54,6 +55,7 @@
         isRequestManualGrade = $bindable(), 
         characterData, app, cardConfig, autoGrade,
         isShowHealthBar = false,
+        isSupportedByHanziWriter = true,
         autoReviewData = $bindable()
     }: Props = $props();
     
@@ -451,7 +453,12 @@
 </style>
 
 <div class="character-writer">
-    <div class="meaning">{meaningStr}</div>
+    <div class="meaning">
+        <div>{meaningStr}</div>
+        {#if !isSupportedByHanziWriter}
+            {SLUG_WORD_NOT_SUPPORTED_BY_HANZI_WRITER}
+        {/if}
+    </div>
     <div class="reading-container" class:is-hidden={!app.getConfig().zh.alwaysShowReading && !isComplete && !cardConfig.isFirstTime}>
         <div class="reading">
             {characterData?.reading}
