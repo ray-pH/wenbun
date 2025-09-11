@@ -104,7 +104,7 @@
     let initialProfileStr = "";
     $: isProfileStrChanged = profileStr !== initialProfileStr;
     function importProfileData() {
-        app.tryImportProfile(profileStr).then((success) => {
+        app.tryImportProfileStr(profileStr).then((success) => {
             alertImportProfile(success);
         });
     }

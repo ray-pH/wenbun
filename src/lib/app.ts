@@ -382,6 +382,7 @@ export class App {
             const parsed = JSON.parse(jsonStr);
             return this.tryImportProfile(parsed, includeReviewLogs);
         } catch (e) {
+            console.error(e);
             return false;
         }
     }
