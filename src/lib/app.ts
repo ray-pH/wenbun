@@ -1038,6 +1038,16 @@ export class App {
         if (!deckData) return;
         deckData.deck[cardId] = newWord;
     }
+    addEmptyCard(deckId: string) {
+        // only allowed for custom decks
+        if (isBuiltinDeck(deckId)) return;
+        const deckData = this.deckData[deckId];
+        if (!deckData) return;
+        deckData.deck.push("");
+        const newCardId = deckData.deck.length - 1;
+        const lastGroup = deckData.groups[deckData.groups.length - 1];
+        lastGroup.cardIds.push(newCardId);
+    }
     
     setCustomEntry(deckId: string, cardId: number, value: string, type: 'reading' | 'meaning'): void {
         const deckData = this.deckData[deckId];

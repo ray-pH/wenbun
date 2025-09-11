@@ -22,9 +22,9 @@
     let isZhCantonese = $state(false);
     let isShowId = $state(false);
     let isInit = $state(false);
-    let deckData = app.deckData[deckId];
+    let deckData = $state(app.deckData[deckId]);
     let lang = $derived(isZhCantonese ? 'yue' : 'zh') as 'zh' | 'yue';
-    let _refresh = $state(0);
+    // let _refresh = $state(0);
     
     let accordionState = $state(new SvelteMap<string, boolean>());
     function toggleAccordion(id: string) {
@@ -63,7 +63,7 @@
                 if (editStr.trim().length > 0) {
                     app.modifyCardWord(deckId, editId, editStr);
                     await app.save();
-                    _refresh++;
+                    refresh();
                 } else {
                     window.alert('Word cannot be empty');
                 }
@@ -82,6 +82,15 @@
         // due to backward compatibility, we need to manually make HSK7 deck to use extra dictionary 
         if (isBuiltinDeck(deckId) && deckId.startsWith('hsk7-v3.0')) return true;
         return !!tags?.includes(DECK_TAGS.ZH_EXTRA_DICT);
+    }
+    
+    function addEmptyCard() {
+        app.addEmptyCard(deckId);
+        refresh();
+    }
+    
+    function refresh() {
+        deckData = app.deckData[deckId]; // refresh
     }
     
     onMount(async () => {
@@ -164,9 +173,7 @@
                                             </button>
                                         {:else}
                                             <span class:not-custom={!wordlist.isCustomEntry(deckData.deck[id]).reading}>
-                                                {#key _refresh}
-                                                    {wordlist.getReading(deckData.deck[id], lang)}
-                                                {/key}
+                                                {wordlist.getReading(deckData.deck[id], lang)}
                                             </span>
                                             <button onclick={() => startEditing(id, 'reading')} aria-label="edit reading" class="edit-button">
                                                 <i class="fa-solid fa-pen-to-square"></i>
@@ -185,9 +192,7 @@
                                             </button>
                                         {:else}
                                             <span class:not-custom={!wordlist.isCustomEntry(deckData.deck[id]).meaning}>
-                                                {#key _refresh}
-                                                    {wordlist.getMeaning(deckData.deck[id])}
-                                                {/key}
+                                                {wordlist.getMeaning(deckData.deck[id])}
                                             </span>
                                             <button onclick={() => startEditing(id, 'meaning')} aria-label="edit reading" class="edit-button">
                                                 <i class="fa-solid fa-pen-to-square"></i>
@@ -203,6 +208,9 @@
                 {/if}
             {/each}
         </table>
+        <div style="margin-top: 1em;">
+            <button class="button" onclick={() => addEmptyCard()}>Add New Empty Card</button>
+        </div>
     {:else}
         <table class:is-show-id={isShowId}>
             <thead>
