@@ -20,12 +20,13 @@ export class AppExtraStudyHandler {
     }
     
     startExtraStudy(deckId: string, cardIds: number[], mode: ExtraStudyMode): void {
-        const url = new URL(`${base}/review`, window.location.origin);
-        url.searchParams.set("id", deckId);
-        url.searchParams.set("isExtraStudy", "true");
-        if (mode !== ExtraStudyMode.Normal) url.searchParams.set("mode", mode);
-        url.searchParams.set("cardIds", JSON.stringify(cardIds));
-        goto(url.pathname + url.search);
+        const path = `${base}/review`;
+        const queryParams = new URLSearchParams();
+        queryParams.set("id", deckId);
+        queryParams.set("isExtraStudy", "true");
+        if (mode !== ExtraStudyMode.Normal) queryParams.set("mode", mode);
+        queryParams.set("cardIds", JSON.stringify(cardIds));
+        goto(`${path}?${queryParams}`);
     }
     
     registerReviewCardIdsOverride(cardIds: number[]): void {
