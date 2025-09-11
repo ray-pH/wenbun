@@ -100,6 +100,21 @@
         goto(`${base}/`);
     }
     
+    async function deleteCards() {
+        const cardIds = Array.from(selections);
+        const words = cardIds.map(id => app.getCardWord(deckId, id));
+        const take10 = words.slice(0, 10);
+        const wordsStr = take10.join(', ') + (words.length > 10 ? ', ...' : '');
+        const confirmed1 = window.confirm(`Are you sure you want to delete these ${cardIds.length} cards? (${wordsStr})`);
+        if (!confirmed1) return;
+        const confirmed2 = window.confirm("Are you really sure you want to delete these cards? All the data will be lost.");
+        if (!confirmed2) return;
+        app.deleteCardsFromDeck(deckId, cardIds, confirmed1 && confirmed2);
+        await app.save();
+        selections.clear();
+        app = app;
+    }
+    
     let isSelecting = false;
     let selections: SvelteSet<number> = new SvelteSet();
     $: isSelectionContainPreviouslyStudied = Array.from(selections).some(id => app.getWenbunCustomState(deckId, id) == WenBunCustomState.PreviouslyStudied);
@@ -353,6 +368,11 @@
             {#if groupLabel}
                 <button class="button" onclick={() => selectAllInGroup(groupLabel)}>
                     <i class="fa-solid fa-check-double"></i>select all in this group
+                </button>
+            {/if}
+            {#if view === DeckView.TableEdit}
+                <button class="button" onclick={() => deleteCards()}>
+                    <i class="fa-solid fa-trash"></i>delete selected cards
                 </button>
             {/if}
         </div>
