@@ -23,6 +23,42 @@
     <div class="changelog-container">
         Changelog
 
+        <h4>v0.14.0 (2025-09-13)</h4>
+        <ul>
+            <li><b>Deck Management</b>:
+                <ul>
+                    <li>Users can now reorder decks on the main page.</li>
+                </ul>
+            </li>
+            <li><b>Review</b>:
+                <ul>
+                    <li>Added a new "All Cards" type for extra study.</li>
+                    <li>The new card interface is no longer shown during extra study sessions.</li>
+                    <li>In dictation mode, users can now reveal the reading and meaning of a card.</li>
+                </ul>
+            </li>
+            <li><b>Character Writer</b>:
+                <ul>
+                    <li>Fixed a bug where the stroke animation speed was not applied immediately.</li>
+                </ul>
+            </li>
+            <li><b>Settings</b>:
+                <ul>
+                    <li>Updated the confirmation message when leaving with unsaved changes to be more explicit.</li>
+                </ul>
+            </li>
+            <li><b>Chinese Audio</b>:
+                <ul>
+                    <li>Fixed an issue where empty recording data could cause problems.</li>
+                </ul>
+            </li>
+            <li><b>UI/UX Bug Fix</b>:
+                <ul>
+                    <li>The TopBar's z-index has been increased to prevent it from being overlapped by other elements.</li>
+                </ul>
+            </li>
+        </ul>
+
         <h4>v0.13.0 (2025-09-11)</h4>
         <ul>
             <li><b>Deck Management</b>:
