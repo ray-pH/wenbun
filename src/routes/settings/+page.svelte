@@ -126,7 +126,7 @@
             if (!isConfigChanged) {
                 resolve(true);
             } else {
-                const confirm = window.confirm("You have unsaved changes. Are you sure you want to leave?");
+                const confirm = window.confirm("You have unsaved changes. Are you sure you want to leave without saving?");
                 resolve(confirm);
             }
         });
