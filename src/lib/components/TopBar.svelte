@@ -74,6 +74,7 @@
         background-color: var(--wenbun-blue);
         padding: 0.5em;
         color: white;
+        z-index: 99999;
     }
     .right {
         margin-right: 1em;
