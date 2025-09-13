@@ -1,11 +1,27 @@
 import _ from "lodash";
-import { ExtraStudyType, WenBunCustomState, type App, type ExtraStudyConfig } from "./app";
+import { WenBunCustomState, type App } from "./app";
 import { base } from "$app/paths";
 import { goto } from "$app/navigation";
 
 export enum ExtraStudyMode {
     Normal = "Normal",
     Dictation = "Dictation", // EXPERIMENTAL, play audio instead of show meaning
+}
+
+export enum ExtraStudyType {
+    StudiedCards = "Studied Cards",
+    All = "All",
+    HardCards = "Hard Cards",
+    NewCards = "New Cards",
+    YoungCards = "Young Cards",
+    MatureCards = "Mature Cards",
+    Group = "Group",
+}
+
+export interface ExtraStudyConfig {
+    type: ExtraStudyType;
+    count: number;
+    group?: string; // for Group
 }
 
 export class AppExtraStudyHandler {
@@ -69,6 +85,11 @@ export class AppExtraStudyHandler {
         const deckData = this.app.deckData[deckId];
         if (!deckData) return [];
         switch (config.type) {
+            case ExtraStudyType.All: {
+                const allIds = this.app.getAllNonIgnoredIds(deckId);
+                const count = Math.min(allIds.length, config.count);
+                return _.shuffle(allIds).slice(0, count);
+            }
             case ExtraStudyType.StudiedCards: {
                 const allCount = Object.keys(deckData.schedule).length;
                 const actualCount = Math.min(allCount, config.count);
@@ -117,6 +138,14 @@ export class AppExtraStudyHandler {
         const deckData = this.app.deckData[deckId];
         if (!deckData) return {desc: '', subdesc: ''};
         switch (config.type) {
+            case ExtraStudyType.All: {
+                const allIds = this.app.getAllNonIgnoredIds(deckId);
+                const count = Math.min(allIds.length, config.count);
+                return {
+                    desc:`Study ${count} cards`,
+                    subdesc: `(out of ${allIds.length} cards in this deck)`
+                }
+            }
             case ExtraStudyType.StudiedCards: {
                 const allCount = Object.keys(deckData.schedule).length;
                 const actualCount = Math.min(allCount, config.count);

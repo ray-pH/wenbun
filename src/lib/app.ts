@@ -45,20 +45,6 @@ export enum NewCardOrder {
     BeforeReviews = "Before Reviews",
 }
 
-export enum ExtraStudyType {
-    StudiedCards = "Studied Cards",
-    HardCards = "Hard Cards",
-    NewCards = "New Cards",
-    YoungCards = "Young Cards",
-    MatureCards = "Mature Cards",
-    Group = "Group",
-}
-export interface ExtraStudyConfig {
-    type: ExtraStudyType;
-    count: number;
-    group?: string; // for Group
-}
-
 export interface DeckData {
     label?: string;
     deck: string[];
@@ -882,10 +868,16 @@ export class App {
         return [1,2,3,4,5].map(i => this.getChineseToneColor(i) ?? '');
     }
     
+    getAllCardIds(deckId: string): number[] {
+        const deckData = this.deckData[deckId];
+        if (!deckData) return [];
+        return Array.from(deckData.deck.keys()).filter((id) => deckData.deck[id]);
+    }
+    
     splitDeckIntoGroupOfN(deckId: string, groupContentCount: number): void {
         const deckData = this.deckData[deckId];
         if (!deckData) return;
-        const ids = Array.from(deckData.deck.keys())
+        const ids = this.getAllCardIds(deckId);
         const groups: typeof deckData.groups = [];
         const groupCount = Math.ceil(ids.length / groupContentCount);
         for (let i = 0; i < groupCount; i++) {
@@ -907,7 +899,7 @@ export class App {
     getAllNonIgnoredIds(deckId: string): number[] {
         const deckData = this.deckData[deckId];
         if (!deckData) return [];
-        const allIds = Array.from(deckData.deck.keys());
+        const allIds = this.getAllCardIds(deckId);
         return allIds.filter((id) => !deckData.ignoredIds?.includes(id));
     }
     

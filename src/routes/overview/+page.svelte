@@ -1,10 +1,10 @@
 <script lang="ts">
     import { base } from '$app/paths';
     import TopBar from "$lib/components/TopBar.svelte";
-    import { App, ExtraStudyType } from "$lib/app";
+    import { App } from "$lib/app";
     import { onMount } from "svelte";
     import Loading from '$lib/components/Loading.svelte';
-    import { ExtraStudyMode } from '$lib/appExtraStudyHandler';
+    import { ExtraStudyMode, ExtraStudyType } from '$lib/appExtraStudyHandler';
     
     export let data: {deckId?: string};
     
