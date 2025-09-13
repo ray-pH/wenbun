@@ -73,11 +73,15 @@
             }
         }
     }
+    let animationDontGoToNextChar = $state(false);
     function completeChar() {
         isStopPlayAudio = true;
         if (unmounted) return;
         if (cardConfig.isFirstTime) {
-            completedCharCount = (completedCharCount + 1) % characterData!.characters.length;
+            if (!animationDontGoToNextChar) {
+                completedCharCount = (completedCharCount + 1) % characterData!.characters.length;
+            }
+            animationDontGoToNextChar = false;
             window.setTimeout(() => {
                 setupHanziWriter(completedCharCount);
                 // play sound
@@ -220,6 +224,15 @@
         const newSpeed = (strokeSpeed % MAX_STROKE_SPEED) + 1;
         strokeSpeed = newSpeed;
         app.setStrokeSpeed(newSpeed);
+        
+        writer.pauseAnimation();
+        writer._assignOptions({
+            strokeAnimationSpeed: strokeSpeed,
+            delayBetweenStrokes: linmap(strokeSpeed, 1, MAX_STROKE_SPEED, 1000, 10),
+            delayBetweenLoops: linmap(strokeSpeed, 1, MAX_STROKE_SPEED, 2000, 10),
+        })
+        animationDontGoToNextChar = true;
+        writer.animateCharacter();
     }
     
     
