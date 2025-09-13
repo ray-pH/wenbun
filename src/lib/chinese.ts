@@ -192,7 +192,7 @@ export class ChineseCharacterWordlist {
     }
     
     getAudioUrlArray(word: string): string[][] {
-        if (this.audioDict[word]) {
+        if (this.audioDict[word] && this.audioDict[word].length > 0) {
             return this.audioDict[word].map(u => [u]);
         } else if (this.lang == 'zh'){
             // generate audio url from pinyin
