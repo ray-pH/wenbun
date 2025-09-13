@@ -63,6 +63,8 @@
     
     let completedCharCount: number = $state(0);
     let meaningStr = characterData?.meanings.join("; ");
+    let isDictationModeRevealReading = $state(false);
+    let isDictationModeRevealMeaning = $state(false);
     
     function getChineseTone(tags: string[]): number | undefined {
         for (const tag of tags) {
@@ -455,22 +457,41 @@
           var(--wenbun-orange) max(var(--rel-mistake),var(--rel-cutoff))
         );
     }
+    
+    .reveal-button {
+        all: unset;
+        cursor: pointer;
+        color: transparent;
+        padding: 0 2em;
+        &:hover {
+            color: unset;
+            transition: 0.2s;
+        }
+    }
 </style>
 
 <div class="character-writer">
     <div class="meaning">
-        <div class:is-hidden={isDictationMode && !isComplete && !cardConfig.isFirstTime}>
-            {meaningStr}
-        </div>
+        {#if isDictationMode && !isDictationModeRevealMeaning && !isComplete && !cardConfig.isFirstTime}
+            <button class="reveal-button" onclick={() => isDictationModeRevealMeaning = true} aria-label="Reveal Meaning">
+                <i class="fa-solid fa-eye"></i>
+            </button>
+        {:else}
+            <div>{meaningStr}</div>
+        {/if}
         {#if !isSupportedByHanziWriter}
             {SLUG_WORD_NOT_SUPPORTED_BY_HANZI_WRITER}
         {/if}
     </div>
     <div class="reading-container" class:is-hidden={!app.getConfig().zh.alwaysShowReading && !isComplete && !cardConfig.isFirstTime && !isDictationMode}>
         <div class="reading">
-            <span class:is-hidden={!app.getConfig().zh.alwaysShowReading && !isComplete && !cardConfig.isFirstTime}>
+            {#if isDictationMode && !isDictationModeRevealReading && !app.getConfig().zh.alwaysShowReading && !isComplete && !cardConfig.isFirstTime}
+                <button class="reveal-button" onclick={() => isDictationModeRevealReading = true} aria-label="Reveal Reading">
+                    <i class="fa-solid fa-eye"></i>
+                </button>
+            {:else}
                 {characterData?.reading}
-            </span>
+            {/if}
         </div>
         {#if audios.length > 0}
             <button class="audio-button" onclick={() => playAudio()} aria-label="Play Audio">
