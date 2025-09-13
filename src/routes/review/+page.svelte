@@ -79,7 +79,7 @@
     let autoGrade: FSRS.Grade | undefined = undefined;
     let isRequestManualGrade = false;
     let _changeCounter = 0;
-    $: isFirstTime = cardState === WenBunCustomState.New;
+    $: isFirstTime = cardState === WenBunCustomState.New && !data.isExtraStudy;
     $: isWarmUp = cardState === WenBunCustomState.WarmUp;
     
     const reviewButtonsLabel = ['Fail', 'Hard', 'Good', 'Easy'];
@@ -326,6 +326,16 @@
           		{ label: "" },
           		{ label: "" },
            	])}
+        {:else if data.isExtraStudy}
+           	{@render ReviewButtons([
+          		{ label: "Again", sublabel: "(Put Back)", className: "review-button-fail", isComplete, 
+                    onclick: () => extraStudyAgain(), alternate: failButtonAlternate
+                },
+          		{ label: "" },
+          		{ label: "" },
+          		{ label: "Good", className: "review-button-easy",  isComplete,
+                    onclick: () => extraStudyGood() }
+           	])}
         {:else if isFirstTime}
             {@render ReviewButtons([
           		{ label: "Ignore", sublabel: "(Don't Learn)", className: "review-button-fail", isComplete: true, 
@@ -357,16 +367,6 @@
           		{ label: "" },
           		{ label: "Next", className: "review-button-easy", isComplete,
                     onclick: () => finishWarmUp() }
-           	])}
-        {:else if data.isExtraStudy}
-           	{@render ReviewButtons([
-          		{ label: "Again", sublabel: "(Put Back)", className: "review-button-fail", isComplete, 
-                    onclick: () => extraStudyAgain(), alternate: failButtonAlternate
-                },
-          		{ label: "" },
-          		{ label: "" },
-          		{ label: "Good", className: "review-button-easy",  isComplete,
-                    onclick: () => extraStudyGood() }
            	])}
         {:else if isAutoGrading && !isRequestManualGrade}
            	{@render ReviewButtons([
