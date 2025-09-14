@@ -36,7 +36,7 @@
     }
 </script>
 
-<div class="top-bar-placeholder">hello</div>
+<div class="top-bar-placeholder"></div>
 <div class="top-bar">
     <div class="left">
         {#if !noBack}
