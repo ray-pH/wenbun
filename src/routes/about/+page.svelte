@@ -23,6 +23,11 @@
     <div class="changelog-container">
         Changelog
         
+        <h4>v0.14.2 (2025-09-14)</h4>
+        <ul>
+            <li>Fix profile sync issue for devices with slower connections, caused by login status is not properly updated in review page.</li>
+        </ul>
+        
         <h4>v0.14.1 (2025-09-14)</h4>
         <ul>
             <li>Fix issue with reporting logic for session expiration auto-logout.</li>
