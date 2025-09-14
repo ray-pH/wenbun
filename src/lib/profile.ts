@@ -8,6 +8,7 @@ import _ from "lodash";
 import type { IStorage } from "./storage";
 
 const STORE_KEY_LOGIN_STATUS = "loginStatus"
+const STORE_KEY_BACKUP_PROFILE_DATA_BEFORE_LOGIN = "backupProfileDataBeforeLogin"
 
 export enum SyncDecision {
     push = "push",
@@ -71,19 +72,14 @@ export class Profile {
             this.isLoggedIn = false;
             console.warn(`Unexpected status: ${res.status}`);
         }
-        await this.checkAndUpdateLoginStatus();
+        if (this.isLoggedIn) {
+            this.updateLoginStatus(LoginStatus.loggedIn);
+        }
     }
     
     async updateLoginStatus(status: LoginStatus | undefined) {
         await this.storage.save(STORE_KEY_LOGIN_STATUS, status);
         this.storedLoginStatus = status;
-    }
-    async checkAndUpdateLoginStatus() {
-        // if currently undefined, store isLoggedIn
-        if (this.storedLoginStatus === undefined) {
-            const status = this.isLoggedIn ? LoginStatus.loggedIn : LoginStatus.loggedOut;
-            await this.updateLoginStatus(status);
-        }
     }
     
     /**
@@ -367,11 +363,12 @@ export class Profile {
     }
     
     async loginGoogle(app: App) {
+        await this.saveBackupProfileDataBeforeLogin(app);
         // TODO: compare with stored login info
         window.location.assign(apiAuthUrl(ApiRoute.AuthGoogle));
     }
     async logout(app: App) {
-        await this.updateLoginStatus(undefined);
+        await this.updateLoginStatus(LoginStatus.loggedOut);
         await app.updateLastSyncTime(new Date(0));
         window.location.assign(apiAuthUrl(ApiRoute.AuthLogout));
     }
@@ -383,5 +380,10 @@ export class Profile {
     isAutomaticallyLoggedOut(): boolean {
         // not currently logged in, but stored as logged in
         return !this.isLoggedIn && this.storedLoginStatus === LoginStatus.loggedIn;
+    }
+    
+    async saveBackupProfileDataBeforeLogin(app: App) {
+        const profileData = app.exportProfileStr();
+        await this.storage.save(STORE_KEY_BACKUP_PROFILE_DATA_BEFORE_LOGIN, profileData);
     }
 }

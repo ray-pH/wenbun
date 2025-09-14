@@ -1,7 +1,7 @@
 <script lang="ts">
     import { type App} from "$lib/app";
     import Loading from "$lib/components/Loading.svelte";
-    import type { SyncConflictInfo } from "$lib/profile";
+    import { LoginStatus, type SyncConflictInfo } from "$lib/profile";
     import { onMount } from "svelte";
     
     export let app: App;
@@ -46,7 +46,7 @@
     function stayLoggedOut() {
         const confirm = window.confirm('Are you sure you want to stay logged out? You might need to sync manually later');
         if (!confirm) return;
-        app.profile.updateLoginStatus(undefined);
+        app.profile.updateLoginStatus(LoginStatus.loggedOut);
         isAutomaticallyLoggedOut = app.profile.isAutomaticallyLoggedOut();
     }
 </script>
