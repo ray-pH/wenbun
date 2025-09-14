@@ -45,6 +45,7 @@
     onMount(async () => {
         // no need to sync in here
         await app.init();
+        await app.initProfile(false);
         const tags = app.deckData[deckId]?.tags;
         isZhCantonese = tags?.includes(DECK_TAGS.ZH_YUE);
         const isUseExtraDict = getIsUseExtraDict(tags);
