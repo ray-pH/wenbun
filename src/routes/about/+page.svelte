@@ -22,6 +22,17 @@
     </div>
     <div class="changelog-container">
         Changelog
+        
+        <h4>v0.14.1 (2025-09-14)</h4>
+        <ul>
+            <li>Fix issue with reporting logic for session expiration auto-logout.</li>
+        </ul>
+        <div class="note">
+            Alongside this update, user are advised to <b>check if they have been auto-logged out</b> due to session expiration.
+            <br><br>
+            If the logout happened <b>before this update</b>, the "auto-logged out" message will not appear.
+            In that case <b>try logging in again</b>. If you experience data loss after logging in again, please contact the developer.
+        </div>
 
         <h4>v0.14.0 (2025-09-13)</h4>
         <ul>
