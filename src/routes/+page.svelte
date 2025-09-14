@@ -7,6 +7,7 @@
     import { DragDropManager, performArrayReorder } from "$lib/dragAndDrop";
     import ButtonPopoverMenu from '$lib/components/ButtonPopoverMenu.svelte';
     import { LoginStatus } from '$lib/profile';
+    import Loading from '$lib/components/Loading.svelte';
     
     let app = new App();
     let isAutomaticallyLoggedOut = false;
@@ -26,11 +27,13 @@
         return a.length === b.length && a.every((val, index) => val === b[index]);
     }
 
+    let isAppInitialized = false;
     onMount(async () => {
         await app.init();
         // Initialize deckOrder after app init
         deckOrder = [...app.decks];
         app = app;
+        isAppInitialized = true;
         isNewUpdateExist = app.isNewUpdateExist();
         registerSW();
         const changed = await app.initProfile();
@@ -132,6 +135,9 @@
             <ButtonPopoverMenu items={actions} align="end" />
         </div>
         <div class="deck-list-container">
+            {#if !isAppInitialized}
+                <Loading></Loading>
+            {/if}
             {#each activeDeckIds as deckId, i (deckId)}
                 <div class="deck-item-wrapper"
                      role="button"
