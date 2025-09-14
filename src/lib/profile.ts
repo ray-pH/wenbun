@@ -386,4 +386,9 @@ export class Profile {
         const profileData = app.exportProfileStr();
         await this.storage.save(STORE_KEY_BACKUP_PROFILE_DATA_BEFORE_LOGIN, profileData);
     }
+    async getBackupProfileDataBeforeLogin(): Promise<string | null> {
+        const res = await this.storage.load<string>(STORE_KEY_BACKUP_PROFILE_DATA_BEFORE_LOGIN);
+        if (res === undefined) return null;
+        return res;
+    }
 }
