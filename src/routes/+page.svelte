@@ -6,6 +6,7 @@
     import { DeckInfo } from "$lib/constants";
     import { DragDropManager, performArrayReorder } from "$lib/dragAndDrop";
     import ButtonPopoverMenu from '$lib/components/ButtonPopoverMenu.svelte';
+    import { LoginStatus } from '$lib/profile';
     
     let app = new App();
     let isAutomaticallyLoggedOut = false;
@@ -59,7 +60,7 @@
     function stayLoggedOut() {
         const confirm = window.confirm('Are you sure you want to stay logged out? You might need to sync manually later');
         if (!confirm) return;
-        app.profile.updateLoginStatus(undefined);
+        app.profile.updateLoginStatus(LoginStatus.loggedOut);
         isAutomaticallyLoggedOut = app.profile.isAutomaticallyLoggedOut();
     }
     
