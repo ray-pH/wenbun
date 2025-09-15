@@ -239,13 +239,18 @@ export class App {
      * @returns boolean: `true` if data changed
      */
     async initProfile(sync: boolean = true): Promise<boolean> {
-        await this.profile.init();
-        if (this.profile.isLoggedIn && sync) {
-            const strategy = isTauri() ? SyncConflicAutoResolve.ask : SyncConflicAutoResolve.normalPull;
-            const changed = await this.profile.trySyncProfile(this, strategy);
-            if (changed) await this.afterInitRoutine();
-            return changed;
-        } else {
+        try {
+            await this.profile.init();
+            if (this.profile.isLoggedIn && sync) {
+                const strategy = isTauri() ? SyncConflicAutoResolve.ask : SyncConflicAutoResolve.normalPull;
+                const changed = await this.profile.trySyncProfile(this, strategy);
+                if (changed) await this.afterInitRoutine();
+                return changed;
+            } else {
+                return false;
+            }
+        } catch(e) {
+            console.error(e);
             return false;
         }
     }
