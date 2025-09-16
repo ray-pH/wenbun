@@ -1,10 +1,11 @@
 <script lang="ts">
     import { base } from '$app/paths';
     import TopBar from "$lib/components/TopBar.svelte";
-    import { App } from "$lib/app";
+    import { App, ReviewMode } from "$lib/app";
     import { onMount } from "svelte";
     import Loading from '$lib/components/Loading.svelte';
     import { ExtraStudyMode, ExtraStudyType } from '$lib/appExtraStudyHandler';
+    import { goto } from '$app/navigation';
     
     export let data: {deckId?: string};
     
@@ -16,6 +17,8 @@
     let app = new App();
     let isInitialized = false;
     let isTodayDone = false;
+    let isNoMoreReview = false;
+    let isNewCardsStillExist = true;
     let isOnlineProfileLoaded = false;
     onMount(async () => {
         await app.init();
@@ -30,6 +33,9 @@
         extraStudyGroup = app.deckData[data.deckId ?? '']?.groups[0]?.label ?? '';
         isInitialized = true;
         isTodayDone = app.getNextCard(data.deckId ?? '') === undefined;
+        isNoMoreReview = app.getNextCard(data.deckId ?? '', ReviewMode.ReviewOnly) === undefined;
+        studyNewCardCount = app.getConfig().newCardPerDay;
+        isNewCardsStillExist = app.getNewCardsCount(data.deckId ?? '') > 0;
         loadExtrastudyParams();
     }
     
@@ -39,6 +45,7 @@
     $: progressBarData = app.getDeckProgressNormalized(deckInfo.id);
     $: progress = deckProgress.youngCount + deckProgress.matureCount;
     $: progressTotal = deckProgress.totalCount - deckProgress.ignoredCount;
+    $: isSeparateLearnAndReview = app.getConfig().isSeparateLearnAndReview;
     
     let extraStudyAccordionState = false;
     let extraStudyCount = 20;
@@ -80,7 +87,28 @@
         quickAdjustPreviouslyStudiedCardLimit = 0;
         quickAdjustReviewCardLimit = 0;
         await app.save();
-        app = app;
+        initComponent();
+    }
+    
+    let studyNewCardCount = 0;
+    function gotoReviewOnlyReview() {
+        if (!data.deckId) return;
+        const path = `${base}/review`;
+        const queryParams = new URLSearchParams();
+        queryParams.set("id", data.deckId);
+        queryParams.set("reviewMode", ReviewMode.ReviewOnly);
+        goto(`${path}?${queryParams}`);
+    }
+    function gotoNewOnlyReview() {
+        if (!data.deckId) return;
+        app.resetWarmUps(data.deckId);
+        app.tweakNewCardCount(data.deckId, studyNewCardCount);
+        app.save(true);
+        const path = `${base}/review`;
+        const queryParams = new URLSearchParams();
+        queryParams.set("id", data.deckId);
+        queryParams.set("reviewMode", ReviewMode.LearnOnly);
+        goto(`${path}?${queryParams}`);
     }
 </script>
 
@@ -98,10 +126,12 @@
         </div>
         <div class="table-container">
             <table class="count-table"><tbody>
-                <tr class="row-count-new">
-                    <td>New</td>
-                    <td class="count">{app.getScheduledNewOrWarmUpCardsCount(deckInfo.id)}</td>
-                </tr>
+                {#if !isSeparateLearnAndReview}
+                    <tr class="row-count-new">
+                        <td>New</td>
+                        <td class="count">{app.getScheduledNewOrWarmUpCardsCount(deckInfo.id)}</td>
+                    </tr>
+                {/if}
                 <tr class="row-count-learn-relearn">
                     <td>Learning</td>
                     <td class="count">{app.getLearningRelearningCardsCount(deckInfo.id)}</td>
@@ -142,12 +172,14 @@
                 <div class="section-help">
                     *Adjustment can be negative
                 </div>
+                {#if !isSeparateLearnAndReview}
                 <div class="section-row">
                     <div>Change today's <b>new card</b> limit by</div>
                     <div>
                         <input type="number" bind:value={quickAdjustNewCardLimit} class="short-input">
                     </div>
                 </div>
+                {/if}
                 <div class="section-row">
                     <div>Change today's <b>previously studied</b> card limit by</div>
                     <div>
@@ -223,13 +255,29 @@
     {/if}
 </div>
 <div class="bottom-bar">
-    <a class="button" href="{base}/review?id={deckInfo.id}" class:disabled={isTodayDone}>
-        {#if isTodayDone}
-            You're done for today
-        {:else}
-            Study
-        {/if}
-    </a>
+    {#if !isSeparateLearnAndReview}
+        <a class="button" href="{base}/review?id={deckInfo.id}" class:disabled={isTodayDone}>
+            {#if isTodayDone}
+                You're done for today
+            {:else}
+                Study
+            {/if}
+        </a>
+    {:else}
+        <div class="study-bottom-button-container">
+            <button class="button" onclick={() => gotoNewOnlyReview()} class:disabled={!isNewCardsStillExist}>
+                Learn New Cards
+            </button>
+            <input type="number" bind:value={studyNewCardCount}>
+        </div> 
+        <button class="button" onclick={() => gotoReviewOnlyReview()} class:disabled={isNoMoreReview}>
+            {#if isTodayDone}
+                You're done for today
+            {:else}
+                Review
+            {/if}
+        </button>
+    {/if}
 </div>
 
 <style>
@@ -239,7 +287,7 @@
         align-items: center;
         margin-top: 2em;
         gap: 1em;
-        margin-bottom: 5em;
+        margin-bottom: 10em;
     }
     .deck-info {
         position: relative;
@@ -335,16 +383,34 @@
         position: fixed;
         width: 100vw;
         bottom: 0;
-        height: 5em;
         padding: 0 1em;
+        padding-bottom: 1em;
         box-sizing: border-box;
         background-color: #E0E0E0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.8em;
         .button {
             height: 3em;
             max-width: 25em;
-            margin: auto;
+            width: 82vw;
         }
     }
+    
+    .study-bottom-button-container {
+        display: flex;
+        flex-direction: row;
+        max-width: 24em;
+        width: 82vw;
+        gap: 0.5em;
+        input {
+            width: 3em;
+            font-size: 1.2em;
+            text-align: center;
+        }
+    }
+    
     .loading {
         position: absolute;
         left: -3em;

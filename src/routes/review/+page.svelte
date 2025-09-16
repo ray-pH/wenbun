@@ -1,6 +1,6 @@
 <script lang="ts">
     import { base } from '$app/paths';
-    import { App, WenBunCustomState } from "$lib/app";
+    import { App, ReviewMode, WenBunCustomState } from "$lib/app";
     import CharacterWriter from "$lib/components/CharacterWriter.svelte";
     import * as FSRS from "ts-fsrs"
     import { onMount } from "svelte";
@@ -19,7 +19,7 @@
     const inFlyParam = { delay: 100, y : -100, duration: 300, easing: cubicOut };
     const outFadeParam = { duration: 200 };
 
-    export let data: {deckId?: string, isExtraStudy?: boolean, cardIds?: string, mode?: string};
+    export let data: {deckId?: string, isExtraStudy?: boolean, cardIds?: string, mode?: string, reviewMode: ReviewMode};
     let deckId = data.deckId || '';
     let cardIdsStr = data.cardIds || encodeURIComponent('[]');
     let cardIds = JSON.parse(decodeURIComponent(cardIdsStr));
@@ -104,7 +104,7 @@
         if (forceStopAudioOnNextCard) stopAudio();
         resetState();
         isCardChanged = true;
-        const id = app.getNextCard(deckId);
+        const id = app.getNextCard(deckId, data.reviewMode);
         if (id === undefined) {
             // done for today
             isDoneToday = true;
@@ -282,7 +282,7 @@
                     </span>
                 </div>
             {:else}
-                <div class="counter">
+                <div class="counter" class:is-learn-only={data.reviewMode === ReviewMode.LearnOnly} class:is-review-only={data.reviewMode === ReviewMode.ReviewOnly}>
                     <span class="deck-count-learn-relearn" class:underlined={cardState === WenBunCustomState.Learning || cardState === WenBunCustomState.Relearning}>
                         {app.getLearningRelearningCardsCount(deckId) || ''}
                     </span>
@@ -475,6 +475,18 @@
         }
         .deck-count-previously-studied {
             color: var(--wenbun-orange);
+        }
+    }
+    .counter.is-learn-only {
+        .deck-count-learn-relearn,
+        .deck-count-review,
+        .deck-count-previously-studied {
+            display: none;
+        }
+    }
+    .counter.is-review-only {
+        .deck-count-new {
+            display: none;
         }
     }
     .bottom-container {

@@ -210,6 +210,9 @@
                 <SettingsItem key="startPreviouslyStudiedCardFromTheBack">
                     <input type="checkbox" bind:checked={config.startPreviouslyStudiedCardFromTheBack}>
                 </SettingsItem>
+                <SettingsItem key="separateLearnAndReview">
+                    <input type="checkbox" bind:checked={config.isSeparateLearnAndReview}>
+                </SettingsItem>
             </div>
         </div>
         
