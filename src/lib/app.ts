@@ -45,6 +45,12 @@ export enum NewCardOrder {
     BeforeReviews = "Before Reviews",
 }
 
+export enum ReviewMode {
+    Normal = "Normal",
+    ReviewOnly = "Review Only",
+    LearnOnly = "Learn Only",
+}
+
 export interface DeckData {
     label?: string;
     deck: string[];
@@ -72,6 +78,7 @@ export interface WenbunConfig {
     newPreviouslyStudiedCardOrder?: NewCardOrder;
     gradeWarmUpCards?: boolean;
     startPreviouslyStudiedCardFromTheBack?: boolean;
+    isSeparateLearnAndReview?: boolean;
     
     // UI & Audio
     uiScale?: 'small' | 'normal' | 'custom'; // 10px, 16px
@@ -110,6 +117,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     newPreviouslyStudiedCardOrder: NewCardOrder.Mix,
     startPreviouslyStudiedCardFromTheBack: true,
     gradeWarmUpCards: false,
+    isSeparateLearnAndReview: false,
     
     uiScale: 'normal',
     customFontSize: 16,
@@ -539,7 +547,7 @@ export class App {
         // the handling of when the warm up is complete is done in the review component
     }
     
-    getNextCard(deckId: string): number | undefined {
+    getNextCard(deckId: string, mode: ReviewMode = ReviewMode.Normal): number | undefined {
         
         if (this.extraStudyHandler.isExtraStudy()) {
             return this.extraStudyHandler.getNextCard();
@@ -548,12 +556,26 @@ export class App {
         // TODO: precalculate the next card on review
         const config = this.getConfig();
         
-        const newOrWarmUpCardCount = this.getScheduledNewOrWarmUpCardsCount(deckId);
-        const previouslyStudiedCardCount = this.getScheduledPreviouslyStudiedCardsCount(deckId);
-        const todaysCardCount = this.getScheduledReviewCardsCount(deckId);
-        
+        let newOrWarmUpCardCount = this.getScheduledNewOrWarmUpCardsCount(deckId);
+        let previouslyStudiedCardCount = this.getScheduledPreviouslyStudiedCardsCount(deckId);
+        let todaysCardCount = this.getScheduledReviewCardsCount(deckId);
         // need this for accurate mixing ratio
-        const totalNewOrWarmUpCardCount = this.getTotalScheduledNewOrWarmUpTotalCount(deckId);
+        let totalNewOrWarmUpCardCount = this.getTotalScheduledNewOrWarmUpTotalCount(deckId);
+        
+        // modify count based on mode
+        switch (mode) {
+            case ReviewMode.ReviewOnly:
+                newOrWarmUpCardCount = 0;
+                totalNewOrWarmUpCardCount = 0;
+                break;
+            case ReviewMode.LearnOnly:
+                previouslyStudiedCardCount = 0;
+                todaysCardCount = 0;
+                break;
+            case ReviewMode.Normal:
+            default:
+                // do nothing
+        }
         
         const newOrWarmUp = (newOrWarmUpCardCount > 0) ? this.getNewOrWarmUpCard(deckId) : undefined;
         const previouslyStudiedCards = (previouslyStudiedCardCount > 0) ? this.getPreviouslyStudiedCard(deckId) : undefined;
@@ -1085,5 +1107,19 @@ export class App {
         // this.decks = this.decks.filter(d => d != deckId);
         const index = this.decks.indexOf(deckId);
         if (index >= 0) this.decks[index] = deckLabel;
+    }
+    
+    resetWarmUps(deckId: string) {
+        const deckData = this.deckData[deckId];
+        if (!deckData) return;
+        deckData.warmUpIds = {};
+    }
+    
+    /** tweak the `doneTodayNewCardCount` so that the scheduled new card will match the target */
+    tweakNewCardCount(deckId: string, target: number) {
+        const deckData = this.deckData[deckId];
+        const count = this.getConfig().newCardPerDay - deckData.doneTodayNewCardCount;
+        const diff = target - count;
+        this.adjustCardLimit(deckId, diff, 0, 0);
     }
 }
