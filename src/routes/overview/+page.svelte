@@ -87,7 +87,7 @@
         quickAdjustPreviouslyStudiedCardLimit = 0;
         quickAdjustReviewCardLimit = 0;
         await app.save();
-        app = app;
+        initComponent();
     }
     
     let studyNewCardCount = 0;
