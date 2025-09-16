@@ -22,6 +22,7 @@
     }
     $: activeDeckIds = deckOrder.length > 0 ? deckOrder : Object.keys(app.deckData);
     $: locked = isAutomaticallyLoggedOut;
+    $: isSeparateLearnAndReview = app.getConfig().isSeparateLearnAndReview;
 
     function arraysEqual(a: string[], b: string[]) {
         return a.length === b.length && a.every((val, index) => val === b[index]);
@@ -201,7 +202,7 @@
                 style={`--subtitle-color: ${info.color ?? '#00000080'}`}
             >{info.subtitle}</span>
         </div>
-        <div class="right">
+        <div class="right" class:no-new={isSeparateLearnAndReview}>
             <span class="deck-count-learn-relearn" title="learning">
                 {app.getLearningRelearningCardsCount(info.id) || ''}
             </span>
@@ -324,6 +325,12 @@
             .deck-count-previously-studied {
                 place-self: center;
                 color: var(--wenbun-orange);
+            }
+            &.no-new {
+                grid-template-columns: 1.5em 1.5em 1.5em;
+                .deck-count-new {
+                    display: none;
+                }
             }
         }
     }

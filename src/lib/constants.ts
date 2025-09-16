@@ -120,6 +120,10 @@ export const SETTINGS_LABEL_DATA = {
         label: "Start Previously Studied Card From The Back",
         help: "When enabled, the previously studied card will be drawn from the back of the pool.",
     },
+    separateLearnAndReview: {
+        label: "Separate Learn and Review",
+        help: "When enabled, the app will treat learning and review as separate sessions, with individual buttons to begin each.",
+    },
     
     uiScale: {
         label: "UI Scale",

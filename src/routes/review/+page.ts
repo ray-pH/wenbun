@@ -1,3 +1,4 @@
+import { ReviewMode } from '$lib/app.js'
 import { ExtraStudyMode } from '$lib/appExtraStudyHandler.js'
 
 export const load = ({ url }) => {
@@ -6,5 +7,6 @@ export const load = ({ url }) => {
         isExtraStudy: url.searchParams.get('isExtraStudy') === 'true',
         cardIds: url.searchParams.get('cardIds') || encodeURIComponent('[]'),
         mode: url.searchParams.get('mode') || ExtraStudyMode.Normal,
+        reviewMode: url.searchParams.get('reviewMode') || ReviewMode.Normal,
     }
 }
