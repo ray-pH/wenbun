@@ -22,6 +22,12 @@
     </div>
     <div class="changelog-container">
         Changelog
+
+        <h4>v0.15.0 (2025-09-16)</h4>
+        <ul>
+            <li>Added an option to separate the <b>"learn"</b> and <b>"review"</b> sessions.</li>
+            <li>Fixed a bug where the study button remained grey after a quick adjustment.</li>
+        </ul>
         
         <h4>v0.14.2 (2025-09-14)</h4>
         <ul>
