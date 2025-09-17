@@ -162,7 +162,9 @@ export class ChineseCharacterWordlist {
     getCharacterWriterData(word: string, config: CharacterWriterDataConfig = {}): CharacterWriterData | undefined {
         word = word.replace(/\r/g, '');
         const wordData = this.getWordData(word);
-        if (!wordData) {
+        const reading = this.getReading(word, this.lang, config.mandarinReading);
+        const meaning = this.getMeaning(word);
+        if (!wordData && !reading && !meaning) {
             return {
                 characters: word,
                 reading: word,
@@ -173,14 +175,13 @@ export class ChineseCharacterWordlist {
         }
         
         const characters = config.convertToTraditional ? this.converter.convert(word) : word;
-        const reading = this.getReading(word, this.lang, config.mandarinReading);
-        const meanings = [this.getMeaning(word)];
+        const meanings = [meaning];
         const audioUrl = config.isPlayAudio ? this.getAudioUrlArray(word) : [];
         const tags: string[][] = []
         
-        const numericReading = wordData.pinyin_num;
-        numericReading.split(' ').forEach((reading, i) => {
-            const tone = parseIntOrUndefined(reading[reading.length - 1]) ?? 0;
+        const pinyinReading = wordData?.pinyin_num ?? reading;
+        pinyinReading.split(' ').forEach((r, i) => {
+            const tone = toneFromPinyin(r);
             tags[i] = [`${TONE_PREFIX}${tone}`];
         });
         
@@ -196,7 +197,7 @@ export class ChineseCharacterWordlist {
             return this.audioDict[word].map(u => [u]);
         } else if (this.lang == 'zh'){
             // generate audio url from pinyin
-            const pinyin_num = this.getWordData(word)?.pinyin_num ?? '';
+            const pinyin_num = this.getWordData(word)?.pinyin_num ?? toPinyinNum(this.getReading(word, this.lang));
             const syls = pinyin_num.split(' ');
             return [syls.map(s => `${WENBUN_AUDIO_ZH_PREFIX_SRC}${s}.mp3`)];
         } else if (this.lang == 'yue') {
@@ -297,6 +298,17 @@ export function toneFromPinyin(pinyin: string): number {
     if (nfd.includes('\u0300')) return 4; // grave
     return 5; // neutral
 }
+export function toPinyinNum(pinyin: string): string {
+    const syllables = pinyin.split(' ');
+    const syllablesTones = syllables.map(s => toneFromPinyin(s));
+    const noAccentSyllables = syllables.map(stripTone);
+    return noAccentSyllables.map((s, i) => `${s}${syllablesTones[i]}`).join(' ');
+}
+export function stripTone(pinyin: string): string {
+    pinyin = pinyin.replace(/\d/g, '');
+    return pinyin.normalize('NFD').replaceAll('\u0304', '').replaceAll('\u0301', '').replaceAll('\u030C', '').replaceAll('\u0300', '');
+}
+
 // U+2FF0–U+2FFB (⿰ ⿱ ⿲ ⿳ ⿴ ⿵ ⿶ ⿷ ⿸ ⿹ ⿺ ⿻).
 export function stripIDC(s: string): string {
     return s.replace(/[\u2FF0-\u2FFB]/gu, "");
