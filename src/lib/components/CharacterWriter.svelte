@@ -126,6 +126,7 @@
             // drawing
             drawingWidth: CHARACTER_WRITER_DRAWING_WIDTH,
             drawingColor: "#555",
+            showHintAfterMisses: app.getConfig().showHintAfterMissesCount,
             // auto stroke animation
             strokeAnimationSpeed: strokeSpeed,
             delayBetweenStrokes: linmap(strokeSpeed, 1, MAX_STROKE_SPEED, 1000, 10),
