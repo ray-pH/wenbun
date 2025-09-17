@@ -23,6 +23,13 @@
     <div class="changelog-container">
         Changelog
 
+        <h4>v0.16.0 (2025-09-17)</h4>
+        <ul>
+            <li><b>Decks</b>: You can now add new cards to existing custom decks in bulk from the "Upload Custom Deck" page.</li>
+            <li><b>Reviews</b>: Added a setting to configure how many times you can miss a stroke before a hint is shown.</li>
+            <li><b>Bug Fix</b>: Fixed an issue where words with custom readings and meanings but no dictionary entry would not be handled correctly.</li>
+        </ul>
+
         <h4>v0.15.0 (2025-09-16)</h4>
         <ul>
             <li>Added an option to separate the <b>"learn"</b> and <b>"review"</b> sessions.</li>
