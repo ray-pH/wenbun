@@ -180,7 +180,7 @@ export class ChineseCharacterWordlist {
         const audioUrl = config.isPlayAudio ? this.getAudioUrlArray(word) : [];
         const tags: string[][] = []
         
-        const pinyinReading = wordData?.pinyin_num ?? reading;
+        const pinyinReading = wordData?.pinyin_num ?? reading ?? "";
         pinyinReading.split(' ').forEach((r, i) => {
             const tone = toneFromPinyin(r);
             tags[i] = [`${TONE_PREFIX}${tone}`];
@@ -198,7 +198,7 @@ export class ChineseCharacterWordlist {
             return this.audioDict[word].map(u => [u]);
         } else if (this.lang == 'zh'){
             // generate audio url from pinyin
-            const pinyin_num = this.getWordData(word)?.pinyin_num ?? toPinyinNum(this.getReading(word, this.lang));
+            const pinyin_num = this.getWordData(word)?.pinyin_num ?? toPinyinNum(this.getReading(word, this.lang)) ?? "";
             const syls = pinyin_num.split(' ');
             return [syls.map(s => `${WENBUN_AUDIO_ZH_PREFIX_SRC}${s}.mp3`)];
         } else if (this.lang == 'yue') {
