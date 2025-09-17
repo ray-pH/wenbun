@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { App, WenBunCustomState } from "$lib/app";
+    import { App, WenBunCustomState, type Lang } from "$lib/app";
     import { ChineseCharacterWordlist } from "$lib/chinese";
     import Loading from "$lib/components/Loading.svelte";
     import { DECK_TAGS } from "$lib/constants";
@@ -23,7 +23,7 @@
     let isShowId = $state(false);
     let isInit = $state(false);
     let deckData = $state(app.deckData[deckId]);
-    let lang = $derived(isZhCantonese ? 'yue' : 'zh') as 'zh' | 'yue';
+    let lang = $derived(isZhCantonese ? 'yue' : 'zh') as Lang;
     // let _refresh = $state(0);
     
     let accordionState = $state(new SvelteMap<string, boolean>());

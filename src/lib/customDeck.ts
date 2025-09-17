@@ -1,10 +1,10 @@
-import { App, type DeckData } from "$lib/app";
+import { App, type DeckData, type Lang } from "$lib/app";
 import { DECK_TAGS } from "./constants";
 
 export interface CustomDeck {
     name: string;
     words: string[];
-    lang: 'zh' | 'yue';
+    lang: Lang;
     isEnableCustomDictionary: boolean;
 }
 

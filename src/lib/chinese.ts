@@ -2,6 +2,7 @@ import { pinyinToZhuyin } from "pinyin-zhuyin";
 import { CHINESE_CC_CEDICT_SRC, CHINESE_CUSTOM_NOTES_SRC, CHINESE_DICT_SRC, CHINESE_MAKEMEAHANZI_SRC, HANZI_WRITER_DATA_CHARS_SRC, SLUG_NO_DATA_IN_DICT, WENBUN_AUDIO_URL, WENBUN_AUDIO_ZH_PREFIX_SRC, YUE_AUDIO_DICT_SRC, ZH_AUDIO_DICT_SRC } from "./constants";
 import { parseIntOrUndefined, type CharacterWriterData } from "./util";
 import * as OpenCC from 'opencc-js';
+import type { Lang } from "./app";
 
 export const TONE_PREFIX = 'tone-';
 
@@ -69,14 +70,14 @@ export class ChineseCharacterWordlist {
     private charDecompositionDict: Record<string, IChineseCharDecomposition> = {};
     private customNotes: Record<string, string> = {};
     private customEntryDict: Record<string, {reading?: string, meaning?: string}> = {};
-    public lang: 'zh' | 'yue' = 'zh';
+    public lang: Lang = 'zh';
     public initializing = false;
     public initialized = false;
     
     constructor() {
     }
     
-    async init(lang: 'zh' | 'yue', useExtraDict: boolean = false): Promise<void> {
+    async init(lang: Lang, useExtraDict: boolean = false): Promise<void> {
         this.initializing = true;
         this.lang = lang;
         const dictP = async () => {
@@ -162,7 +163,9 @@ export class ChineseCharacterWordlist {
     getCharacterWriterData(word: string, config: CharacterWriterDataConfig = {}): CharacterWriterData | undefined {
         word = word.replace(/\r/g, '');
         const wordData = this.getWordData(word);
-        if (!wordData) {
+        const reading = this.getReading(word, this.lang, config.mandarinReading);
+        const meaning = this.getMeaning(word);
+        if (!wordData && !reading && !meaning) {
             return {
                 characters: word,
                 reading: word,
@@ -173,14 +176,13 @@ export class ChineseCharacterWordlist {
         }
         
         const characters = config.convertToTraditional ? this.converter.convert(word) : word;
-        const reading = this.getReading(word, this.lang, config.mandarinReading);
-        const meanings = [this.getMeaning(word)];
+        const meanings = [meaning];
         const audioUrl = config.isPlayAudio ? this.getAudioUrlArray(word) : [];
         const tags: string[][] = []
         
-        const numericReading = wordData.pinyin_num;
-        numericReading.split(' ').forEach((reading, i) => {
-            const tone = parseIntOrUndefined(reading[reading.length - 1]) ?? 0;
+        const pinyinReading = wordData?.pinyin_num ?? reading ?? "";
+        pinyinReading.split(' ').forEach((r, i) => {
+            const tone = toneFromPinyin(r);
             tags[i] = [`${TONE_PREFIX}${tone}`];
         });
         
@@ -196,7 +198,7 @@ export class ChineseCharacterWordlist {
             return this.audioDict[word].map(u => [u]);
         } else if (this.lang == 'zh'){
             // generate audio url from pinyin
-            const pinyin_num = this.getWordData(word)?.pinyin_num ?? '';
+            const pinyin_num = this.getWordData(word)?.pinyin_num ?? toPinyinNum(this.getReading(word, this.lang)) ?? "";
             const syls = pinyin_num.split(' ');
             return [syls.map(s => `${WENBUN_AUDIO_ZH_PREFIX_SRC}${s}.mp3`)];
         } else if (this.lang == 'yue') {
@@ -215,7 +217,7 @@ export class ChineseCharacterWordlist {
     
     getReading(
         word: string,
-        lang: 'zh' | 'yue' = 'zh',
+        lang: Lang = 'zh',
         mandarinReading: ChineseMandarinReading = ChineseMandarinReading.Pinyin
     ): string {
         if (this.customEntryDict[word]?.reading) return this.customEntryDict[word].reading;
@@ -297,6 +299,17 @@ export function toneFromPinyin(pinyin: string): number {
     if (nfd.includes('\u0300')) return 4; // grave
     return 5; // neutral
 }
+export function toPinyinNum(pinyin: string): string {
+    const syllables = pinyin.split(' ');
+    const syllablesTones = syllables.map(s => toneFromPinyin(s));
+    const noAccentSyllables = syllables.map(stripTone);
+    return noAccentSyllables.map((s, i) => `${s}${syllablesTones[i]}`).join(' ');
+}
+export function stripTone(pinyin: string): string {
+    pinyin = pinyin.replace(/\d/g, '');
+    return pinyin.normalize('NFD').replaceAll('\u0304', '').replaceAll('\u0301', '').replaceAll('\u030C', '').replaceAll('\u0300', '');
+}
+
 // U+2FF0–U+2FFB (⿰ ⿱ ⿲ ⿳ ⿴ ⿵ ⿶ ⿷ ⿸ ⿹ ⿺ ⿻).
 export function stripIDC(s: string): string {
     return s.replace(/[\u2FF0-\u2FFB]/gu, "");

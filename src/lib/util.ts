@@ -1,4 +1,5 @@
 import { base } from "$app/paths";
+import type { Lang } from "./app";
 import { DeckInfo } from "./constants";
 
 export type DeepRequired<T> =
@@ -28,7 +29,7 @@ export interface CharacterWriterConfig {
     warmUpMaxCount: number;
     isGradeWarmUpCards: boolean;
     isShowOutline: boolean;
-    lang: 'zh' | 'yue';
+    lang: Lang;
 }
 
 export async function loadDeck(filename: string): Promise<string[] | undefined> {

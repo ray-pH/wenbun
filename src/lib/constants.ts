@@ -174,6 +174,10 @@ export const SETTINGS_LABEL_DATA = {
         label: "Show Health Bar",
         help: "Displays a progress bar above the character grid that drains as you make stroke mistakes, indicating the auto-graded grade."
     },
+    showHintAfterMissesCount: {
+        label: "Show Hint After Misses",
+        help: "Specifies the number of misses before the hint will be shown.",
+    },
     
     zhIsColorBasedOnTone: {
         label: "Color Characters Based On Their Tone",
@@ -218,4 +222,8 @@ export const SETTINGS_LABEL_DATA = {
         label: "Enable Custom Dictionary",
         help: "When enabled, the custom dictionary (CC-CEDICT) will be used to look up words in the deck. (initial loading may take a while)",
     },
+    addToExistingDeck: {
+        label: "Add To Existing Deck",
+        help: "When enabled, the new cards will be added to an existing deck.",
+    }
 }

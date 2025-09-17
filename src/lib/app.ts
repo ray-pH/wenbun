@@ -28,6 +28,8 @@ export const DEFAULT_GROUP_CONTENT_COUNT = 30;
 const DEFAULT_WARMUP_MAX_COUNT = 3;
 const GENERATED_DECK_ID_LENGTH = 8;
 
+export type Lang = 'zh' | 'yue';
+
 export enum WenBunCustomState {
     New = "New",
     WarmUp = "WarmUp",
@@ -89,6 +91,7 @@ export interface WenbunConfig {
     gradingMethod?: 'auto' | 'manual';
     strokeLeniency?: number;
     showAutoGradingBar?: boolean;
+    showHintAfterMissesCount?: number;
     
     // FSRS
     learningSteps?: FSRS.Steps;
@@ -126,6 +129,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     gradingMethod: 'auto',
     strokeLeniency: 1.5,
     showAutoGradingBar: false,
+    showHintAfterMissesCount: 3,
     
     learningSteps: ["1m", "10m"],
     previouslyStudiedLearningSteps: ["1m", "5d"],
@@ -471,6 +475,21 @@ export class App {
         if (this.decks.includes(deckId)) return;
         this.decks.push(deckId);
         this.splitDeckIntoGroupOfN(deckId, DEFAULT_GROUP_CONTENT_COUNT)
+    }
+    
+    extendDeck(deckId: string, words: string[], ignoredIds: number[] = []) {
+        const deckData = this.deckData[deckId];
+        if (!deckData) return;
+        
+        const startId = deckData.deck.length;
+        const newCardIds = Array.from(words.keys()).map(id => id + startId);
+        ignoredIds = ignoredIds.map(id => id + startId);
+        
+        deckData.deck.push(...words);
+        deckData.ignoredIds?.push(...ignoredIds);
+        
+        const lastGroup = deckData.groups[deckData.groups.length - 1];
+        lastGroup.cardIds.push(...newCardIds);
     }
     
     async deleteDeck(deckId: string, confirmed = false): Promise<void> {
@@ -1121,5 +1140,20 @@ export class App {
         const count = this.getConfig().newCardPerDay - deckData.doneTodayNewCardCount;
         const diff = target - count;
         this.adjustCardLimit(deckId, diff, 0, 0);
+    }
+    
+    getAllCustomDeckIdAndNamePairs(): {id: string, label?: string}[] {
+        return Object.entries(this.deckData)
+            .filter(([id, _]) => !isBuiltinDeck(id))
+            .map(([id, data]) => ({id, label: data.label}));
+    }
+    getDeckLanguage(deckId: string): Lang {
+        const tags = this.deckData[deckId]?.tags ?? [];
+        if (tags.includes(DECK_TAGS.ZH_YUE)) return 'yue';
+        return 'zh';
+    }
+    isDeckUsingExtraDict(deckId: string): boolean {
+        const tags = this.deckData[deckId]?.tags ?? [];
+        return !!tags.includes(DECK_TAGS.ZH_EXTRA_DICT);
     }
 }
