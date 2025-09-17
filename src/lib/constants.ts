@@ -222,4 +222,8 @@ export const SETTINGS_LABEL_DATA = {
         label: "Enable Custom Dictionary",
         help: "When enabled, the custom dictionary (CC-CEDICT) will be used to look up words in the deck. (initial loading may take a while)",
     },
+    addToExistingDeck: {
+        label: "Add To Existing Deck",
+        help: "When enabled, the new cards will be added to an existing deck.",
+    }
 }

@@ -2,6 +2,7 @@ import { pinyinToZhuyin } from "pinyin-zhuyin";
 import { CHINESE_CC_CEDICT_SRC, CHINESE_CUSTOM_NOTES_SRC, CHINESE_DICT_SRC, CHINESE_MAKEMEAHANZI_SRC, HANZI_WRITER_DATA_CHARS_SRC, SLUG_NO_DATA_IN_DICT, WENBUN_AUDIO_URL, WENBUN_AUDIO_ZH_PREFIX_SRC, YUE_AUDIO_DICT_SRC, ZH_AUDIO_DICT_SRC } from "./constants";
 import { parseIntOrUndefined, type CharacterWriterData } from "./util";
 import * as OpenCC from 'opencc-js';
+import type { Lang } from "./app";
 
 export const TONE_PREFIX = 'tone-';
 
@@ -69,14 +70,14 @@ export class ChineseCharacterWordlist {
     private charDecompositionDict: Record<string, IChineseCharDecomposition> = {};
     private customNotes: Record<string, string> = {};
     private customEntryDict: Record<string, {reading?: string, meaning?: string}> = {};
-    public lang: 'zh' | 'yue' = 'zh';
+    public lang: Lang = 'zh';
     public initializing = false;
     public initialized = false;
     
     constructor() {
     }
     
-    async init(lang: 'zh' | 'yue', useExtraDict: boolean = false): Promise<void> {
+    async init(lang: Lang, useExtraDict: boolean = false): Promise<void> {
         this.initializing = true;
         this.lang = lang;
         const dictP = async () => {
@@ -216,7 +217,7 @@ export class ChineseCharacterWordlist {
     
     getReading(
         word: string,
-        lang: 'zh' | 'yue' = 'zh',
+        lang: Lang = 'zh',
         mandarinReading: ChineseMandarinReading = ChineseMandarinReading.Pinyin
     ): string {
         if (this.customEntryDict[word]?.reading) return this.customEntryDict[word].reading;

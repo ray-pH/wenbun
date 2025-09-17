@@ -17,6 +17,9 @@
     let issueCount = 0;
     let issueIds: number[] = [];
     let isShowIssuesOnly = false;
+    let addToExistingDeck = false;
+    let existingDeckId = "";
+    let allCustomDeckIdAndNamePairs: {id: string, label?: string}[] = [];
     
     let inputType = CUSTOM_DECK_INPUT_TYPE.Simple;
     let ankiInputWordColumn: number = 1;
@@ -66,20 +69,40 @@
         goto(`${base}/`);
     }
     
+    async function addToDeck() {
+        if (existingDeckId.trim() === "") {
+            window.alert("Deck must be selected.");
+            return;
+        }
+        if (issueCount > 0) {
+            const confirm = window.confirm("You have issues in your deck. Card with issues will be ignored. Are you sure you want to add this deck?");
+            if (!confirm) return;
+        }
+        app.extendDeck(existingDeckId, customDeck.words, issueIds);
+        await app.save(false, true);
+        goto(`${base}/`);
+    }
+    
+    function updateParamBasedOnExistingDeck() {
+        customDeck.lang = app.getDeckLanguage(existingDeckId);
+        customDeck.isEnableCustomDictionary = app.isDeckUsingExtraDict(existingDeckId);
+    }
+    
     onMount(async () => {
         const cachedInput = window.localStorage.getItem(LOCAL_STORAGE_KEY);
         if (cachedInput) {
             input = cachedInput;
         }
         await app.init();
+        initComponent();
+        const changed = await app.initProfile();
+        if (changed) initComponent();
+    })
+    function initComponent() {
         onInputChanged();
         app = app;
-        const changed = await app.initProfile();
-        if (changed) {
-            onInputChanged();
-        }
-        app = app;
-    })
+        allCustomDeckIdAndNamePairs = app.getAllCustomDeckIdAndNamePairs();
+    }
     
 </script>
 
@@ -145,29 +168,48 @@
     <div class="config-container">
         <div class="section-title">Config</div>
         <div class="config-items">
-            <SettingsItem key="deckName">
-                <div style="text-align: right;">
-                    <input type="text" bind:value={customDeck.name}>
-                    <div class="warning-text" style="color: #A64547;" class:hidden={customDeck.name.trim()}>
-                        Deck name cannot be empty.
+            {#if addToExistingDeck}
+                <SettingsItem key="deckName">
+                    <select bind:value={existingDeckId} onchange={() => updateParamBasedOnExistingDeck()}>
+                        {#each allCustomDeckIdAndNamePairs as {id, label}}
+                            <option value={id}>{label}</option>
+                        {/each}
+                    </select>
+                </SettingsItem>
+            {:else}
+                <SettingsItem key="deckName">
+                    <div style="text-align: right;">
+                        <input type="text" bind:value={customDeck.name}>
+                        <div class="warning-text" style="color: #A64547;" class:hidden={customDeck.name.trim()}>
+                            Deck name cannot be empty.
+                        </div>
                     </div>
-                </div>
-            </SettingsItem>
+                </SettingsItem>
+            {/if}
             <SettingsItem key="deckLanguage">
-                <select bind:value={customDeck.lang}>
+                <select bind:value={customDeck.lang} disabled={addToExistingDeck}>
                     <option value="zh">Mandarin</option>
                     <option value="yue">Cantonese</option>
                 </select>
             </SettingsItem>
             <SettingsItem key="deckEnableCustomDictionary">
-                <input type="checkbox" bind:checked={customDeck.isEnableCustomDictionary} onchange={onInputChanged}>
+                <input type="checkbox" bind:checked={customDeck.isEnableCustomDictionary} onchange={onInputChanged} disabled={addToExistingDeck}>
+            </SettingsItem>
+            <SettingsItem key="addToExistingDeck">
+                <input type="checkbox" bind:checked={addToExistingDeck} onchange={onInputChanged}>
             </SettingsItem>
         </div>
     </div>
     <div class="add-deck-container">
-        <button class="button" onclick={addDeck}>
-            Add Deck
-        </button>
+        {#if addToExistingDeck}
+            <button class="button" onclick={addToDeck}>
+                    Add To Deck
+            </button>
+        {:else}
+            <button class="button" onclick={addDeck}>
+                    Add Deck
+            </button>
+        {/if}
     </div>
 </div>
 
