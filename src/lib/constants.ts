@@ -174,6 +174,10 @@ export const SETTINGS_LABEL_DATA = {
         label: "Show Health Bar",
         help: "Displays a progress bar above the character grid that drains as you make stroke mistakes, indicating the auto-graded grade."
     },
+    showHintAfterMissesCount: {
+        label: "Show Hint After Misses",
+        help: "Specifies the number of misses before the hint will be shown.",
+    },
     
     zhIsColorBasedOnTone: {
         label: "Color Characters Based On Their Tone",

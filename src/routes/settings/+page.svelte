@@ -245,6 +245,9 @@
         <div class="settings-section">
             <div class="section-title">Character Writer</div>
             <div class="section-container">
+                <SettingsItem key="showHintAfterMissesCount">
+                    <input type="number" step="1" min="0" bind:value={config.showHintAfterMissesCount}>
+                </SettingsItem>
                 <SettingsItem key="strokeLeniency">
                     <input type="number" step="0.01" bind:value={config.strokeLeniency}>
                 </SettingsItem>
