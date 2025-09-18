@@ -95,7 +95,7 @@
                 isComplete = true;
                 surpressGradeIndicator = false;
                 window.setTimeout(() => {
-                    playAudio();
+                    if (!isDictationMode) playAudio();
                 }, NEXT_CHAR_DELAY);
             } else {
                 window.setTimeout(() => {
@@ -180,8 +180,6 @@
     export function stopAllAudio() {
         // Stop any playing audio sequences
         audios.forEach(a => a.stop());
-        correctSound.pause();
-        correctSound.currentTime = 0;
     }
 
     function playAudio() {
