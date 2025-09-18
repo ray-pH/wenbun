@@ -173,7 +173,14 @@
         if (!urls) return;
         audios = urls.map(rawUs => {
             const us = rawUs.map(u => getAudioUrl(cardConfig.lang, u));
-            return new AudioSequence(us);
+            if (us.length > 1) {
+                return new AudioSequence(us, {
+                    defaultEndEarlyMs: 320,
+                    defaultOffsetMs: 300,
+                });
+            } else {
+                return new AudioSequence(us);
+            }
         });
     }
 
