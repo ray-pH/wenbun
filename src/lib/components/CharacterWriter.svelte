@@ -87,7 +87,7 @@
                 // play sound
             }, NEXT_CHAR_DELAY);
         } else {
-            correctSound.play();
+            if (app.getConfig().playSuccessSound) correctSound.play();
             completedCharCount = completedCharCount + 1;
             if (completedCharCount == characterData?.characters.length) {
                 // done;
