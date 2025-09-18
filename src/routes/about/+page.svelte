@@ -23,6 +23,17 @@
     <div class="changelog-container">
         Changelog
 
+        <h4>v0.16.1 (2025-09-18)</h4>
+        <ul>
+            <li><b>Audio</b>: Reduced the delay for per-syllable audio playback.</li>
+            <li><b>Bug Fixes</b>:
+                <ul>
+                    <li>The "Play Success Sound" setting now works as expected.</li>
+                    <li>Audio no longer plays on completion in dictation mode.</li>
+                </ul>
+            </li>
+        </ul>
+
         <h4>v0.16.0 (2025-09-17)</h4>
         <ul>
             <li><b>Decks</b>: You can now add new cards to existing custom decks in bulk from the "Upload Custom Deck" page.</li>
