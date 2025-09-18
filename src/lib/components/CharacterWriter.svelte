@@ -87,7 +87,7 @@
                 // play sound
             }, NEXT_CHAR_DELAY);
         } else {
-            correctSound.play();
+            if (app.getConfig().playSuccessSound) correctSound.play();
             completedCharCount = completedCharCount + 1;
             if (completedCharCount == characterData?.characters.length) {
                 // done;
@@ -95,7 +95,7 @@
                 isComplete = true;
                 surpressGradeIndicator = false;
                 window.setTimeout(() => {
-                    playAudio();
+                    if (!isDictationMode) playAudio();
                 }, NEXT_CHAR_DELAY);
             } else {
                 window.setTimeout(() => {
@@ -173,15 +173,20 @@
         if (!urls) return;
         audios = urls.map(rawUs => {
             const us = rawUs.map(u => getAudioUrl(cardConfig.lang, u));
-            return new AudioSequence(us);
+            if (us.length > 1) {
+                return new AudioSequence(us, {
+                    defaultEndEarlyMs: 320,
+                    defaultOffsetMs: 300,
+                });
+            } else {
+                return new AudioSequence(us);
+            }
         });
     }
 
     export function stopAllAudio() {
         // Stop any playing audio sequences
         audios.forEach(a => a.stop());
-        correctSound.pause();
-        correctSound.currentTime = 0;
     }
 
     function playAudio() {
