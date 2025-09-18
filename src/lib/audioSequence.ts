@@ -64,7 +64,6 @@ export class AudioSequence {
                 volume: spec.volume ?? 1,
                 offsetMs: spec.offsetMs ?? this.defaults.defaultOffsetMs,
             });
-            console.log(this.cfg);
         }
     }
 
