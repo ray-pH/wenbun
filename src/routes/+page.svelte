@@ -8,6 +8,17 @@
     import ButtonPopoverMenu from '$lib/components/ButtonPopoverMenu.svelte';
     import { LoginStatus } from '$lib/profile';
     import Loading from '$lib/components/Loading.svelte';
+    import { registerSW } from 'virtual:pwa-register';
+    
+    registerSW({
+        immediate: true,
+        onRegisteredSW(swUrl, reg) {
+            console.log("SW registered:", swUrl, reg);
+        },
+        onRegisterError(err) {
+            console.error("SW registration failed:", err);
+        },
+    });
     
     let app = new App();
     let isAutomaticallyLoggedOut = false;
@@ -36,7 +47,6 @@
         app = app;
         isAppInitialized = true;
         isNewUpdateExist = app.isNewUpdateExist();
-        registerSW();
         const changed = await app.initProfile();
         isAutomaticallyLoggedOut = app.profile.isAutomaticallyLoggedOut();
         if (changed) {
@@ -45,17 +55,6 @@
         }
         isNewUpdateExist = app.isNewUpdateExist();
     });
-    
-    function registerSW() {
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker
-                .register(`${base}/service-worker.js`)
-                .then(reg => {
-                    // console.log('SW registered:', reg)
-                })
-                .catch(err => console.error('SW registration failed:', err));
-        }
-    }
     
     function loginGoogle() {
         app.profile.loginGoogle(app);
