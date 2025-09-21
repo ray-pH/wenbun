@@ -8,7 +8,7 @@
     import { base } from '$app/paths';
     import { AudioSequence } from '$lib/audioSequence';
     import { AutoReview, AutoReviewGradeClass, AutoReviewGradeFAClass, AutoReviewGradeLabel, type AutoReviewData } from '$lib/autoReview';
-    import { CHARACTER_WRITER_DRAWING_WIDTH, SLUG_WORD_NOT_SUPPORTED_BY_HANZI_WRITER } from "$lib/constants";
+    import { CHARACTER_WRITER_DRAWING_WIDTH, HANZI_WRITER_DATA_DIR_SRC, SLUG_WORD_NOT_SUPPORTED_BY_HANZI_WRITER } from "$lib/constants";
     
     let width = $state(500);
     let height = $state(500);
@@ -133,6 +133,12 @@
             delayBetweenLoops: linmap(strokeSpeed, 1, MAX_STROKE_SPEED, 2000, 10),
             onComplete: () => {
                 completeChar();
+            },
+            // load locally
+            charDataLoader: (char, onComplete) => {
+                const res =  fetch(HANZI_WRITER_DATA_DIR_SRC + char + '.json')
+                    .then(r => r.json())
+                    .then(data => onComplete(data));
             }
         });
         if (!cardConfig.isFirstTime) {
