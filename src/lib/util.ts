@@ -1,4 +1,5 @@
 import { base } from "$app/paths";
+import { isTauri } from "@tauri-apps/api/core";
 import type { Lang } from "./app";
 import { DeckInfo } from "./constants";
 
@@ -128,4 +129,24 @@ export function generateRandomString(length: number): string {
         id += Math.random().toString(36).slice(2);
     }
     return id.slice(0, length);
+}
+
+export function isOnlineClient(): boolean {
+    return !isTauri() && !isRunningInPWA();
+}
+
+export function isRunningInPWA(): boolean {
+    // Chrome / Edge / Chromium (Android, desktop)
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        return true;
+    }
+    // iOS Safari
+    if ((window.navigator as any).standalone === true) {
+        return true;
+    }
+    // Android installed PWA launched from app shortcut
+    if (document.referrer.startsWith('android-app://')) {
+        return true;
+    }
+    return false;
 }

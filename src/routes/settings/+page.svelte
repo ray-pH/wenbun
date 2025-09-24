@@ -10,6 +10,7 @@
     import { ChineseToneColorPalette } from "$lib/constants";
     import { ChineseMandarinReading } from '$lib/chinese';
     import ProfileLogin from './ProfileLogin.svelte';
+    import { SyncMode, type ManualSyncStatus } from '$lib/profile';
     
     export let data: {leniency?: string};
     
@@ -21,6 +22,9 @@
         await app.init();
         initComponent();
         const changed = await app.initProfile();
+        if (await app.profile.getSyncMode() === SyncMode.manual) {
+            await app.profile.getManualSyncStatus(app);
+        }
         isOnlineProfileLoaded = true;
         if (changed) initComponent();
     })

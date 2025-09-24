@@ -6,7 +6,7 @@
     import { DeckInfo } from "$lib/constants";
     import { DragDropManager, performArrayReorder } from "$lib/dragAndDrop";
     import ButtonPopoverMenu from '$lib/components/ButtonPopoverMenu.svelte';
-    import { LoginStatus } from '$lib/profile';
+    import { LoginStatus, ManualSyncStatus } from '$lib/profile';
     import Loading from '$lib/components/Loading.svelte';
     import { registerSW } from 'virtual:pwa-register';
     
@@ -20,6 +20,7 @@
         },
     });
     
+    let syncStatus: ManualSyncStatus | undefined = undefined;
     let app = new App();
     let isAutomaticallyLoggedOut = false;
     let isNewUpdateExist = false;
@@ -54,6 +55,7 @@
             deckOrder = [...app.decks];
         }
         isNewUpdateExist = app.isNewUpdateExist();
+        syncStatus = await app.profile.getManualSyncStatus(app);
     });
     
     function loginGoogle() {
@@ -90,6 +92,20 @@
   		deckOrder = newOrder;
   		app.decks = newOrder;
    	}
+    
+    let isSyncing = false;
+    async function trySync() {
+        isSyncing = true;
+        if (syncStatus === ManualSyncStatus.canPull || syncStatus === ManualSyncStatus.canPush) {
+            await app.profile.trySyncProfile(app);
+            syncStatus = await app.profile.getManualSyncStatus(app);
+        } else if (syncStatus === ManualSyncStatus.conflict) {
+            await app.profile.trySyncProfile(app);
+        } else if (syncStatus === ManualSyncStatus.noSync) {
+            window.alert("Data is already up-to-date");
+        }
+        isSyncing = false;
+    }
    	
    	// Initialize drag drop manager when component mounts
    	onMount(() => {
@@ -106,7 +122,12 @@
    	});
 </script>
 
-<TopBar title="WenBun (beta)" noBack={true}></TopBar>
+<TopBar 
+    title="WenBun (beta)" noBack={true}
+    syncStatus={syncStatus}
+    syncButtonCallback={() => trySync()}
+    isSyncing={isSyncing}
+></TopBar>
 <div class="main-container">
     <div class="top-container">
         <a class="a-button" style="background-color: #A0D0F0;" href="{base}/about/">

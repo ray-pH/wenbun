@@ -6,9 +6,16 @@ import { page } from '$app/state';
 import { ApiRoute, apiUrl, apiAuthUrl } from "./api";
 import _ from "lodash";
 import type { IStorage } from "./storage";
+import { isOnlineClient } from "./util";
 
 const STORE_KEY_LOGIN_STATUS = "loginStatus"
 const STORE_KEY_BACKUP_PROFILE_DATA_BEFORE_LOGIN = "backupProfileDataBeforeLogin"
+const STORE_KEY_SYNC_MODE = "syncMode"
+
+export enum SyncMode {
+    auto = "auto",
+    manual = "manual",
+}
 
 export enum SyncDecision {
     push = "push",
@@ -29,6 +36,14 @@ export enum LoginStatus {
     loggedIn = "loggedIn",
     loggedOut = "loggedOut",
 }
+
+export enum ManualSyncStatus {
+    noSync = "noSync",
+    canPull = "canPull",
+    canPush = "canPush",
+    conflict = "conflict",
+}
+
 
 export interface ProfileInfo {
     id: string;
@@ -113,16 +128,7 @@ export class Profile {
                 syncDecision = await this.autoResolveSyncConflict(syncDecision, syncConflictAutoResolveStrategy, app);
                 switch (syncDecision) {
                     case SyncDecision.conflict: {
-                        this.syncConflictInfo = { localModifiedAt, remoteModifiedAt, lastSyncTime };
-                        this.isSyncConflict = true;
-                        // check path if already in settings
-                        const isAlreadyInSettings = page.url.pathname.startsWith("/settings");
-                        if (!isAlreadyInSettings) {
-                            const isGotoSettings = window.confirm("Sync Failed, Conflict Detected. Do you want to go to settings?");
-                            if (isGotoSettings) {
-                                goto(`${base}/settings/`);
-                            }
-                        }
+                        this.onConflict(localModifiedAt, remoteModifiedAt, lastSyncTime);
                         return false;
                     }
                     case SyncDecision.push: {
@@ -164,6 +170,21 @@ export class Profile {
             console.error(e);
             //TODO: not sure if something went wrong whether to return true or false
             return false;
+        }
+    }
+    
+    async onConflict(localModifiedAt: Date, remoteModifiedAt: Date, lastSyncTime: Date, showAlert = true) {
+        this.syncConflictInfo = { localModifiedAt, remoteModifiedAt, lastSyncTime };
+        this.isSyncConflict = true;
+        if (showAlert) {
+            // check path if already in settings
+            const isAlreadyInSettings = page.url.pathname.startsWith("/settings");
+            if (!isAlreadyInSettings) {
+                const isGotoSettings = window.confirm("Sync Failed, Conflict Detected. Do you want to go to settings?");
+                if (isGotoSettings) {
+                    goto(`${base}/settings/`);
+                }
+            }
         }
     }
     
@@ -221,9 +242,9 @@ export class Profile {
         }
     }
     
-    getSyncDecision(localModifiedAt: Date, remoteModifiedAt: Date, lastSyncTime: Date): SyncDecision {
-        const isLocalModified = localModifiedAt > lastSyncTime;
-        const isRemoteModified = remoteModifiedAt > lastSyncTime;
+    getSyncDecision(localModifiedAt: Date, remoteModifiedAt: Date, lastSyncTime: Date, toleranceMs = 100): SyncDecision {
+        const isLocalModified = localModifiedAt.getTime() - lastSyncTime.getTime() > toleranceMs;
+        const isRemoteModified = remoteModifiedAt.getTime() - lastSyncTime.getTime() > toleranceMs;
         if (isLocalModified && isRemoteModified) {
             return SyncDecision.conflict;
         } else if (isLocalModified) {
@@ -276,8 +297,10 @@ export class Profile {
         }
     }
     
-    async pushReviewLog(latestServerReviewLog: ReviewLog | null, localReviewLogs: ReviewLog[], force = false) {
-        if (latestServerReviewLog === null || force) {
+    async pushReviewLog(latestServerReviewLog: ReviewLog | null, localReviewLogs?: ReviewLog[], force = false) {
+        if (!localReviewLogs || localReviewLogs.length === 0) {
+            return true;
+        } else if (latestServerReviewLog === null || force) {
             // push all
             const res = await fetch(apiUrl(ApiRoute.ReviewLog, { force }), {
                 method: "POST",
@@ -290,10 +313,10 @@ export class Profile {
             return res.ok;
         } else {
             // push all after latestServerReviewLog
-            const latestServerMs = +new Date(latestServerReviewLog.log.review);
+            const latestServerMs = +new Date(latestServerReviewLog.log?.review ?? 0);
             const cut = localReviewLogs.findLastIndex(l => {
-                const v = l.log.review;
-                const ms = +new Date(v);
+                const v = l.log?.review;
+                const ms = +new Date(v ?? 0);
                 return ms <= latestServerMs;
             });
             const localReviewLogsAfterLatestServerReviewLog = localReviewLogs.slice(cut + 1);
@@ -390,5 +413,43 @@ export class Profile {
         const res = await this.storage.load<string>(STORE_KEY_BACKUP_PROFILE_DATA_BEFORE_LOGIN);
         if (res === undefined) return null;
         return res;
+    }
+    
+    async getSyncMode(): Promise<SyncMode> {
+        let res = await this.storage.load<SyncMode>(STORE_KEY_SYNC_MODE);
+        res ??= isOnlineClient() ? SyncMode.auto : SyncMode.manual;
+        return res;
+    }
+    async setSyncMode(mode: SyncMode) {
+        await this.storage.save(STORE_KEY_SYNC_MODE, mode);
+    }
+    
+    async getManualSyncStatus(app: App): Promise<ManualSyncStatus | undefined> {
+        if (!this.isLoggedIn) return undefined;
+        try {
+            const remoteProfileData = await this.getProfileData();
+            if (remoteProfileData === null) {
+                return ManualSyncStatus.canPush;
+            } else {
+                // check
+                const localModifiedAt = new Date(app.meta.modifiedAt ?? 0);
+                const remoteModifiedAt = new Date(remoteProfileData.meta.modifiedAt ?? 0);;
+                const lastSyncTime = new Date(app.lastSyncTime ?? 0);
+                const syncDecisionFromTime = this.getSyncDecision(localModifiedAt, remoteModifiedAt, lastSyncTime);
+                let syncDecision = (_.isEqual(remoteProfileData, app.exportProfile(false))) ? SyncDecision.none : syncDecisionFromTime;
+                switch (syncDecision) {
+                    case SyncDecision.push: return ManualSyncStatus.canPush;
+                    case SyncDecision.pull: return ManualSyncStatus.canPull;
+                    case SyncDecision.none: return ManualSyncStatus.noSync;
+                    case SyncDecision.conflict: {
+                        this.onConflict(localModifiedAt, remoteModifiedAt, lastSyncTime, false);
+                        return ManualSyncStatus.conflict;
+                    }
+                }
+            }
+        } catch (e) {
+            return undefined;
+        }
+        return undefined;
     }
 }
