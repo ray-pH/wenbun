@@ -22,6 +22,11 @@
     </div>
     <div class="changelog-container">
         Changelog
+        
+        <h4>v0.16.2 (2025-09-25)</h4>
+        <ul>
+            <li><b>Bug Fix</b>: Improve the stability of syncing process.</li>
+        </ul>
 
         <h4>v0.16.1 (2025-09-18)</h4>
         <ul>
