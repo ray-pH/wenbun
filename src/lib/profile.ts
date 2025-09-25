@@ -221,9 +221,9 @@ export class Profile {
         }
     }
     
-    getSyncDecision(localModifiedAt: Date, remoteModifiedAt: Date, lastSyncTime: Date): SyncDecision {
-        const isLocalModified = localModifiedAt > lastSyncTime;
-        const isRemoteModified = remoteModifiedAt > lastSyncTime;
+    getSyncDecision(localModifiedAt: Date, remoteModifiedAt: Date, lastSyncTime: Date, toleranceMs = 100): SyncDecision {
+        const isLocalModified = localModifiedAt.getTime() - lastSyncTime.getTime() > toleranceMs;
+        const isRemoteModified = remoteModifiedAt.getTime() - lastSyncTime.getTime() > toleranceMs;
         if (isLocalModified && isRemoteModified) {
             return SyncDecision.conflict;
         } else if (isLocalModified) {
