@@ -1,4 +1,5 @@
 import { clientsClaim } from "workbox-core";
+import JSZip from "jszip";
 
 self.skipWaiting();
 clientsClaim();
@@ -18,13 +19,39 @@ async function getManifestFiles() {
     return { text, files };
 }
 
-// async function getHanziWriterData() {
-//     const resp = await fetch("/wenbun-assets/hanzi_writer_data_chars.txt");
-//     const text = await resp.text();
-//     const chars = text.split("");
-//     const files = chars.map((char) => `/wenbun-assets/hanzi-writer-data/${char}.json`);
-//     return files;
-// }
+async function cacheHanziData(cache) {
+    // 1. Fetch zip
+    const resp = await fetch("/wenbun-assets/hanzi-writer-data.zip");
+    const blob = await resp.blob();
+
+    // 2. Load zip
+    const zip = await JSZip.loadAsync(blob);
+
+    // 3. Get all .json files
+    const files = Object.keys(zip.files).filter(f => f.endsWith(".json"));
+
+    const batchSize = 500; // adjust as needed
+    for (let i = 0; i < files.length; i += batchSize) {
+        const batch = files.slice(i, i + batchSize);
+
+        // process a batch in parallel
+        const results = await Promise.allSettled(
+            batch.map(async filename => {
+                const text = await zip.file(filename).async("text");
+                const response = new Response(text, {
+                    headers: { "Content-Type": "application/json" }
+                });
+                const url = `/wenbun-assets/hanzi-writer-data/${filename}`;
+                await cache.put(url, response);
+            })
+        );
+
+        const successCount = results.filter(r => r.status === "fulfilled").length;
+        console.log(`[SW] cached ${i + successCount} / ${files.length} files`);
+    }
+
+    console.log("[SW] finished caching hanzi data:", files.length, "files");
+}
 
 async function hashString(str) {
     const buffer = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
@@ -34,12 +61,19 @@ async function hashString(str) {
 async function cacheManifestFiles() {
     const { text, files } = await getManifestFiles();
     const manifestHash = await hashString(text);
-    // const hanziWriterData = await getHanziWriterData();
     const CACHE_NAME = "wenbun-cache-" + manifestHash.slice(0, 16);
+    
+    // don't cache if the manifest has not changed
+    // check if cache with key CACHE_NAME exists
+    if (await caches.has(CACHE_NAME)) {
+        self.__CURRENT_CACHE = CACHE_NAME;
+        console.log("[SW] cache exists, done");
+        return;
+    }
 
     const cache = await caches.open(CACHE_NAME);
     await cache.addAll(files);
-    // await cache.addAll(hanziWriterData);
+    await cacheHanziData(cache);
 
     self.__CURRENT_CACHE = CACHE_NAME;
     console.log("[SW] cached", files.length, "files into", CACHE_NAME);
