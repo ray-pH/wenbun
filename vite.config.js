@@ -12,12 +12,15 @@ export default defineConfig(async () => ({
         sveltekit(),
         SvelteKitPWA({
             registerType: "autoUpdate", // auto checks for new SW
+            filename: "service-worker.js",
+            srcDir: "src",
             // since you already have manifest.json in static/,
             // just point to it:
             manifest: false,
             // include favicon or other static assets if needed
             includeAssets: [
-                "favicon.png", "wenbun-128.png", "wenbun-192.png", "wenbun-512.png",
+                "favicon.png", "wenbun-128.png", "wenbun-192.png", "wenbun-512.png", 
+                "main.css", "assets/**",
             ],
         }),
   ],
