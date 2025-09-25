@@ -51,6 +51,7 @@ async function cacheHanziData(cache) {
     }
 
     console.log("[SW] finished caching hanzi data:", files.length, "files");
+    await cache.put("/wenbun-assets/hanzi-writer-data/done", new Response(`${files.length}`));
 }
 
 async function hashString(str) {
@@ -58,47 +59,59 @@ async function hashString(str) {
     return Array.from(new Uint8Array(buffer)).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-async function cacheManifestFiles() {
+async function isCacheComplete(cache, files) {
+    const results = await Promise.all(
+        files.map(f => cache.match(f))
+    );
+    return results.every(r => r !== undefined) 
+        && await cache.match("/wenbun-assets/hanzi-writer-data/done");
+}
+
+async function tryCacheFiles() {
     const { text, files } = await getManifestFiles();
     const manifestHash = await hashString(text);
     const CACHE_NAME = "wenbun-cache-" + manifestHash.slice(0, 16);
+    const cache = await caches.open(CACHE_NAME);
     
     // don't cache if the manifest has not changed
     // check if cache with key CACHE_NAME exists
-    if (await caches.has(CACHE_NAME)) {
-        self.__CURRENT_CACHE = CACHE_NAME;
+    if ((await caches.has(CACHE_NAME)) && (await isCacheComplete(cache, files))) {
         console.log("[SW] cache exists, done");
         return;
     }
 
-    const cache = await caches.open(CACHE_NAME);
+    broadcast({ type: "CACHE_START" });
     await cache.addAll(files);
     await cacheHanziData(cache);
 
-    self.__CURRENT_CACHE = CACHE_NAME;
     console.log("[SW] cached", files.length, "files into", CACHE_NAME);
+    broadcast({ type: "CACHE_FINISH" });
+    cleanupCaches(CACHE_NAME);
+}
+
+function broadcast(msg) {
+    self.clients.matchAll({ type: "window", includeUncontrolled: true })
+        .then(clients => {
+            for (const client of clients) client.postMessage(msg);
+        });
 }
 
 // Only precache when app is actually installed
 self.addEventListener("message", (event) => {
     if (event.data && event.data.type === "PRECACHE_ASSETS") {
-        event.waitUntil(cacheManifestFiles());
+        event.waitUntil(tryCacheFiles());
     }
 });
 
-self.addEventListener("activate", (event) => {
-    event.waitUntil(
-        (async () => {
-            const keys = await caches.keys();
-            for (const key of keys) {
-                if (key.startsWith("wenbun-cache-") && key !== self.__CURRENT_CACHE) {
-                    await caches.delete(key);
-                    console.log("[SW] deleted old cache", key);
-                }
-            }
-        })(),
-    );
-});
+async function cleanupCaches(currentCacheName) {
+    const keys = await caches.keys();
+    for (const key of keys) {
+        if (key.startsWith("wenbun-cache-") && key !== currentCacheName) {
+            await caches.delete(key);
+            console.log("[SW] deleted old cache", key);
+        }
+    }
+}
 
 self.addEventListener("fetch", (event) => {
     event.respondWith(
