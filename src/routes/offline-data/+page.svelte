@@ -148,11 +148,11 @@
         </div>
         <button class="button" onclick={() => redownloadData()}>
             <i class="fa-solid fa-download"></i>&nbsp;
-            Redownload Core Data
+            Install Core Data
         </button>
         <button class="button" disabled>
             <i class="fa-solid fa-upload"></i>&nbsp;
-            Upload Core Data zip file
+            Manually upload Core Data zip file
         </button>
     {/if}
     <div>
@@ -182,7 +182,7 @@
     <div style="display: flex; gap: 0.5em;">
         <button class="button" onclick={() => downloadAudioZip()}>
             <i class="fa-solid fa-download"></i>&nbsp;
-            Download Audio Data
+            Install Audio Data
         </button>
         {#if currentAudioDownload}
             <button class="button" onclick={() => cancelAudioDownload()}>
@@ -192,8 +192,12 @@
     </div>
     <button class="button" onclick={() => uploadAudioZip()}>
         <i class="fa-solid fa-upload"></i>&nbsp;
-        Upload Audio Data zip file
+        Manually upload Audio Data zip file
     </button>
+    <div class="note">
+        You can also download the audio data zip file manually.
+    </div>
+    <a href={AUDIO_ZIP_URL} download="wenbun-audio-mandarin.zip">wenbun-audio-mandarin.zip</a>
 </div>
 
 <style>
@@ -218,5 +222,8 @@
     }
     .note {
         color: #00000090;
+    }
+    a {
+        color: var(--wenbun-blue);
     }
 </style>

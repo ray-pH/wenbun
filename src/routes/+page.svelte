@@ -142,10 +142,14 @@
         {#if isShowDomainMigration}
             <div style="display: flex; align-items: center;">
                 <div class="domain-notice">
-                    <p>You are visiting an old domain. 
-                        We will be keeping this old domain because some user data might still be stored here.
-                        <br>
-                        We're now moving the project to <a href={NEW_DOMAIN} target="_blank">{NEW_DOMAIN}</a>.</p>
+                    <p>
+                        You are visiting an old domain. 
+                        <br><br>
+                        We will be keeping this domain until the end of October 2025
+                        because some user local data might still be stored here.
+                        <br><br>
+                        We're now moving the project to <a href={NEW_DOMAIN} target="_blank">{NEW_DOMAIN}</a>.
+                    </p>
                     <a href={NEW_DOMAIN} target="_blank" class="button">
                         <i class="fa-solid fa-globe"></i>
                         Go to the new domain
@@ -465,5 +469,8 @@
         font-weight: bold;
         cursor: pointer;
         text-decoration: none;
+    }
+    a {
+        color: var(--wenbun-blue);
     }
 </style>
