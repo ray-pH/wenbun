@@ -9,6 +9,9 @@
     import { LoginStatus, ManualSyncStatus } from '$lib/profile';
     import Loading from '$lib/components/Loading.svelte';
     import { registerSW } from 'virtual:pwa-register';
+    import { isTauri } from '@tauri-apps/api/core';
+    
+    const NEW_DOMAIN = 'https://app.wenbun.com';
     
     registerSW({
         immediate: true,
@@ -106,12 +109,18 @@
         }
         isSyncing = false;
     }
+    
+    let isShowDomainMigration = false;
    	
    	// Initialize drag drop manager when component mounts
    	onMount(() => {
   		dragDropManager = new DragDropManager({
  			onReorder: handleReorder
   		});
+        
+        if (!isTauri() && typeof window !== 'undefined') {
+            isShowDomainMigration = window.location.hostname !== 'app.wenbun.com';
+        }
   		
   		return () => {
  			// Cleanup on component destroy
@@ -130,6 +139,20 @@
 ></TopBar>
 <div class="main-container">
     <div class="top-container">
+        {#if isShowDomainMigration}
+            <div style="display: flex; align-items: center;">
+                <div class="domain-notice">
+                    <p>You are visiting an old domain. 
+                        We will be keeping this old domain because some user data might still be stored here.
+                        <br>
+                        We're now moving the project to <a href={NEW_DOMAIN} target="_blank">{NEW_DOMAIN}</a>.</p>
+                    <a href={NEW_DOMAIN} target="_blank" class="button">
+                        <i class="fa-solid fa-globe"></i>
+                        Go to the new domain
+                    </a>
+                </div>
+            </div>
+        {/if}
         <a class="a-button" style="background-color: #A0D0F0;" href="{base}/about/">
             <div style="display: flex; align-items: center; justify-content: space-between;">
                 <span>Changelog</span>
@@ -371,6 +394,7 @@
         display: flex;
         flex-direction: column;
         gap: 1em;
+        align-items: center;
     }
     .a-button {
         all: unset;
@@ -420,5 +444,26 @@
         margin-top: 0.5em;
         width: calc(100vw - 2em);
         max-width: 24em;
+    }
+    .domain-notice {
+        margin: 1em;
+        padding: 1em;
+        border-radius: 0.5em;
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+        text-align: center;
+        max-width: 20em;
+    }
+    .domain-notice .button {
+        display: inline-block;
+        margin-top: 0.5em;
+        padding: 0.5em 1em;
+        border-radius: 0.5em;
+        background-color: var(--wenbun-blue);
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: none;
     }
 </style>
