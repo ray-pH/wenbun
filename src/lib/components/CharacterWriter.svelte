@@ -174,11 +174,11 @@
         }
     }
     
-    function setupAudios() {
+    async function setupAudios() {
         const urls = characterData?.audioUrl;
         if (!urls) return;
-        audios = urls.map(rawUs => {
-            const us = rawUs.map(u => getAudioUrl(cardConfig.lang, u));
+        audios = await Promise.all(urls.map(async (rawUs) => {
+            const us = await Promise.all(rawUs.map(u => getAudioUrl(cardConfig.lang, u)));
             if (us.length > 1) {
                 return new AudioSequence(us, {
                     defaultEndEarlyMs: 320,
@@ -187,7 +187,7 @@
             } else {
                 return new AudioSequence(us);
             }
-        });
+        }));
     }
 
     export function stopAllAudio() {
@@ -270,13 +270,14 @@
         };
         setupHealthBarCssVar();
         updateWidth();
-        setupAudios();
+        setupAudios().then(() => {
+            if (isDictationMode) {
+                playAudio();
+            }
+        });
         window.addEventListener('resize', updateWidth);
         strokeSpeed = app.getStrokeSpeed();
         setupHanziWriter(0);
-        if (isDictationMode) {
-            playAudio();
-        }
         return () => {
             unmounted = true;
             window.removeEventListener('resize', updateWidth);
