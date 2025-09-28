@@ -20,6 +20,12 @@ export default defineConfig(async () => ({
                 "favicon.png", "wenbun-128.png", "wenbun-192.png", "wenbun-512.png", 
                 "main.css", "assets/**",
             ],
+            injectManifest: {
+                globPatterns: [
+                    "**/assets/**",
+                ],
+                    maximumFileSizeToCacheInBytes: 50 * 1024 * 1024, // bump if you have big files
+                },
         }),
   ],
   define: {

@@ -6,11 +6,13 @@
     import _ from "lodash";
     import SettingsItem from "./SettingsItem.svelte";
     import * as FSRS from "ts-fsrs"
-    import { type DeepRequired } from "$lib/util";
+    import { isRunningInPWA, type DeepRequired } from "$lib/util";
     import { ChineseToneColorPalette } from "$lib/constants";
     import { ChineseMandarinReading } from '$lib/chinese';
     import ProfileLogin from './ProfileLogin.svelte';
     import { SyncMode, type ManualSyncStatus } from '$lib/profile';
+    import '@khmyznikov/pwa-install';
+    import type { PWAInstallElement } from '@khmyznikov/pwa-install';
     
     export let data: {leniency?: string};
     
@@ -18,6 +20,7 @@
     let config: DeepRequired<WenbunConfig>;
     let initialConfig: DeepRequired<WenbunConfig>;
     let isOnlineProfileLoaded = false;
+    let pwaInstallComponent: PWAInstallElement;
     onMount(async () => {
         await app.init();
         initComponent();
@@ -134,6 +137,12 @@
                 resolve(confirm);
             }
         });
+    }
+    
+    function showPWAInstallDialog() {
+        if (pwaInstallComponent && typeof pwaInstallComponent.showDialog === 'function') {
+           pwaInstallComponent.showDialog(true);
+         }
     }
     
 </script>
@@ -350,7 +359,19 @@
         <div class="settings-section">
             <div class="section-title">Offline Data</div>
             <div class="section-container">
-                <a class="button" href={`${base}/offline-data`} aria-label="Offline Data">Go to Offline Data Settings</a>
+                {#if !isRunningInPWA()}
+                    <div class="note">
+                        This app can be installed as PWA and can be accessed offline.
+                    </div>
+                    <button class="button" onclick={() => showPWAInstallDialog()}>
+                        <i class="fa-solid fa-download"></i>&nbsp;
+                        Install as PWA
+                    </button>
+                {/if}
+                <a class="button" href={`${base}/offline-data`} aria-label="Offline Data">
+                    <i class="fa-solid fa-gear"></i>&nbsp;
+                    Go to Offline Data Settings
+                </a>
             </div>
         </div>
         
@@ -375,6 +396,7 @@
         </div>
     {/if}
 </div>
+<pwa-install name="WenBun" bind:this={pwaInstallComponent}></pwa-install>
 
 <style>
     .main-container {
