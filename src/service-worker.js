@@ -3,7 +3,7 @@ import { precacheAndRoute } from "workbox-precaching";
 import JSZip from "jszip";
 const base = (import.meta.env.BASE_URL ?? "/").slice(0, -1);
 
-precacheAndRoute(self.__WB_MANIFEST);
+precacheAndRoute(self.__WB_MANIFEST ?? []);
 
 self.skipWaiting();
 clientsClaim();
