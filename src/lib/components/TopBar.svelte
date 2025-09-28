@@ -3,6 +3,7 @@
     import { goto } from '$app/navigation';
     import { get } from 'svelte/store';
     import { navigationHistory, canGoBack } from '$lib/navigation';
+    import { ManualSyncStatus } from '$lib/profile';
 
     interface Props {
 		title: string;
@@ -11,8 +12,15 @@
 		prohibitedBackUrl?: string;
 		isSettings?: boolean;
 		backConfirmCallback?: () => Promise<boolean>;
+		// sync
+		syncStatus?: ManualSyncStatus;
+		isSyncing?: boolean; // animation
+		syncButtonCallback?: () => Promise<void>;
 	}
-    let { title, noBack, backUrl, prohibitedBackUrl, isSettings, backConfirmCallback }: Props = $props();
+    let { 
+        title, noBack, backUrl, prohibitedBackUrl, isSettings, backConfirmCallback,
+        syncStatus, syncButtonCallback, isSyncing,
+    }: Props = $props();
     
     function goBack() {
         const performBackNavigation = () => {
@@ -49,6 +57,22 @@
         <span class="title">{title}</span>
     </div>
     <div class="right">
+        {#if syncStatus}
+            <button class="icon-button sync" aria-label="Sync" onclick={() => syncButtonCallback?.()}>
+                <i class="fa-solid fa-rotate" class:syncing={isSyncing}></i>
+                {#if !isSyncing}
+                    <div class="sync-status-badge">
+                        {#if syncStatus === ManualSyncStatus.canPull || syncStatus === ManualSyncStatus.canPush}
+                            <div class="red-dot"></div>
+                        {:else if syncStatus === ManualSyncStatus.conflict}
+                            <div class="badge">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                            </div>
+                        {/if}
+                    </div>
+                {/if}
+            </button>
+        {/if}
         {#if !isSettings}
             <a class="icon-button" href="{base}/settings" title="Settings" aria-label="Settings">
                 <i class="fa-solid fa-gear"></i>
@@ -90,8 +114,38 @@
         cursor: pointer;
         padding: 0.5em 1em;
         border-radius: 0.5em;
+        @media (max-width: 600px) {
+            padding: 0.5em 0.5em;
+        }
     }
     .icon-button:hover {
         background-color: #00000050;
+    }
+    .icon-button.sync {
+        position: relative;
+    }
+    .sync-status-badge {
+        position: absolute;
+        right: 0.5em;
+        top: 0.5em;
+    }
+    .badge {
+        color: var(--wenbun-orange);
+        font-size: 0.8em;
+    }
+    .red-dot {
+        width: 0.5em;
+        height: 0.5em;
+        background-color: var(--wenbun-red);
+        border-radius: 50%;
+    }
+    .syncing {
+        opacity: 0.5;
+        animation: rotate 1s ease-in-out infinite;
+    }
+    
+    @keyframes rotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(180deg); }
     }
 </style>

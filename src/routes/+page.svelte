@@ -6,9 +6,21 @@
     import { DeckInfo } from "$lib/constants";
     import { DragDropManager, performArrayReorder } from "$lib/dragAndDrop";
     import ButtonPopoverMenu from '$lib/components/ButtonPopoverMenu.svelte';
-    import { LoginStatus } from '$lib/profile';
+    import { LoginStatus, ManualSyncStatus } from '$lib/profile';
     import Loading from '$lib/components/Loading.svelte';
+    import { registerSW } from 'virtual:pwa-register';
     
+    registerSW({
+        immediate: true,
+        onRegisteredSW(swUrl, reg) {
+            console.log("SW registered:", swUrl, reg);
+        },
+        onRegisterError(err) {
+            console.error("SW registration failed:", err);
+        },
+    });
+    
+    let syncStatus: ManualSyncStatus | undefined = undefined;
     let app = new App();
     let isAutomaticallyLoggedOut = false;
     let isNewUpdateExist = false;
@@ -36,7 +48,6 @@
         app = app;
         isAppInitialized = true;
         isNewUpdateExist = app.isNewUpdateExist();
-        registerSW();
         const changed = await app.initProfile();
         isAutomaticallyLoggedOut = app.profile.isAutomaticallyLoggedOut();
         if (changed) {
@@ -44,18 +55,8 @@
             deckOrder = [...app.decks];
         }
         isNewUpdateExist = app.isNewUpdateExist();
+        syncStatus = await app.profile.getManualSyncStatus(app);
     });
-    
-    function registerSW() {
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker
-                .register(`${base}/service-worker.js`)
-                .then(reg => {
-                    // console.log('SW registered:', reg)
-                })
-                .catch(err => console.error('SW registration failed:', err));
-        }
-    }
     
     function loginGoogle() {
         app.profile.loginGoogle(app);
@@ -91,6 +92,20 @@
   		deckOrder = newOrder;
   		app.decks = newOrder;
    	}
+    
+    let isSyncing = false;
+    async function trySync() {
+        isSyncing = true;
+        if (syncStatus === ManualSyncStatus.canPull || syncStatus === ManualSyncStatus.canPush) {
+            await app.profile.trySyncProfile(app);
+            syncStatus = await app.profile.getManualSyncStatus(app);
+        } else if (syncStatus === ManualSyncStatus.conflict) {
+            await app.profile.trySyncProfile(app);
+        } else if (syncStatus === ManualSyncStatus.noSync) {
+            window.alert("Data is already up-to-date");
+        }
+        isSyncing = false;
+    }
    	
    	// Initialize drag drop manager when component mounts
    	onMount(() => {
@@ -107,7 +122,12 @@
    	});
 </script>
 
-<TopBar title="WenBun (beta)" noBack={true}></TopBar>
+<TopBar 
+    title="WenBun (beta)" noBack={true}
+    syncStatus={syncStatus}
+    syncButtonCallback={() => trySync()}
+    isSyncing={isSyncing}
+></TopBar>
 <div class="main-container">
     <div class="top-container">
         <a class="a-button" style="background-color: #A0D0F0;" href="{base}/about/">

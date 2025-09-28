@@ -10,6 +10,7 @@
     import { ChineseToneColorPalette } from "$lib/constants";
     import { ChineseMandarinReading } from '$lib/chinese';
     import ProfileLogin from './ProfileLogin.svelte';
+    import { SyncMode, type ManualSyncStatus } from '$lib/profile';
     
     export let data: {leniency?: string};
     
@@ -21,6 +22,9 @@
         await app.init();
         initComponent();
         const changed = await app.initProfile();
+        if (await app.profile.getSyncMode() === SyncMode.manual) {
+            await app.profile.getManualSyncStatus(app);
+        }
         isOnlineProfileLoaded = true;
         if (changed) initComponent();
     })
@@ -340,6 +344,13 @@
                 <SettingsItem key="zhToneNeutral">
                     <input type="color" bind:value={config.zh.toneColors[4]}>
                 </SettingsItem>
+            </div>
+        </div>
+        
+        <div class="settings-section">
+            <div class="section-title">Offline Data</div>
+            <div class="section-container">
+                <a class="button" href={`${base}/offline-data`} aria-label="Offline Data">Go to Offline Data Settings</a>
             </div>
         </div>
         

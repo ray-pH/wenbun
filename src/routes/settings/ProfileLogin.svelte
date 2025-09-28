@@ -1,7 +1,7 @@
 <script lang="ts">
     import { type App} from "$lib/app";
     import Loading from "$lib/components/Loading.svelte";
-    import { LoginStatus, type SyncConflictInfo } from "$lib/profile";
+    import { LoginStatus, SyncMode, type SyncConflictInfo } from "$lib/profile";
     import { onMount } from "svelte";
     
     export let app: App;
@@ -16,13 +16,14 @@
     onMount(() => {
         updateState();
     })
-    function updateState() {
+    async function updateState() {
         if (app) {
             isLoggedIn = app.profile.isLoggedIn;
             name = app.profile.getName();
             isSyncConflict = app.profile.isSyncConflict;
             syncConflictInfo = app.profile.syncConflictInfo;
             isAutomaticallyLoggedOut = app.profile.isAutomaticallyLoggedOut();
+            syncMode = await app.profile.getSyncMode();
         }
     }
     
@@ -49,6 +50,11 @@
         app.profile.updateLoginStatus(LoginStatus.loggedOut);
         isAutomaticallyLoggedOut = app.profile.isAutomaticallyLoggedOut();
     }
+    
+    let syncMode: SyncMode = SyncMode.auto;
+    function onSyncModeChange() {
+        app.profile.setSyncMode(syncMode);
+    }
 </script>
 
 <div class="container">
@@ -59,6 +65,15 @@
     {:else if isLoggedIn}
         <div>
             Logged in as <span class="name">{name}</span>
+        </div>
+        <div>
+            <label style="display: flex; justify-content: space-between; width: 100%;">
+                <span>Sync mode:</span>
+                <select bind:value={syncMode} class="select" onchange={() => onSyncModeChange()}>
+                    <option value={SyncMode.auto}>Auto</option>
+                    <option value={SyncMode.manual}>Manual</option>
+                </select>
+            </label>
         </div>
         <button class="button" onclick={logout}>
             <i class="fa-solid fa-right-from-bracket"></i>&nbsp;
