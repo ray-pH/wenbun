@@ -11,9 +11,7 @@ export default defineConfig(async () => ({
   plugins: [
         sveltekit(),
         SvelteKitPWA({
-            registerType: "autoUpdate", // auto checks for new SW
-            filename: "service-worker.js",
-            srcDir: "src",
+            strategies: "injectManifest",
             // since you already have manifest.json in static/,
             // just point to it:
             manifest: false,
