@@ -121,7 +121,7 @@ export class Profile {
             } else {
                 // check
                 const localModifiedAt = new Date(app.meta.modifiedAt ?? 0);
-                const remoteModifiedAt = new Date(remoteProfileData.meta.modifiedAt ?? 0);;
+                const remoteModifiedAt = new Date(remoteProfileData.meta.modifiedAt ?? 0);
                 const lastSyncTime = new Date(app.lastSyncTime ?? 0);
                 const syncDecisionFromTime = this.getSyncDecision(localModifiedAt, remoteModifiedAt, lastSyncTime);
                 let syncDecision = (_.isEqual(remoteProfileData, app.exportProfile(false))) ? SyncDecision.none : syncDecisionFromTime;

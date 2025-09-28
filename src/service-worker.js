@@ -64,8 +64,8 @@ async function isCacheComplete(cache, files) {
     const results = await Promise.all(
         files.map(f => cache.match(f))
     );
-    return results.every(r => r !== undefined) 
-        && await cache.match(`${base}/wenbun-assets/hanzi-writer-data/done`);
+    return results.every(r => r !== undefined)  &&
+        await cache.match(`${base}/wenbun-assets/hanzi-writer-data/done`);
 }
 
 async function tryCacheFiles(force = false) {
