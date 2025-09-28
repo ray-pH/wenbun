@@ -12,6 +12,7 @@
     import { isTauri } from '@tauri-apps/api/core';
     
     const NEW_DOMAIN = 'https://app.wenbun.com';
+    const DEV_DOMAIN = 'https://wenbun-dev.photon-ray.xyz/'
     
     registerSW({
         immediate: true,
@@ -111,6 +112,7 @@
     }
     
     let isShowDomainMigration = false;
+    let isInDev = window.location.hostname.endsWith('dev.photon-ray.xyz');
    	
    	// Initialize drag drop manager when component mounts
    	onMount(() => {
@@ -139,7 +141,7 @@
 ></TopBar>
 <div class="main-container">
     <div class="top-container">
-        {#if isShowDomainMigration}
+        {#if isShowDomainMigration && !isInDev}
             <div style="display: flex; align-items: center;">
                 <div class="domain-notice">
                     <p>
