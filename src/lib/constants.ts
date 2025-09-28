@@ -87,7 +87,7 @@ export const DEFAULT_FSRS_PARAM =  [
 ]
 
 export const WENBUN_AUDIO_URL = "https://github.com/ray-pH/wenbun-audio/raw/refs/heads/main"
-// https://github.com/ray-pH/wenbun-audio/raw/refs/heads/main/mandarin/hugolpz-audio-cmn-64k/syllabs/cmn-chao2.mp3
+export const WENBUN_LOCAL_AUDIO_URL = `/cached/wenbun-audio`
 export const ZH_AUDIO_DICT_SRC = `${base}/wenbun-assets/audio_dict/zh_audio_dict.json`;
 export const YUE_AUDIO_DICT_SRC = `${base}/wenbun-assets/audio_dict/yue_audio_dict.json`;
 export const WENBUN_AUDIO_ZH_PREFIX_SRC = `/hugolpz-audio-cmn-64k/syllabs/cmn-`

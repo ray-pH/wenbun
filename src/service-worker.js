@@ -1,11 +1,12 @@
 import { clientsClaim } from "workbox-core";
 import JSZip from "jszip";
+const base = (import.meta.env.BASE_URL ?? "/").slice(0, -1);
 
 self.skipWaiting();
 clientsClaim();
 
 async function getManifestFiles() {
-    const resp = await fetch("/wenbun-assets/manifest.txt");
+    const resp = await fetch(`${base}/wenbun-assets/manifest.txt`);
     const text = await resp.text();
 
     const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
@@ -13,7 +14,7 @@ async function getManifestFiles() {
     const files = lines.map((line) => {
         const [, file] = line.split(/\s+/);
         const clean = file.startsWith("./") ? file.slice(2) : file;
-        return `/wenbun-assets/${clean}`;
+        return `${base}/wenbun-assets/${clean}`;
     });
 
     return { text, files };
@@ -21,7 +22,7 @@ async function getManifestFiles() {
 
 async function cacheHanziData(cache) {
     // 1. Fetch zip
-    const resp = await fetch("/wenbun-assets/hanzi-writer-data.zip");
+    const resp = await fetch(`${base}/wenbun-assets/hanzi-writer-data.zip`);
     const blob = await resp.blob();
 
     // 2. Load zip
@@ -41,7 +42,7 @@ async function cacheHanziData(cache) {
                 const response = new Response(text, {
                     headers: { "Content-Type": "application/json" }
                 });
-                const url = `/wenbun-assets/hanzi-writer-data/${filename}`;
+                const url = `${base}/wenbun-assets/hanzi-writer-data/${filename}`;
                 await cache.put(url, response);
             })
         );
@@ -51,7 +52,7 @@ async function cacheHanziData(cache) {
     }
 
     console.log("[SW] finished caching hanzi data:", files.length, "files");
-    await cache.put("/wenbun-assets/hanzi-writer-data/done", new Response(`${files.length}`));
+    await cache.put(`${base}/wenbun-assets/hanzi-writer-data/done`, new Response(`${files.length}`));
 }
 
 async function hashString(str) {
@@ -64,10 +65,10 @@ async function isCacheComplete(cache, files) {
         files.map(f => cache.match(f))
     );
     return results.every(r => r !== undefined) 
-        && await cache.match("/wenbun-assets/hanzi-writer-data/done");
+        && await cache.match(`${base}/wenbun-assets/hanzi-writer-data/done`);
 }
 
-async function tryCacheFiles() {
+async function tryCacheFiles(force = false) {
     const { text, files } = await getManifestFiles();
     const manifestHash = await hashString(text);
     const CACHE_NAME = "wenbun-cache-" + manifestHash.slice(0, 16);
@@ -75,7 +76,7 @@ async function tryCacheFiles() {
     
     // don't cache if the manifest has not changed
     // check if cache with key CACHE_NAME exists
-    if ((await caches.has(CACHE_NAME)) && (await isCacheComplete(cache, files))) {
+    if (!force && (await caches.has(CACHE_NAME)) && (await isCacheComplete(cache, files))) {
         console.log("[SW] cache exists, done");
         return;
     }
@@ -99,7 +100,7 @@ function broadcast(msg) {
 // Only precache when app is actually installed
 self.addEventListener("message", (event) => {
     if (event.data && event.data.type === "PRECACHE_ASSETS") {
-        event.waitUntil(tryCacheFiles());
+        event.waitUntil(tryCacheFiles(event.data.force));
     }
 });
 

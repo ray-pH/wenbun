@@ -71,3 +71,18 @@ export class WebFileManager implements IFileManager {
         URL.revokeObjectURL(url);
     }
 };
+
+export function payloadToArrayBuffer(payload: FilePayload): ArrayBuffer {
+    if (typeof payload.data === "string") {
+        const binary = atob(payload.data);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+        }
+        return bytes.buffer;
+    } else if (payload.data instanceof Uint8Array) {
+        return payload.data.buffer;
+    } else {
+        return new Uint8Array(0).buffer;
+    }
+}

@@ -348,6 +348,13 @@
         </div>
         
         <div class="settings-section">
+            <div class="section-title">Offline Data</div>
+            <div class="section-container">
+                <a class="button" href={`${base}/offline-data`} aria-label="Offline Data">Go to Offline Data Settings</a>
+            </div>
+        </div>
+        
+        <div class="settings-section">
             <div class="section-container">
                 <button class="button" onclick={() => resetConfigToDefault()}>Reset to Default Settings</button>
             </div>
