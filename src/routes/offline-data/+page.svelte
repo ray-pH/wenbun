@@ -4,6 +4,7 @@
     import TopBar from "$lib/components/TopBar.svelte";
     import { payloadToArrayBuffer, WebFileManager } from "$lib/fileManager";
     import { humanReadableByte, streamDownload } from "$lib/util";
+    import { isTauri } from "@tauri-apps/api/core";
     import JSZip from "jszip";
     import { onMount } from "svelte";
     
@@ -129,29 +130,31 @@
         </div>
     </div>
     <div class="sep"></div>
-    <div>
-        <span>Offline Data Status:</span>
-        {#if !isDone}
-            <span><Loading/></span>
-        {:else}
-            <span class:healthy={isCoreDataHealthy} class:unhealthy={!isCoreDataHealthy}>
-                {isCoreDataHealthy ? "Available Offline" : "Missing"}
-            </span> 
-            {#if !isCoreDataHealthy}
-                <div class="note">
-                    *Please redownload the data again
-                </div>
+    {#if !isTauri()}
+        <div>
+            <span>Offline Data Status:</span>
+            {#if !isDone}
+                <span><Loading/></span>
+            {:else}
+                <span class:healthy={isCoreDataHealthy} class:unhealthy={!isCoreDataHealthy}>
+                    {isCoreDataHealthy ? "Available Offline" : "Missing"}
+                </span> 
+                {#if !isCoreDataHealthy}
+                    <div class="note">
+                        *Please redownload the data again
+                    </div>
+                {/if}
             {/if}
-        {/if}
-    </div>
-    <button class="button" onclick={() => redownloadData()}>
-        <i class="fa-solid fa-download"></i>&nbsp;
-        Redownload Core Data
-    </button>
-    <button class="button" disabled>
-        <i class="fa-solid fa-upload"></i>&nbsp;
-        Upload Core Data zip file
-    </button>
+        </div>
+        <button class="button" onclick={() => redownloadData()}>
+            <i class="fa-solid fa-download"></i>&nbsp;
+            Redownload Core Data
+        </button>
+        <button class="button" disabled>
+            <i class="fa-solid fa-upload"></i>&nbsp;
+            Upload Core Data zip file
+        </button>
+    {/if}
     <div>
         <span>Audio Data Status:</span>
         {#if !isDone || isHandlingAudioZip}
