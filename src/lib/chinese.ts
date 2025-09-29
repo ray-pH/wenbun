@@ -1,5 +1,5 @@
 import { pinyinToZhuyin } from "pinyin-zhuyin";
-import { CHINESE_CC_CEDICT_SRC, CHINESE_CUSTOM_NOTES_SRC, CHINESE_DICT_SRC, CHINESE_MAKEMEAHANZI_SRC, HANZI_WRITER_DATA_CHARS_SRC, SLUG_NO_DATA_IN_DICT, WENBUN_AUDIO_URL, WENBUN_AUDIO_ZH_PREFIX_SRC, YUE_AUDIO_DICT_SRC, ZH_AUDIO_DICT_SRC } from "./constants";
+import { CHINESE_CC_CEDICT_SRC, CHINESE_CUSTOM_NOTES_SRC, CHINESE_DICT_SRC, CHINESE_MAKEMEAHANZI_SRC, HANZI_WRITER_DATA_CHARS_SRC, SLUG_NO_DATA_IN_DICT, WENBUN_AUDIO_URL, WENBUN_AUDIO_ZH_PREFIX_SRC, WENBUN_CACHE_AUDIO_URL, YUE_AUDIO_DICT_SRC, ZH_AUDIO_DICT_SRC } from "./constants";
 import { parseIntOrUndefined, type CharacterWriterData } from "./util";
 import * as OpenCC from 'opencc-js';
 import type { Lang } from "./app";
@@ -282,9 +282,11 @@ const AUDIO_LANG_DIR = {
     'zh': 'mandarin',
     'yue': 'yue'
 }
-export function getAudioUrl(lang: 'zh' | 'yue', relativePath: string): string {
+export async function getAudioUrl(lang: 'zh' | 'yue', relativePath: string): Promise<string> {
     const dir = AUDIO_LANG_DIR[lang];
-    return `${WENBUN_AUDIO_URL}/${dir}/${encodeURI(relativePath)}`;
+    const localURL = `${WENBUN_CACHE_AUDIO_URL}/${dir}/${encodeURI(relativePath)}`;
+    const remoteUrl =  `${WENBUN_AUDIO_URL}/${dir}/${encodeURI(relativePath)}`;
+    return (await caches.match(localURL)) ? localURL : remoteUrl;
 }
 export function toneFromPinyin(pinyin: string): number {
     // number form (e.g., "ma3")

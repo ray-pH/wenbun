@@ -1,4 +1,5 @@
 import { base } from "$app/paths";
+import { isTauri } from "@tauri-apps/api/core";
 import type { Lang } from "./app";
 import { DeckInfo } from "./constants";
 
@@ -128,4 +129,87 @@ export function generateRandomString(length: number): string {
         id += Math.random().toString(36).slice(2);
     }
     return id.slice(0, length);
+}
+
+export function isOnlineClient(): boolean {
+    return !isTauri() && !isRunningInPWA();
+}
+
+export function isRunningInPWA(): boolean {
+    // Chrome / Edge / Chromium (Android, desktop)
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        return true;
+    }
+    // iOS Safari
+    if ((window.navigator as any).standalone === true) {
+        return true;
+    }
+    // Android installed PWA launched from app shortcut
+    if (document.referrer.startsWith('android-app://')) {
+        return true;
+    }
+    return false;
+}
+
+export function humanReadableByte(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    const exp = Math.floor(Math.log(bytes) / Math.log(1024));
+    const pre = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    return `${(bytes / Math.pow(1024, exp)).toFixed(2)} ${pre[exp]}`;
+}
+
+export function streamDownload(
+    {url, callbackTotalSize, callbackDownloadedSize, callbackDone}: {
+        url: string,
+        callbackTotalSize: (totalSize: number | null) => void,
+        callbackDownloadedSize: (downloadedSize: number) => void,
+        callbackDone: (data: ArrayBuffer) => void
+    }
+) {
+    const controller = new AbortController();
+
+    const promise = (async () => {
+        const resp = await fetch(url, { signal: controller.signal });
+        if (!resp.ok) {
+            throw new Error(`Failed to download ${url}: ${resp.status} ${resp.statusText}`);
+        }
+
+        const contentLength = resp.headers.get("Content-Length");
+        const totalSize = contentLength ? parseInt(contentLength, 10) : null;
+        callbackTotalSize(totalSize);
+
+        const reader = resp.body?.getReader();
+        if (!reader) throw new Error("ReadableStream not supported in this environment");
+
+        let downloadedSize = 0;
+        const chunks: Uint8Array[] = [];
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            if (value) {
+                chunks.push(value);
+                downloadedSize += value.length;
+                callbackDownloadedSize(downloadedSize);
+            }
+            if (controller.signal.aborted) {
+                console.log("Download aborted");
+                return;
+            }
+        }
+
+        const result = new Uint8Array(downloadedSize);
+        let offset = 0;
+        for (const chunk of chunks) {
+            result.set(chunk, offset);
+            offset += chunk.length;
+        }
+
+        callbackDone(result.buffer);
+    })();
+
+    return {
+        cancel: () => controller.abort(),
+        finished: promise
+    };
 }

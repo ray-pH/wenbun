@@ -22,10 +22,36 @@
     </div>
     <div class="changelog-container">
         Changelog
-        
+
+        <h4>v0.17.0 (2025-09-29)</h4>
+        <ul>
+            <li><b>Domain Migration</b>:
+                <ul>
+                    <li>The app has been migrated to a new domain: <a href="https://app.wenbun.com" target="_blank">app.wenbun.com</a>. A notice will be displayed on the old domain to guide users to the new address.</li>
+                </ul>
+            </li>
+            <li><b>PWA & Offline Mode</b>:
+                <ul>
+                    <li>The app can now be installed as a PWA (Progressive Web App) for offline use.</li>
+                    <li>Added an "<b>Install as PWA</b>" button in the settings.</li>
+                    <li>Added an "<b>Offline Data</b>" page to manage offline assets, including core data and audio files.</li>
+                </ul>
+            </li>
+            <li><b>Sync</b>:
+                <ul>
+                    <li>Added a <b>manual sync</b> mode. Users can now choose between automatic and manual synchronization.</li>
+                </ul>
+            </li>
+            <li><b>Audio</b>:
+                <ul>
+                    <li>The audio library has been updated to be more extensive.</li>
+                </ul>
+            </li>
+        </ul>
+
         <h4>v0.16.2 (2025-09-25)</h4>
         <ul>
-            <li><b>Bug Fix</b>: Improve the stability of syncing process.</li>
+            <li><b>Bug Fix</b>: Improve the stability of the syncing process by adding a tolerance to the time difference check.</li>
         </ul>
 
         <h4>v0.16.1 (2025-09-18)</h4>

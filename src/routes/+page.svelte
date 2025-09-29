@@ -6,9 +6,25 @@
     import { DeckInfo } from "$lib/constants";
     import { DragDropManager, performArrayReorder } from "$lib/dragAndDrop";
     import ButtonPopoverMenu from '$lib/components/ButtonPopoverMenu.svelte';
-    import { LoginStatus } from '$lib/profile';
+    import { LoginStatus, ManualSyncStatus } from '$lib/profile';
     import Loading from '$lib/components/Loading.svelte';
+    import { registerSW } from 'virtual:pwa-register';
+    import { isTauri } from '@tauri-apps/api/core';
     
+    const NEW_DOMAIN = 'https://app.wenbun.com';
+    const DEV_DOMAIN = 'https://wenbun-dev.photon-ray.xyz/'
+    
+    registerSW({
+        immediate: true,
+        onRegisteredSW(swUrl, reg) {
+            console.log("SW registered:", swUrl, reg);
+        },
+        onRegisterError(err) {
+            console.error("SW registration failed:", err);
+        },
+    });
+    
+    let syncStatus: ManualSyncStatus | undefined = undefined;
     let app = new App();
     let isAutomaticallyLoggedOut = false;
     let isNewUpdateExist = false;
@@ -36,7 +52,6 @@
         app = app;
         isAppInitialized = true;
         isNewUpdateExist = app.isNewUpdateExist();
-        registerSW();
         const changed = await app.initProfile();
         isAutomaticallyLoggedOut = app.profile.isAutomaticallyLoggedOut();
         if (changed) {
@@ -44,18 +59,8 @@
             deckOrder = [...app.decks];
         }
         isNewUpdateExist = app.isNewUpdateExist();
+        syncStatus = await app.profile.getManualSyncStatus(app);
     });
-    
-    function registerSW() {
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker
-                .register(`${base}/service-worker.js`)
-                .then(reg => {
-                    // console.log('SW registered:', reg)
-                })
-                .catch(err => console.error('SW registration failed:', err));
-        }
-    }
     
     function loginGoogle() {
         app.profile.loginGoogle(app);
@@ -91,12 +96,33 @@
   		deckOrder = newOrder;
   		app.decks = newOrder;
    	}
+    
+    let isSyncing = false;
+    async function trySync() {
+        isSyncing = true;
+        if (syncStatus === ManualSyncStatus.canPull || syncStatus === ManualSyncStatus.canPush) {
+            await app.profile.trySyncProfile(app);
+            syncStatus = await app.profile.getManualSyncStatus(app);
+        } else if (syncStatus === ManualSyncStatus.conflict) {
+            await app.profile.trySyncProfile(app);
+        } else if (syncStatus === ManualSyncStatus.noSync) {
+            window.alert("Data is already up-to-date");
+        }
+        isSyncing = false;
+    }
+    
+    let isShowDomainMigration = false;
+    let isInDev = window.location.hostname.endsWith('dev.photon-ray.xyz');
    	
    	// Initialize drag drop manager when component mounts
    	onMount(() => {
   		dragDropManager = new DragDropManager({
  			onReorder: handleReorder
   		});
+        
+        if (!isTauri() && typeof window !== 'undefined') {
+            isShowDomainMigration = window.location.hostname !== 'app.wenbun.com';
+        }
   		
   		return () => {
  			// Cleanup on component destroy
@@ -107,9 +133,32 @@
    	});
 </script>
 
-<TopBar title="WenBun (beta)" noBack={true}></TopBar>
+<TopBar 
+    title="WenBun (beta)" noBack={true}
+    syncStatus={syncStatus}
+    syncButtonCallback={() => trySync()}
+    isSyncing={isSyncing}
+></TopBar>
 <div class="main-container">
     <div class="top-container">
+        {#if isShowDomainMigration && !isInDev}
+            <div style="display: flex; align-items: center;">
+                <div class="domain-notice">
+                    <p>
+                        You are visiting an old domain. 
+                        <br><br>
+                        We will be keeping this domain until the end of October 2025
+                        because some user local data might still be stored here.
+                        <br><br>
+                        We're now moving the project to <a href={NEW_DOMAIN} target="_blank">{NEW_DOMAIN}</a>.
+                    </p>
+                    <a href={NEW_DOMAIN} target="_blank" class="button">
+                        <i class="fa-solid fa-globe"></i>
+                        Go to the new domain
+                    </a>
+                </div>
+            </div>
+        {/if}
         <a class="a-button" style="background-color: #A0D0F0;" href="{base}/about/">
             <div style="display: flex; align-items: center; justify-content: space-between;">
                 <span>Changelog</span>
@@ -351,6 +400,7 @@
         display: flex;
         flex-direction: column;
         gap: 1em;
+        align-items: center;
     }
     .a-button {
         all: unset;
@@ -400,5 +450,29 @@
         margin-top: 0.5em;
         width: calc(100vw - 2em);
         max-width: 24em;
+    }
+    .domain-notice {
+        margin: 1em;
+        padding: 1em;
+        border-radius: 0.5em;
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+        text-align: center;
+        max-width: 20em;
+    }
+    .domain-notice .button {
+        display: inline-block;
+        margin-top: 0.5em;
+        padding: 0.5em 1em;
+        border-radius: 0.5em;
+        background-color: var(--wenbun-blue);
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    a {
+        color: var(--wenbun-blue);
     }
 </style>

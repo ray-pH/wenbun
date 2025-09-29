@@ -1,4 +1,8 @@
-<div class="loading">
+<script lang="ts">
+    export let color: string = '#333';
+</script>
+
+<div class="loading" style="--color: {color}">
     <span></span>
     <span></span>
     <span></span>
@@ -13,7 +17,7 @@
     .loading span {
       width: 8px;
       height: 8px;
-      background-color: #333;
+      background-color: var(--color);
       border-radius: 50%;
       animation: bounce 0.6s infinite ease-in-out;
     }

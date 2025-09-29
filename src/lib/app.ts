@@ -7,7 +7,7 @@ import { isTauri } from "@tauri-apps/api/core";
 import { WebFileManager, type IFileManager } from "./fileManager";
 import { ChineseMandarinReading } from "./chinese";
 import { AppExtraStudyHandler } from "./appExtraStudyHandler";
-import { Profile, SyncConflicAutoResolve } from "./profile";
+import { Profile, SyncConflicAutoResolve, SyncMode } from "./profile";
 declare const __APP_VERSION__: string; // injected by vite
 const UNGROUPED_GROUP = "__ungrouped__"
 
@@ -250,10 +250,11 @@ export class App {
     /**
      * @returns boolean: `true` if data changed
      */
-    async initProfile(sync: boolean = true): Promise<boolean> {
+    async initProfile(skipSync: boolean = false): Promise<boolean> {
         try {
             await this.profile.init();
-            if (this.profile.isLoggedIn && sync) {
+            const isAutoSync = (await this.profile.getSyncMode()) === SyncMode.auto;
+            if (this.profile.isLoggedIn && !skipSync && isAutoSync) {
                 const strategy = isTauri() ? SyncConflicAutoResolve.ask : SyncConflicAutoResolve.normalPull;
                 const changed = await this.profile.trySyncProfile(this, strategy);
                 if (changed) await this.afterInitRoutine();
@@ -351,7 +352,9 @@ export class App {
             this.storage.save(STORE_KEY_META, this.meta),
             this.storage.save(STORE_KEY_LAST_SYNC_TIME, this.lastSyncTime),
         ]);
-        if (!skipSync) {
+        
+        const isAutoSync = (await this.profile.getSyncMode()) === SyncMode.auto;
+        if (!skipSync && isAutoSync) {
             const strategy = isTauri() ? SyncConflicAutoResolve.ask : SyncConflicAutoResolve.normalPush;
             if (awaitSync) await this.profile.trySyncProfile(this, strategy);
             else this.profile.trySyncProfile(this, strategy).catch(console.error);

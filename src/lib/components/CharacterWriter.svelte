@@ -8,7 +8,7 @@
     import { base } from '$app/paths';
     import { AudioSequence } from '$lib/audioSequence';
     import { AutoReview, AutoReviewGradeClass, AutoReviewGradeFAClass, AutoReviewGradeLabel, type AutoReviewData } from '$lib/autoReview';
-    import { CHARACTER_WRITER_DRAWING_WIDTH, SLUG_WORD_NOT_SUPPORTED_BY_HANZI_WRITER } from "$lib/constants";
+    import { CHARACTER_WRITER_DRAWING_WIDTH, HANZI_WRITER_DATA_DIR_SRC, SLUG_WORD_NOT_SUPPORTED_BY_HANZI_WRITER } from "$lib/constants";
     
     let width = $state(500);
     let height = $state(500);
@@ -133,6 +133,12 @@
             delayBetweenLoops: linmap(strokeSpeed, 1, MAX_STROKE_SPEED, 2000, 10),
             onComplete: () => {
                 completeChar();
+            },
+            // load locally
+            charDataLoader: (char, onComplete) => {
+                const res =  fetch(HANZI_WRITER_DATA_DIR_SRC + char + '.json')
+                    .then(r => r.json())
+                    .then(data => onComplete(data));
             }
         });
         if (!cardConfig.isFirstTime) {
@@ -168,11 +174,11 @@
         }
     }
     
-    function setupAudios() {
+    async function setupAudios() {
         const urls = characterData?.audioUrl;
         if (!urls) return;
-        audios = urls.map(rawUs => {
-            const us = rawUs.map(u => getAudioUrl(cardConfig.lang, u));
+        audios = await Promise.all(urls.map(async (rawUs) => {
+            const us = await Promise.all(rawUs.map(u => getAudioUrl(cardConfig.lang, u)));
             if (us.length > 1) {
                 return new AudioSequence(us, {
                     defaultEndEarlyMs: 320,
@@ -181,7 +187,7 @@
             } else {
                 return new AudioSequence(us);
             }
-        });
+        }));
     }
 
     export function stopAllAudio() {
@@ -264,13 +270,14 @@
         };
         setupHealthBarCssVar();
         updateWidth();
-        setupAudios();
+        setupAudios().then(() => {
+            if (isDictationMode) {
+                playAudio();
+            }
+        });
         window.addEventListener('resize', updateWidth);
         strokeSpeed = app.getStrokeSpeed();
         setupHanziWriter(0);
-        if (isDictationMode) {
-            playAudio();
-        }
         return () => {
             unmounted = true;
             window.removeEventListener('resize', updateWidth);
