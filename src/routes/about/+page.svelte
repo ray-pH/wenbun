@@ -23,13 +23,13 @@
     <div class="changelog-container">
         Changelog
 
-        <h4>v0.17.0 (2025-09-28)</h4>
+        <h4>v0.17.0 (2025-09-29)</h4>
         <ul>
-            <!-- <li><b>Domain Migration</b>:
+            <li><b>Domain Migration</b>:
                 <ul>
                     <li>The app has been migrated to a new domain: <a href="https://app.wenbun.com" target="_blank">app.wenbun.com</a>. A notice will be displayed on the old domain to guide users to the new address.</li>
                 </ul>
-            </li> -->
+            </li>
             <li><b>PWA & Offline Mode</b>:
                 <ul>
                     <li>The app can now be installed as a PWA (Progressive Web App) for offline use.</li>
