@@ -6,7 +6,7 @@
     import _ from "lodash";
     import SettingsItem from "./SettingsItem.svelte";
     import * as FSRS from "ts-fsrs"
-    import { isRunningInPWA, type DeepRequired } from "$lib/util";
+    import { type DeepRequired } from "$lib/util";
     import { ChineseToneColorPalette } from "$lib/constants";
     import { ChineseMandarinReading } from '$lib/chinese';
     import ProfileLogin from './ProfileLogin.svelte';
@@ -359,15 +359,13 @@
         <div class="settings-section">
             <div class="section-title">Offline Data</div>
             <div class="section-container">
-                {#if !isRunningInPWA()}
-                    <div class="note">
-                        This app can be installed as PWA and can be accessed offline.
-                    </div>
-                    <button class="button" onclick={() => showPWAInstallDialog()}>
-                        <i class="fa-solid fa-download"></i>&nbsp;
-                        Install as PWA
-                    </button>
-                {/if}
+                <div class="note">
+                    This app can be installed as PWA and can be accessed offline.
+                </div>
+                <button class="button" onclick={() => showPWAInstallDialog()}>
+                    <i class="fa-solid fa-download"></i>&nbsp;
+                    Install as PWA
+                </button>
                 <a class="button" href={`${base}/offline-data`} aria-label="Offline Data">
                     <i class="fa-solid fa-gear"></i>&nbsp;
                     Go to Offline Data Settings
