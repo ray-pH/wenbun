@@ -99,12 +99,22 @@
             characterWriterRef.stopAllAudio();
         }
     }
+    
+    const MAX_NEXT_CARD_RETRY_COUNT = 10;
+    function getNextCardId(): number | undefined {
+        //TODO: avoid duplication in a deterministic way
+        let id = undefined;
+        for (let i = 0; i < MAX_NEXT_CARD_RETRY_COUNT; i++) {
+            id = app.getNextCard(deckId, data.reviewMode);
+            if (id === undefined || id !== currentCardId) return id;
+        }
+    }
 
     function nextCard() {
         if (forceStopAudioOnNextCard) stopAudio();
         resetState();
         isCardChanged = true;
-        const id = app.getNextCard(deckId, data.reviewMode);
+        const id = getNextCardId();
         if (id === undefined) {
             // done for today
             isDoneToday = true;
