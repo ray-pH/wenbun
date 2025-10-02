@@ -452,4 +452,14 @@ export class Profile {
         }
         return undefined;
     }
+    
+    static async sendAccountDeletionRequest(email: string) {
+        await fetch(apiUrl(ApiRoute.AccountDeletionRequest), { 
+            method: "POST", 
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email })
+        });
+    }
 }
