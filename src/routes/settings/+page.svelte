@@ -379,6 +379,10 @@
         <div class="settings-section">
             <div class="section-container">
                 <button class="button" onclick={() => resetConfigToDefault()}>Reset to Default Settings</button>
+                <a href="{base}/account" class="button danger-button">
+                    <i class="fa-solid fa-trash"></i>&nbsp;
+                    Request Account Deletion
+                </a>
             </div>
         </div>
         
