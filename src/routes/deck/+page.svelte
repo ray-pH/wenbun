@@ -9,6 +9,7 @@
     import { onMount } from "svelte";
     import { SvelteMap, SvelteSet } from "svelte/reactivity";
     import TableEditView from './TableEditView.svelte';
+    import { ExtraStudyMode } from '$lib/appExtraStudyHandler';
     
     const LOCALSTORAGE_KEY_DECK_VIEW = "deckView"
 
@@ -194,7 +195,7 @@
     
     function startExtraStudy() {
         if (!isSelecting || selections.size === 0) return;
-        app.extraStudyHandler.startExtraStudy(deckId, Array.from(selections));
+        app.extraStudyHandler.startExtraStudy(deckId, Array.from(selections), ExtraStudyMode.Normal);
     }
     
     $: isNameEditable = !isBuiltinDeck(deckId);

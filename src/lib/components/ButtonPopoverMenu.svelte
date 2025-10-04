@@ -22,7 +22,7 @@
 
     let open = $state(false);
     let triggerEl: HTMLButtonElement | null = null;
-    let menuEl: HTMLDivElement | null = null;
+    let menuEl: HTMLDivElement | null = $state(null);
     let activeIndex = $state<number>(-1);
 
     const menuId = `menu-${Math.random().toString(36).slice(2)}`;
