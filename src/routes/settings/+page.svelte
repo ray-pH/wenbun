@@ -15,7 +15,7 @@
     import type { PWAInstallElement } from '@khmyznikov/pwa-install';
     import { isTauri } from '@tauri-apps/api/core';
     
-    export let data: {leniency?: string};
+    export let data: {leniency?: string, fadeDuration?: string};
     
     let app = new App();
     let config: DeepRequired<WenbunConfig>;
@@ -41,9 +41,8 @@
         fsrsParamsString = config.FSRSParams.join(",");
         profileStr = app.exportProfileStr();
         initialProfileStr = profileStr;
-        if (data.leniency) {
-            config.strokeLeniency = parseFloat(data.leniency);
-        }
+        if (data.leniency) config.strokeLeniency = parseFloat(data.leniency);
+        if (data.fadeDuration) config.strokeFadeDuration = parseInt(data.fadeDuration);
         app = app;
     }
     
@@ -265,9 +264,12 @@
                 <SettingsItem key="strokeLeniency">
                     <input type="number" step="0.01" bind:value={config.strokeLeniency}>
                 </SettingsItem>
+                <SettingsItem key="strokeFadeDuration">
+                    <input type="number" step="1" bind:value={config.strokeFadeDuration}>
+                </SettingsItem>
                 <a class="button" href="{base}/settings/leniency-calibration" aria-label="Test Leniency Calibration">
                     <i class="fa-solid fa-sliders"></i>&nbsp;
-                    Test Leniency
+                    Test Writer
                 </a>
             </div>
         </div>
