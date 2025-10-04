@@ -90,6 +90,7 @@ export interface WenbunConfig {
     // Review
     gradingMethod?: 'auto' | 'manual';
     strokeLeniency?: number;
+    strokeFadeDuration?: number;
     showAutoGradingBar?: boolean;
     showHintAfterMissesCount?: number;
     
@@ -128,6 +129,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     
     gradingMethod: 'auto',
     strokeLeniency: 1.5,
+    strokeFadeDuration: 400,
     showAutoGradingBar: false,
     showHintAfterMissesCount: 3,
     
