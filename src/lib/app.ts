@@ -102,6 +102,9 @@ export interface WenbunConfig {
     enableFuzz?: boolean;
     FSRSParams?: number[];
     
+    // Dictionary
+    isShowPlecoLink?: boolean;
+    
     // chinese
     zh: {
         isColorBasedOnTone?: boolean;
@@ -139,6 +142,8 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     enableShortTerm: false,
     enableFuzz: false,
     FSRSParams: DEFAULT_FSRS_PARAM,
+    
+    isShowPlecoLink: false,
     
     zh: {
         isColorBasedOnTone: true,

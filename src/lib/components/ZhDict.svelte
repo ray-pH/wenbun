@@ -13,9 +13,11 @@
         toneColors: string[];
         zhReading: ChineseMandarinReading;
         isOpenChildrenDict?: boolean;
+        isShowPlecoLink?: boolean;
     }
     let { 
         charData, wordlist, toneColors, zhReading,
+        isShowPlecoLink,
         isOpenChildrenDict = $bindable()
     }: Props = $props();
     let word = charData.characters ?? "";
@@ -80,6 +82,7 @@
             wordlist={wordlist}
             toneColors={toneColors}
             zhReading={zhReading}
+            isShowPlecoLink={isShowPlecoLink}
             bind:isOpenChildrenDict={isNestedChildrenDictOpen}
         />
     {:else}
@@ -88,6 +91,12 @@
 </div>
     
 {#snippet DictMainContent()}
+    {#if isShowPlecoLink}
+        <a class="extern-a-button pleco" href="plecoapi://x-callback-url/s?q={word}">
+            <img src="/assets/imgs/pleco-favicon.ico" alt="Pleco">
+            <span>Pleco</span>
+        </a>
+    {/if}
     {#if isComposite}
         <div class="row">
             <div class="label">Simplified</div>
@@ -302,6 +311,27 @@
         padding: 0.2em 0.5em;
         &:hover {
             opacity: 0.5;
+        }
+    }
+    
+    .extern-a-button {
+        display: flex;
+        align-items: center;
+        gap: 0.2em;
+        width: fit-content;
+        color: white;
+        text-decoration: none;
+        padding: 0.4em 0.6em;
+        border-radius: 0.5em;
+        margin-bottom: 0.5em;
+        span {
+            font-size: 0.8em;
+        }
+        img {
+            height: 1em;
+        }
+        &.pleco {
+            background-color: #0078C3;
         }
     }
     

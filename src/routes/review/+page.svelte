@@ -420,6 +420,7 @@
             wordlist={wordlist}
             toneColors={app.getChineseToneColorArray()}
             zhReading={app.getConfig().zh.mandarinReading}
+            isShowPlecoLink={app.getConfig().isShowPlecoLink}
         ></ZhDict>
     {/if}
 </SlideablePopup>
