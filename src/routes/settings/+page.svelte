@@ -360,6 +360,15 @@
         </div>
         
         <div class="settings-section">
+            <div class="section-title">Chinese</div>
+            <div class="section-container">
+                <SettingsItem key="isShowPlecoLink">
+                    <input type="checkbox" bind:checked={config.isShowPlecoLink}>
+                </SettingsItem>
+            </div>
+        </div>
+                
+        <div class="settings-section">
             <div class="section-title">Offline Data</div>
             <div class="section-container">
                 {#if !isTauri()}
