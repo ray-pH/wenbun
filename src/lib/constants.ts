@@ -153,7 +153,7 @@ export const SETTINGS_LABEL_DATA = {
     },
     enableShortTerm: {
         label: "Enable Short Term",
-        help: "When disabled, the short-term review schedule is bypassed.",
+        help: "When enabled, failed cards can reappear in the same session. When disabled, the short-term review schedule (less than 24 hours) is bypassed.",
     },
     enableFuzz: {
         label: "Enable Fuzz",
