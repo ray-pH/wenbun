@@ -245,6 +245,27 @@
         selections.clear();
         app = app;
     }
+    
+    $: groupStats = getAllGroupStats(groups);
+    function getAllGroupStats(grps: typeof groups) {
+        const map = new SvelteMap<string, {cardCount: number, studiedCardCount: number, isNotCompleted: boolean}>();
+        for (const group of grps) {
+            const studiedCount = group.cardIds.filter(id => {
+                const state = app.getWenbunCustomState(deckId, id);
+                return state === WenBunCustomState.PreviouslyStudied 
+                    || state === WenBunCustomState.Learning
+                    || state === WenBunCustomState.ReviewYoung
+                    || state === WenBunCustomState.ReviewMature
+                    || state === WenBunCustomState.Relearning;
+            }).length;
+            map.set(group.label, {
+                cardCount: group.cardIds.length, 
+                studiedCardCount: studiedCount,
+                isNotCompleted: group.cardIds.length !== studiedCount,
+            });
+        }
+        return map;
+    }
 </script>
 
 <TopBar title="Deck"></TopBar>
@@ -326,11 +347,22 @@
     <div class="group-container">
         {#each groups as group}
             <div class="group">
-                <button class="group-header" onclick={() => toggleAccordion(group.label)}>
+                <button class="group-header" onclick={() => toggleAccordion(group.label)} 
+                    class:not-completed={groupStats.get(group.label)?.isNotCompleted}
+                >
                     <div>
                         {group.label == '__ungrouped__' ? 'Ungrouped' : group.label}
                     </div>
-                    <div>
+                    <div style="display: flex; flex-direction: row; align-items: center; gap: 0.5em;">
+                        {#key groupStats}
+                        {#if groupStats.get(group.label)}
+                            <div>
+                                <span>{groupStats.get(group.label)?.studiedCardCount}</span>
+                                <span>/</span>
+                                <span>{groupStats.get(group.label)?.cardCount}</span>
+                            </div>
+                        {/if}
+                        {/key}
                         {#if accordionState.get(group.label)}
                             <i class="fa-solid fa-chevron-down"></i>
                         {:else}
@@ -528,6 +560,9 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+        &.not-completed {
+            background-color: #00000090;
+        }
     }
     .card {
         display: flex;
