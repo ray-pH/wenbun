@@ -51,10 +51,19 @@ export interface ProfileInfo {
     name: string;
 }
 
+export interface DeckInfoSummary {
+    id: string;
+    label?: string;
+    studiedCount: number;
+    totalCount: number;
+}
+
 export interface SyncConflictInfo {
     localModifiedAt: Date;
     remoteModifiedAt: Date;
     lastSyncTime: Date;
+    localDeckInfo: DeckInfoSummary[];
+    remoteDeckInfo: DeckInfoSummary[];
 }
 
 export class Profile {
@@ -63,6 +72,7 @@ export class Profile {
     syncConflictInfo: SyncConflictInfo | undefined;
     profileInfo: ProfileInfo | null = null;
     storedLoginStatus: LoginStatus | undefined = undefined;
+    justLoggenIn: boolean = false;
     
     constructor(private storage: IStorage) {
     }
@@ -87,7 +97,8 @@ export class Profile {
             this.isLoggedIn = false;
             console.warn(`Unexpected status: ${res.status}`);
         }
-        if (this.isLoggedIn) {
+        if (this.isLoggedIn && this.storedLoginStatus !== LoginStatus.loggedIn) {
+            this.justLoggenIn = true;
             this.updateLoginStatus(LoginStatus.loggedIn);
         }
     }
@@ -128,7 +139,7 @@ export class Profile {
                 syncDecision = await this.autoResolveSyncConflict(syncDecision, syncConflictAutoResolveStrategy, app);
                 switch (syncDecision) {
                     case SyncDecision.conflict: {
-                        this.onConflict(localModifiedAt, remoteModifiedAt, lastSyncTime);
+                        this.onConflict(app, remoteProfileData, lastSyncTime);
                         return false;
                     }
                     case SyncDecision.push: {
@@ -173,8 +184,15 @@ export class Profile {
         }
     }
     
-    async onConflict(localModifiedAt: Date, remoteModifiedAt: Date, lastSyncTime: Date, showAlert = true) {
-        this.syncConflictInfo = { localModifiedAt, remoteModifiedAt, lastSyncTime };
+    async onConflict(app: App, remoteProfileData: ProfileData, lastSyncTime: Date, showAlert = true) {
+        const localProfileData = app.exportProfile(false);
+        const localModifiedAt = new Date(localProfileData.meta.modifiedAt ?? 0);
+        const remoteModifiedAt = new Date(remoteProfileData.meta.modifiedAt ?? 0);;
+        this.syncConflictInfo = { 
+            localModifiedAt, remoteModifiedAt, lastSyncTime, 
+            localDeckInfo: app.getProfileDataDeckSummary(localProfileData),
+            remoteDeckInfo: app.getProfileDataDeckSummary(remoteProfileData),
+        };
         this.isSyncConflict = true;
         if (showAlert) {
             // check path if already in settings
@@ -231,7 +249,7 @@ export class Profile {
     async tryForcePush(app: App) {
         const success = await Promise.all([
             this.updateProfileData(app.exportProfile(false), "push"),
-            this.pushReviewLog(null, app.reviewLogs, true),
+            this.pushReviewLog(null, app.reviewLogs ?? [], true),
         ])
         if (success.every(s => s)) {
             app.lastSyncTime = new Date().toISOString();
@@ -442,7 +460,7 @@ export class Profile {
                     case SyncDecision.pull: return ManualSyncStatus.canPull;
                     case SyncDecision.none: return ManualSyncStatus.noSync;
                     case SyncDecision.conflict: {
-                        this.onConflict(localModifiedAt, remoteModifiedAt, lastSyncTime, false);
+                        this.onConflict(app, remoteProfileData, lastSyncTime, false);
                         return ManualSyncStatus.conflict;
                     }
                 }
@@ -451,5 +469,15 @@ export class Profile {
             return undefined;
         }
         return undefined;
+    }
+    
+    static async sendAccountDeletionRequest(email: string) {
+        await fetch(apiUrl(ApiRoute.AccountDeletionRequest), { 
+            method: "POST", 
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email })
+        });
     }
 }

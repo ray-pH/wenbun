@@ -1,7 +1,7 @@
 <script lang="ts">
     import { type App} from "$lib/app";
     import Loading from "$lib/components/Loading.svelte";
-    import { LoginStatus, SyncMode, type SyncConflictInfo } from "$lib/profile";
+    import { LoginStatus, SyncMode, type DeckInfoSummary, type SyncConflictInfo } from "$lib/profile";
     import { onMount } from "svelte";
     
     export let app: App;
@@ -94,28 +94,51 @@
                 </div>
                 {#if syncConflictInfo}
                     <div class="sync-conflict-info">
-                        <div class="sync-conflict-info-item">
-                            <span class="label"><b>Remote</b> modified at:</span>
-                            <span class="value">{syncConflictInfo.remoteModifiedAt.toLocaleString()}</span>
+                        <div class="sync-conflict-info-title">Remote</div>
+                        <div class="sync-conflict-section">
+                            <div class="sync-conflict-info-item">
+                                <span class="label">modified at:</span>
+                                <span class="value">{syncConflictInfo.remoteModifiedAt.toLocaleString()}</span>
+                            </div>
+                            <div class="sync-conflict-info-item">
+                                <span class="label">decks:</span>
+                                {@render deckInfoSummary(syncConflictInfo.remoteDeckInfo)}
+                            </div>
                         </div>
-                        <div class="sync-conflict-info-item">
-                            <span class="label"><b>Local</b> modified at:</span>
-                            <span class="value">{syncConflictInfo.localModifiedAt.toLocaleString()}</span>
+                        <button class="button" onclick={conflictUseRemote} style="margin-bottom: 1em">
+                            <i class="fa-solid fa-download"></i>&nbsp;
+                            Use Remote
+                        </button>
+                        <div class="sync-conflict-info-title">Local</div>
+                        <div class="sync-conflict-section">
+                            <div class="sync-conflict-info-item">
+                                <span class="label">modified at:</span>
+                                <span class="value">{syncConflictInfo.localModifiedAt.toLocaleString()}</span>
+                            </div>
+                            <div class="sync-conflict-info-item">
+                                <span class="label">decks:</span>
+                                {@render deckInfoSummary(syncConflictInfo.localDeckInfo)}
+                            </div>
                         </div>
+                        <button class="button" onclick={conflictUseLocal} style="margin-bottom: 1em">
+                            <i class="fa-solid fa-upload"></i>&nbsp;
+                            Use Local
+                        </button>
                         <div class="sync-conflict-info-item">
                             <span class="label">Last Sync Time:</span>
                             <span class="value">{syncConflictInfo.lastSyncTime.toLocaleString()}</span>
                         </div>
                     </div>
+                {:else}
+                    <button class="button" onclick={conflictUseRemote}>
+                        <i class="fa-solid fa-download"></i>&nbsp;
+                        Use Remote
+                    </button>
+                    <button class="button" onclick={conflictUseLocal}>
+                        <i class="fa-solid fa-upload"></i>&nbsp;
+                        Use Local
+                    </button>
                 {/if}
-                <button class="button" onclick={conflictUseRemote}>
-                    <i class="fa-solid fa-download"></i>&nbsp;
-                    Use Remote
-                </button>
-                <button class="button" onclick={conflictUseLocal}>
-                    <i class="fa-solid fa-upload"></i>&nbsp;
-                    Use Local
-                </button>
             </div>
         {/if}
     {:else}
@@ -146,6 +169,19 @@
     
 </div>
 
+{#snippet deckInfoSummary(deckInfoList: DeckInfoSummary[])}
+    <div class="value" style="display: flex; flex-direction: column; align-items: end;">
+        {#each deckInfoList as deck}
+            <div>
+                {deck.label ?? deck.id}
+                <span style="color: #00000090">
+                    ({deck.studiedCount}/{deck.totalCount})
+                </span>
+            </div> 
+        {/each}
+    </div>
+{/snippet}
+
 <style>
     
     .container {
@@ -174,15 +210,22 @@
     
     .label {
         color: #00000090;
-        b {
-            color: black;
-        }
     }
     
+    .sync-conflict-info-title {
+        font-size: 0.9em;
+        font-weight: bold;
+    }
+    .sync-conflict-section {
+        background-color: #e0e0e0;
+        padding: 0.5em 0.5em;
+        margin-bottom: 0.5em;
+        border-radius: 0.5rem;
+    }
     .sync-conflict-info-item {
         font-size: 0.9em;
         display: flex;
-        align-items: center;
+        align-items: start;
         justify-content: space-between;
     }
     

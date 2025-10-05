@@ -6,7 +6,7 @@
     import { DeckInfo } from "$lib/constants";
     import { DragDropManager, performArrayReorder } from "$lib/dragAndDrop";
     import ButtonPopoverMenu from '$lib/components/ButtonPopoverMenu.svelte';
-    import { LoginStatus, ManualSyncStatus } from '$lib/profile';
+    import { LoginStatus, ManualSyncStatus, SyncMode } from '$lib/profile';
     import Loading from '$lib/components/Loading.svelte';
     import { registerSW } from 'virtual:pwa-register';
     import { isTauri } from '@tauri-apps/api/core';
@@ -59,7 +59,9 @@
             deckOrder = [...app.decks];
         }
         isNewUpdateExist = app.isNewUpdateExist();
-        syncStatus = await app.profile.getManualSyncStatus(app);
+        
+        const isManualSync = (await app.profile.getSyncMode()) === SyncMode.manual;
+        if (isManualSync) syncStatus = await app.profile.getManualSyncStatus(app);
     });
     
     function loginGoogle() {

@@ -4,8 +4,7 @@
     import HanziWriter from "hanzi-writer";
     import { onMount } from "svelte";
     import SettingsItem from "../SettingsItem.svelte";
-    import { App } from "$lib/app";
-    import { CHARACTER_WRITER_DRAWING_WIDTH, SETTINGS_LABEL_DATA } from "$lib/constants";
+    import { CHARACTER_WRITER_DRAWING_WIDTH } from "$lib/constants";
     import { LENIENCY_CHARS } from "./leniency-chars";
     
     let width = $state(500);
@@ -22,7 +21,11 @@
     
     let writer: HanziWriter;
     let chara = $state('被');
-    function setupHanziWriter(leniency: number) {
+    function setupHanziWriter(leniency: number, fadeDuration: number) {
+        if (writer) {
+            writer.hideCharacter();
+            writer.cancelQuiz();
+        }
         writer = HanziWriter.create('grid-background-target', chara, {
             width: width,
             height: height,
@@ -30,6 +33,7 @@
             showCharacter: false, 
             showOutline: false,
             highlightOnComplete: false,
+            strokeFadeDuration: fadeDuration,
             strokeColor: "#555",
             drawingWidth: CHARACTER_WRITER_DRAWING_WIDTH,
         });
@@ -50,11 +54,19 @@
     $effect(() => {
         resetHanziWriter(leniency, chara);
     })
+    $effect(() => {
+        resetHanziWriterDuration(fadeDuration);
+    })
+    
+    function resetHanziWriterDuration(fadeDuration: number) {
+        setupHanziWriter(leniency, fadeDuration);
+    }
     
     let leniency = $state(1.5);
+    let fadeDuration = $state(400);
     onMount(() => {
         updateWidth();
-        setupHanziWriter(leniency);
+        setupHanziWriter(leniency, fadeDuration);
         window.addEventListener('resize', updateWidth);
         return () => {
             window.removeEventListener('resize', updateWidth);
@@ -67,19 +79,16 @@
     }
 </script>
 
-<TopBar title="Leniency Calibration" backUrl="{base}/settings?leniency={leniency}" isSettings={true}></TopBar>
+<TopBar title="Leniency Calibration" backUrl="{base}/settings?leniency={leniency}&fadeDuration={fadeDuration}" isSettings={true}></TopBar>
 <div class="main-container">
     
     <div class="section-container">
-        <label class="settings-label">
-            <div>
-                <div class="settings-label-title">{SETTINGS_LABEL_DATA['strokeLeniency'].label}</div>
-                <div class="settings-label-help">{SETTINGS_LABEL_DATA['strokeLeniency'].help}</div>
-            </div>
-            <div class="settings-children">
-                <input type="number" step="0.01" bind:value={leniency}>
-            </div>
-        </label>
+        <SettingsItem key="strokeLeniency">
+            <input type="number" step="0.01" bind:value={leniency}>
+        </SettingsItem>
+        <SettingsItem key="strokeFadeDuration">
+            <input type="number" step="1" bind:value={fadeDuration}>
+        </SettingsItem>
     </div>
     
     <div class="character-display">
@@ -144,16 +153,6 @@
         margin: 1em 0;
         input {
             width: 5em;
-        }
-    }
-    .settings-label {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        .settings-label-help {
-            color: #00000090;
-            font-size: 0.8em;
-            max-width: 24em;
         }
     }
 </style>

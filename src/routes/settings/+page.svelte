@@ -13,8 +13,9 @@
     import { SyncMode, type ManualSyncStatus } from '$lib/profile';
     import '@khmyznikov/pwa-install';
     import type { PWAInstallElement } from '@khmyznikov/pwa-install';
+    import { isTauri } from '@tauri-apps/api/core';
     
-    export let data: {leniency?: string};
+    export let data: {leniency?: string, fadeDuration?: string};
     
     let app = new App();
     let config: DeepRequired<WenbunConfig>;
@@ -40,9 +41,8 @@
         fsrsParamsString = config.FSRSParams.join(",");
         profileStr = app.exportProfileStr();
         initialProfileStr = profileStr;
-        if (data.leniency) {
-            config.strokeLeniency = parseFloat(data.leniency);
-        }
+        if (data.leniency) config.strokeLeniency = parseFloat(data.leniency);
+        if (data.fadeDuration) config.strokeFadeDuration = parseInt(data.fadeDuration);
         app = app;
     }
     
@@ -264,9 +264,12 @@
                 <SettingsItem key="strokeLeniency">
                     <input type="number" step="0.01" bind:value={config.strokeLeniency}>
                 </SettingsItem>
+                <SettingsItem key="strokeFadeDuration">
+                    <input type="number" step="1" bind:value={config.strokeFadeDuration}>
+                </SettingsItem>
                 <a class="button" href="{base}/settings/leniency-calibration" aria-label="Test Leniency Calibration">
                     <i class="fa-solid fa-sliders"></i>&nbsp;
-                    Test Leniency
+                    Test Writer
                 </a>
             </div>
         </div>
@@ -357,15 +360,26 @@
         </div>
         
         <div class="settings-section">
+            <div class="section-title">Chinese</div>
+            <div class="section-container">
+                <SettingsItem key="isShowPlecoLink">
+                    <input type="checkbox" bind:checked={config.isShowPlecoLink}>
+                </SettingsItem>
+            </div>
+        </div>
+                
+        <div class="settings-section">
             <div class="section-title">Offline Data</div>
             <div class="section-container">
-                <div class="note">
-                    This app can be installed as PWA and can be accessed offline.
-                </div>
-                <button class="button" onclick={() => showPWAInstallDialog()}>
-                    <i class="fa-solid fa-download"></i>&nbsp;
-                    Install as PWA
-                </button>
+                {#if !isTauri()}
+                    <div class="note">
+                        This app can be installed as PWA and can be accessed offline.
+                    </div>
+                    <button class="button" onclick={() => showPWAInstallDialog()}>
+                        <i class="fa-solid fa-download"></i>&nbsp;
+                        Install as PWA
+                    </button>
+                {/if}
                 <a class="button" href={`${base}/offline-data`} aria-label="Offline Data">
                     <i class="fa-solid fa-gear"></i>&nbsp;
                     Go to Offline Data Settings
@@ -376,6 +390,10 @@
         <div class="settings-section">
             <div class="section-container">
                 <button class="button" onclick={() => resetConfigToDefault()}>Reset to Default Settings</button>
+                <a href="{base}/account" class="button danger-button">
+                    <i class="fa-solid fa-trash"></i>&nbsp;
+                    Request Account Deletion
+                </a>
             </div>
         </div>
         
@@ -394,7 +412,9 @@
         </div>
     {/if}
 </div>
-<pwa-install name="WenBun" bind:this={pwaInstallComponent}></pwa-install>
+{#if !isTauri()}
+    <pwa-install name="WenBun" bind:this={pwaInstallComponent}></pwa-install>
+{/if}
 
 <style>
     .main-container {

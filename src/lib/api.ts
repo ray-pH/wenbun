@@ -7,6 +7,8 @@ export enum ApiRoute {
     ReviewLogMostRecent = "/reviewlog/mostrecent",
     AuthGoogle = "/auth/google",
     AuthLogout = "/auth/logout",
+    AccountDeletionRequest = "/account-delete/request-delete",
+    AccountDelete = "/account-delete/delete",
 }
 
 export function apiUrl(route: ApiRoute, params?: Record<string, string | number | boolean>): string {

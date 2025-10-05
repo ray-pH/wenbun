@@ -153,7 +153,7 @@ export const SETTINGS_LABEL_DATA = {
     },
     enableShortTerm: {
         label: "Enable Short Term",
-        help: "When disabled, the short-term review schedule is bypassed.",
+        help: "When enabled, failed cards can reappear in the same session. When disabled, the short-term review schedule (less than 24 hours) is bypassed.",
     },
     enableFuzz: {
         label: "Enable Fuzz",
@@ -171,6 +171,10 @@ export const SETTINGS_LABEL_DATA = {
         label: "Stroke Grading Leniency",
         help: "(default 1.5) This can be set to make stroke grading more or less lenient. The closer this is to 0 the more strictly the quiz is graded."
     },
+    strokeFadeDuration: {
+        label: "Stroke Fade Duration",
+        help: "(default 400) stroke fade duration in ms."
+    },
     showHealthBar: {
         label: "Show Health Bar",
         help: "Displays a progress bar above the character grid that drains as you make stroke mistakes, indicating the auto-graded grade."
@@ -178,6 +182,10 @@ export const SETTINGS_LABEL_DATA = {
     showHintAfterMissesCount: {
         label: "Show Hint After Misses",
         help: "Specifies the number of misses before the hint will be shown.",
+    },
+    isShowPlecoLink: {
+        label: "Show Pleco Link",
+        help: "When enabled, a link to open Pleco will be shown on the dictionary.",
     },
     
     zhIsColorBasedOnTone: {

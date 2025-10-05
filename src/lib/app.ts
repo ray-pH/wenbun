@@ -7,7 +7,7 @@ import { isTauri } from "@tauri-apps/api/core";
 import { WebFileManager, type IFileManager } from "./fileManager";
 import { ChineseMandarinReading } from "./chinese";
 import { AppExtraStudyHandler } from "./appExtraStudyHandler";
-import { Profile, SyncConflicAutoResolve, SyncMode } from "./profile";
+import { Profile, SyncConflicAutoResolve, SyncMode, type DeckInfoSummary } from "./profile";
 declare const __APP_VERSION__: string; // injected by vite
 const UNGROUPED_GROUP = "__ungrouped__"
 
@@ -90,6 +90,7 @@ export interface WenbunConfig {
     // Review
     gradingMethod?: 'auto' | 'manual';
     strokeLeniency?: number;
+    strokeFadeDuration?: number;
     showAutoGradingBar?: boolean;
     showHintAfterMissesCount?: number;
     
@@ -100,6 +101,9 @@ export interface WenbunConfig {
     enableShortTerm?: boolean;
     enableFuzz?: boolean;
     FSRSParams?: number[];
+    
+    // Dictionary
+    isShowPlecoLink?: boolean;
     
     // chinese
     zh: {
@@ -128,6 +132,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     
     gradingMethod: 'auto',
     strokeLeniency: 1.5,
+    strokeFadeDuration: 400,
     showAutoGradingBar: false,
     showHintAfterMissesCount: 3,
     
@@ -137,6 +142,8 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     enableShortTerm: false,
     enableFuzz: false,
     FSRSParams: DEFAULT_FSRS_PARAM,
+    
+    isShowPlecoLink: false,
     
     zh: {
         isColorBasedOnTone: true,
@@ -255,7 +262,7 @@ export class App {
             await this.profile.init();
             const isAutoSync = (await this.profile.getSyncMode()) === SyncMode.auto;
             if (this.profile.isLoggedIn && !skipSync && isAutoSync) {
-                const strategy = isTauri() ? SyncConflicAutoResolve.ask : SyncConflicAutoResolve.normalPull;
+                const strategy = isTauri() || this.profile.justLoggenIn ? SyncConflicAutoResolve.ask : SyncConflicAutoResolve.normalPull;
                 const changed = await this.profile.trySyncProfile(this, strategy);
                 if (changed) await this.afterInitRoutine();
                 return changed;
@@ -1158,5 +1165,17 @@ export class App {
     isDeckUsingExtraDict(deckId: string): boolean {
         const tags = this.deckData[deckId]?.tags ?? [];
         return !!tags.includes(DECK_TAGS.ZH_EXTRA_DICT);
+    }
+    
+    getProfileDataDeckSummary(profileData: ProfileData): DeckInfoSummary[] {
+        return Object.entries(profileData.deckData).map(([id, deckData]) => this.getDeckInfoSummary(id, deckData));
+    }
+    getDeckInfoSummary(id: string, deckData: DeckData): DeckInfoSummary {
+        return {
+            id,
+            label: deckData.label,
+            studiedCount: Object.keys(deckData.schedule).length,
+            totalCount: deckData.deck.filter(s => s).length,
+        }
     }
 }
