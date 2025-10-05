@@ -9,6 +9,9 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    &.danger-button {
+        background-color: var(--wenbun-red);
+    }
     &.invert {
         border: var(--wenbun-blue) solid 1px;
         background-color: #FFFFFF90;
@@ -22,7 +25,7 @@
     }
     &.disabled,
     &:disabled {
-        background-color: gray;
+        background-color: gray !important;
         pointer-events: none;
     }
 }
