@@ -23,6 +23,31 @@
     <div class="changelog-container">
         Changelog
 
+        <h4>v0.18.0 (2025-10-05)</h4>
+        <ul>
+            <li><b>Sync</b>:
+                <ul>
+                    <li>Improved the <b>sync conflict UI</b> to provide more detailed information about local and remote data.</li>
+                    <li>The <b>sync button</b> is now hidden when the sync mode is set to <b>auto</b>.</li>
+                </ul>
+            </li>
+            <li><b>Review</b>:
+                Reduced the probability of getting the same card consecutively.
+            </li>
+            <li><b>Deck</b>:
+                Added a summary of group statistics to the deck page.
+            </li>
+            <li><b>Dictionary</b>:
+                Added a setting to display a link to <b>Pleco</b> in the dictionary.
+            </li>
+            <li><b>Settings</b>:
+                Added a configuration option for the stroke fade duration in the character writer.
+            </li>
+            <li><b>Account</b>:
+                Added a form to request account deletion.
+            </li>
+        </ul>
+
         <h4>v0.17.0 (2025-09-29)</h4>
         <ul>
             <li><b>Domain Migration</b>:
