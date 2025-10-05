@@ -252,7 +252,6 @@ export class Profile {
             this.pushReviewLog(null, app.reviewLogs ?? [], true),
         ])
         if (success.every(s => s)) {
-            console.log('here')
             app.lastSyncTime = new Date().toISOString();
             await app.updateLastSyncTime();
             this.isSyncConflict = false;
