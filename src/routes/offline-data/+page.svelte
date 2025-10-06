@@ -114,6 +114,13 @@
         const arrayBuffer = payloadToArrayBuffer(payload);
         await handleAudioZip(arrayBuffer);
     }
+    
+    async function clearAudioData() {
+        const confirm = window.confirm("Are you sure you want to clear the audio data?");
+        if (!confirm) return;
+        await caches.delete("wenbun-audio");
+        await checkHealth();
+    }
 
     onMount(async () => {
         checkHealth();
@@ -161,7 +168,7 @@
             <span><Loading/></span>
         {:else}
             <span class:healthy={isAudioDataHealthy} class:unhealthy={!isAudioDataHealthy}>
-                {isAudioDataHealthy ? "Healthy" : "Unhealthy"}
+                {isAudioDataHealthy ? "Available Offline" : "Not Available Offline"}
             </span> 
             {#if currentAudioDownload}
                 <div>
@@ -193,6 +200,10 @@
     <button class="button" onclick={() => uploadAudioZip()}>
         <i class="fa-solid fa-upload"></i>&nbsp;
         Manually upload Audio Data zip file
+    </button>
+    <button class="button danger-button" onclick={() => clearAudioData()}>
+        <i class="fa-solid fa-trash"></i>&nbsp;
+        Clear Audio Data
     </button>
     <div class="note">
         You can also download the audio data zip file manually.
