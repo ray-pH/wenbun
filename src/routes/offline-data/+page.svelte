@@ -53,6 +53,16 @@
         navigator.serviceWorker.controller?.postMessage({ type: "PRECACHE_ASSETS", force: true });
     }
     
+    async function clearCoreData() {
+        const confirm = window.confirm("Are you sure you want to clear the core data?");
+        if (!confirm) return;
+        // delete all caches that start with "wenbun-cache-"
+        const cacheNames = await caches.keys();
+        const cachesToDelete = cacheNames.filter(name => name.startsWith("wenbun-cache-"));
+        await Promise.all(cachesToDelete.map(name => caches.delete(name)));
+        await checkHealth();
+    }
+    
     let isHandlingAudioZip = false;
     async function handleAudioZip(arrayBuffer: ArrayBuffer) {
         isHandlingAudioZip = true;
@@ -114,6 +124,13 @@
         const arrayBuffer = payloadToArrayBuffer(payload);
         await handleAudioZip(arrayBuffer);
     }
+    
+    async function clearAudioData() {
+        const confirm = window.confirm("Are you sure you want to clear the audio data?");
+        if (!confirm) return;
+        await caches.delete("wenbun-audio");
+        await checkHealth();
+    }
 
     onMount(async () => {
         checkHealth();
@@ -154,6 +171,10 @@
             <i class="fa-solid fa-upload"></i>&nbsp;
             Manually upload Core Data zip file
         </button>
+        <button class="button danger-button" onclick={() => clearCoreData()}>
+            <i class="fa-solid fa-trash"></i>&nbsp;
+            Clear Core Data
+        </button>
     {/if}
     <div>
         <span>Audio Data Status:</span>
@@ -161,7 +182,7 @@
             <span><Loading/></span>
         {:else}
             <span class:healthy={isAudioDataHealthy} class:unhealthy={!isAudioDataHealthy}>
-                {isAudioDataHealthy ? "Healthy" : "Unhealthy"}
+                {isAudioDataHealthy ? "Available Offline" : "Not Available Offline"}
             </span> 
             {#if currentAudioDownload}
                 <div>
@@ -193,6 +214,10 @@
     <button class="button" onclick={() => uploadAudioZip()}>
         <i class="fa-solid fa-upload"></i>&nbsp;
         Manually upload Audio Data zip file
+    </button>
+    <button class="button danger-button" onclick={() => clearAudioData()}>
+        <i class="fa-solid fa-trash"></i>&nbsp;
+        Clear Audio Data
     </button>
     <div class="note">
         You can also download the audio data zip file manually.

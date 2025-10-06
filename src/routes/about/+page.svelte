@@ -22,6 +22,11 @@
     </div>
     <div class="changelog-container">
         Changelog
+       
+        <h4>v0.18.1 (2025-10-06)</h4>
+        <ul>
+            <li><b>Offline Data</b>: added a button to clear downloaded data</li>
+        </ul>
 
         <h4>v0.18.0 (2025-10-05)</h4>
         <ul>
