@@ -53,6 +53,16 @@
         navigator.serviceWorker.controller?.postMessage({ type: "PRECACHE_ASSETS", force: true });
     }
     
+    async function clearCoreData() {
+        const confirm = window.confirm("Are you sure you want to clear the core data?");
+        if (!confirm) return;
+        // delete all caches that start with "wenbun-cache-"
+        const cacheNames = await caches.keys();
+        const cachesToDelete = cacheNames.filter(name => name.startsWith("wenbun-cache-"));
+        await Promise.all(cachesToDelete.map(name => caches.delete(name)));
+        await checkHealth();
+    }
+    
     let isHandlingAudioZip = false;
     async function handleAudioZip(arrayBuffer: ArrayBuffer) {
         isHandlingAudioZip = true;
@@ -160,6 +170,10 @@
         <button class="button" disabled>
             <i class="fa-solid fa-upload"></i>&nbsp;
             Manually upload Core Data zip file
+        </button>
+        <button class="button danger-button" onclick={() => clearCoreData()}>
+            <i class="fa-solid fa-trash"></i>&nbsp;
+            Clear Core Data
         </button>
     {/if}
     <div>
