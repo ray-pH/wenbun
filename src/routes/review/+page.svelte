@@ -108,6 +108,7 @@
             id = app.getNextCard(deckId, data.reviewMode);
             if (id === undefined || id !== currentCardId) return id;
         }
+        return id;
     }
 
     function nextCard() {
