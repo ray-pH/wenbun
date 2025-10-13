@@ -22,6 +22,11 @@
     </div>
     <div class="changelog-container">
         Changelog
+        
+        <h4>v0.18.2 (2025-10-13)</h4>
+        <ul>
+            <li><b>Bugfix</b>: fix issue where the <i>"You have done today’s review"</i> message appear unexpectedly</li>
+        </ul>
        
         <h4>v0.18.1 (2025-10-06)</h4>
         <ul>
