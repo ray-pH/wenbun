@@ -30,6 +30,13 @@
                     (llan)
                 </a>
             </div>
+            <div class="entry">
+                Csywn
+                <a href="https://github.com/aaleta" target="_blank">
+                    <i class="fa-brands fa-github"></i>
+                    (aaleta)
+                </a>
+            </div>
         </div>
     </div>
     <div class="credits-section">

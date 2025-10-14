@@ -23,6 +23,11 @@
     <div class="changelog-container">
         Changelog
         
+        <h4>v0.18.3 (2025-10-14)</h4>
+        <ul>
+            <li><b>Deck</b>: Added <b>sorting</b> option in the table view</li>
+        </ul>
+        
         <h4>v0.18.2 (2025-10-13)</h4>
         <ul>
             <li><b>Bugfix</b>: fix issue where the <i>"You have done today’s review"</i> message appear unexpectedly</li>
