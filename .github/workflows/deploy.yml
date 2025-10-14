@@ -4,7 +4,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main
+      - prod
 
 jobs:
   build-and-deploy:

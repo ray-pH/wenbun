@@ -1,6 +1,6 @@
 {
   "name": "wenbun",
-  "version": "0.18.2",
+  "version": "0.18.3",
   "description": "",
   "type": "module",
   "scripts": {
@@ -22,6 +22,7 @@
     "hanzi-writer": "^3.7.2",
     "hanzi-writer-data": "^2.0.1",
     "jszip": "^3.10.1",
+    "lit": "^3.3.1",
     "lodash": "^4.17.21",
     "opencc-js": "^1.0.5",
     "pinyin-zhuyin": "^1.0.4",
