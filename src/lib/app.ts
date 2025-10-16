@@ -104,6 +104,7 @@ export interface WenbunConfig {
     
     // Dictionary
     isShowPlecoLink?: boolean;
+    isShowDongLink?: boolean;
     
     // chinese
     zh: {
@@ -144,6 +145,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     FSRSParams: DEFAULT_FSRS_PARAM,
     
     isShowPlecoLink: false,
+    isShowDongLink: false,
     
     zh: {
         isColorBasedOnTone: true,

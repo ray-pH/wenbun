@@ -14,10 +14,11 @@
         zhReading: ChineseMandarinReading;
         isOpenChildrenDict?: boolean;
         isShowPlecoLink?: boolean;
+        isShowDongLink?: boolean;
     }
     let { 
         charData, wordlist, toneColors, zhReading,
-        isShowPlecoLink,
+        isShowPlecoLink, isShowDongLink,
         isOpenChildrenDict = $bindable()
     }: Props = $props();
     let word = charData.characters ?? "";
@@ -83,6 +84,7 @@
             toneColors={toneColors}
             zhReading={zhReading}
             isShowPlecoLink={isShowPlecoLink}
+            isShowDongLink={isShowDongLink}
             bind:isOpenChildrenDict={isNestedChildrenDictOpen}
         />
     {:else}
@@ -95,6 +97,12 @@
         <a class="extern-a-button pleco" href="plecoapi://x-callback-url/s?q={word}">
             <img src="/assets/imgs/pleco-favicon.ico" alt="Pleco">
             <span>Pleco</span>
+        </a>
+    {/if}
+    {#if isShowDongLink}
+        <a class="extern-a-button dong" href="https://www.dong-chinese.com/wiki/{word}" target="_blank">
+            <img src="/assets/imgs/dong-favicon.png" alt="Dong Chinese">
+            <span>Dong-Chinese</span>
         </a>
     {/if}
     {#if isComposite}
@@ -332,6 +340,9 @@
         }
         &.pleco {
             background-color: #0078C3;
+        }
+        &.dong {
+            background-color: #AC0045;
         }
     }
     
