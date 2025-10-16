@@ -22,6 +22,11 @@
     </div>
     <div class="changelog-container">
         Changelog
+
+        <h4>v0.18.4 (2025-10-16)</h4>
+        <ul>
+            <li><b>Dictionary</b>: Added a setting to display a link to <b>Dong-Chinese</b> in the dictionary.</li>
+        </ul>
         
         <h4>v0.18.3 (2025-10-14)</h4>
         <ul>
