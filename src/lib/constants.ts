@@ -187,6 +187,10 @@ export const SETTINGS_LABEL_DATA = {
         label: "Show Pleco Link",
         help: "When enabled, a link to open Pleco will be shown on the dictionary.",
     },
+    isShowDongLink: {
+        label: "Show Dong Link",
+        help: "When enabled, a link to open Dong-Chinese's dictionary will be shown on the dictionary.",
+    },
     
     zhIsColorBasedOnTone: {
         label: "Color Characters Based On Their Tone",
