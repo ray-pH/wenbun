@@ -360,10 +360,13 @@
         </div>
         
         <div class="settings-section">
-            <div class="section-title">Chinese</div>
+            <div class="section-title">Dictionary</div>
             <div class="section-container">
                 <SettingsItem key="isShowPlecoLink">
                     <input type="checkbox" bind:checked={config.isShowPlecoLink}>
+                </SettingsItem>
+                <SettingsItem key="isShowDongLink">
+                    <input type="checkbox" bind:checked={config.isShowDongLink}>
                 </SettingsItem>
             </div>
         </div>

@@ -422,6 +422,7 @@
             toneColors={app.getChineseToneColorArray()}
             zhReading={app.getConfig().zh.mandarinReading}
             isShowPlecoLink={app.getConfig().isShowPlecoLink}
+            isShowDongLink={app.getConfig().isShowDongLink}
         ></ZhDict>
     {/if}
 </SlideablePopup>
