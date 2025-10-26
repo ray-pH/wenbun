@@ -23,6 +23,18 @@
     <div class="changelog-container">
         Changelog
 
+        <h4>v0.19.0 (2025-10-27)</h4>
+        <ul>
+            <li><b>Android</b>:
+                <ul>
+                    <li>Fix google login</li>
+                    <li>Fixed an issue where data was not being saved.</li>
+                    <li>Updated icon background color.</li>
+                </ul>
+            </li>
+            <li><b>Writer</b>: Added an experimental fix for the Apple Pencil (enable manually in settings).</li>
+        </ul>
+
         <h4>v0.18.4 (2025-10-16)</h4>
         <ul>
             <li><b>Dictionary</b>: Added a setting to display a link to <b>Dong-Chinese</b> in the dictionary.</li>
