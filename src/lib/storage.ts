@@ -16,8 +16,8 @@ export class TauriStorage implements IStorage {
     
     private async ensureStoreLoaded(): Promise<void> {
         if (!this.isLoaded) {
-        this.store = await load(this.storeFilename, { autoSave: false });
-        this.isLoaded = true;
+            this.store = await load(this.storeFilename, { autoSave: false });
+            this.isLoaded = true;
         }
     }
     
@@ -31,6 +31,7 @@ export class TauriStorage implements IStorage {
         await this.ensureStoreLoaded();
         if (!this.store) return;
         await this.store.set(key, value);
+        await this.store.save();
     }
 }
 
