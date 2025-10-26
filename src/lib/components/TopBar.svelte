@@ -9,7 +9,7 @@
 		title: string;
 		noBack?: boolean;
 		backUrl?: string; // override
-		prohibitedBackUrl?: string;
+		prohibitedBackUrls?: string[];
 		isSettings?: boolean;
 		backConfirmCallback?: () => Promise<boolean>;
 		// sync
@@ -18,7 +18,7 @@
 		syncButtonCallback?: () => Promise<void>;
 	}
     let { 
-        title, noBack, backUrl, prohibitedBackUrl, isSettings, backConfirmCallback,
+        title, noBack, backUrl, prohibitedBackUrls, isSettings, backConfirmCallback,
         syncStatus, syncButtonCallback, isSyncing,
     }: Props = $props();
     
@@ -28,7 +28,7 @@
                 navigationHistory.popWithoutGoingBack();
                 goto(backUrl);
             } else if (get(canGoBack)) {
-                navigationHistory.back(prohibitedBackUrl);
+                navigationHistory.back(prohibitedBackUrls);
             } else {
                 goto(base + '/');
             }

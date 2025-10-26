@@ -12,7 +12,7 @@ export const navigationHistory = {
             history.update(h => [...h, path]);
         }
     },
-    back: (prohibitedBackUrl?: string) => {
+    back: (prohibitedBackUrls?: string[]) => {
         const currentHistory = get(history);
         if (currentHistory.length > 1) {
             // Pop current page from our history
@@ -22,7 +22,8 @@ export const navigationHistory = {
             // Get previous page
             const previousPage = newHistory[newHistory.length - 1];
             if (previousPage) {
-                if (prohibitedBackUrl && new URL(previousPage, window.location.origin).pathname === prohibitedBackUrl) {
+                const prohibited = prohibitedBackUrls?.includes(new URL(previousPage, window.location.origin).pathname);
+                if (prohibited) {
                     goto(base + '/');
                 } else {
                     // Navigate back. replaceState is used to not create a new entry in the browser's history.
