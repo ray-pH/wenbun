@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { ApiRoute, apiUrl } from "$lib/api";
+    import { apiFetch, ApiRoute, apiUrl } from "$lib/api";
     import Loading from "$lib/components/Loading.svelte";
 import TopBar from "$lib/components/TopBar.svelte";
     import { onMount } from "svelte";
@@ -7,7 +7,7 @@ import TopBar from "$lib/components/TopBar.svelte";
     export let data: {token: string};
     
     async function sendDeleteRequest(): Promise<boolean> {
-        const res = await fetch(apiUrl(ApiRoute.AccountDelete, {token: data.token}), {
+        const res = await apiFetch(apiUrl(ApiRoute.AccountDelete, {token: data.token}), {
             method: "GET",
         });
         return res.ok;
