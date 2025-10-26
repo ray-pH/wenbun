@@ -147,7 +147,9 @@
     
 </script>
 
-<TopBar title="Settings" isSettings={true} backConfirmCallback={backConfirmCallback} prohibitedBackUrl={`${base}/settings/leniency-calibration`}></TopBar>
+<TopBar title="Settings" isSettings={true} backConfirmCallback={backConfirmCallback} 
+    prohibitedBackUrls={[`${base}/settings/leniency-calibration`, `${base}/auth-token`]}>
+</TopBar>
 <div class="main-container">
     {#if config}
         <div class="top-settings-section">
