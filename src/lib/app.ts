@@ -115,6 +115,9 @@ export interface WenbunConfig {
         playAudio?: boolean;
         forceStopAudioOnNextCard?: boolean;
     }
+    
+    // experimental
+    _experimentalFixApplePencil?: boolean;
 }
 
 const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
@@ -155,6 +158,8 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
         playAudio: true,
         forceStopAudioOnNextCard: false,
     },
+    
+    _experimentalFixApplePencil: false,
 }
 
 export type ReviewLog = {
@@ -1170,7 +1175,7 @@ export class App {
     }
     
     getProfileDataDeckSummary(profileData: ProfileData): DeckInfoSummary[] {
-        return Object.entries(profileData.deckData).map(([id, deckData]) => this.getDeckInfoSummary(id, deckData));
+        return Object.entries(profileData.deckData ?? {}).map(([id, deckData]) => this.getDeckInfoSummary(id, deckData));
     }
     getDeckInfoSummary(id: string, deckData: DeckData): DeckInfoSummary {
         return {

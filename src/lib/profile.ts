@@ -3,7 +3,7 @@ import type { App } from "./app";
 import { goto } from '$app/navigation';
 import { base } from "$app/paths";
 import { page } from '$app/state';
-import { ApiRoute, apiUrl, apiAuthUrl } from "./api";
+import { ApiRoute, apiUrl, apiAuthUrl, apiFetch, IS_USE_TOKEN_AUTH } from "./api";
 import _ from "lodash";
 import type { IStorage } from "./storage";
 import { isOnlineClient } from "./util";
@@ -80,9 +80,7 @@ export class Profile {
     async init() {
         this.storedLoginStatus = await this.storage.load<LoginStatus>(STORE_KEY_LOGIN_STATUS);
             
-        const res = await fetch(apiUrl(ApiRoute.Profile), {
-            credentials: "include", // important if using cookies/session
-        });
+        const res = await apiFetch(apiUrl(ApiRoute.Profile));
 
         if (res.ok) {
             // logged in
@@ -275,11 +273,11 @@ export class Profile {
     }
     
     getName() {
-        return this.profileInfo?.name ?? "(no name)";
+        return this.profileInfo?.name ?? this.profileInfo?.email ?? "(no name)";
     }
     
     async getProfileData(): Promise<ProfileData | null> {
-        const res = await fetch(apiUrl(ApiRoute.ProfileData), {credentials: "include"});
+        const res = await apiFetch(apiUrl(ApiRoute.ProfileData));
         if (res.status === 204) {
             return null;
         } else if (res.ok) {
@@ -292,9 +290,8 @@ export class Profile {
     
     async updateProfileData(profileData: ProfileData, decision: 'normal'|'pull'|'push' = 'normal'): Promise<boolean> {
         //TODO: check for conflict
-        const res = await fetch(apiUrl(ApiRoute.ProfileData, { decision }), {
+        const res = await apiFetch(apiUrl(ApiRoute.ProfileData, { decision }), {
             method: "POST",
-            credentials: "include",
             headers: {
                 "Content-Type": "application/json",
             },
@@ -304,7 +301,7 @@ export class Profile {
     }
     
     async getLatestReviewLog(): Promise<ReviewLog | null> {
-        const res = await fetch(apiUrl(ApiRoute.ReviewLogMostRecent), {credentials: "include"});
+        const res = await apiFetch(apiUrl(ApiRoute.ReviewLogMostRecent));
         if (res.status === 204) {
             return null;
         } else if (res.ok) {
@@ -320,9 +317,8 @@ export class Profile {
             return true;
         } else if (latestServerReviewLog === null || force) {
             // push all
-            const res = await fetch(apiUrl(ApiRoute.ReviewLog, { force }), {
+            const res = await apiFetch(apiUrl(ApiRoute.ReviewLog, { force }), {
                 method: "POST",
-                credentials: "include",
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -338,9 +334,8 @@ export class Profile {
                 return ms <= latestServerMs;
             });
             const localReviewLogsAfterLatestServerReviewLog = localReviewLogs.slice(cut + 1);
-            const res = await fetch(apiUrl(ApiRoute.ReviewLog), {
+            const res = await apiFetch(apiUrl(ApiRoute.ReviewLog), {
                 method: "POST",
-                credentials: "include",
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -370,9 +365,8 @@ export class Profile {
     async getReviewLogs(localReviewLogs: ReviewLog[], force = false): Promise<ReviewLog[] | null> {
         if (force) {
             const fromDate = new Date(0).toISOString();
-            const res = await fetch(apiUrl(ApiRoute.ReviewLog, { from: fromDate }), {
+            const res = await apiFetch(apiUrl(ApiRoute.ReviewLog, { from: fromDate }), {
                 method: "GET",
-                credentials: "include",
             });
             
             if (res.status === 204) {
@@ -387,9 +381,8 @@ export class Profile {
             // pull only after latest local review log
             const latestLocalReviewLog = localReviewLogs[localReviewLogs.length - 1];
             const latestLocalDate = new Date(latestLocalReviewLog?.log?.review ?? 0).toISOString();
-            const res = await fetch(apiUrl(ApiRoute.ReviewLog, { from: latestLocalDate }), {
+            const res = await apiFetch(apiUrl(ApiRoute.ReviewLog, { from: latestLocalDate }), {
                 method: "GET",
-                credentials: "include",
             });
             
             if (res.status === 204) {
@@ -406,7 +399,11 @@ export class Profile {
     async loginGoogle(app: App) {
         await this.saveBackupProfileDataBeforeLogin(app);
         // TODO: compare with stored login info
-        window.location.assign(apiAuthUrl(ApiRoute.AuthGoogle));
+        if (IS_USE_TOKEN_AUTH) {
+            window.location.assign(apiAuthUrl(ApiRoute.AuthGoogleToken) + "?redirect=" + encodeURIComponent(window.location.origin + '/auth-token'));
+        } else {
+            window.location.assign(apiAuthUrl(ApiRoute.AuthGoogle) + "?redirect=" + encodeURIComponent(window.location.href));
+        }
     }
     async logout(app: App) {
         await this.updateLoginStatus(LoginStatus.loggedOut);
@@ -472,7 +469,7 @@ export class Profile {
     }
     
     static async sendAccountDeletionRequest(email: string) {
-        await fetch(apiUrl(ApiRoute.AccountDeletionRequest), { 
+        await apiFetch(apiUrl(ApiRoute.AccountDeletionRequest), { 
             method: "POST", 
             headers: {
                 "Content-Type": "application/json",
