@@ -1170,7 +1170,7 @@ export class App {
     }
     
     getProfileDataDeckSummary(profileData: ProfileData): DeckInfoSummary[] {
-        return Object.entries(profileData.deckData).map(([id, deckData]) => this.getDeckInfoSummary(id, deckData));
+        return Object.entries(profileData.deckData ?? {}).map(([id, deckData]) => this.getDeckInfoSummary(id, deckData));
     }
     getDeckInfoSummary(id: string, deckData: DeckData): DeckInfoSummary {
         return {
