@@ -262,6 +262,65 @@
         healthBarHardLimit = hard;
     }
     
+    
+    function experimentalApplePencilFix() {
+        if (!app.getConfig()._experimentalFixApplePencil) return;
+    
+        const writerEl = document.getElementById('grid-background-target');
+        if (!writerEl) return;
+    
+        let lastPointer = Date.now();
+        const updatePointerTime = () => (lastPointer = Date.now());
+        const touchEvents = ['pointerdown', 'touchstart'];
+    
+        // --- attach listeners ---
+        touchEvents.forEach(evt =>
+            writerEl.addEventListener(evt, updatePointerTime, { passive: true })
+        );
+    
+        // --- CSS hardening ---
+        Object.assign(writerEl.style, {
+            touchAction: 'none',
+            WebkitUserSelect: 'none',
+            WebkitTouchCallout: 'none',
+        });
+    
+        // --- touch revive loop ---
+        let frameId: number;
+        const reviveTouch = () => {
+            const now = Date.now();
+            if (now - lastPointer > 3000) {
+                writerEl.style.pointerEvents = 'none';
+                requestAnimationFrame(() => {
+                    // trigger layout reflow
+                    void writerEl.offsetHeight;
+                    writerEl.style.pointerEvents = 'auto';
+                });
+                lastPointer = now;
+            }
+            frameId = requestAnimationFrame(reviveTouch);
+        };
+        frameId = requestAnimationFrame(reviveTouch);
+    
+        // --- optional extra guard for Safari's ghost touchcancel ---
+        const touchCancelHandler = () => {
+            writerEl.style.pointerEvents = 'none';
+            setTimeout(() => (writerEl.style.pointerEvents = 'auto'), 50);
+        };
+        window.addEventListener('touchcancel', touchCancelHandler);
+    
+        // --- return cleanup function ---
+        return () => {
+            touchEvents.forEach(evt =>
+                writerEl.removeEventListener(evt, updatePointerTime)
+            );
+            window.removeEventListener('touchcancel', touchCancelHandler);
+            if (frameId) cancelAnimationFrame(frameId);
+            // restore pointer events if it was disabled mid-loop
+            writerEl.style.pointerEvents = 'auto';
+        };
+    }
+    
     onMount(() => {
         autoReviewData = {
             correctStrokeCount: 0,
@@ -279,9 +338,11 @@
         window.addEventListener('resize', updateWidth);
         strokeSpeed = app.getStrokeSpeed();
         setupHanziWriter(0);
+        const cleanupApplePencilFix = experimentalApplePencilFix();
         return () => {
             unmounted = true;
             window.removeEventListener('resize', updateWidth);
+            if (cleanupApplePencilFix) cleanupApplePencilFix();
         };
     });
 </script>

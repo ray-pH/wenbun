@@ -238,5 +238,11 @@ export const SETTINGS_LABEL_DATA = {
     addToExistingDeck: {
         label: "Add To Existing Deck",
         help: "When enabled, the new cards will be added to an existing deck.",
-    }
+    },
+    
+    //
+    experimentalApplePencilFix: {
+        label: "Experimental Apple Pencil Fix",
+        help: "When enabled, the app will try to fix the Apple Pencil bug.",
+    },
 }

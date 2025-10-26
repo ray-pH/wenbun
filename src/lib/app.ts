@@ -115,6 +115,9 @@ export interface WenbunConfig {
         playAudio?: boolean;
         forceStopAudioOnNextCard?: boolean;
     }
+    
+    // experimental
+    _experimentalFixApplePencil?: boolean;
 }
 
 const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
@@ -155,6 +158,8 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
         playAudio: true,
         forceStopAudioOnNextCard: false,
     },
+    
+    _experimentalFixApplePencil: false,
 }
 
 export type ReviewLog = {
