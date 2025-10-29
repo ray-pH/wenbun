@@ -5,6 +5,7 @@ import * as OpenCC from 'opencc-js';
 import type { Lang } from "./app";
 
 export const TONE_PREFIX = 'tone-';
+export const WENBUN_TTS_URL = import.meta.env.VITE_WENBUN_TTS_URL;
 
 export interface ChineseWordData {
     simplified: string;
@@ -73,13 +74,15 @@ export class ChineseCharacterWordlist {
     public lang: Lang = 'zh';
     public initializing = false;
     public initialized = false;
+    public useAiGeneratedAudio = false;
     
     constructor() {
     }
     
-    async init(lang: Lang, useExtraDict: boolean = false): Promise<void> {
+    async init(lang: Lang, useExtraDict: boolean = false, useAiGeneratedAudio: boolean = false): Promise<void> {
         this.initializing = true;
         this.lang = lang;
+        this.useAiGeneratedAudio = useAiGeneratedAudio;
         const dictP = async () => {
             const res = await fetch(CHINESE_DICT_SRC)
             const dict = await res.json();
@@ -197,10 +200,14 @@ export class ChineseCharacterWordlist {
         if (this.audioDict[word] && this.audioDict[word].length > 0) {
             return this.audioDict[word].map(u => [u]);
         } else if (this.lang == 'zh'){
-            // generate audio url from pinyin
-            const pinyin_num = this.getWordData(word)?.pinyin_num ?? toPinyinNum(this.getReading(word, this.lang)) ?? "";
-            const syls = pinyin_num.split(' ');
-            return [syls.map(s => `${WENBUN_AUDIO_ZH_PREFIX_SRC}${s}.mp3`)];
+            if (this.useAiGeneratedAudio) {
+                return [[WENBUN_TTS_URL + '/tts?text=' + encodeURIComponent(word)]];
+            } else {
+                // generate audio url from pinyin
+                const pinyin_num = this.getWordData(word)?.pinyin_num ?? toPinyinNum(this.getReading(word, this.lang)) ?? "";
+                const syls = pinyin_num.split(' ');
+                return [syls.map(s => `${WENBUN_AUDIO_ZH_PREFIX_SRC}${s}.mp3`)];
+            }
         } else if (this.lang == 'yue') {
             return [];
         } else {
@@ -283,6 +290,8 @@ const AUDIO_LANG_DIR = {
     'yue': 'yue'
 }
 export async function getAudioUrl(lang: 'zh' | 'yue', relativePath: string): Promise<string> {
+    if (relativePath.startsWith(WENBUN_TTS_URL)) return relativePath;
+    
     const dir = AUDIO_LANG_DIR[lang];
     const localURL = `${WENBUN_CACHE_AUDIO_URL}/${dir}/${encodeURI(relativePath)}`;
     const remoteUrl =  `${WENBUN_AUDIO_URL}/${dir}/${encodeURI(relativePath)}`;
