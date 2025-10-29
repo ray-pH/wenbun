@@ -2,7 +2,7 @@
     import * as FSRS from "ts-fsrs"
     import HanziWriter from 'hanzi-writer';
     import { onMount } from 'svelte';
-    import { getAudioUrl, TONE_PREFIX } from '$lib/chinese';
+    import { getAudioUrl, TONE_PREFIX, WENBUN_TTS_URL } from '$lib/chinese';
     import { type CharacterWriterData, type CharacterWriterConfig, parseIntOrUndefined, lerp, linmap } from '$lib/util';
     import type { App } from '$lib/app';
     import { base } from '$app/paths';
@@ -15,6 +15,7 @@
     let gridLinePad = $state(30);
     let p = $derived(gridLinePad);
     let gridStroke = "#DDD";
+    let isAudioArtificial = $state(false);
     const NEXT_CHAR_DELAY = 500;
     const INDICATOR_FLASH_MS = 1600; // show indicator briefly after fail+reveal
     // const correctSound = new Audio(`${base}/assets/sounds/rightanswer-95219.mp3`);
@@ -177,6 +178,7 @@
     
     async function setupAudios() {
         const urls = characterData?.audioUrl;
+        isAudioArtificial = urls?.length === 1 && urls[0][0].startsWith(WENBUN_TTS_URL);
         if (!urls) return;
         audios = await Promise.all(urls.map(async (rawUs) => {
             const us = await Promise.all(rawUs.map(u => getAudioUrl(cardConfig.lang, u)));
@@ -585,6 +587,9 @@
             <button class="audio-button" onclick={() => playAudio()} aria-label="Play Audio">
                 <i class="fa-solid fa-volume-low"></i>
             </button>
+            <!-- {#if isAudioArtificial}
+                <i class="fa-solid fa-robot"></i>
+            {/if} -->
         {/if}
     </div>
     <div class="character-container">
