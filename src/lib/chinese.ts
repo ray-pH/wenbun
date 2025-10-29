@@ -196,14 +196,6 @@ export class ChineseCharacterWordlist {
         return this.dict[word] ?? this.dict[this.simplifiedConverter.convert(word)];
     }
     
-    isArtificalAudio(word: string): boolean {
-        if (this.audioDict[word] && this.audioDict[word].length > 0) {
-            return !!this.audioDict[word];
-        } else {
-            return false;
-        }
-    }
-    
     getAudioUrlArray(word: string): string[][] {
         if (this.audioDict[word] && this.audioDict[word].length > 0) {
             return this.audioDict[word].map(u => [u]);
