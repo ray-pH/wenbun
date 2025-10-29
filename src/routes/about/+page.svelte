@@ -25,7 +25,7 @@
         
         <h4>v0.19.1 (2025-10-29)</h4>
         <ul>
-            <li><b>Audio</b>: Added a setting to use AI generated audio for words that has no audio recording in the database.</li>
+            <li><b>Audio</b>: Added a setting to use AI generated audio for words that have no audio recording in the database.</li>
         </ul>
 
         <h4>v0.19.0 (2025-10-27)</h4>
