@@ -325,6 +325,9 @@
                 <SettingsItem key="zhPlayAudio">
                     <input type="checkbox" bind:checked={config.zh.playAudio}>
                 </SettingsItem>
+                <SettingsItem key="zhUseAiGeneratedAudioForMissingAudio">
+                    <input type="checkbox" bind:checked={config.zh.useAiGeneratedAudioForMissingAudio}>
+                </SettingsItem>
                 <SettingsItem key="zhForceStopAudioOnNextCard">
                     <input type="checkbox" bind:checked={config.zh.forceStopAudioOnNextCard}>
                 </SettingsItem>

@@ -114,6 +114,7 @@ export interface WenbunConfig {
         mandarinReading?: ChineseMandarinReading;
         playAudio?: boolean;
         forceStopAudioOnNextCard?: boolean;
+        useAiGeneratedAudioForMissingAudio?: boolean;
     }
     
     // experimental
@@ -157,6 +158,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
         mandarinReading: ChineseMandarinReading.Pinyin,
         playAudio: true,
         forceStopAudioOnNextCard: false,
+        useAiGeneratedAudioForMissingAudio: false,
     },
     
     _experimentalFixApplePencil: false,
