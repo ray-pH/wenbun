@@ -550,6 +550,14 @@ export class App {
         await this.save();
     }
     
+    debugSimulateRateCard(deckId: string, cardId: number, grade: FSRS.Grade, date?: Date): void {
+        const card = this.getCard(deckId, cardId, true);
+        if (!card) return;
+        const fsrs = this.fsrs;
+        const schedulingCards = fsrs.repeat(card, date ?? new Date()) as FSRS.RecordLog;
+        this.setCard(deckId, cardId, schedulingCards[grade].card);
+    }
+    
     rateCard(deckId: string, cardId: number, grade: FSRS.Grade, date?: Date): void {
         // if card is rated, remove from warm up
         this.stopWarmUp(deckId, cardId);
