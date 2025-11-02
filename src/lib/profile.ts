@@ -7,6 +7,8 @@ import { ApiRoute, apiUrl, apiAuthUrl, apiFetch, IS_USE_TOKEN_AUTH } from "./api
 import _ from "lodash";
 import type { IStorage } from "./storage";
 import { isOnlineClient } from "./util";
+import { isTauri } from "@tauri-apps/api/core";
+import { openUrl } from '@tauri-apps/plugin-opener';
 
 const STORE_KEY_LOGIN_STATUS = "loginStatus"
 const STORE_KEY_BACKUP_PROFILE_DATA_BEFORE_LOGIN = "backupProfileDataBeforeLogin"
@@ -399,8 +401,11 @@ export class Profile {
     async loginGoogle(app: App) {
         await this.saveBackupProfileDataBeforeLogin(app);
         // TODO: compare with stored login info
-        if (IS_USE_TOKEN_AUTH) {
-            window.location.assign(apiAuthUrl(ApiRoute.AuthGoogleToken) + "?redirect=" + encodeURIComponent(window.location.origin + '/auth-token'));
+        if (isTauri()) {
+            // TODO: maybe different 
+            const scheme = "wenbun://"
+            const url = apiAuthUrl(ApiRoute.AuthGoogleToken) + "?redirect=" + encodeURIComponent(scheme + 'auth-token')
+            openUrl(url);
         } else {
             window.location.assign(apiAuthUrl(ApiRoute.AuthGoogle) + "?redirect=" + encodeURIComponent(window.location.href));
         }

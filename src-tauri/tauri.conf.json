@@ -21,6 +21,20 @@
       "csp": null
     }
   },
+  "plugins": {
+    "deep-link": {
+      "mobile": [
+        {
+          "scheme": ["wenbun"],
+          "host": "auth-token",
+          "appLink": false
+        }
+      ],
+      "desktop": {
+          "schemes": ["wenbun"]
+       }
+    }
+  },
   "bundle": {
     "active": true,
     "targets": "all",
