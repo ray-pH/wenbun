@@ -4,7 +4,7 @@
     import { onMount } from 'svelte';
     import { getAudioUrl, TONE_PREFIX, WENBUN_TTS_URL } from '$lib/chinese';
     import { type CharacterWriterData, type CharacterWriterConfig, parseIntOrUndefined, lerp, linmap } from '$lib/util';
-    import type { App } from '$lib/app';
+    import { WritingMode, type App } from '$lib/app';
     import { base } from '$app/paths';
     import { AudioSequence } from '$lib/audioSequence';
     import { AutoReview, AutoReviewGradeClass, AutoReviewGradeFAClass, AutoReviewGradeLabel, type AutoReviewData } from '$lib/autoReview';
@@ -50,6 +50,7 @@
 		autoReviewData: AutoReviewData;
 		isShowHealthBar: boolean;
 		isSupportedByHanziWriter: boolean;
+		writingMode: WritingMode;
 		app: App;
 	}
     let { 
@@ -59,6 +60,7 @@
         isShowHealthBar = false,
         isDictationMode = false,
         isSupportedByHanziWriter = true,
+        writingMode = WritingMode.Default,
         autoReviewData = $bindable()
     }: Props = $props();
     
@@ -78,7 +80,7 @@
     function completeChar() {
         isStopPlayAudio = true;
         if (unmounted) return;
-        if (cardConfig.isFirstTime) {
+        if (cardConfig.isFirstTime || writingMode === WritingMode.External) {
             if (!animationDontGoToNextChar) {
                 completedCharCount = (completedCharCount + 1) % characterData!.characters.length;
             }
@@ -116,12 +118,13 @@
             writer.hideOutline();
         }
         const tone = getChineseTone(characterData.tags[index] ?? []);
+        const externalAndDone = writingMode === WritingMode.External && isComplete;
         writer = HanziWriter.create('grid-background-target', characterData.characters[index], {
             width: width,
             height: height,
             padding: 5,
             showCharacter: false, 
-            showOutline: cardConfig.isShowOutline,
+            showOutline: cardConfig.isShowOutline || externalAndDone,
             highlightOnComplete: false,
             strokeColor: app.getChineseToneColor(tone) ?? "#555",
             // drawing
@@ -143,7 +146,7 @@
                     .then(data => onComplete(data));
             }
         });
-        if (!cardConfig.isFirstTime) {
+        if (!cardConfig.isFirstTime && !externalAndDone) {
             writer.quiz({
                 leniency: app.getConfig().strokeLeniency,
                 onMistake: () => { 
@@ -262,6 +265,13 @@
         const {hard, again} = AutoReview.getGradeMistakeCountLimits(total);
         healthBarAgainLimit = again;
         healthBarHardLimit = hard;
+    }
+    
+    function onExternalWritingModeComplete() {
+        onComplete({...autoReviewData});
+        isComplete = true;
+        surpressGradeIndicator = false;
+        setupHanziWriter(0)
     }
     
     
@@ -558,6 +568,33 @@
             transition: 0.2s;
         }
     }
+    
+    .external-writing-mode-div {
+        position: absolute;
+        width: 100%;
+        height: 85%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        .panel {
+            display: flex;
+            align-items: center;
+            padding: 2em;
+            margin: 2em;
+            background-color: #00000000;
+            border-radius: 0.5rem;
+            flex-direction: column;
+            gap: 1em;
+            justify-content: center;
+            .instruction {
+                text-align: center;
+            }
+            .button {
+                width: fit-content;
+                padding: 2em 4em;
+            }
+        }
+    }
 </style>
 
 <div class="character-writer">
@@ -599,6 +636,18 @@
                         style={`--mistake-count: ${autoReviewData.incorrectStrokeCount}; --limit-hard: ${healthBarHardLimit}; --limit-again: ${healthBarAgainLimit}`}
                     ></div>
                 {/if}
+                {#if writingMode === WritingMode.External && !isComplete && !cardConfig.isFirstTime}
+                    <div class="external-writing-mode-div">
+                        <div class="panel">
+                            <div class="instruction">
+                                Write on paper or elsewhere outside the app.
+                            </div>
+                            <button class="button" onclick={() => onExternalWritingModeComplete()}>
+                                Done
+                            </button>
+                        </div>
+                    </div>
+                {/if}
             <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} id="grid-background-target">
             <line x1={p} y1={p} x2={width - p} y2={height - p} stroke={gridStroke} />
             <line x1={width - p} y1={p} x2={p} y2={height - p} stroke={gridStroke} />
@@ -626,7 +675,7 @@
                     </button>
                     <div class="character-box-container chinese-font">
                         {#each characterData.characters as character, i}
-                            {#if i < completedCharCount || cardConfig.isFirstTime}
+                            {#if i < completedCharCount || cardConfig.isFirstTime || (writingMode === WritingMode.External && isComplete)}
                                 <span>{character}</span>
                             {:else}
                                 <span class="empty-character-box">&#x3000;</span>
