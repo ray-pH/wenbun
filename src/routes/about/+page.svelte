@@ -23,6 +23,29 @@
     <div class="changelog-container">
         Changelog
         
+        <h4>v0.20.0 (2025-11-02)</h4>
+        <ul>
+            <li><b>Android</b>:
+                <ul>
+                    <li>Fix google login</li>
+                    <li>Register <code>wenbun://</code> scheme</li>
+                </ul>
+                <div class="note">
+                    Actually working google login for the android app.
+                </div>
+            </li>
+            <li><b>Writing</b>:
+                <ul>
+                    <li>Add <b>External</b> writing mode</li>
+                </ul>
+                <div class="note">
+                    Allows users to practice writing characters on paper or outside the app, instead of drawing strokes on-screen. 
+                    This mode disables automatic stroke grading and tracking.
+                </div>
+            </li>
+            <li>Update dictionary for "打"</li>
+        </ul>
+        
         <h4>v0.19.1 (2025-10-29)</h4>
         <ul>
             <li><b>Audio</b>: Added a setting to use AI generated audio for words that have no audio recording in the database.</li>
@@ -525,5 +548,11 @@
     
     .privacy-policy-link a {
         color: var(--wenbun-blue);
+    }
+    
+    code {
+        background-color: #f0f0f0;
+        padding: 0.2em 0.4em;
+        border-radius: 0.3em;
     }
 </style>
