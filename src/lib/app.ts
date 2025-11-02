@@ -53,6 +53,12 @@ export enum ReviewMode {
     LearnOnly = "Learn Only",
 }
 
+export enum WritingMode {
+    Default = "Default",
+    // Manual = "Manual",
+    External = "External",
+}
+
 export interface DeckData {
     label?: string;
     deck: string[];
@@ -93,6 +99,7 @@ export interface WenbunConfig {
     strokeFadeDuration?: number;
     showAutoGradingBar?: boolean;
     showHintAfterMissesCount?: number;
+    writingMode?: WritingMode;
     
     // FSRS
     learningSteps?: FSRS.Steps;
@@ -140,6 +147,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     strokeFadeDuration: 400,
     showAutoGradingBar: false,
     showHintAfterMissesCount: 3,
+    writingMode: WritingMode.Default,
     
     learningSteps: ["1m", "10m"],
     previouslyStudiedLearningSteps: ["1m", "5d"],

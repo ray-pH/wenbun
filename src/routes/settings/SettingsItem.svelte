@@ -18,6 +18,7 @@
         gap: 1em;
         .settings-label-help {
             color: #00000090;
+            white-space: pre-line;
             font-size: 0.8em;
             max-width: 18em;
         }

@@ -183,6 +183,11 @@ export const SETTINGS_LABEL_DATA = {
         label: "Show Hint After Misses",
         help: "Specifies the number of misses before the hint will be shown.",
     },
+    writingMode: {
+        label: "Writing Mode",
+        help: "- [Default] Write each stroke on-screen for automatic grading. \n - [External] write on paper or elsewhere outside the app."
+    },
+    
     isShowPlecoLink: {
         label: "Show Pleco Link",
         help: "When enabled, a link to open Pleco will be shown on the dictionary.",

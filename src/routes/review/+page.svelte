@@ -1,6 +1,6 @@
 <script lang="ts">
     import { base } from '$app/paths';
-    import { App, ReviewMode, WenBunCustomState } from "$lib/app";
+    import { App, ReviewMode, WenBunCustomState, WritingMode } from "$lib/app";
     import CharacterWriter from "$lib/components/CharacterWriter.svelte";
     import * as FSRS from "ts-fsrs"
     import { onMount } from "svelte";
@@ -53,7 +53,7 @@
         wordlist.registerCustomEntryDict(app.getCustomEntryDict(deckId));
         app = app;
         isZhTraditional = tags?.includes(DECK_TAGS.ZH_TRAD);
-        isAutoGrading = app.isAutoGrading();
+        isAutoGrading = app.isAutoGrading() && app.getConfig().writingMode !== WritingMode.External;
         isGradeWarmUpCards = app.getConfig().gradeWarmUpCards;
         isPageReady = true;
         if (data.isExtraStudy) app.extraStudyHandler.registerReviewCardIdsOverride(cardIds);
@@ -327,6 +327,7 @@
                     cardConfig={getCardConfig(currentCardId)}
                     autoGrade={autoGrade}
                     bind:autoReviewData={autoReviewData}
+                    writingMode={app.getConfig().writingMode}
                 />
             {/key}
         </div>
