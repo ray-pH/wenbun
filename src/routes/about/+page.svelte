@@ -23,7 +23,7 @@
     <div class="changelog-container">
         Changelog
         
-        <h4>v0.20.0 (2025-11-02)</h4>
+        <h4>v0.20.0 (2025-11-03)</h4>
         <ul>
             <li><b>Android</b>:
                 <ul>
@@ -34,6 +34,11 @@
                     Actually working google login for the android app.
                 </div>
             </li>
+            <li><b>Deck</b>:
+                <ul>
+                    <li>Fix major issue where deck data can be accidentally wiped out.</li>
+                </ul>
+            </li>
             <li><b>Writing</b>:
                 <ul>
                     <li>Add <b>External</b> writing mode</li>
@@ -43,7 +48,11 @@
                     This mode disables automatic stroke grading and tracking.
                 </div>
             </li>
-            <li>Update dictionary for "打"</li>
+            <li><b>Dictionary</b>:
+                <ul>
+                    <li>Update dictionary for "打"</li>
+                </ul>
+            </li>
         </ul>
         
         <h4>v0.19.1 (2025-10-29)</h4>
