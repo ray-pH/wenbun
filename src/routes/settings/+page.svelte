@@ -1,7 +1,7 @@
 <script lang="ts">
     import { base } from '$app/paths';
     import { onMount } from "svelte";
-    import { App, NewCardOrder, type WenbunConfig } from "$lib/app";
+    import { App, NewCardOrder, WritingMode, type WenbunConfig } from "$lib/app";
     import TopBar from "$lib/components/TopBar.svelte";
     import _ from "lodash";
     import SettingsItem from "./SettingsItem.svelte";
@@ -190,10 +190,25 @@
         <div class="settings-section">
             <div class="section-title">Learning</div>
             <div class="section-container">
-                <SettingsItem key="gradingMethod">
-                    <select bind:value={config.gradingMethod}>
-                        <option value="auto">auto</option>
-                        <option value="manual">manual</option>
+                {#if config.writingMode === WritingMode.External}
+                    <SettingsItem key="gradingMethod">
+                        <select disabled value="manual">
+                            <option value="auto">auto</option>
+                            <option value="manual">manual</option>
+                        </select>
+                    </SettingsItem>
+                {:else}
+                    <SettingsItem key="gradingMethod">
+                        <select bind:value={config.gradingMethod}>
+                            <option value="auto">auto</option>
+                            <option value="manual">manual</option>
+                        </select>
+                    </SettingsItem>
+                {/if}
+                <SettingsItem key="writingMode">
+                    <select bind:value={config.writingMode}>
+                        <option value="{WritingMode.Default}">Default</option>
+                        <option value="{WritingMode.External}">External</option>
                     </select>
                 </SettingsItem>
                 <SettingsItem key="newCardPerDay">

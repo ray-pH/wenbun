@@ -179,6 +179,7 @@
             opacity: 0.6;
         }
         &.invisible {
+            pointer-events: none;
             opacity: 0;
         }
     }

@@ -53,6 +53,12 @@ export enum ReviewMode {
     LearnOnly = "Learn Only",
 }
 
+export enum WritingMode {
+    Default = "Default",
+    // Manual = "Manual",
+    External = "External",
+}
+
 export interface DeckData {
     label?: string;
     deck: string[];
@@ -93,6 +99,7 @@ export interface WenbunConfig {
     strokeFadeDuration?: number;
     showAutoGradingBar?: boolean;
     showHintAfterMissesCount?: number;
+    writingMode?: WritingMode;
     
     // FSRS
     learningSteps?: FSRS.Steps;
@@ -140,6 +147,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     strokeFadeDuration: 400,
     showAutoGradingBar: false,
     showHintAfterMissesCount: 3,
+    writingMode: WritingMode.Default,
     
     learningSteps: ["1m", "10m"],
     previouslyStudiedLearningSteps: ["1m", "5d"],
@@ -482,6 +490,8 @@ export class App {
     }
     
     async addDeckById(deckId: string): Promise<void> {
+        // do nothing if deck is already added
+        if (this.decks.includes(deckId)) return;
         const deckData = await this.getInitDeckDataById(deckId);
         if (!deckData) return Promise.reject(new Error("loading deck failed"))
         this.addDeck(deckId, deckData, deckId);
@@ -540,6 +550,14 @@ export class App {
     async saveConfig(config: WenbunConfig): Promise<void> {
         this.config = config;
         await this.save();
+    }
+    
+    debugSimulateRateCard(deckId: string, cardId: number, grade: FSRS.Grade, date?: Date): void {
+        const card = this.getCard(deckId, cardId, true);
+        if (!card) return;
+        const fsrs = this.fsrs;
+        const schedulingCards = fsrs.repeat(card, date ?? new Date()) as FSRS.RecordLog;
+        this.setCard(deckId, cardId, schedulingCards[grade].card);
     }
     
     rateCard(deckId: string, cardId: number, grade: FSRS.Grade, date?: Date): void {
