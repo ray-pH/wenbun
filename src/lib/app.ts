@@ -490,6 +490,8 @@ export class App {
     }
     
     async addDeckById(deckId: string): Promise<void> {
+        // do nothing if deck is already added
+        if (this.decks.includes(deckId)) return;
         const deckData = await this.getInitDeckDataById(deckId);
         if (!deckData) return Promise.reject(new Error("loading deck failed"))
         this.addDeck(deckId, deckData, deckId);
