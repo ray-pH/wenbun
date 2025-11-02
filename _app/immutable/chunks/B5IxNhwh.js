@@ -1,0 +1,1 @@
+import{j as _,_ as c,$ as i,k as h,l as r,m as k,G as y,y as d,A as l,U as u}from"./DLK13rFv.js";function I(f,n,t){r&&k();var e=f,s=u,a,o=_()?c:i;h(()=>{o(s,s=n())&&(a&&y(a),a=d(()=>t(e)))}),r&&(e=l)}export{I as k};

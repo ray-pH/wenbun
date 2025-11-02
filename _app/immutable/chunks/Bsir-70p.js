@@ -1,0 +1,1 @@
+import{Q as S,R as T,S as h,z as k,T as c}from"./DLK13rFv.js";function t(r,i){return r===i||(r==null?void 0:r[c])===i}function z(r={},i,a,q){return S(()=>{var f,s;return T(()=>{f=s,s=[],h(()=>{r!==a(...s)&&(i(r,...s),f&&t(a(...f),r)&&i(null,...f))})}),()=>{k(()=>{s&&t(a(...s),r)&&i(null,...s)})}}),r}export{z as b};
