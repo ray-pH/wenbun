@@ -23,6 +23,11 @@
     <div class="changelog-container">
         Changelog
         
+        <h4>v0.20.1 (2025-11-03)</h4>
+        <ul>
+            <li><b>Android</b>: Fix missing icon/app launcher.</li>
+        </ul>
+        
         <h4>v0.20.0 (2025-11-03)</h4>
         <ul>
             <li><b>Android</b>:
