@@ -432,7 +432,9 @@
                 </button>
             {/if}
         </div>
-        <ButtonPopoverMenu items={rightbuttonActions} align="end" />
+        <div class="group-buttons-container" style="align-items: flex-end;">
+            <ButtonPopoverMenu items={rightbuttonActions} align="end" blueButton={true} />
+        </div>
     </div>
 {/snippet}
 
