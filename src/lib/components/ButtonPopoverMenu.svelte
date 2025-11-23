@@ -11,6 +11,7 @@
         sheetBreakpointPx?: number;               // under this width -> mobile sheet
         closeOnClick?: boolean;
         ariaLabel?: string;                       // trigger label
+        blueButton?: boolean;
     }
 
     let {
@@ -18,7 +19,8 @@
         align = 'end',
         sheetBreakpointPx = 640,
         closeOnClick = true,
-        ariaLabel = 'More options'
+        ariaLabel = 'More options',
+        blueButton = false,
     }: Props = $props();
 
     let open = $state(false);
@@ -141,6 +143,7 @@
     <button
         type="button"
         class="tdm-trigger"
+        class:blue={blueButton}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={menuId}
@@ -257,6 +260,16 @@
     }
     .tdm-trigger:hover {
         background: var(--tdm-bg-hover, rgba(0,0,0,0.04));
+    }
+    
+    .tdm-trigger.blue {
+        background: var(--wenbun-blue);
+        color: white;
+        opacity: 1;
+        border-radius: 0.5em;
+        &:hover {
+            opacity: 0.8;
+        }
     }
 
     /* Desktop popover */
