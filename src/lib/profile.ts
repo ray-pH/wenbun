@@ -413,7 +413,10 @@ export class Profile {
     async logout(app: App) {
         await this.updateLoginStatus(LoginStatus.loggedOut);
         await app.updateLastSyncTime(new Date(0));
-        window.location.assign(apiAuthUrl(ApiRoute.AuthLogout));
+        if (isTauri()) {
+            localStorage.removeItem('jwt');
+        }
+        window.location.assign(apiAuthUrl(ApiRoute.AuthLogout) + "?redirect=" + encodeURIComponent(window.location.href));
     }
    
     /**
