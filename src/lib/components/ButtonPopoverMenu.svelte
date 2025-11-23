@@ -3,6 +3,7 @@
         icon: string;
         label: string;
         onclick: () => void;
+        isDisabled?: () => boolean;
     }
     interface Props {
         items: MenuItem[];
@@ -24,6 +25,7 @@
     let triggerEl: HTMLButtonElement | null = null;
     let menuEl: HTMLDivElement | null = $state(null);
     let activeIndex = $state<number>(-1);
+    let disabledStates = $state<boolean[]>([]);
 
     const menuId = `menu-${Math.random().toString(36).slice(2)}`;
 
@@ -32,12 +34,14 @@
     }
 
     function openMenu() {
+        checkDisabled();
         if (open) return;
         open = true;
         queueMicrotask(() => focusItem(0));
         addGlobalListeners();
     }
     function closeMenu(focusTrigger = true) {
+        checkDisabled();
         if (!open) return;
         open = false;
         activeIndex = -1;
@@ -60,6 +64,17 @@
             e.preventDefault();
             openMenu();
         }
+    }
+    
+    function checkDisabled() {
+        for (let i = 0; i < items.length; i++) {
+            checkDisabledByIndex(i);
+        }
+    }
+    
+    function checkDisabledByIndex(idx: number) {
+        const f = items[idx].isDisabled;
+        disabledStates[idx] = f ? f() : false;
     }
 
     function onMenuKeydown(e: KeyboardEvent) {
@@ -160,6 +175,7 @@
                                 type="button"
                                 role="menuitem"
                                 class="tdm-item"
+                                disabled={disabledStates[i]}
                                 data-menuitem
                                 onclick={() => onItemClick(item)}
                                 onmouseenter={() => (activeIndex = i)}
@@ -190,6 +206,7 @@
                             <button
                                 type="button"
                                 role="menuitem"
+                                disabled={disabledStates[i]}
                                 class="tdm-item"
                                 data-menuitem
                                 onclick={() => onItemClick(item)}

@@ -10,6 +10,7 @@
     import { SvelteMap, SvelteSet } from "svelte/reactivity";
     import TableEditView from './TableEditView.svelte';
     import { ExtraStudyMode } from '$lib/appExtraStudyHandler';
+    import ButtonPopoverMenu from '$lib/components/ButtonPopoverMenu.svelte';
     
     const LOCALSTORAGE_KEY_DECK_VIEW = "deckView"
 
@@ -266,6 +267,28 @@
         }
         return map;
     }
+    
+    // TODO: allow disabled buttons
+    const rightbuttonActions = [
+        { icon: 'fa fa-solid fa-chalkboard-user', label: 'Start extra study', onclick: () => startExtraStudy(),
+            isDisabled: () => selections.size == 0,
+        },
+        { icon: 'fa fa-solid fa-right-left', label: 'Move to another group', onclick: () => moveCardsIntoGroup(),
+            isDisabled: () => selections.size == 0,
+        },
+        { icon: 'fa fa-solid fa-book-open', label: 'Mark as previously studied', onclick: () => addPreviouslyStudiedMark(),
+            isDisabled: () => selections.size == 0,
+        },
+        { icon: 'fa fa-solid fa-book-open', label: 'Remove previously studied mark', onclick: () => removePreviouslyStudiedMark(),
+            isDisabled: () => selections.size == 0 || !isSelectionContainPreviouslyStudied,
+        },
+        { icon: 'fa fa-solid fa-square-xmark', label: 'Mark as ignored', onclick: () => addIgnoredMark(),
+            isDisabled: () => selections.size == 0,
+        },
+        { icon: 'fa fa-solid fa-square-xmark', label: 'Remove ignored mark', onclick: () => removeIgnoredMark(),
+            isDisabled: () => selections.size == 0 || !isSelectionContainIgnored,
+        },
+    ]
 </script>
 
 <TopBar title="Deck"></TopBar>
@@ -409,22 +432,7 @@
                 </button>
             {/if}
         </div>
-        <div class="group-buttons-container" style="align-items: flex-end;">
-            <button class="button" disabled={selections.size == 0} onclick={() => startExtraStudy()}>
-                <i class="fa-solid fa-chalkboard-user"></i><span>start <b>extra study</b> from selection</span></button>
-            <button class="button" disabled={selections.size == 0} onclick={() => moveCardsIntoGroup()}>
-                <i class="fa-solid fa-right-left"></i><span>move to another group</span></button>
-            <button class="button" disabled={selections.size == 0} onclick={() => addPreviouslyStudiedMark()}>
-                <i class="fa-solid fa-book-open"></i><span>mark as <b>previously studied</b></span></button>
-            <button class="button" disabled={selections.size == 0 || !isSelectionContainPreviouslyStudied} 
-                onclick={() => removePreviouslyStudiedMark()}>
-                <i class="fa-solid fa-book-open"></i><span>remove <b>previously studied</b> mark</span></button>
-            <button class="button" disabled={selections.size == 0} onclick={() => addIgnoredMark()}>
-                <i class="fa-solid fa-square-xmark"></i><span>mark as <b>ignored</b></span></button>
-            <button class="button" disabled={selections.size == 0 || !isSelectionContainIgnored} 
-                onclick={() => removeIgnoredMark()}>
-                <i class="fa-solid fa-square-xmark"></i><span>remove <b>ignored</b> mark</span></button>
-        </div>
+        <ButtonPopoverMenu items={rightbuttonActions} align="end" />
     </div>
 {/snippet}
 
