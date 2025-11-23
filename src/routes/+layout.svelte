@@ -5,6 +5,7 @@
     import Popup from '$lib/components/Popup.svelte';
     import { navigationHistory } from '$lib/navigation';
     import { humanReadableByte, isRunningInPWA } from '$lib/util';
+    import { isTauri } from '@tauri-apps/api/core';
     import { getCurrent, onOpenUrl } from '@tauri-apps/plugin-deep-link';
     
     function handleDeepLink(url: string) {
@@ -12,20 +13,22 @@
         const stripped = url.replace('wenbun://', '');
         goto(base + '/' + stripped);
     }
-    getCurrent().then((startUrls) => {
-        if (startUrls) {
-            // console.log('startUrls', startUrls)
-            for (const url of startUrls) {
+    if (isTauri()) {
+        getCurrent().then((startUrls) => {
+            if (startUrls) {
+                // console.log('startUrls', startUrls)
+                for (const url of startUrls) {
+                    handleDeepLink(url);
+                }
+            }
+        });
+        onOpenUrl((urls) => {
+            // console.log('onOpenUrl', urls)
+            for (const url of urls) {
                 handleDeepLink(url);
             }
-        }
-    });
-    onOpenUrl((urls) => {
-        // console.log('onOpenUrl', urls)
-        for (const url of urls) {
-            handleDeepLink(url);
-        }
-    })
+        })
+    }
 
     let isPrecaching = false;
     let initialStorageUse = 0; 
