@@ -145,7 +145,7 @@
     <div class="top-container">
         {#if isShowDomainMigration && !isInDev}
             <div style="display: flex; align-items: center;">
-                <div class="domain-notice">
+                <!-- <div class="domain-notice">
                     <p>
                         You are visiting an old domain. 
                         <br><br>
@@ -158,7 +158,7 @@
                         <i class="fa-solid fa-globe"></i>
                         Go to the new domain
                     </a>
-                </div>
+                </div> -->
             </div>
         {/if}
         <a class="a-button" style="background-color: #A0D0F0;" href="{base}/about/">
