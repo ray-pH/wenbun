@@ -13,9 +13,10 @@
         isEditDeck: boolean;
         toggleSelection: (id: number) => void;
         selections: SvelteSet<number>;
+        accordionState: SvelteMap<string, boolean>;
     }
     let { 
-        app, deckId, isEditDeck, toggleSelection, selections
+        app, deckId, isEditDeck, toggleSelection, selections, accordionState
     }: Props = $props();
 
     let wordlist = new ChineseCharacterWordlist();
@@ -25,8 +26,6 @@
     let deckData = $state(app.deckData[deckId]);
     let lang = $derived(isZhCantonese ? 'yue' : 'zh') as Lang;
     // let _refresh = $state(0);
-    
-    let accordionState = $state(new SvelteMap<string, boolean>());
     
     function toggleAccordion(id: string) {
         accordionState.set(id, !accordionState.get(id));
@@ -177,7 +176,6 @@
         await wordlist.init(lang, isUseExtraDict);
         wordlist.registerCustomEntryDict(app.getCustomEntryDict(deckId));
         isInit = true;
-        for (const g of deckData.groups) accordionState.set(g.label, true);
     })
 </script>
 
