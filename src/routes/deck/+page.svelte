@@ -363,6 +363,7 @@
                 isEditDeck={view == DeckView.TableEdit}
                 toggleSelection={(id: number) => toggleSelect(id)}
                 selections={selections}
+                accordionState={accordionState}
             >
             </TableEditView>
         {/key}
