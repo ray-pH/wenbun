@@ -357,6 +357,10 @@
                 <SettingsItem key="zhForceStopAudioOnNextCard">
                     <input type="checkbox" bind:checked={config.zh.forceStopAudioOnNextCard}>
                 </SettingsItem>
+                <a class="button" href="{base}/settings/audio-settings" aria-label="Audio Settings">
+                    <i class="fa-solid fa-sliders"></i>&nbsp;
+                    More Audio Settings
+                </a>
                 <SettingsItem key="zhIsColorBasedOnTone">
                     <input type="checkbox" bind:checked={config.zh.isColorBasedOnTone}>
                 </SettingsItem>

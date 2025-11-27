@@ -71,6 +71,7 @@ export class ChineseCharacterWordlist {
     private charDecompositionDict: Record<string, IChineseCharDecomposition> = {};
     private customNotes: Record<string, string> = {};
     private customEntryDict: Record<string, {reading?: string, meaning?: string}> = {};
+    private audioSrcBlacklist: string[] = [];
     public lang: Lang = 'zh';
     public initializing = false;
     public initialized = false;
@@ -79,10 +80,11 @@ export class ChineseCharacterWordlist {
     constructor() {
     }
     
-    async init(lang: Lang, useExtraDict: boolean = false, useAiGeneratedAudio: boolean = false): Promise<void> {
+    async init(lang: Lang, useExtraDict: boolean = false, useAiGeneratedAudio: boolean = false, audioSrcBlacklist: string[] = []): Promise<void> {
         this.initializing = true;
         this.lang = lang;
         this.useAiGeneratedAudio = useAiGeneratedAudio;
+        this.audioSrcBlacklist = audioSrcBlacklist;
         const dictP = async () => {
             const res = await fetch(CHINESE_DICT_SRC)
             const dict = await res.json();
@@ -196,9 +198,15 @@ export class ChineseCharacterWordlist {
         return this.dict[word] ?? this.dict[this.simplifiedConverter.convert(word)];
     }
     
+    getAudioDictEntry(word: string): string[] {
+        const entry = this.audioDict[word] ?? [];
+        return entry.filter(url => !this.audioSrcBlacklist.some(src => url.startsWith(src)));
+    }
+    
     getAudioUrlArray(word: string): string[][] {
-        if (this.audioDict[word] && this.audioDict[word].length > 0) {
-            return this.audioDict[word].map(u => [u]);
+        const entry = this.getAudioDictEntry(word);
+        if (entry && entry.length > 0) {
+            return entry.map(u => [u]);
         } else if (this.lang == 'zh'){
             if (this.useAiGeneratedAudio) {
                 return [[WENBUN_TTS_URL + '/tts?text=' + encodeURIComponent(word)]];
