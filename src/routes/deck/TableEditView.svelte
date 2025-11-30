@@ -6,6 +6,8 @@
     import { isBuiltinDeck } from "$lib/util";
     import { onMount } from "svelte";
     import { SvelteMap, SvelteSet } from "svelte/reactivity";
+    import Page from "../upload-custom-deck/help/+page.svelte";
+    import TopRevealBar from "$lib/components/TopRevealBar.svelte";
     
     interface Props {
         app: App;
@@ -16,13 +18,14 @@
         accordionState: SvelteMap<string, boolean>;
     }
     let { 
-        app, deckId, isEditDeck, toggleSelection, selections, accordionState
+        app, deckId, isEditDeck, toggleSelection, selections, accordionState,
     }: Props = $props();
 
     let wordlist = new ChineseCharacterWordlist();
     let isZhCantonese = $state(false);
     let isShowId = $state(false);
     let isInit = $state(false);
+    let isBulkEdit = $state(false);
     let deckData = $state(app.deckData[deckId]);
     let lang = $derived(isZhCantonese ? 'yue' : 'zh') as Lang;
     // let _refresh = $state(0);
@@ -105,15 +108,18 @@
     let editType: EditType = $state('reading');
     let originalEditStr = $state('');
     let editStr = $state('');
+    let originalBulkEditValues = new SvelteMap<string, string>();
+    let defaultBulkEditValues = new SvelteMap<string, string>();
+    let bulkEditValues: SvelteMap<string, string> = $state(new SvelteMap());
     
     function isEditing(id: number, typ: EditType) {
         return editId === id && editType === typ;
     }
     
-    function getEditValue(id: number, typ: EditType): string {
+    function getEditValue(id: number, typ: EditType, ignoreCustomEntry: boolean = false): string {
         switch (typ) {
-            case 'reading': return wordlist.getReading(deckData.deck[id], lang);
-            case 'meaning': return wordlist.getMeaning(deckData.deck[id]);
+            case 'reading': return wordlist.getReading(deckData.deck[id], lang, undefined, ignoreCustomEntry);
+            case 'meaning': return wordlist.getMeaning(deckData.deck[id], ignoreCustomEntry);
             case 'word': return deckData.deck[id];
         }
     }
@@ -122,6 +128,56 @@
         editStr = originalEditStr = getEditValue(id, typ);
         editId = id;
         editType = typ;
+    }
+    
+    function bulkEditStart() {
+        isBulkEdit = true;
+        const ids = deckData.groups.flatMap(g => g.cardIds);
+        bulkEditValues.clear();
+        originalBulkEditValues.clear();
+        for (const id of ids) {
+            const isCustomEntry = wordlist.isCustomEntry(deckData.deck[id]);
+            const reading = isCustomEntry.reading ? getEditValue(id, 'reading') : '';
+            const meaning = isCustomEntry.meaning ? getEditValue(id, 'meaning') : '';
+            
+            bulkEditValues.set(`${id}-reading`, reading);
+            bulkEditValues.set(`${id}-meaning`, meaning);
+            originalBulkEditValues.set(`${id}-reading`, reading);
+            originalBulkEditValues.set(`${id}-meaning`, meaning);
+            
+            const defaultReading = getEditValue(id, 'reading', true);
+            const defaultMeaning = getEditValue(id, 'meaning', true);
+            defaultBulkEditValues.set(`${id}-reading`, defaultReading);
+            defaultBulkEditValues.set(`${id}-meaning`, defaultMeaning);
+        }
+    }
+    async function bulkEditSave() {
+        for (const id of deckData.groups.flatMap(g => g.cardIds)) {
+            const readingId = `${id}-reading`;
+            if (bulkEditIsEdited(readingId)) {
+                app.setCustomEntry(deckId, id, bulkEditGetValue(readingId), 'reading');
+            }
+            const meaningId = `${id}-meaning`;
+            if (bulkEditIsEdited(meaningId)) {
+                app.setCustomEntry(deckId, id, bulkEditGetValue(meaningId), 'meaning');
+            }
+        }
+        await app.save();
+        isBulkEdit = false;
+        refresh();
+    }
+    function bulkEditCancel() {
+        bulkEditStart();
+        isBulkEdit = false;
+    }
+    function bulkEditGetValue(key: string) {
+        return bulkEditValues.get(key) ?? "";
+    }
+    function bulkEditSetValue(key: string, v: string) {
+        bulkEditValues.set(key, v);
+    }
+    function bulkEditIsEdited(key: string) {
+        return originalBulkEditValues.get(key) !== bulkEditValues.get(key);
     }
     
     function cancelEdit() {
@@ -145,9 +201,6 @@
         } else {
             app.setCustomEntry(deckId, editId, editStr, editType);
             await app.save();
-            
-            wordlist.resetCustomEntryDict();
-            wordlist.registerCustomEntryDict(app.getCustomEntryDict(deckId));
         }
         refresh();
         
@@ -166,6 +219,8 @@
     }
     
     function refresh() {
+        wordlist.resetCustomEntryDict();
+        wordlist.registerCustomEntryDict(app.getCustomEntryDict(deckId));
         deckData = app.deckData[deckId]; // refresh
     }
     
@@ -235,10 +290,25 @@
     {/if}
 {/snippet}
 
-<div>
+{#snippet topSettingsContent()}
+    <div class="bulk-edit-buttons-container">
+        {#if isBulkEdit}
+            <button class="button" onclick={() => bulkEditSave()}>Save Edit</button>
+            <button class="button" onclick={() => bulkEditCancel()}>Cancel</button>
+        {:else}
+            <button class="button" onclick={() => bulkEditStart()}>Start Bulk Edit</button>
+            <button class="button" onclick={() => addEmptyCard()}>Add New Empty Card</button>
+        {/if}
+    </div>
+{/snippet}
+<TopRevealBar>
+    {@render topSettingsContent()}
+</TopRevealBar>
+<div style="margin-bottom: 1em;">
+    {@render topSettingsContent()}
 </div>
 <div class="table-container">
-    {#if isEditDeck}
+    {#if isEditDeck && !isBulkEdit}
         <table class:is-show-id={isShowId}>
             {@render tableHeader([
                 {key: 'id', label: 'id'},
@@ -267,6 +337,57 @@
                                 </td>
                                 <td class="meaning">
                                     {@render editableCell(id, 'meaning', wordlist.getMeaning(deckData.deck[id]), wordlist.isCustomEntry(deckData.deck[id]).meaning)}
+                                </td>
+                            </tr>
+                        {/each}
+                    </tbody>
+                {/if}
+            {/each}
+        </table>
+        <div style="margin-top: 1em;">
+            <button class="button" onclick={() => addEmptyCard()}>Add New Empty Card</button>
+        </div>
+    {:else if isEditDeck && isBulkEdit}
+        <table class:is-show-id={isShowId}>
+            {@render tableHeader([
+                {key: 'id', label: 'id'},
+                {key: 'word', label: 'word'},
+                {key: 'reading', label: 'reading'},
+                {key: 'meaning', label: 'meaning'}
+            ])}
+            {#each deckData.groups as g}
+                {@render groupHeader(g.label)}
+                {#if isAccordionOpen(g.label)}
+                    <tbody>
+                        {#each getSortedCardIds(g.cardIds) as id}
+                            <tr class:selected={selections.has(id)}>
+                                <td class="id">{id}</td>
+                                <td class="word">
+                                    {@render editableCell(id, 'word', deckData.deck[id], true, 'width: 3em')}
+                                </td>
+                                <td class="reading">
+                                    <input
+                                        type="text"
+                                        placeholder={defaultBulkEditValues.get(`${id}-reading`)}
+                                        class="bulk-edit-input"
+                                        class:edited={bulkEditIsEdited(`${id}-reading`)}
+                                        bind:value={
+                                            () => bulkEditGetValue(`${id}-reading`),
+                                            v => bulkEditSetValue(`${id}-reading`, v)
+                                        }
+                                        style="width: 5em"
+                                    />
+                                </td>
+                                <td class="meaning">
+                                    <textarea
+                                        placeholder={defaultBulkEditValues.get(`${id}-meaning`)}
+                                        class="bulk-edit-textarea"
+                                        class:edited={bulkEditIsEdited(`${id}-meaning`)}
+                                        bind:value={
+                                            () => bulkEditGetValue(`${id}-meaning`),
+                                            v => bulkEditSetValue(`${id}-meaning`, v)
+                                        }
+                                    ></textarea>
                                 </td>
                             </tr>
                         {/each}
@@ -399,5 +520,22 @@
         .edit-button {
             color: white;
         }
+    }
+    
+    textarea {
+        max-width: 33vw;
+    }
+    
+    .bulk-edit-buttons-container {
+        display: flex;
+        gap: 0.5em;
+    }
+    
+    .bulk-edit-input.edited {
+        background-color: #EEE8AA;
+    }
+    
+    .bulk-edit-textarea.edited {
+        background-color: #EEE8AA;
     }
 </style>

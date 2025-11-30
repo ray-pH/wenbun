@@ -224,8 +224,8 @@ export class ChineseCharacterWordlist {
         // return this.audioDict[word]?.map(u => [u]) ?? [];
     }
     
-    getMeaning(word: string): string {
-        if (this.customEntryDict[word]?.meaning) return this.customEntryDict[word].meaning;
+    getMeaning(word: string, ignoreCustomEntry: boolean = false): string {
+        if (!ignoreCustomEntry && this.customEntryDict[word]?.meaning) return this.customEntryDict[word].meaning;
         const wordData = this.getWordData(word);
         return wordData?.meaning ?? '';
     }
@@ -233,9 +233,10 @@ export class ChineseCharacterWordlist {
     getReading(
         word: string,
         lang: Lang = 'zh',
-        mandarinReading: ChineseMandarinReading = ChineseMandarinReading.Pinyin
+        mandarinReading: ChineseMandarinReading = ChineseMandarinReading.Pinyin,
+        ignoreCustomEntry: boolean = false
     ): string {
-        if (this.customEntryDict[word]?.reading) return this.customEntryDict[word].reading;
+        if (!ignoreCustomEntry && this.customEntryDict[word]?.reading) return this.customEntryDict[word].reading;
         const wordData = this.getWordData(word);
         if (!wordData) return '';
         switch (lang) {
