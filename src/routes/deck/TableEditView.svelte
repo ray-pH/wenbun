@@ -15,10 +15,16 @@
         isEditDeck: boolean;
         toggleSelection: (id: number) => void;
         selections: SvelteSet<number>;
-        accordionState: SvelteMap<string, boolean>;
+        accordionState?: SvelteMap<string, boolean>;
+        filterIds?: number[];
+        standaloneBulkEdit?: boolean;
+        onBulkEditDone?: () => void;
     }
     let { 
-        app, deckId, isEditDeck, toggleSelection, selections, accordionState,
+        app, deckId, isEditDeck, toggleSelection, selections, 
+        standaloneBulkEdit = false,
+        accordionState = new SvelteMap(), filterIds = [],
+        onBulkEditDone = () => {}
     }: Props = $props();
 
     let wordlist = new ChineseCharacterWordlist();
@@ -130,9 +136,16 @@
         editType = typ;
     }
     
+    function getDeckDataGroups(): typeof deckData.groups {
+        if (filterIds.length === 0) return deckData.groups;
+        else {
+            return [{label: "filtered", cardIds: filterIds}]
+        }
+    }
+    
     function bulkEditStart() {
         isBulkEdit = true;
-        const ids = deckData.groups.flatMap(g => g.cardIds);
+        const ids = getDeckDataGroups().flatMap(g => g.cardIds);
         bulkEditValues.clear();
         originalBulkEditValues.clear();
         for (const id of ids) {
@@ -152,7 +165,7 @@
         }
     }
     async function bulkEditSave() {
-        for (const id of deckData.groups.flatMap(g => g.cardIds)) {
+        for (const id of getDeckDataGroups().flatMap(g => g.cardIds)) {
             const readingId = `${id}-reading`;
             if (bulkEditIsEdited(readingId)) {
                 app.setCustomEntry(deckId, id, bulkEditGetValue(readingId), 'reading');
@@ -163,11 +176,13 @@
             }
         }
         await app.save();
+        onBulkEditDone();
         isBulkEdit = false;
         refresh();
     }
     function bulkEditCancel() {
         bulkEditStart();
+        onBulkEditDone();
         isBulkEdit = false;
     }
     function bulkEditGetValue(key: string) {
@@ -230,6 +245,7 @@
         const isUseExtraDict = getIsUseExtraDict(tags);
         await wordlist.init(lang, isUseExtraDict);
         wordlist.registerCustomEntryDict(app.getCustomEntryDict(deckId));
+        if (standaloneBulkEdit) bulkEditStart();
         isInit = true;
     })
 </script>
@@ -301,12 +317,17 @@
         {/if}
     </div>
 {/snippet}
-<TopRevealBar>
-    {@render topSettingsContent()}
-</TopRevealBar>
-<div style="margin-bottom: 1em;">
-    {@render topSettingsContent()}
-</div>
+
+{#if isEditDeck}
+    <TopRevealBar>
+        {@render topSettingsContent()}
+    </TopRevealBar>
+    
+    <div style="margin-bottom: 1em;">
+        {@render topSettingsContent()}
+    </div>
+{/if}
+
 <div class="table-container">
     {#if isEditDeck && !isBulkEdit}
         <table class:is-show-id={isShowId}>
@@ -317,7 +338,7 @@
                 {key: 'reading', label: 'reading'},
                 {key: 'meaning', label: 'meaning'}
             ])}
-            {#each deckData.groups as g}
+            {#each getDeckDataGroups() as g}
                 {@render groupHeader(g.label)}
                 {#if isAccordionOpen(g.label)}
                     <tbody>
@@ -355,12 +376,14 @@
                 {key: 'reading', label: 'reading'},
                 {key: 'meaning', label: 'meaning'}
             ])}
-            {#each deckData.groups as g}
-                {@render groupHeader(g.label)}
-                {#if isAccordionOpen(g.label)}
+            {#each getDeckDataGroups() as g}
+                {#if !standaloneBulkEdit}
+                    {@render groupHeader(g.label)}
+                {/if}
+                {#if isAccordionOpen(g.label) || standaloneBulkEdit}
                     <tbody>
                         {#each getSortedCardIds(g.cardIds) as id}
-                            <tr class:selected={selections.has(id)}>
+                            <tr class:selected={selections.has(id) && !standaloneBulkEdit}>
                                 <td class="id">{id}</td>
                                 <td class="word">
                                     {@render editableCell(id, 'word', deckData.deck[id], true, 'width: 3em')}
@@ -395,9 +418,11 @@
                 {/if}
             {/each}
         </table>
-        <div style="margin-top: 1em;">
-            <button class="button" onclick={() => addEmptyCard()}>Add New Empty Card</button>
-        </div>
+        {#if !standaloneBulkEdit}
+            <div style="margin-top: 1em;">
+                <button class="button" onclick={() => addEmptyCard()}>Add New Empty Card</button>
+            </div>
+        {/if}
     {:else}
         <table class:is-show-id={isShowId}>
             {@render tableHeader([
@@ -407,7 +432,7 @@
                 {key: 'meaning', label: 'meaning'},
                 {key: 'due', label: 'due'}
             ])}
-            {#each deckData.groups as g}
+            {#each getDeckDataGroups() as g}
                 {@render groupHeader(g.label)}
                 {#if isAccordionOpen(g.label)}
                     <tbody>

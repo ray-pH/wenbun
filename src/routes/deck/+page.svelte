@@ -11,6 +11,9 @@
     import TableEditView from './TableEditView.svelte';
     import { ExtraStudyMode } from '$lib/appExtraStudyHandler';
     import ButtonPopoverMenu from '$lib/components/ButtonPopoverMenu.svelte';
+    import SlideablePopup from '$lib/components/SlideablePopup.svelte';
+    import Popup from '$lib/components/Popup.svelte';
+    import DeckPreview from '$lib/components/DeckPreview.svelte';
     
     const LOCALSTORAGE_KEY_DECK_VIEW = "deckView"
 
@@ -19,6 +22,7 @@
     let isZhTraditional = false;
     let converter: ChineseCharacterConverter;
     let view: DeckView = DeckView.Normal;
+    let showBulkEditModal = false;
     
     let app = new App();
     onMount(async () => {
@@ -268,9 +272,15 @@
         return map;
     }
     
-    // TODO: allow disabled buttons
+    function startEdit() {
+        showBulkEditModal = true;
+    }
+    
     const rightbuttonActions = [
         { icon: 'fa fa-solid fa-chalkboard-user', label: 'Start extra study', onclick: () => startExtraStudy(),
+            isDisabled: () => selections.size == 0,
+        },
+        { icon: 'fa fa-solid fa-pen-to-square', label: 'Edit', onclick: () => startEdit(),
             isDisabled: () => selections.size == 0,
         },
         { icon: 'fa fa-solid fa-right-left', label: 'Move to another group', onclick: () => moveCardsIntoGroup(),
@@ -292,6 +302,24 @@
 </script>
 
 <TopBar title="Deck"></TopBar>
+
+<!-- <SlideablePopup bind:isOpen={showEditModal} onClose={() => (showEditModal = false)}>
+    test
+</SlideablePopup> -->
+<Popup bind:isOpen={showBulkEditModal} onClose={() => (showBulkEditModal = false)}>
+    <TableEditView
+        app={app}
+        deckId={deckId}
+        isEditDeck={true}
+        standaloneBulkEdit={true}
+        filterIds={Array.from(selections)}
+        toggleSelection={() => {}}
+        selections={selections}
+        onBulkEditDone={() => showBulkEditModal = false}
+    >
+    </TableEditView>
+</Popup>
+
 <div class="container">
     <div class="top-container">
         <div class="deck-name-container">

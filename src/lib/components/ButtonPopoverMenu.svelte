@@ -276,7 +276,7 @@
     .tdm-popover {
         position: absolute;
         z-index: 1000;
-        min-width: 200px;
+        min-width: 240px;
         max-height: min(60vh, 360px);
         overflow: auto;
         border-radius: 12px;
