@@ -115,7 +115,7 @@
                         <button class="audio-button" onclick={() => play('zh', url)}>
                             {url.split('/').slice(-1)[0].split('.')[0]}
                             {#await cacheAudio('zh', url)}
-                                <i class="fa-solid fa-spinner fa-spin"></i>
+                                <i class="fa-solid fa-circle-notch fa-spin loading-icon"></i>
                             {:then}
                                 <i class="fa-solid fa-play"></i>
                             {/await}
@@ -178,5 +178,9 @@
         &.allowed {
             color: var(--wenbun-blue);
         }
+    }
+    
+    .loading-icon {
+        opacity: 0.5;
     }
 </style>
