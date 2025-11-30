@@ -6,7 +6,6 @@
     import { isBuiltinDeck } from "$lib/util";
     import { onMount } from "svelte";
     import { SvelteMap, SvelteSet } from "svelte/reactivity";
-    import Page from "../upload-custom-deck/help/+page.svelte";
     import TopRevealBar from "$lib/components/TopRevealBar.svelte";
     
     interface Props {
