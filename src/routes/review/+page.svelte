@@ -49,7 +49,11 @@
         const tags = app.deckData[deckId]?.tags;
         isZhCantonese = tags?.includes(DECK_TAGS.ZH_YUE);
         const isUseExtraDict = getIsUseExtraDict(tags);
-        await wordlist.init(isZhCantonese ? 'yue' : 'zh', isUseExtraDict, app.config.zh.useAiGeneratedAudioForMissingAudio);
+        await wordlist.init(
+            isZhCantonese ? 'yue' : 'zh', isUseExtraDict, 
+            app.config.zh.useAiGeneratedAudioForMissingAudio,
+            app.getBlacklistAudioSrc(),
+        );
         wordlist.registerCustomEntryDict(app.getCustomEntryDict(deckId));
         app = app;
         isZhTraditional = tags?.includes(DECK_TAGS.ZH_TRAD);

@@ -24,6 +24,10 @@
     let isComplete = $state(false);
     let isStopPlayAudio = $state(false); // so we know to play audio only once
     let unmounted = $state(false);
+    let isDisableLoadingIndicator = false;
+    
+    let isAudioLoaded = $state(false);
+    let isStrokeDataLoaded = $state(false);
     
     function getEmInPx(): number {
         return parseFloat(getComputedStyle(document.body).fontSize);
@@ -141,9 +145,13 @@
             },
             // load locally
             charDataLoader: (char, onComplete) => {
-                const res =  fetch(HANZI_WRITER_DATA_DIR_SRC + char + '.json')
+                isStrokeDataLoaded = false;
+                fetch(HANZI_WRITER_DATA_DIR_SRC + char + '.json')
                     .then(r => r.json())
                     .then(data => onComplete(data));
+            },
+            onLoadCharDataSuccess: () => {
+                isStrokeDataLoaded = true;
             }
         });
         if (!cardConfig.isFirstTime && !externalAndDone) {
@@ -183,6 +191,13 @@
         const urls = characterData?.audioUrl;
         isAudioArtificial = urls?.length === 1 && urls[0][0].startsWith(WENBUN_TTS_URL);
         if (!urls) return;
+        
+        const flatUrls = urls.flat();
+        Promise.all(flatUrls.map(async (u) => {
+            const url = await getAudioUrl(cardConfig.lang, u);
+            return waitForAudioLoaded(url);
+        })).then(() => isAudioLoaded = true);
+        
         audios = await Promise.all(urls.map(async (rawUs) => {
             const us = await Promise.all(rawUs.map(u => getAudioUrl(cardConfig.lang, u)));
             if (us.length > 1) {
@@ -194,6 +209,15 @@
                 return new AudioSequence(us);
             }
         }));
+    }
+    
+    async function waitForAudioLoaded(url: string) {
+        return new Promise((resolve) => {
+            const audio = new Audio(url);
+            audio.oncanplaythrough = () => {
+                resolve(audio);
+            }
+        });
     }
 
     export function stopAllAudio() {
@@ -538,6 +562,11 @@
         padding: 0.2em 0.5em;
         border-radius: 0.5rem;
     }
+    .stroke-data-loading-indicator {
+        position: absolute;
+        top: 1em;
+        right: 1em;
+    }
     .auto-grade-health-bar {
         position: absolute;
         border-radius: 0.8rem;
@@ -595,6 +624,10 @@
             }
         }
     }
+    
+    .loading-icon {
+        opacity: 0.5;
+    }
 </style>
 
 <div class="character-writer">
@@ -621,9 +654,15 @@
             {/if}
         </div>
         {#if audios.length > 0}
-            <button class="audio-button" onclick={() => playAudio()} aria-label="Play Audio">
-                <i class="fa-solid fa-volume-low"></i>
-            </button>
+            {#if !isAudioLoaded && !isDisableLoadingIndicator}
+                <button class="audio-button" onclick={() => {}} aria-label="Loading Audio">
+                    <i class="fa-solid fa-circle-notch fa-spin loading-icon"></i>
+                </button>
+            {:else}
+                <button class="audio-button" onclick={() => playAudio()} aria-label="Play Audio">
+                    <i class="fa-solid fa-volume-low"></i>
+                </button>
+            {/if}
             <!-- {#if isAudioArtificial}
                 <i class="fa-solid fa-robot"></i>
             {/if} -->
@@ -697,6 +736,11 @@
                 {/if}
                 <span>{strokeSpeed}x</span>
             </button>
+        {/if}
+        {#if !isStrokeDataLoaded && !isDisableLoadingIndicator}
+            <div class="stroke-data-loading-indicator">
+                <i class="fa-solid fa-circle-notch fa-spin loading-icon"></i>
+            </div>
         {/if}
         {#if autoGrade && !surpressGradeIndicator}
             <button 

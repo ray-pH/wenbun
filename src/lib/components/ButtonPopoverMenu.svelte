@@ -3,6 +3,7 @@
         icon: string;
         label: string;
         onclick: () => void;
+        isDisabled?: () => boolean;
     }
     interface Props {
         items: MenuItem[];
@@ -10,6 +11,7 @@
         sheetBreakpointPx?: number;               // under this width -> mobile sheet
         closeOnClick?: boolean;
         ariaLabel?: string;                       // trigger label
+        blueButton?: boolean;
     }
 
     let {
@@ -17,13 +19,15 @@
         align = 'end',
         sheetBreakpointPx = 640,
         closeOnClick = true,
-        ariaLabel = 'More options'
+        ariaLabel = 'More options',
+        blueButton = false,
     }: Props = $props();
 
     let open = $state(false);
     let triggerEl: HTMLButtonElement | null = null;
     let menuEl: HTMLDivElement | null = $state(null);
     let activeIndex = $state<number>(-1);
+    let disabledStates = $state<boolean[]>([]);
 
     const menuId = `menu-${Math.random().toString(36).slice(2)}`;
 
@@ -32,12 +36,14 @@
     }
 
     function openMenu() {
+        checkDisabled();
         if (open) return;
         open = true;
         queueMicrotask(() => focusItem(0));
         addGlobalListeners();
     }
     function closeMenu(focusTrigger = true) {
+        checkDisabled();
         if (!open) return;
         open = false;
         activeIndex = -1;
@@ -60,6 +66,17 @@
             e.preventDefault();
             openMenu();
         }
+    }
+    
+    function checkDisabled() {
+        for (let i = 0; i < items.length; i++) {
+            checkDisabledByIndex(i);
+        }
+    }
+    
+    function checkDisabledByIndex(idx: number) {
+        const f = items[idx].isDisabled;
+        disabledStates[idx] = f ? f() : false;
     }
 
     function onMenuKeydown(e: KeyboardEvent) {
@@ -126,6 +143,7 @@
     <button
         type="button"
         class="tdm-trigger"
+        class:blue={blueButton}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={menuId}
@@ -160,6 +178,7 @@
                                 type="button"
                                 role="menuitem"
                                 class="tdm-item"
+                                disabled={disabledStates[i]}
                                 data-menuitem
                                 onclick={() => onItemClick(item)}
                                 onmouseenter={() => (activeIndex = i)}
@@ -190,6 +209,7 @@
                             <button
                                 type="button"
                                 role="menuitem"
+                                disabled={disabledStates[i]}
                                 class="tdm-item"
                                 data-menuitem
                                 onclick={() => onItemClick(item)}
@@ -241,12 +261,22 @@
     .tdm-trigger:hover {
         background: var(--tdm-bg-hover, rgba(0,0,0,0.04));
     }
+    
+    .tdm-trigger.blue {
+        background: var(--wenbun-blue);
+        color: white;
+        opacity: 1;
+        border-radius: 0.5em;
+        &:hover {
+            opacity: 0.8;
+        }
+    }
 
     /* Desktop popover */
     .tdm-popover {
         position: absolute;
         z-index: 1000;
-        min-width: 200px;
+        min-width: 240px;
         max-height: min(60vh, 360px);
         overflow: auto;
         border-radius: 12px;

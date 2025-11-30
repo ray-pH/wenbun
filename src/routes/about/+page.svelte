@@ -23,6 +23,51 @@
     <div class="changelog-container">
         Changelog
         
+        <h4>v0.21.0 (2025-11-30)</h4>
+        <ul>
+            <li><b>Deck Editing</b>:
+                <ul>
+                    <li>Added bulk editing in the deck editor.</li>
+                    <li>Added quick edit functionality.</li>
+                    <div class="note">
+                        - Select some words<br>
+                        - Menu > Edit
+                    </div>
+                    <li>Converted selection action buttons into a popover menu.</li>
+                </ul>
+            </li>
+            <li><b>Audio</b>:
+                <ul>
+                    <li>Added a setting to blacklist audio sources.</li>
+                    <div class="note">
+                        Goto:
+                        Settings > Chinese > More Audio Settings
+                    </div>
+                </ul>
+            </li>
+            <li><b>Review</b>:
+                <ul>
+                    <li>Added a visual indicator when the audio or stroke data is being loaded.</li>
+                </ul>
+            </li>
+            <li><b>General</b>:
+                <ul>
+                    <li>Fix logout functionality for the android app.</li>
+                    <li>Implemented floating panel in settings and deck editor so user doesn't have to scroll to see the top buttons.</li>
+                </ul>
+            </li>
+            <li><b>Deck</b>:
+                <ul>
+                    <li>Removed word duplicates in HSK v3.0 decks.</li>
+                </ul>
+            </li>
+        </ul>
+        
+        <h4>v0.20.1 (2025-11-03)</h4>
+        <ul>
+            <li><b>Android</b>: Fix missing icon/app launcher.</li>
+        </ul>
+        
         <h4>v0.20.0 (2025-11-03)</h4>
         <ul>
             <li><b>Android</b>:

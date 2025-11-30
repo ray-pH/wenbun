@@ -14,6 +14,7 @@
     import '@khmyznikov/pwa-install';
     import type { PWAInstallElement } from '@khmyznikov/pwa-install';
     import { isTauri } from '@tauri-apps/api/core';
+    import TopRevealBar from '$lib/components/TopRevealBar.svelte';
     
     export let data: {leniency?: string, fadeDuration?: string};
     
@@ -150,11 +151,21 @@
 <TopBar title="Settings" isSettings={true} backConfirmCallback={backConfirmCallback} 
     prohibitedBackUrls={[`${base}/settings/leniency-calibration`, `${base}/auth-token`]}>
 </TopBar>
+
+{#snippet topSettingsContent()}
+    <div class="top-settings-section floating">
+        <button class="button" onclick={() => saveConfig()} disabled={!isConfigChanged}>Save</button>
+        <button class="button" onclick={() => discardChanges()} disabled={!isConfigChanged}>Discard Changes</button>
+    </div>
+{/snippet}
+
+<TopRevealBar>
+    {@render topSettingsContent()}
+</TopRevealBar>
 <div class="main-container">
     {#if config}
         <div class="top-settings-section">
-            <button class="button" onclick={() => saveConfig()} disabled={!isConfigChanged}>Save</button>
-            <button class="button" onclick={() => discardChanges()} disabled={!isConfigChanged}>Discard Changes</button>
+            {@render topSettingsContent()}
         </div>
         <div class="settings-section">
             <div class="section-title">Profile</div>
@@ -346,6 +357,10 @@
                 <SettingsItem key="zhForceStopAudioOnNextCard">
                     <input type="checkbox" bind:checked={config.zh.forceStopAudioOnNextCard}>
                 </SettingsItem>
+                <a class="button" href="{base}/settings/audio-settings" aria-label="Audio Settings">
+                    <i class="fa-solid fa-sliders"></i>&nbsp;
+                    More Audio Settings
+                </a>
                 <SettingsItem key="zhIsColorBasedOnTone">
                     <input type="checkbox" bind:checked={config.zh.isColorBasedOnTone}>
                 </SettingsItem>
@@ -467,6 +482,10 @@
         display: flex;
         gap: 0.5em;
         margin-bottom: 2em;
+        &.floating {
+            padding: 0;
+            margin-bottom: 0;
+        }
     }
     .settings-section {
         width: 100%;

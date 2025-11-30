@@ -122,6 +122,7 @@ export interface WenbunConfig {
         playAudio?: boolean;
         forceStopAudioOnNextCard?: boolean;
         useAiGeneratedAudioForMissingAudio?: boolean;
+        audioSrcBlacklist?: string[];
     }
     
     // experimental
@@ -167,6 +168,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
         playAudio: true,
         forceStopAudioOnNextCard: false,
         useAiGeneratedAudioForMissingAudio: false,
+        audioSrcBlacklist: [],
     },
     
     _experimentalFixApplePencil: false,
@@ -1204,5 +1206,24 @@ export class App {
             studiedCount: Object.keys(deckData.schedule).length,
             totalCount: deckData.deck.filter(s => s).length,
         }
+    }
+    
+    getBlacklistAudioSrc(): string[] {
+        return this.getConfig().zh.audioSrcBlacklist ?? [];
+    }
+    ensureAudioSrcBlacklist() {
+        if (!this.config.zh.audioSrcBlacklist) this.config.zh.audioSrcBlacklist = [];
+    }
+    blacklistAudioSrc(src: string) {
+        this.ensureAudioSrcBlacklist();
+        const list = this.config.zh.audioSrcBlacklist;
+        if (list && !list.includes(src)) list.push(src);
+    }
+    unblacklistAudioSrc(src: string) {
+        this.ensureAudioSrcBlacklist();
+        const list = this.config.zh.audioSrcBlacklist;
+        if (!list) return;
+        const index = list.indexOf(src);
+        if (index >= 0) list.splice(index, 1);
     }
 }
