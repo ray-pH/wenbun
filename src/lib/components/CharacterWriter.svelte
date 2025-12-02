@@ -566,6 +566,11 @@
         position: absolute;
         top: 1em;
         right: 1em;
+        opacity: 0;
+        animation: appear 0.1s ease-out 0.2s forwards;
+    }
+    @keyframes appear {
+        to { opacity: 1; }
     }
     .auto-grade-health-bar {
         position: absolute;
