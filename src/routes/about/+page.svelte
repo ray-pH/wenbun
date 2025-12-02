@@ -23,6 +23,13 @@
     <div class="changelog-container">
         Changelog
         
+        <h4>v0.21.1 (2025-12-01)</h4>
+        <ul>
+            <li>Tweak the loading indicator to no flash quickly.
+            </li>
+        </ul>
+        
+        
         <h4>v0.21.0 (2025-11-30)</h4>
         <ul>
             <li><b>Deck Editing</b>:
