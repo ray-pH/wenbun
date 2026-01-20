@@ -321,6 +321,7 @@
                 <CharacterWriter 
                     app={app} 
                     isShowHealthBar={isAutoGrading && app.getConfig().showAutoGradingBar}
+                    isShowReadingOnFail={app.getConfig().showReadingOnFail}
                     isSupportedByHanziWriter={isWordSupportedByHanziWriter}
                     isDictationMode={isDictationMode}
                     bind:this={characterWriterRef}

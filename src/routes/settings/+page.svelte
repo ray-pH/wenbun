@@ -280,6 +280,9 @@
                 <SettingsItem key="playSuccessSound">
                     <input type="checkbox" bind:checked={config.playSuccessSound}>
                 </SettingsItem>
+                <SettingsItem key="showReadingOnFail">
+                    <input type="checkbox" bind:checked={config.showReadingOnFail}>
+                </SettingsItem>
             </div>
         </div>
         
