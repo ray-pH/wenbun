@@ -53,6 +53,7 @@
 		autoGrade: FSRS.Grade | undefined;
 		autoReviewData: AutoReviewData;
 		isShowHealthBar: boolean;
+		isShowReadingOnFail: boolean;
 		isSupportedByHanziWriter: boolean;
 		writingMode: WritingMode;
 		app: App;
@@ -62,6 +63,7 @@
         isRequestManualGrade = $bindable(), 
         characterData, app, cardConfig, autoGrade,
         isShowHealthBar = false,
+        isShowReadingOnFail = false,
         isDictationMode = false,
         isSupportedByHanziWriter = true,
         writingMode = WritingMode.Default,
@@ -381,6 +383,15 @@
             if (cleanupApplePencilFix) cleanupApplePencilFix();
         };
     });
+    
+    const isShowReading = $derived(() => {
+        if (app.getConfig().zh.alwaysShowReading) return true;
+        if (isShowReadingOnFail && autoReviewData.isFailAndReveal) return true;
+        if (isComplete) return true;
+        if (cardConfig.isFirstTime) return true;
+        if (isDictationMode) return true;
+        return false;
+    });
 </script>
 
 <style>
@@ -648,7 +659,7 @@
             {SLUG_WORD_NOT_SUPPORTED_BY_HANZI_WRITER}
         {/if}
     </div>
-    <div class="reading-container" class:is-hidden={!app.getConfig().zh.alwaysShowReading && !isComplete && !cardConfig.isFirstTime && !isDictationMode}>
+    <div class="reading-container" class:is-hidden={!isShowReading()}>
         <div class="reading">
             {#if isDictationMode && !isDictationModeRevealReading && !app.getConfig().zh.alwaysShowReading && !isComplete && !cardConfig.isFirstTime}
                 <button class="reveal-button" onclick={() => isDictationModeRevealReading = true} aria-label="Reveal Reading">

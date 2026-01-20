@@ -92,6 +92,7 @@ export interface WenbunConfig {
     uiScale?: 'small' | 'normal' | 'custom'; // 10px, 16px
     customFontSize?: number;
     playSuccessSound?: boolean;
+    showReadingOnFail?: boolean;
     
     // Review
     gradingMethod?: 'auto' | 'manual';
@@ -142,6 +143,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     uiScale: 'normal',
     customFontSize: 16,
     playSuccessSound: true,
+    showReadingOnFail: false,
     
     gradingMethod: 'auto',
     strokeLeniency: 1.5,
