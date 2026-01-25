@@ -129,20 +129,20 @@
                 {#if !isSeparateLearnAndReview}
                     <tr class="row-count-new">
                         <td>New</td>
-                        <td class="count">{app.getScheduledNewOrWarmUpCardsCount(deckInfo.id)}</td>
+                        <td class="count">{app.recursiveMetaDeckCount(deckInfo.id, app.getScheduledNewOrWarmUpCardsCount.bind(app))}</td>
                     </tr>
                 {/if}
                 <tr class="row-count-learn-relearn">
                     <td>Learning</td>
-                    <td class="count">{app.getLearningRelearningCardsCount(deckInfo.id)}</td>
+                    <td class="count">{app.recursiveMetaDeckCount(deckInfo.id, app.getLearningRelearningCardsCount.bind(app))}</td>
                 </tr>
                 <tr class="row-count-previously-studied">
                     <td>Previously Studied</td>
-                    <td class="count">{app.getScheduledPreviouslyStudiedCardsCount(deckInfo.id)}</td>
+                    <td class="count">{app.recursiveMetaDeckCount(deckInfo.id, app.getScheduledPreviouslyStudiedCardsCount.bind(app))}</td>
                 </tr>
                 <tr class="row-count-review">
                     <td>Review</td>
-                    <td class="count">{app.getScheduledReviewCardsCount(deckInfo.id)}</td>
+                    <td class="count">{app.recursiveMetaDeckCount(deckInfo.id, app.getScheduledReviewCardsCount.bind(app))}</td>
                 </tr>
             </tbody></table>
         </div>

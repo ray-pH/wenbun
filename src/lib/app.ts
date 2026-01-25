@@ -1,7 +1,7 @@
 import * as FSRS from "ts-fsrs"
-import { dateDiffFormatted, generateRandomString, getDaysSinceEpochLocal, getDeckFilename, isBuiltinDeck, loadDeck, semverBiggerThan, type DeepRequired } from "./util"
+import { dateDiffFormatted, generateRandomString, getDaysSinceEpochLocal, getDeckFilename, getDefaultDeckInfo, isBuiltinDeck, loadDeck, semverBiggerThan, sum, takeRandom, type DeepRequired } from "./util"
 import { BrowserIndexedDBStorage, type IStorage, TauriStorage } from "./storage";
-import _ from "lodash";
+import _, { reduce } from "lodash";
 import { ChineseToneColorPalette, DECK_TAGS, DeckInfo, DEFAULT_FSRS_PARAM } from "./constants";
 import { isTauri } from "@tauri-apps/api/core";
 import { WebFileManager, type IFileManager } from "./fileManager";
@@ -75,6 +75,9 @@ export interface DeckData {
     doneTodayReviewCount: number;
     // custom entry
     customEntry?: Record<number, {r?: string, m?: string}> // reading and meaning
+    // meta decks
+    isMetaDeck?: boolean;
+    subDeckIds?: string[];
 }
 
 export interface WenbunConfig {
@@ -513,6 +516,7 @@ export class App {
     extendDeck(deckId: string, words: string[], ignoredIds: number[] = []) {
         const deckData = this.deckData[deckId];
         if (!deckData) return;
+        if (this.isDeckMeta(deckId)) return;
         
         const startId = deckData.deck.length;
         const newCardIds = Array.from(words.keys()).map(id => id + startId);
@@ -607,14 +611,80 @@ export class App {
         // the handling of when the warm up is complete is done in the review component
     }
     
-    getNextCard(deckId: string, mode: ReviewMode = ReviewMode.Normal): number | undefined {
+    getNextCard(deckId: string, mode: ReviewMode = ReviewMode.Normal): {cardId: number|undefined, deckId: string} | undefined {
+        if (this.isDeckMeta(deckId)) {
+            return this.getNextCardMetaDeck(deckId, mode);
+        } else {
+            const cardId = this.getNextCardSimpleDeck(deckId, mode);
+            return { cardId, deckId } 
+        }
+    }
+    
+    recursiveMetaDeckCount(deckId: string, fn: (id: string) => number): number {
+        if (this.isDeckMeta(deckId)) {
+            const subDeckIds = this.deckData[deckId]?.subDeckIds ?? [];
+            return subDeckIds.map(id => fn.call(this, id)).reduce((a, b) => a + b, 0);
+        }
+        return fn.call(this, deckId);
+    }
+    
+    getNextCardMetaDeck(deckId: string, mode: ReviewMode = ReviewMode.Normal): {cardId: number|undefined, deckId: string}|undefined {
+        const subDeckIds = this.deckData[deckId].subDeckIds;
+        if (!subDeckIds) return { cardId: undefined, deckId };
         
+        // TODO: handle extra study for meta decks
+        let newOrWarmUpCardCount = this.recursiveMetaDeckCount(deckId, this.getScheduledNewOrWarmUpCardsCount.bind(this));
+        let previouslyStudiedCardCount = this.recursiveMetaDeckCount(deckId, this.getScheduledPreviouslyStudiedCardsCount.bind(this));
+        let todaysCardCount = this.recursiveMetaDeckCount(deckId, this.getScheduledReviewCardsCount.bind(this));
+        // need this for accurate mixing ratio
+        let totalNewOrWarmUpCardCount = this.recursiveMetaDeckCount(deckId, this.getTotalScheduledNewOrWarmUpTotalCount.bind(this));
+        
+        // modify count based on mode
+        switch (mode) {
+            case ReviewMode.ReviewOnly:
+                newOrWarmUpCardCount = 0;
+                totalNewOrWarmUpCardCount = 0;
+                break;
+            case ReviewMode.LearnOnly:
+                previouslyStudiedCardCount = 0;
+                todaysCardCount = 0;
+                break;
+            case ReviewMode.Normal:
+            default:
+                // do nothing
+        }
+        
+        let newOrWarmUpArr: {cardId: number, deckId: string}[] = [];
+        let previouslyStudiedArr: {cardId: number, deckId: string}[] = [];
+        let todaysArr: {cardId: number, deckId: string}[] = [];
+        for (const subdeckId of subDeckIds) {
+            const cardId = this.getNextCardSimpleDeck(subdeckId, mode);
+            if (!cardId) continue;
+            const state = this.getWenbunCustomState(subdeckId, cardId);
+            const card = { cardId, deckId: subdeckId }
+            switch (state) {
+                case WenBunCustomState.New:
+                case WenBunCustomState.WarmUp: newOrWarmUpArr.push(card); break;
+                case WenBunCustomState.PreviouslyStudied: previouslyStudiedArr.push(card); break;
+                case WenBunCustomState.Ignored: break;
+                default: todaysArr.push(card); break;
+            }
+        }
+        const arr = this.orderCardsBasedOnConfig(
+            takeRandom(newOrWarmUpArr), totalNewOrWarmUpCardCount, 
+            takeRandom(previouslyStudiedArr), previouslyStudiedCardCount, 
+            takeRandom(todaysArr), todaysCardCount
+        );
+        return arr.reduce((a, b) => a ?? b, undefined);
+    }
+        
+    getNextCardSimpleDeck(deckId: string, mode: ReviewMode = ReviewMode.Normal): number | undefined {
+            
         if (this.extraStudyHandler.isExtraStudy()) {
             return this.extraStudyHandler.getNextCard();
         }
         
         // TODO: precalculate the next card on review
-        const config = this.getConfig();
         
         let newOrWarmUpCardCount = this.getScheduledNewOrWarmUpCardsCount(deckId);
         let previouslyStudiedCardCount = this.getScheduledPreviouslyStudiedCardsCount(deckId);
@@ -640,26 +710,37 @@ export class App {
         const newOrWarmUp = (newOrWarmUpCardCount > 0) ? this.getNewOrWarmUpCard(deckId) : undefined;
         const previouslyStudiedCards = (previouslyStudiedCardCount > 0) ? this.getPreviouslyStudiedCard(deckId) : undefined;
         const todaysCards = (todaysCardCount > 0) ? this.getTodaysScheduledCards(deckId)[0] : undefined;
-        
+        const arr = this.orderCardsBasedOnConfig(
+            newOrWarmUp, totalNewOrWarmUpCardCount, 
+            previouslyStudiedCards, previouslyStudiedCardCount, 
+            todaysCards, todaysCardCount
+        );
+        return arr.reduce((a, b) => a ?? b, undefined);
+    }
+    
+    private orderCardsBasedOnConfig<T>(
+        newOrWarmUp: T,  totalNewOrWarmUpCount: number,
+        previouslyStudied: T,  previouslyStudiedCount: number,
+        today: T, todayCount: number,
+    ): T[] {
+        const config = this.getConfig();
         const head = [];
-        const mid = [todaysCards];
+        const mid = [today];
         const tail = [];
         
         if (config.newCardOrder === NewCardOrder.BeforeReviews) head.push(newOrWarmUp);
         if (config.newCardOrder === NewCardOrder.AfterReviews) tail.push(newOrWarmUp);
-        if (config.newPreviouslyStudiedCardOrder === NewCardOrder.BeforeReviews) head.push(previouslyStudiedCards);
-        if (config.newPreviouslyStudiedCardOrder === NewCardOrder.AfterReviews) tail.push(previouslyStudiedCards);
+        if (config.newPreviouslyStudiedCardOrder === NewCardOrder.BeforeReviews) head.push(previouslyStudied);
+        if (config.newPreviouslyStudiedCardOrder === NewCardOrder.AfterReviews) tail.push(previouslyStudied);
         if (config.newCardOrder === NewCardOrder.Mix) {
-            const prob = totalNewOrWarmUpCardCount / (totalNewOrWarmUpCardCount + todaysCardCount);
+            const prob = totalNewOrWarmUpCount / (totalNewOrWarmUpCount + todayCount);
             if (Math.random() < prob) mid.unshift(newOrWarmUp); else mid.push(newOrWarmUp);
         }
         if (config.newPreviouslyStudiedCardOrder === NewCardOrder.Mix) {
-            const prob = previouslyStudiedCardCount / (totalNewOrWarmUpCardCount + previouslyStudiedCardCount + todaysCardCount);
-            if (Math.random() < prob) mid.unshift(previouslyStudiedCards); else mid.push(previouslyStudiedCards);
+            const prob = previouslyStudiedCount / (totalNewOrWarmUpCount + previouslyStudiedCount + todayCount);
+            if (Math.random() < prob) mid.unshift(previouslyStudied); else mid.push(previouslyStudied);
         }
-        
-        const arr = [...head, ...mid, ...tail];
-        return arr.reduce((a, b) => a ?? b, undefined);
+        return [...head, ...mid, ...tail];
     }
     
     skipWarmUp(deckId: string, cardId: number): void {
@@ -1007,7 +1088,25 @@ export class App {
         return this.tryImportProfileStr(payload.data);
     }
     
-    getDeckProgress(deckId: string) {
+    getDeckProgress(deckId: string): {
+        totalCount: number,
+        previouslyStudiedCount: number,
+        youngCount: number,
+        matureCount: number,
+        ignoredCount: number,
+    } {
+        if (this.isDeckMeta(deckId)) {
+            const subDeckIds = this.deckData[deckId]?.subDeckIds ?? [];
+            const progresses = subDeckIds.map(id => this.getDeckProgress(id));
+            return {
+                totalCount: sum(progresses.map(p => p.totalCount)),
+                previouslyStudiedCount: sum(progresses.map(p => p.previouslyStudiedCount)),
+                youngCount: sum(progresses.map(p => p.youngCount)),
+                matureCount: sum(progresses.map(p => p.matureCount)),
+                ignoredCount: sum(progresses.map(p => p.ignoredCount)),
+            }
+        }
+        
         const deckData = this.deckData[deckId];
         if (!deckData) return {
             totalCount: 1, previouslyStudiedCount: 0,
@@ -1188,6 +1287,17 @@ export class App {
             .filter(([id, _]) => !isBuiltinDeck(id))
             .map(([id, data]) => ({id, label: data.label}));
     }
+    getAllDeckIdAndNamePairs(): {id: string, label?: string}[] {
+        return Object.entries(this.deckData)
+            .map(([id, data]) => {
+                const deckInfo = getDefaultDeckInfo(id);
+                if (isBuiltinDeck(id)) {
+                    return {id, label: deckInfo.subtitle ? `${deckInfo.title} ${deckInfo.subtitle}` : deckInfo.title};
+                } else {
+                    return {id, label: data.label};
+                }
+            });
+    }
     getDeckLanguage(deckId: string): Lang {
         const tags = this.deckData[deckId]?.tags ?? [];
         if (tags.includes(DECK_TAGS.ZH_YUE)) return 'yue';
@@ -1228,4 +1338,28 @@ export class App {
         const index = list.indexOf(src);
         if (index >= 0) list.splice(index, 1);
     }
+    
+    isDeckMeta(deckId: string): boolean {
+        const deck = this.deckData[deckId];
+        return !!deck?.isMetaDeck;
+    }
 }
+
+// Decorators
+// function HandleMetaDeckForCount() {
+//     return function ( 
+//         value: (deckId: string) => number,
+//         context: ClassMethodDecoratorContext) 
+//     {
+//         if (context.kind !== "method")  return;
+//         return function (this: App, deckId: string) {
+//             if (this.isDeckMeta(deckId)) {
+//                 const subDeckIds = this.deckData[deckId].subDeckIds;
+//                 if (subDeckIds) {
+//                     return subDeckIds.reduce((sum, id) => sum + value.call(this, id), 0);
+//                 }
+//             }
+//             return value.call(this, deckId);
+//         }
+//     }
+// }
