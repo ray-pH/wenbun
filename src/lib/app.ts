@@ -690,7 +690,7 @@ export class App {
         
         let newOrWarmUpCardCount = this.getScheduledNewOrWarmUpCardsCount(deckId);
         let previouslyStudiedCardCount = this.getScheduledPreviouslyStudiedCardsCount(deckId);
-        let todaysCardCount = this.getScheduledReviewCardsCount(deckId);
+        let todaysCardCount = this.getScheduledReviewCardsCount(deckId, true);
         // need this for accurate mixing ratio
         let totalNewOrWarmUpCardCount = this.getTotalScheduledNewOrWarmUpTotalCount(deckId);
         
@@ -912,15 +912,16 @@ export class App {
         }
     }
     
-    getTodaysReviewCards(deckId: string): number[] {
+    getTodaysReviewCards(deckId: string, includeLearning = false): number[] {
         const deckData = this.deckData[deckId];
         const todaysScheduledCards = this.getTodaysScheduledCards(deckId);
+        if (includeLearning) return todaysScheduledCards;
         const todaysReviewCards = todaysScheduledCards.filter((id) => deckData.schedule[id]?.state === FSRS.State.Review);
         return todaysReviewCards;
     }
-    getScheduledReviewCardsCount(deckId: string): number {
+    getScheduledReviewCardsCount(deckId: string, includeLearning = false): number {
         const deckData = this.deckData[deckId];
-        const todaysReviewCards = this.getTodaysReviewCards(deckId);
+        const todaysReviewCards = this.getTodaysReviewCards(deckId, includeLearning);
         const config = this.getConfig();
         const count = Math.min(todaysReviewCards.length, config.maxReviewsPerDay - deckData.doneTodayReviewCount);
         return Math.max(0, count);
