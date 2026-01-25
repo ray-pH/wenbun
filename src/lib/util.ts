@@ -131,6 +131,14 @@ export function generateRandomString(length: number): string {
     return id.slice(0, length);
 }
 
+export function takeRandom<T>(arr: T[]): T | undefined {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+export function sum(arr: number[]): number {
+    return arr.reduce((a, b) => a + b, 0);
+}
+
 export function isOnlineClient(): boolean {
     return !isTauri() && !isRunningInPWA();
 }
