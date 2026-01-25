@@ -108,13 +108,13 @@
     const MAX_NEXT_CARD_RETRY_COUNT = 10;
     function getNextCard(): {cardId: number | undefined, deckId: string} | undefined {
         //TODO: avoid duplication in a deterministic way
-        let cardId = undefined;
+        let res = undefined;
         for (let i = 0; i < MAX_NEXT_CARD_RETRY_COUNT; i++) {
-            const res = app.getNextCard(metaDeckId, data.reviewMode);
+            res = app.getNextCard(metaDeckId, data.reviewMode);
             const cardId = res?.cardId;
             if (cardId === undefined || cardId !== currentCardId) return res;
         }
-        return cardId;
+        return res;
     }
 
     function nextCard() {
