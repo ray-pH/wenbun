@@ -22,6 +22,25 @@
     </div>
     <div class="changelog-container">
         Changelog
+
+        <h4>v0.22.0 (2026-01-25)</h4>
+        <ul>
+            <li><b>Review</b>:
+                <ul>
+                    <li>Added a setting to <b>automatically advance to the next card</b> upon a successful review.</li>
+                    <li>Added a setting to display the reading of a card when it is failed/revealed.</li>
+                    <li>Fixed an issue with FSRS short-term scheduling.</li>
+                </ul>
+            </li>
+            <li><b>Decks</b>:
+                <ul>
+                    <li>Initial implementation of <b>meta decks</b>, which allow combining multiple decks into one.</li>
+                    <div class="note">
+                        This feature is still in experimental stage.
+                    </div>
+                </ul>
+            </li>
+        </ul>
         
         <h4>v0.21.1 (2025-12-01)</h4>
         <ul>
