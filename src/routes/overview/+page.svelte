@@ -20,6 +20,8 @@
     let isNoMoreReview = false;
     let isNewCardsStillExist = true;
     let isOnlineProfileLoaded = false;
+    let isMetaDeck = false;
+    let subDeckIds: string[] = [];
     onMount(async () => {
         await app.init();
         initComponent();
@@ -36,6 +38,8 @@
         isNoMoreReview = app.getNextCard(data.deckId ?? '', ReviewMode.ReviewOnly) === undefined;
         studyNewCardCount = app.getConfig().newCardPerDay;
         isNewCardsStillExist = app.getNewCardsCount(data.deckId ?? '') > 0;
+        isMetaDeck = app.isDeckMeta(data.deckId ?? '');
+        if (isMetaDeck) subDeckIds = app.deckData[data.deckId ?? '']?.subDeckIds ?? [];
         loadExtrastudyParams();
     }
     
@@ -124,6 +128,16 @@
                 {/if}
             </div>
         </div>
+        {#if isMetaDeck}
+            <div class="subdeck-container">
+                {#each subDeckIds as id}
+                    <div class="subdeck-card">
+                        {app.getDeckInfo(id).title}
+                        {app.getDeckInfo(id).subtitle}
+                    </div>
+                {/each}
+            </div>
+        {/if}
         <div class="table-container">
             <table class="count-table"><tbody>
                 {#if !isSeparateLearnAndReview}
@@ -161,14 +175,19 @@
                 <span style="opacity: 0.5;"> / {progressTotal}</span>
             </div>
         </div>
+        {#if isMetaDeck}
+            <div class="info-container">
+                Meta deck is still experimental. Quick adjust and extra study are disabled.
+            </div>
+        {/if}
         <div class="section-container">
-            <button onclick={() => quickAdjustAccordionState = !quickAdjustAccordionState} class="section-title-button">
+            <button onclick={() => quickAdjustAccordionState = !quickAdjustAccordionState} class="section-title-button" disabled={isMetaDeck}>
                 <div class="section-title">Quick Adjust</div>
                 <div>
                     <i class="fa-solid" class:fa-chevron-down={quickAdjustAccordionState} class:fa-chevron-right={!quickAdjustAccordionState}></i>
                 </div>
             </button>
-            {#if quickAdjustAccordionState}
+            {#if quickAdjustAccordionState && !isMetaDeck}
                 <div class="section-help">
                     *Adjustment can be negative
                 </div>
@@ -198,13 +217,13 @@
             {/if}
         </div>
         <div class="section-container">
-            <button onclick={() => extraStudyAccordionState = !extraStudyAccordionState} class="section-title-button">
+            <button onclick={() => extraStudyAccordionState = !extraStudyAccordionState} class="section-title-button" disabled={isMetaDeck}>
                 <div class="section-title">Extra Study</div>
                 <div>
                     <i class="fa-solid" class:fa-chevron-down={extraStudyAccordionState} class:fa-chevron-right={!extraStudyAccordionState}></i>
                 </div>
             </button>
-            {#if extraStudyAccordionState}
+            {#if extraStudyAccordionState && !isMetaDeck}
                 <div class="section-help">
                     Study more without affecting the SRS schedule
                 </div>
@@ -332,6 +351,10 @@
         cursor: pointer;
         border-bottom: 1px solid #00000020;
     }
+    .section-title-button:disabled {
+        opacity: 0.5;
+        pointer-events: none;
+    }
     
     .progress-container {
         margin-top: 1em;
@@ -419,5 +442,28 @@
     
     .short-input {
         width: 3em;
+    }
+    
+    .info-container {
+        max-width: 22em;
+        background-color: white;
+        padding: 0.5em;
+        border-radius: 0.5em;
+    }
+    
+    .subdeck-container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 1em;
+        max-width: 30em;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1em;
+    }
+    .subdeck-card {
+        background-color: white;
+        padding: 0.5em;
+        border-radius: 0.5em;
     }
 </style>

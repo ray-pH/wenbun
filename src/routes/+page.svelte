@@ -255,16 +255,16 @@
         </div>
         <div class="right" class:no-new={isSeparateLearnAndReview}>
             <span class="deck-count-learn-relearn" title="learning">
-                {app.getLearningRelearningCardsCount(info.id) || ''}
+                {app.recursiveMetaDeckCount(info.id, app.getLearningRelearningCardsCount.bind(app)) || ''}
             </span>
             <span class="deck-count-review" title="review">
-                {app.getScheduledReviewCardsCount(info.id) || ''}
+                {app.recursiveMetaDeckCount(info.id, app.getScheduledReviewCardsCount.bind(app)) || ''}
             </span>
             <span class="deck-count-new" title="new">
-                {app.getScheduledNewOrWarmUpCardsCount(info.id) || ''}
+                {app.recursiveMetaDeckCount(info.id, app.getScheduledNewOrWarmUpCardsCount.bind(app)) || ''}
             </span>
             <span class="deck-count-previously-studied" title="previously studied">
-                {app.getScheduledPreviouslyStudiedCardsCount(info.id) || ''}
+                {app.recursiveMetaDeckCount(info.id, app.getScheduledPreviouslyStudiedCardsCount.bind(app)) || ''}
             </span>
         </div>
     </a>
