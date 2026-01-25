@@ -200,6 +200,13 @@
         isComplete = true;
         if (isAutoGrading) autoGrade = AutoReview.getGrade(data);
     }
+    function onReadyToGoNext() {
+        const config = app.getConfig();
+        if (!config.isAutoNextOnSuccess || !isAutoGrading) return;
+        if (autoGrade === undefined) return;
+        if (autoGrade === FSRS.Rating.Again) return;
+        acceptAutoGrade();
+    }
     async function onReviewButtonClick(grade: FSRS.Grade) {
         app.rateCard(currentDeckId, currentCardId!, grade);
         await app.save();
@@ -333,6 +340,7 @@
                     characterData={characterWriterDataFromId(currentCardId)} 
                     onComplete={(data) => onComplete(data)} 
                     onOpenDict={() => openDict()}
+                    onReadyToGoNext={() => onReadyToGoNext()}
                     bind:isRequestManualGrade={isRequestManualGrade}
                     cardConfig={getCardConfig(currentCardId)}
                     autoGrade={autoGrade}

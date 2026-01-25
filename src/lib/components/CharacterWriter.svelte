@@ -46,6 +46,7 @@
     interface Props {
 		onComplete: (data: AutoReviewData) => void;
 		onOpenDict: () => void;
+		onReadyToGoNext: () => void;
 		isRequestManualGrade: boolean;
 		isDictationMode: boolean; // EXPERIMENTAL, play audio instead of show meaning
 		characterData: CharacterWriterData | undefined;
@@ -59,7 +60,7 @@
 		app: App;
 	}
     let { 
-        onComplete, onOpenDict,
+        onComplete, onOpenDict, onReadyToGoNext,
         isRequestManualGrade = $bindable(), 
         characterData, app, cardConfig, autoGrade,
         isShowHealthBar = false,
@@ -103,8 +104,9 @@
                 onComplete({...autoReviewData});
                 isComplete = true;
                 surpressGradeIndicator = false;
-                window.setTimeout(() => {
-                    if (!isDictationMode) playAudio();
+                window.setTimeout(async () => {
+                    if (!isDictationMode) await playAudio();
+                    onReadyToGoNext();
                 }, NEXT_CHAR_DELAY);
             } else {
                 window.setTimeout(() => {
@@ -227,14 +229,14 @@
         audios.forEach(a => a.stop());
     }
 
-    function playAudio() {
+    async function playAudio() {
         if (unmounted) return;
         // Stop any currently playing audio first
         stopAllAudio();
         // random index
         const index = Math.floor(Math.random() * audios.length);
         const a = audios[index];
-        a.play();
+        await a.playAsync();
     }
     
     function toggleRequestManualGrade() {
