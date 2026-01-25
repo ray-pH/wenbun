@@ -659,6 +659,8 @@ export class App {
         let newOrWarmUpArr: {cardId: number, deckId: string}[] = [];
         let previouslyStudiedArr: {cardId: number, deckId: string}[] = [];
         let todaysArr: {cardId: number, deckId: string}[] = [];
+        
+        // TODO: pick subdeck based on weighted probability
         for (const subdeckId of subDeckIds) {
             const cardId = this.getNextCardSimpleDeck(subdeckId, mode);
             if (!cardId) continue;
