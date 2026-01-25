@@ -78,6 +78,12 @@
                     Upload custom deck
                 </a>
             </div>
+            <div class="custom-deck-upload-container">
+                <a class="button upload-deck-button" href="{base}/upload-custom-deck/meta">
+                    <i class="fa-solid fa-book"></i>&nbsp;
+                    Create meta deck (experimental)
+                </a>
+            </div>
         {/if}
         <div class="deck-list-container">
             {#each filteredDeckInfo as info}

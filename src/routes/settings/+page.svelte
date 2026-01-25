@@ -245,6 +245,9 @@
                         <option value={NewCardOrder.BeforeReviews}>Before Reviews</option>
                     </select>
                 </SettingsItem>
+                <SettingsItem key="isAutoNextOnSuccess">
+                    <input type="checkbox" disabled={config.gradingMethod === 'manual'} bind:checked={config.isAutoNextOnSuccess}>
+                </SettingsItem>
                 <SettingsItem key="gradeWarmUpCards">
                     <input type="checkbox" bind:checked={config.gradeWarmUpCards}>
                 </SettingsItem>
@@ -279,6 +282,9 @@
                 {/if}
                 <SettingsItem key="playSuccessSound">
                     <input type="checkbox" bind:checked={config.playSuccessSound}>
+                </SettingsItem>
+                <SettingsItem key="showReadingOnFail">
+                    <input type="checkbox" bind:checked={config.showReadingOnFail}>
                 </SettingsItem>
             </div>
         </div>

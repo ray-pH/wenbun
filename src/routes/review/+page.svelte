@@ -20,7 +20,7 @@
     const outFadeParam = { duration: 200 };
 
     export let data: {deckId?: string, isExtraStudy?: boolean, cardIds?: string, mode?: string, reviewMode: ReviewMode};
-    let deckId = data.deckId || '';
+    let metaDeckId = data.deckId || '';
     let cardIdsStr = data.cardIds || encodeURIComponent('[]');
     let cardIds = JSON.parse(decodeURIComponent(cardIdsStr));
     let title = data.isExtraStudy ? 'Extra Study' : 'Review';
@@ -46,7 +46,7 @@
         // no need to sync in here
         await app.init();
         await app.initProfile(true);
-        const tags = app.deckData[deckId]?.tags;
+        const tags = app.deckData[metaDeckId]?.tags;
         isZhCantonese = tags?.includes(DECK_TAGS.ZH_YUE);
         const isUseExtraDict = getIsUseExtraDict(tags);
         await wordlist.init(
@@ -54,7 +54,7 @@
             app.config.zh.useAiGeneratedAudioForMissingAudio,
             app.getBlacklistAudioSrc(),
         );
-        wordlist.registerCustomEntryDict(app.getCustomEntryDict(deckId));
+        wordlist.registerCustomEntryDict(app.getCustomEntryDict(metaDeckId));
         app = app;
         isZhTraditional = tags?.includes(DECK_TAGS.ZH_TRAD);
         isAutoGrading = app.isAutoGrading() && app.getConfig().writingMode !== WritingMode.External;
@@ -67,7 +67,7 @@
     
     function getIsUseExtraDict(tags: string[] | undefined): boolean {
         // due to backward compatibility, we need to manually make HSK7 deck to use extra dictionary 
-        if (isBuiltinDeck(deckId) && deckId.startsWith('hsk7-v3.0')) return true;
+        if (isBuiltinDeck(metaDeckId) && metaDeckId.startsWith('hsk7-v3.0')) return true;
         return !!tags?.includes(DECK_TAGS.ZH_EXTRA_DICT);
     }
     
@@ -90,6 +90,7 @@
     const reviewButtonsLabel = ['Fail', 'Hard', 'Good', 'Easy'];
     
     let currentCardId: number | undefined = undefined;
+    let currentDeckId: string = metaDeckId;
     let scheduledTimeStr: Record<FSRS.Grade, string> = {1: '', 2: '', 3: '', 4: ''};
     function resetState() {
         isComplete = false;
@@ -105,54 +106,58 @@
     }
     
     const MAX_NEXT_CARD_RETRY_COUNT = 10;
-    function getNextCardId(): number | undefined {
+    function getNextCard(): {cardId: number | undefined, deckId: string} | undefined {
         //TODO: avoid duplication in a deterministic way
-        let id = undefined;
+        let res = undefined;
         for (let i = 0; i < MAX_NEXT_CARD_RETRY_COUNT; i++) {
-            id = app.getNextCard(deckId, data.reviewMode);
-            if (id === undefined || id !== currentCardId) return id;
+            res = app.getNextCard(metaDeckId, data.reviewMode);
+            const cardId = res?.cardId;
+            if (cardId === undefined || cardId !== currentCardId) return res;
         }
-        return id;
+        return res;
     }
 
     function nextCard() {
         if (forceStopAudioOnNextCard) stopAudio();
         resetState();
         isCardChanged = true;
-        const id = getNextCardId();
-        if (id === undefined) {
+        const cardData = getNextCard();
+        const cardId = cardData?.cardId;
+        const deckId = cardData?.deckId;
+        if (cardId === undefined || deckId === undefined) {
             // done for today
             isDoneToday = true;
             return;
         }
-        const card = app.getCard(deckId, id, true);
+        const card = app.getCard(metaDeckId, cardId, true);
         if (!card) return;
         isCardChanged = false;
-        currentCardId = id;
-        scheduledTimeStr = app.getRatingScheduledTimeStr(deckId, id);
-        cardState = app.getWenbunCustomState(deckId, id);
-        isWordSupportedByHanziWriter = wordlist.isWordSupportedByHanziWriter(app.deckData[deckId]?.deck[id]);
+        currentCardId = cardId;
+        currentDeckId = deckId;
+        scheduledTimeStr = app.getRatingScheduledTimeStr(currentDeckId, cardId);
+        cardState = app.getWenbunCustomState(currentDeckId, cardId);
+        isWordSupportedByHanziWriter = wordlist.isWordSupportedByHanziWriter(app.deckData[currentDeckId]?.deck[cardId]);
         _changeCounter++;
     }
     
     async function onLearnNewCard() {
-        app.startWarmUp(deckId, currentCardId!);
+        app.startWarmUp(currentDeckId, currentCardId!);
         await app.save();
         isNewCardInteractedWith = true;
         currentCardId = currentCardId;
-        scheduledTimeStr = app.getRatingScheduledTimeStr(deckId, currentCardId!);
-        cardState = app.getWenbunCustomState(deckId, currentCardId!);
+        scheduledTimeStr = app.getRatingScheduledTimeStr(currentDeckId, currentCardId!);
+        cardState = app.getWenbunCustomState(currentDeckId, currentCardId!);
     }
     
     async function onSkipWarmUp() {
-        app.skipWarmUp(deckId, currentCardId!);
+        app.skipWarmUp(currentDeckId, currentCardId!);
         isNewCardInteractedWith = true;
         await app.save();
         nextCard();
     }
     
     function characterWriterDataFromId(id: number): CharacterWriterData | undefined {
-        const word = app.getCardWord(deckId, id);
+        const word = app.getCardWord(currentDeckId, id);
         const config = app.getConfig();
         return wordlist.getCharacterWriterData(word, {
             convertToTraditional: isZhTraditional,
@@ -178,7 +183,7 @@
     }
     
     function getCardConfig(id: number): CharacterWriterConfig {
-        const warmUpCount = app.getWarmUpCount(deckId, id);
+        const warmUpCount = app.getWarmUpCount(currentDeckId, id);
         const isFirstWarmUp = isWarmUp && warmUpCount === 0;
         return {
             isFirstTime,
@@ -195,8 +200,15 @@
         isComplete = true;
         if (isAutoGrading) autoGrade = AutoReview.getGrade(data);
     }
+    function onReadyToGoNext() {
+        const config = app.getConfig();
+        if (!config.isAutoNextOnSuccess || !isAutoGrading) return;
+        if (autoGrade === undefined) return;
+        if (autoGrade === FSRS.Rating.Again) return;
+        acceptAutoGrade();
+    }
     async function onReviewButtonClick(grade: FSRS.Grade) {
-        app.rateCard(deckId, currentCardId!, grade);
+        app.rateCard(currentDeckId, currentCardId!, grade);
         await app.save();
         nextCard();
     }
@@ -210,7 +222,7 @@
     }
     
     async function ignoreCard() {
-        app.addIgnoredMark(deckId, currentCardId!);
+        app.addIgnoredMark(currentDeckId, currentCardId!);
         await app.save();
         nextCard();
     }
@@ -227,7 +239,7 @@
     
     async function acceptAutoGrade() {
         app.storeAutoGradeLog(autoReviewData.correctStrokeCount, autoReviewData.incorrectStrokeCount, autoGrade!);
-        app.rateCard(deckId, currentCardId!, autoGrade!);
+        app.rateCard(currentDeckId, currentCardId!, autoGrade!);
         await app.save();
         nextCard();
     }
@@ -237,7 +249,7 @@
     }
     
     async function warmUpNext() {
-        app.warmUpNext(deckId, currentCardId!);
+        app.warmUpNext(currentDeckId, currentCardId!);
         await app.save();
         nextCard();
     }
@@ -248,12 +260,12 @@
     }
     
     function isFinalWarmUp(id: number, _changeCounter?: number): boolean {
-        const warmUpCount = app.getWarmUpCount(deckId, id);
+        const warmUpCount = app.getWarmUpCount(currentDeckId, id);
         if (warmUpCount === undefined) return true;
         return warmUpCount >= app.getMaxWarmUpCount();
     }
     function isFirstWarmUp(id: number, _changeCounter?: number): boolean {
-        const warmUpCount = app.getWarmUpCount(deckId, id);
+        const warmUpCount = app.getWarmUpCount(currentDeckId, id);
         return warmUpCount === 0;
     }
     
@@ -299,19 +311,19 @@
             {:else}
                 <div class="counter" class:is-learn-only={data.reviewMode === ReviewMode.LearnOnly} class:is-review-only={data.reviewMode === ReviewMode.ReviewOnly}>
                     <span class="deck-count-learn-relearn" class:underlined={cardState === WenBunCustomState.Learning || cardState === WenBunCustomState.Relearning}>
-                        {app.getLearningRelearningCardsCount(deckId) || ''}
+                        {app.getLearningRelearningCardsCount(metaDeckId) || ''}
                     </span>
                     <span class="deck-count-review" class:underlined={cardState === WenBunCustomState.ReviewYoung || cardState === WenBunCustomState.ReviewMature}>
-                        {app.getScheduledReviewCardsCount(deckId) || ''}
+                        {app.getScheduledReviewCardsCount(metaDeckId) || ''}
                     </span>
                     <span class="deck-count-new" class:underlined={cardState === WenBunCustomState.New}>
-                        {app.getScheduledNewCardsCount(deckId) || ''}
+                        {app.getScheduledNewCardsCount(metaDeckId) || ''}
                     </span>
                     <span class="deck-count-new" class:underlined={cardState === WenBunCustomState.WarmUp}>
-                        {app.getWarmUpCardsCount(deckId) ? `(${app.getWarmUpCardsCount(deckId)})` : ''}
+                        {app.getWarmUpCardsCount(metaDeckId) ? `(${app.getWarmUpCardsCount(metaDeckId)})` : ''}
                     </span>
                     <span class="deck-count-previously-studied" class:underlined={cardState === WenBunCustomState.PreviouslyStudied}>
-                        {app.getScheduledPreviouslyStudiedCardsCount(deckId) || ''}
+                        {app.getScheduledPreviouslyStudiedCardsCount(metaDeckId) || ''}
                     </span>
                 </div>
             {/if}
@@ -321,12 +333,14 @@
                 <CharacterWriter 
                     app={app} 
                     isShowHealthBar={isAutoGrading && app.getConfig().showAutoGradingBar}
+                    isShowReadingOnFail={app.getConfig().showReadingOnFail}
                     isSupportedByHanziWriter={isWordSupportedByHanziWriter}
                     isDictationMode={isDictationMode}
                     bind:this={characterWriterRef}
                     characterData={characterWriterDataFromId(currentCardId)} 
                     onComplete={(data) => onComplete(data)} 
                     onOpenDict={() => openDict()}
+                    onReadyToGoNext={() => onReadyToGoNext()}
                     bind:isRequestManualGrade={isRequestManualGrade}
                     cardConfig={getCardConfig(currentCardId)}
                     autoGrade={autoGrade}

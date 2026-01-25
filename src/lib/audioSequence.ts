@@ -36,6 +36,10 @@ export class AudioSequence {
     private endEarlyTimer: number | null = null;
     private activeFades: Array<() => void> = [];
     private nextStartedEarly = false;
+   
+    // playAsync promise hooks
+    private playResolve: (() => void) | null = null;
+    private playReject: ((reason?: any) => void) | null = null;
 
     constructor(items: ClipSpec[], options: SequenceOptions = {}) {
         this.defaults = {
@@ -66,6 +70,18 @@ export class AudioSequence {
             });
         }
     }
+    
+    public playAsync(): Promise<void> {
+        if (this.audios.length === 0) return Promise.resolve();
+        if (this.isPlaying) this.stop();
+        return new Promise<void>((resolve, reject) => {
+            this.playResolve = resolve;
+            this.playReject = reject;
+            this.isPlaying = true;
+            this.currentIndex = 0;
+            this.playCurrent();
+        });
+    }
 
     /** Start (or restart) the sequence from the first clip */
     public play() {
@@ -73,7 +89,7 @@ export class AudioSequence {
         if (this.isPlaying) this.stop();
         this.isPlaying = true;
         this.currentIndex = 0;
-        void this.playCurrent();
+        this.playCurrent();
     }
 
     /** Stop playback immediately and reset to the beginning */
@@ -94,6 +110,13 @@ export class AudioSequence {
 
         this.currentIndex = 0;
         this.nextStartedEarly = false;
+        
+        if (this.playReject) {
+            const rej = this.playReject;
+            this.playResolve = null;
+            this.playReject = null;
+            rej(new Error("Playback stopped"));
+        }
     }
 
     // -------------------- internals --------------------
@@ -134,6 +157,12 @@ export class AudioSequence {
             await audio.play();
         } catch (err) {
             console.warn("Playback failed:", err);
+            if (this.playReject) {
+                const rej = this.playReject;
+                this.playResolve = null;
+                this.playReject = null;
+                rej(err);
+            }
             this.stop();
             return;
         }
@@ -214,6 +243,13 @@ export class AudioSequence {
             // sequence complete
             this.isPlaying = false;
             this.currentIndex = 0;
+            
+            if (this.playResolve) {
+                const r = this.playResolve;
+                this.playResolve = null;
+                this.playReject = null;
+                r();
+            }
         }
     }
 

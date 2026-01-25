@@ -46,6 +46,7 @@
     interface Props {
 		onComplete: (data: AutoReviewData) => void;
 		onOpenDict: () => void;
+		onReadyToGoNext: () => void;
 		isRequestManualGrade: boolean;
 		isDictationMode: boolean; // EXPERIMENTAL, play audio instead of show meaning
 		characterData: CharacterWriterData | undefined;
@@ -53,15 +54,17 @@
 		autoGrade: FSRS.Grade | undefined;
 		autoReviewData: AutoReviewData;
 		isShowHealthBar: boolean;
+		isShowReadingOnFail: boolean;
 		isSupportedByHanziWriter: boolean;
 		writingMode: WritingMode;
 		app: App;
 	}
     let { 
-        onComplete, onOpenDict,
+        onComplete, onOpenDict, onReadyToGoNext,
         isRequestManualGrade = $bindable(), 
         characterData, app, cardConfig, autoGrade,
         isShowHealthBar = false,
+        isShowReadingOnFail = false,
         isDictationMode = false,
         isSupportedByHanziWriter = true,
         writingMode = WritingMode.Default,
@@ -101,8 +104,9 @@
                 onComplete({...autoReviewData});
                 isComplete = true;
                 surpressGradeIndicator = false;
-                window.setTimeout(() => {
-                    if (!isDictationMode) playAudio();
+                window.setTimeout(async () => {
+                    if (!isDictationMode) await playAudio();
+                    onReadyToGoNext();
                 }, NEXT_CHAR_DELAY);
             } else {
                 window.setTimeout(() => {
@@ -225,14 +229,14 @@
         audios.forEach(a => a.stop());
     }
 
-    function playAudio() {
+    async function playAudio() {
         if (unmounted) return;
         // Stop any currently playing audio first
         stopAllAudio();
         // random index
         const index = Math.floor(Math.random() * audios.length);
         const a = audios[index];
-        a.play();
+        await a.playAsync();
     }
     
     function toggleRequestManualGrade() {
@@ -380,6 +384,15 @@
             window.removeEventListener('resize', updateWidth);
             if (cleanupApplePencilFix) cleanupApplePencilFix();
         };
+    });
+    
+    const isShowReading = $derived(() => {
+        if (app.getConfig().zh.alwaysShowReading) return true;
+        if (isShowReadingOnFail && autoReviewData.isFailAndReveal) return true;
+        if (isComplete) return true;
+        if (cardConfig.isFirstTime) return true;
+        if (isDictationMode) return true;
+        return false;
     });
 </script>
 
@@ -648,7 +661,7 @@
             {SLUG_WORD_NOT_SUPPORTED_BY_HANZI_WRITER}
         {/if}
     </div>
-    <div class="reading-container" class:is-hidden={!app.getConfig().zh.alwaysShowReading && !isComplete && !cardConfig.isFirstTime && !isDictationMode}>
+    <div class="reading-container" class:is-hidden={!isShowReading()}>
         <div class="reading">
             {#if isDictationMode && !isDictationModeRevealReading && !app.getConfig().zh.alwaysShowReading && !isComplete && !cardConfig.isFirstTime}
                 <button class="reveal-button" onclick={() => isDictationModeRevealReading = true} aria-label="Reveal Reading">
