@@ -171,6 +171,10 @@ export const SETTINGS_LABEL_DATA = {
         label: "Grading Method",
         help: "Whether the system will grade the cards automatically or let the user manually grade them.",
     },
+    isAutoNextOnSuccess: {
+        label: "Auto Next On Success",
+        help: "When enabled, the app will automatically move to the next card after a \"correct\" answer (not failed).",
+    },
     strokeLeniency: {
         label: "Stroke Grading Leniency",
         help: "(default 1.5) This can be set to make stroke grading more or less lenient. The closer this is to 0 the more strictly the quiz is graded."
