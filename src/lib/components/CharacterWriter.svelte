@@ -105,7 +105,7 @@
                 isComplete = true;
                 surpressGradeIndicator = false;
                 window.setTimeout(async () => {
-                    if (!isDictationMode) await playAudio();
+                    if (!isDictationMode && audios.length) await playAudio();
                     onReadyToGoNext();
                 }, NEXT_CHAR_DELAY);
             } else {
