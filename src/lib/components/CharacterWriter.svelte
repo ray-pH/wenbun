@@ -105,7 +105,7 @@
                 isComplete = true;
                 surpressGradeIndicator = false;
                 window.setTimeout(async () => {
-                    if (!isDictationMode) await playAudio();
+                    if (!isDictationMode && audios.length) await playAudio();
                     onReadyToGoNext();
                 }, NEXT_CHAR_DELAY);
             } else {
@@ -236,6 +236,7 @@
         // random index
         const index = Math.floor(Math.random() * audios.length);
         const a = audios[index];
+        if (!a) return;
         await a.playAsync();
     }
     

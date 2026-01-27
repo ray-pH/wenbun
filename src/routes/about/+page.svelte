@@ -23,6 +23,12 @@
     <div class="changelog-container">
         Changelog
 
+        <h4>v0.22.1 (2026-01-27)</h4>
+        <ul>
+            <li><b>Review</b>: Fixed an issue where the <b>"auto next"</b> feature would not work correctly when <b>"play audio"</b> was disabled.
+            </li>
+        </ul>
+
         <h4>v0.22.0 (2026-01-25)</h4>
         <ul>
             <li><b>Review</b>:
