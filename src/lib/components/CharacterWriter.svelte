@@ -236,6 +236,7 @@
         // random index
         const index = Math.floor(Math.random() * audios.length);
         const a = audios[index];
+        if (!a) return;
         await a.playAsync();
     }
     
