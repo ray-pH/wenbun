@@ -142,6 +142,14 @@ export const SETTINGS_LABEL_DATA = {
         label: "Show Reading On Fail/Reveal",
         help: "When enabled, the reading will be shown after the fail/reveal button is pressed.",
     },
+    enableNextKeyButtons: {
+        label: "Enable Next Button Keys",
+        help: "When enabled, you can press the next key to move to the next card.",
+    },
+    nextKeyButtons: {
+        label: "Next Button Keys",
+        help: "",
+    },
     
     learningSteps: {
         label: "Learning Steps",

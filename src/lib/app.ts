@@ -91,11 +91,13 @@ export interface WenbunConfig {
     startPreviouslyStudiedCardFromTheBack?: boolean;
     isSeparateLearnAndReview?: boolean;
     
-    // UI & Audio
+    // UI, Audio & Input
     uiScale?: 'small' | 'normal' | 'custom'; // 10px, 16px
     customFontSize?: number;
     playSuccessSound?: boolean;
     showReadingOnFail?: boolean;
+    enableNextButtonKey: boolean,
+    nextButtonKeyCodes: (string|undefined)[];
     
     // Review
     gradingMethod?: 'auto' | 'manual';
@@ -148,6 +150,8 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     customFontSize: 16,
     playSuccessSound: true,
     showReadingOnFail: false,
+    enableNextButtonKey: false,
+    nextButtonKeyCodes: ["Space"],
     
     gradingMethod: 'auto',
     isAutoNextOnSuccess: false,
