@@ -146,6 +146,29 @@
          }
     }
     
+    function addKeyButton() {
+        config.nextButtonKeyCodes = [ ...config.nextButtonKeyCodes, undefined ];
+    }
+    let editingKeyButtonIndex: number|undefined = undefined;
+    function requestEditKeyButton(index: number) {
+        editingKeyButtonIndex = index;
+        const handler = (e: KeyboardEvent) => {
+            e.preventDefault();
+            window.removeEventListener("keydown", handler);
+            if (e.code === 'Escape') {
+                // cancel
+            } else {
+                // save
+                config.nextButtonKeyCodes[index] = e.code;
+            }
+            editingKeyButtonIndex = undefined;
+        };
+        window.addEventListener("keydown", handler);
+    }
+    function removeNextKeyButton(index: number) {
+        config.nextButtonKeyCodes = config.nextButtonKeyCodes.filter((_, i) => i !== index);
+    }
+    
 </script>
 
 <TopBar title="Settings" isSettings={true} backConfirmCallback={backConfirmCallback} 
@@ -157,6 +180,23 @@
         <button class="button" onclick={() => saveConfig()} disabled={!isConfigChanged}>Save</button>
         <button class="button" onclick={() => discardChanges()} disabled={!isConfigChanged}>Discard Changes</button>
     </div>
+{/snippet}
+
+{#snippet nextButtonKeyConfig()}
+    <button class="hidden-button">hidden button to trick html label behaviour</button>
+    <div class="next-key-button-container">
+        {#each config.nextButtonKeyCodes as code, index}
+            <div class="next-key-button-key">
+                <button class="next-key-button-key-button" class:is-editing={editingKeyButtonIndex === index} onclick={() => requestEditKeyButton(index)}>
+                    <span>{code ?? '-'}</span>
+                </button>
+                <button onclick={() => removeNextKeyButton(index)} aria-label="Remove Key">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+        {/each}
+    </div>
+    <button class="button" onclick={() => addKeyButton()}>Add New Key</button>
 {/snippet}
 
 <TopRevealBar>
@@ -261,7 +301,7 @@
         </div>
         
         <div class="settings-section">
-            <div class="section-title">UI & Audio</div>
+            <div class="section-title">UI, Audio & Input</div>
             <div class="section-container">
                 <SettingsItem key="uiScale">
                     <select bind:value={config.uiScale}>
@@ -286,6 +326,14 @@
                 <SettingsItem key="showReadingOnFail">
                     <input type="checkbox" bind:checked={config.showReadingOnFail}>
                 </SettingsItem>
+                <SettingsItem key="enableNextKeyButtons">
+                    <input type="checkbox" bind:checked={config.enableNextButtonKey}>
+                </SettingsItem>
+                {#if config.enableNextButtonKey}
+                    <SettingsItem key="nextKeyButtons">
+                        {@render nextButtonKeyConfig()}
+                    </SettingsItem>
+                {/if}
             </div>
         </div>
         
@@ -535,5 +583,28 @@
     }
     input:invalid {
         background-color: var(--wenbun-red);
+    }
+    
+    .hidden-button {
+        display: none;
+    }
+    
+    .next-key-button-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2em;
+        margin-bottom: 0.5em;
+        .is-editing {
+            span {
+                display: none;
+            }
+        }
+        .is-editing::after {
+            content: "...";
+        }
+        .next-key-button-key-button {
+            width: 8em;
+            cursor: pointer;
+        }
     }
 </style>

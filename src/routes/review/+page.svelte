@@ -3,7 +3,7 @@
     import { App, ReviewMode, WenBunCustomState, WritingMode } from "$lib/app";
     import CharacterWriter from "$lib/components/CharacterWriter.svelte";
     import * as FSRS from "ts-fsrs"
-    import { onMount } from "svelte";
+    import { onDestroy, onMount } from "svelte";
     import { isBuiltinDeck, parseIntOrUndefined, type CharacterWriterConfig, type CharacterWriterData } from "$lib/util";
     import { ChineseCharacterWordlist, ChineseMandarinReading, TONE_PREFIX } from "$lib/chinese";
     import TopBar from "$lib/components/TopBar.svelte";
@@ -32,6 +32,7 @@
         className?: string;
         onclick?: () => void;
         isComplete?: boolean;
+        isNextButton?: boolean;
         alternate?: Omit<ReviewButton, 'alternate'>;
     };
     
@@ -42,6 +43,7 @@
     let showDictModal = false;
     let forceStopAudioOnNextCard = false;
     let isWordSupportedByHanziWriter = true;
+    let nextButtonAction: (() => void) | undefined = undefined;
     onMount(async () => {
         // no need to sync in here
         await app.init();
@@ -62,7 +64,11 @@
         isPageReady = true;
         if (data.isExtraStudy) app.extraStudyHandler.registerReviewCardIdsOverride(cardIds);
         forceStopAudioOnNextCard = app.getConfig().zh.forceStopAudioOnNextCard;
+        setupNextKeyListener();
         nextCard();
+    })
+    onDestroy(() => {
+        destroyNextKeyListener();
     })
     
     function getIsUseExtraDict(tags: string[] | undefined): boolean {
@@ -283,6 +289,32 @@
     function openDict() {
         showDictModal = true;
     }
+    
+    function setNextButtonAction(fun: (() => void) | undefined) {
+        nextButtonAction = fun;
+    }
+    
+    let nextKeyButtonCodes: string[] = [];
+    let keyDownHandler = (e: KeyboardEvent) => {
+        //TODO: pass is complete check as property of ReviewButton
+        if (!isComplete) return; 
+        if (nextKeyButtonCodes.includes(e.code)) {
+            e.preventDefault();
+            nextButtonAction?.();
+            console.log("next button clicked");
+        }
+    }
+    
+    function setupNextKeyListener() {
+        const config = app.getConfig();
+        if (!config.enableNextButtonKey) return;
+        nextKeyButtonCodes = config.nextButtonKeyCodes.filter(code => !!code) as string[];
+        window.addEventListener("keydown", keyDownHandler);
+    }
+    
+    function destroyNextKeyListener() {
+        window.removeEventListener("keydown", keyDownHandler);
+    }
 </script>
 
 
@@ -375,7 +407,7 @@
                     onclick: () => onSkipWarmUp() },
           		{ label: "" },
           		{ label: "Learn", className: "review-button-easy main-button", isComplete: true,
-                    onclick: () => onLearnNewCard() }
+                    onclick: () => onLearnNewCard(), isNextButton: true }
            	])}
         {:else if isWarmUp && !isFinalWarmUp(currentCardId, _changeCounter)}
             {@render ReviewButtons([
@@ -388,7 +420,7 @@
           		{ label: "" },
           		{ label: "" },
           		{ label: "Next", className: "review-button-easy", isComplete,
-                    onclick: () => warmUpNext() }
+                    onclick: () => warmUpNext(), isNextButton: true }
            	])}
         {:else if isWarmUp && isFinalWarmUp(currentCardId, _changeCounter) && !isGradeWarmUpCards}
             <!-- if isGradeWarmup, should go to the last (else) branch -->
@@ -397,7 +429,7 @@
           		{ label: "" },
           		{ label: "" },
           		{ label: "Next", className: "review-button-easy", isComplete,
-                    onclick: () => finishWarmUp() }
+                    onclick: () => finishWarmUp(), isNextButton: true }
            	])}
         {:else if isAutoGrading && !isRequestManualGrade}
            	{@render ReviewButtons([
@@ -405,7 +437,7 @@
           		{ label: "" },
           		{ label: "" },
           		{ label: "Next", className: "review-button-easy",  isComplete,
-                    onclick: () => acceptAutoGrade() }
+                    onclick: () => acceptAutoGrade(), isNextButton: true }
            	])}
         {:else if isAutoGrading && isRequestManualGrade}
            	{@render ReviewButtons(
@@ -446,10 +478,20 @@
     {/if}
 </SlideablePopup>
 
-{#snippet ReviewButtons(buttons: ReviewButton[], extraClass = "")}
+{#snippet ReviewButtons(
+    buttons: ReviewButton[], 
+    extraClass = "",
+)}
 	<div class="bottom-container" in:fly={inFlyParam} out:fade={outFadeParam}>
 		<div class={`review-button-container ${extraClass}`}>
 			{#each buttons as b}
+			    <div style="display: none">
+    			    {#if b.isNextButton && b.onclick}
+    					{ setNextButtonAction(b.onclick) }
+    				{:else}
+   					    { setNextButtonAction(undefined) }
+    				{/if}
+				</div>
 			    {#if b.alternate && !b.isComplete && b.alternate.isComplete}
 					<button
     					class={`review-button ${b.alternate.className || b.className || ""}`}

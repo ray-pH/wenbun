@@ -22,6 +22,14 @@
     </div>
     <div class="changelog-container">
         Changelog
+        
+        <h4>v0.23.0 (2026-02-16)</h4>
+        <ul>
+            <li>
+                <b>Review</b>
+                Added the ability to setup a keyboard key to advance to the next card.
+            </li>
+        </ul>
 
         <h4>v0.22.1 (2026-01-27)</h4>
         <ul>
