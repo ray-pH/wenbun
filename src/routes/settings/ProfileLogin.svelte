@@ -8,6 +8,7 @@
     export let isLoggedIn = false;
     export let isOnlineProfileLoaded = false;
     let name: string = "";
+    let uid: string | undefined = "";
     
     let isSyncConflict = false;
     let syncConflictInfo: SyncConflictInfo | undefined;
@@ -20,6 +21,7 @@
         if (app) {
             isLoggedIn = app.profile.isLoggedIn;
             name = app.profile.getName();
+            uid = app.profile.profileInfo?.id;
             isSyncConflict = app.profile.isSyncConflict;
             syncConflictInfo = app.profile.syncConflictInfo;
             isAutomaticallyLoggedOut = app.profile.isAutomaticallyLoggedOut();
@@ -66,6 +68,11 @@
         <div>
             Logged in as <span class="name">{name}</span>
         </div>
+        {#if uid}
+            <div>
+                UID: <span class="uid">{uid}</span>
+            </div>
+        {/if}
         <div>
             <label style="display: flex; justify-content: space-between; width: 100%;">
                 <span>Sync mode:</span>
@@ -198,6 +205,13 @@
     
     .name {
       font-weight: bold;
+    }
+    .uid {
+        font-size: 0.8em;
+        font-family: monospace;
+        background-color: #e0e0e0;
+        padding: 0.2em 0.4em;
+        border-radius: 0.3em;
     }
     
     .warning {
