@@ -23,10 +23,18 @@
     <div class="changelog-container">
         Changelog
         
+        <h4>v0.23.1 (2026-02-21)</h4>
+        <ul>
+            <li>
+                <b>Settings</b>:
+                Show public UID in the settings page.
+            </li>
+        </ul>
+        
         <h4>v0.23.0 (2026-02-16)</h4>
         <ul>
             <li>
-                <b>Review</b>
+                <b>Review</b>:
                 Added the ability to setup a keyboard key to advance to the next card.
             </li>
         </ul>
