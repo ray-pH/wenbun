@@ -23,6 +23,14 @@
     <div class="changelog-container">
         Changelog
         
+        <h4>v0.23.2 (2026-02-22)</h4>
+        <ul>
+            <li>
+                <b>Bugfix</b>:
+                Fixed Blank Screen when <code>Show Reading On Fail/Reveal</code> is enabled
+            </li>
+        </ul>
+        
         <h4>v0.23.1 (2026-02-21)</h4>
         <ul>
             <li>
