@@ -389,7 +389,7 @@
     
     const isShowReading = $derived(() => {
         if (app.getConfig().zh.alwaysShowReading) return true;
-        if (isShowReadingOnFail && autoReviewData.isFailAndReveal) return true;
+        if (isShowReadingOnFail && autoReviewData?.isFailAndReveal) return true;
         if (isComplete) return true;
         if (cardConfig.isFirstTime) return true;
         if (isDictationMode) return true;
