@@ -98,6 +98,7 @@ export interface WenbunConfig {
     showReadingOnFail?: boolean;
     enableNextButtonKey: boolean,
     nextButtonKeyCodes: (string|undefined)[];
+    showDeckLastStudyTime?: boolean;
     
     // Review
     gradingMethod?: 'auto' | 'manual';
@@ -152,6 +153,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     showReadingOnFail: false,
     enableNextButtonKey: false,
     nextButtonKeyCodes: ["Space"],
+    showDeckLastStudyTime: false,
     
     gradingMethod: 'auto',
     isAutoNextOnSuccess: false,
@@ -1351,6 +1353,18 @@ export class App {
     isDeckMeta(deckId: string): boolean {
         const deck = this.deckData[deckId];
         return !!deck?.isMetaDeck;
+    }
+    
+    getDeckLastStudied(deckId: string): Date {
+        if (this.isDeckMeta(deckId)) {
+            const subDeckIds = this.deckData[deckId].subDeckIds ?? [];
+            const lastStudied = subDeckIds.map(id => this.getDeckLastStudied(id));
+            return lastStudied.reduce((a, b) => a > b ? a : b, new Date(0));
+        } else {
+            const deckData = this.deckData[deckId];
+            return Object.values(deckData.schedule).map(s => s.last_review)
+                .filter(s => s).reduce((a, b) => a! > b! ? a : b, new Date(0)) ?? new Date(0);
+        }
     }
 }
 

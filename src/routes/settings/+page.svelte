@@ -326,6 +326,9 @@
                 <SettingsItem key="showReadingOnFail">
                     <input type="checkbox" bind:checked={config.showReadingOnFail}>
                 </SettingsItem>
+                <SettingsItem key="showDeckLastStudyTime">
+                    <input type="checkbox" bind:checked={config.showDeckLastStudyTime}>
+                </SettingsItem>
                 <SettingsItem key="enableNextKeyButtons">
                     <input type="checkbox" bind:checked={config.enableNextButtonKey}>
                 </SettingsItem>

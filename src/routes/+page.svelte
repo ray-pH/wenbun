@@ -25,6 +25,7 @@
     let app = new App();
     let isAutomaticallyLoggedOut = false;
     let isNewUpdateExist = false;
+    let isShowLastStudied = false;
     let deckOrder: string[] = [];
     
     $: {
@@ -47,6 +48,7 @@
         // Initialize deckOrder after app init
         deckOrder = [...app.decks];
         app = app;
+        isShowLastStudied = app.getConfig().showDeckLastStudyTime;
         isAppInitialized = true;
         isNewUpdateExist = app.isNewUpdateExist();
         const changed = await app.initProfile();
@@ -54,6 +56,7 @@
         if (changed) {
             app = app;
             deckOrder = [...app.decks];
+            isShowLastStudied = app.getConfig().showDeckLastStudyTime;
         }
         isNewUpdateExist = app.isNewUpdateExist();
         
@@ -112,6 +115,12 @@
     
     let isShowDomainMigration = false;
     let isInDev = window.location.hostname.endsWith('dev.photon-ray.xyz');
+    
+    function getDeckLastStudiedString(deckId: string): string {
+        const date = new Date(app.getDeckLastStudied(deckId));
+        if (date.getTime() === 0) return '-';
+        else return date.toLocaleString();
+    }
    	
    	// Initialize drag drop manager when component mounts
    	onMount(() => {
@@ -243,27 +252,35 @@
 
 {#snippet deckCard(info: typeof DeckInfo[number], disable: boolean)}
     <a class="deck-card" class:disabled={disable} href="{base}/overview?id={info.id}" draggable="false">
-        <div class="left">
-            <span class="deck-card-title">{info.title}</span>
-            <span 
-                class="deck-card-subtitle"
-                style={`--subtitle-color: ${info.color ?? '#00000080'}`}
-            >{info.subtitle}</span>
+        <div class="deck-card-info">
+            <div class="left">
+                <span class="deck-card-title">{info.title}</span>
+                <span 
+                    class="deck-card-subtitle"
+                    style={`--subtitle-color: ${info.color ?? '#00000080'}`}
+                >{info.subtitle}</span>
+            </div>
+            <div class="right" class:no-new={isSeparateLearnAndReview}>
+                <span class="deck-count-learn-relearn" title="learning">
+                    {app.recursiveMetaDeckCount(info.id, app.getLearningRelearningCardsCount.bind(app)) || ''}
+                </span>
+                <span class="deck-count-review" title="review">
+                    {app.recursiveMetaDeckCount(info.id, app.getScheduledReviewCardsCount.bind(app)) || ''}
+                </span>
+                <span class="deck-count-new" title="new">
+                    {app.recursiveMetaDeckCount(info.id, app.getScheduledNewOrWarmUpCardsCount.bind(app)) || ''}
+                </span>
+                <span class="deck-count-previously-studied" title="previously studied">
+                    {app.recursiveMetaDeckCount(info.id, app.getScheduledPreviouslyStudiedCardsCount.bind(app)) || ''}
+                </span>
+            </div>
         </div>
-        <div class="right" class:no-new={isSeparateLearnAndReview}>
-            <span class="deck-count-learn-relearn" title="learning">
-                {app.recursiveMetaDeckCount(info.id, app.getLearningRelearningCardsCount.bind(app)) || ''}
-            </span>
-            <span class="deck-count-review" title="review">
-                {app.recursiveMetaDeckCount(info.id, app.getScheduledReviewCardsCount.bind(app)) || ''}
-            </span>
-            <span class="deck-count-new" title="new">
-                {app.recursiveMetaDeckCount(info.id, app.getScheduledNewOrWarmUpCardsCount.bind(app)) || ''}
-            </span>
-            <span class="deck-count-previously-studied" title="previously studied">
-                {app.recursiveMetaDeckCount(info.id, app.getScheduledPreviouslyStudiedCardsCount.bind(app)) || ''}
-            </span>
-        </div>
+        {#if isShowLastStudied}
+            <div class="deck-card-last-studied">
+                Last Studied: 
+                {getDeckLastStudiedString(info.id)}
+            </div>
+        {/if}
     </a>
 {/snippet}
 
@@ -332,6 +349,19 @@
         border-radius: 0.5em;
         padding: 1em;
         flex-grow: 1;
+        /*display: flex;*/
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        gap: 1em;
+        
+        &.disabled {
+            pointer-events: none;
+        }
+    }
+    .deck-card-info {
+        all: unset;
+        flex-grow: 1;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -349,9 +379,11 @@
         .right {
             color: var(--wenbun-blue);
         }
-        &.disabled {
-            pointer-events: none;
-        }
+    }
+    .deck-card-last-studied {
+        margin-top: 0.2em;
+        font-size: 0.9em;
+        opacity: 0.4;
     }
     .deck-card {
         .right {
