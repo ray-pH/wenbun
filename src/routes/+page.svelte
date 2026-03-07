@@ -9,7 +9,6 @@
     import { LoginStatus, ManualSyncStatus, SyncMode } from '$lib/profile';
     import Loading from '$lib/components/Loading.svelte';
     import { registerSW } from 'virtual:pwa-register';
-    import { isTauri } from '@tauri-apps/api/core';
     
     registerSW({
         immediate: true,
@@ -113,9 +112,6 @@
         isSyncing = false;
     }
     
-    let isShowDomainMigration = false;
-    let isInDev = window.location.hostname.endsWith('dev.photon-ray.xyz');
-    
     function getDeckLastStudiedString(deckId: string): string {
         const date = new Date(app.getDeckLastStudied(deckId));
         if (date.getTime() === 0) return '-';
@@ -128,10 +124,6 @@
  			onReorder: handleReorder
   		});
         
-        if (!isTauri() && typeof window !== 'undefined') {
-            isShowDomainMigration = window.location.hostname !== 'app.wenbun.com';
-        }
-  		
   		return () => {
  			// Cleanup on component destroy
  			if (dragDropManager) {
@@ -149,24 +141,6 @@
 ></TopBar>
 <div class="main-container">
     <div class="top-container">
-        {#if isShowDomainMigration && !isInDev}
-            <div style="display: flex; align-items: center;">
-                <!-- <div class="domain-notice">
-                    <p>
-                        You are visiting an old domain. 
-                        <br><br>
-                        We will be keeping this domain until the end of October 2025
-                        because some user local data might still be stored here.
-                        <br><br>
-                        We're now moving the project to <a href={NEW_DOMAIN} target="_blank">{NEW_DOMAIN}</a>.
-                    </p>
-                    <a href={NEW_DOMAIN} target="_blank" class="button">
-                        <i class="fa-solid fa-globe"></i>
-                        Go to the new domain
-                    </a>
-                </div> -->
-            </div>
-        {/if}
         <a class="a-button" style="background-color: #A0D0F0;" href="{base}/about/">
             <div style="display: flex; align-items: center; justify-content: space-between;">
                 <span>Changelog</span>
