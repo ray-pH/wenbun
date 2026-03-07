@@ -11,9 +11,6 @@
     import { registerSW } from 'virtual:pwa-register';
     import { isTauri } from '@tauri-apps/api/core';
     
-    const NEW_DOMAIN = 'https://app.wenbun.com';
-    const DEV_DOMAIN = 'https://wenbun-dev.photon-ray.xyz/'
-    
     registerSW({
         immediate: true,
         onRegisteredSW(swUrl, reg) {
@@ -452,27 +449,6 @@
         margin-top: 0.5em;
         width: calc(100vw - 2em);
         max-width: 24em;
-    }
-    .domain-notice {
-        margin: 1em;
-        padding: 1em;
-        border-radius: 0.5em;
-        background: #fff3cd;
-        color: #856404;
-        border: 1px solid #ffeeba;
-        text-align: center;
-        max-width: 20em;
-    }
-    .domain-notice .button {
-        display: inline-block;
-        margin-top: 0.5em;
-        padding: 0.5em 1em;
-        border-radius: 0.5em;
-        background-color: var(--wenbun-blue);
-        color: white;
-        font-weight: bold;
-        cursor: pointer;
-        text-decoration: none;
     }
     a {
         color: var(--wenbun-blue);
