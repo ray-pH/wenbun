@@ -23,23 +23,37 @@
     
     let inputType = CUSTOM_DECK_INPUT_TYPE.Simple;
     let ankiInputWordColumn: number = 1;
+    let ankiIgnoreSpecialCharacters = false;
+    let ankiIncludeReading = false;
+    let ankiIncludeMeaning = false;
+    let ankiReadingColumn: number = 2;
+    let ankiMeaningColumn: number = 3;
     
     let _updateCounter = 0;
     function update() { _updateCounter++ }
     
     function onInputChanged() {
-        window.localStorage.setItem(LOCAL_STORAGE_KEY, input);
-        const newParsed = getParsed();
-        if (newParsed) {
-            customDeck = {...customDeck, ...newParsed};
-        }
-        update();
+        window.requestAnimationFrame(() => {
+            window.localStorage.setItem(LOCAL_STORAGE_KEY, input);
+            const newParsed = getParsed();
+            if (newParsed) {
+                customDeck = {...customDeck, ...newParsed};
+            }
+            update();
+        });
     }
     
     function getParsed(): Partial<CustomDeck> {
         switch (inputType) {
             case CUSTOM_DECK_INPUT_TYPE.Simple: return parser.parseSimple(input);
-            case CUSTOM_DECK_INPUT_TYPE.AnkiText: return parser.parseAnkiText(input, ankiInputWordColumn);
+            case CUSTOM_DECK_INPUT_TYPE.AnkiText: return parser.parseAnkiText(input, {
+                columnIndex: ankiInputWordColumn,
+                ignoreSpecialCharacters: ankiIgnoreSpecialCharacters,
+                importReading: ankiIncludeReading,
+                readingColumnIndex: ankiReadingColumn,
+                importMeaning: ankiIncludeMeaning,
+                meaningColumnIndex: ankiMeaningColumn
+            });
         }
     }
     
@@ -78,7 +92,7 @@
             const confirm = window.confirm("You have issues in your deck. Card with issues will be ignored. Are you sure you want to add this deck?");
             if (!confirm) return;
         }
-        app.extendDeck(existingDeckId, customDeck.words, issueIds);
+        app.extendDeck(existingDeckId, customDeck.words, customDeck.customEntry, issueIds);
         await app.save(false, true);
         goto(`${base}/`);
     }
@@ -127,6 +141,35 @@
                     <input type="number" bind:value={ankiInputWordColumn} step="1" min="0" oninput={onInputChanged}>
                 </label>
             </div>
+            <div>
+                <label> Ignore Special Character:
+                    <input type="checkbox" bind:checked={ankiIgnoreSpecialCharacters} oninput={onInputChanged}>
+                </label>
+            </div>
+            <div>
+                <label> Import Reading:
+                    <input type="checkbox" bind:checked={ankiIncludeReading} oninput={onInputChanged}>
+                </label>
+            </div>
+            {#if ankiIncludeReading}
+                <div>
+                    <label> Reading Column Index:
+                        <input type="number" bind:value={ankiReadingColumn} step="1" min="0" oninput={onInputChanged}>
+                    </label>
+                </div>
+            {/if}
+            <div>
+                <label> Import Meaning:
+                    <input type="checkbox" bind:checked={ankiIncludeMeaning} oninput={onInputChanged}>
+                </label>
+            </div>
+            {#if ankiIncludeMeaning}
+                <div>
+                    <label> Meaning Column Index:
+                        <input type="number" bind:value={ankiMeaningColumn} step="1" min="0" oninput={onInputChanged}>
+                    </label>
+                </div>
+            {/if}
         {/if}
         <textarea 
             bind:value={input} 
