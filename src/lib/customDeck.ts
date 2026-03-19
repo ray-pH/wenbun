@@ -19,15 +19,17 @@ export const DEFAULT_CUSTOM_DECK: CustomDeck = {
 export enum CUSTOM_DECK_INPUT_TYPE {
     Simple = "simple",
     AnkiText = "ankiText",
+    CSV = "csv",
 }
 
-export interface ParseAnkiParams {
+export interface ParseParams {
     columnIndex: number;
     ignoreSpecialCharacters: boolean;
     importReading: boolean;
     readingColumnIndex: number;
     importMeaning: boolean;
     meaningColumnIndex: number;
+    ignoreHeader: boolean;
 }
 
 export class CustomDeckParser {
@@ -47,12 +49,70 @@ export class CustomDeckParser {
         return { words };
     }
     
-    parseAnkiText(input: string, param: ParseAnkiParams): Partial<CustomDeck> {
+    parseAnkiText(input: string, param: ParseParams): Partial<CustomDeck> {
         const rows = input.split("\n")
             .filter(w => w.trim() !== '' && !w.startsWith("#"))
             .map(w => w.split("\t"));
         const rawWords = rows.map(r => r[param.columnIndex - 1]);
         const words = param.ignoreSpecialCharacters ? rawWords.map(w => this.cleanWord(w)) : rawWords;
+        if (param.importReading || param.importMeaning) {
+            let customEntry: Record<number, {r?: string, m?: string}> = {};
+            const reading = param.importReading ? rows.map(r => r[param.readingColumnIndex - 1]) : [];
+            const meaning = param.importMeaning ? rows.map(r => r[param.meaningColumnIndex - 1]) : [];
+            const count = Math.max(reading.length, meaning.length);
+            for (let i = 0; i < count; i++) {
+                customEntry[i] = { r: reading[i], m: meaning[i] };
+            }
+            return { words, customEntry };
+        } else {
+            return { words };
+        }
+    }
+
+    parseCSV(input: string, param: ParseParams): Partial<CustomDeck> {
+        const parseLine = (line: string): string[] => {
+            const cells: string[] = [];
+            let current = "";
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const ch = line[i];
+                if (inQuotes) {
+                    if (ch === '"') {
+                        const next = line[i + 1];
+                        if (next === '"') {
+                            current += '"';
+                            i++;
+                        } else {
+                            inQuotes = false;
+                        }
+                    } else {
+                        current += ch;
+                    }
+                } else {
+                    if (ch === '"') {
+                        inQuotes = true;
+                    } else if (ch === ",") {
+                        cells.push(current);
+                        current = "";
+                    } else {
+                        current += ch;
+                    }
+                }
+            }
+            cells.push(current);
+            return cells;
+        };
+
+        const rows = input
+            .split("\n")
+            .map((line) => line.replace(/\r$/, ""))
+            .filter(w => w.trim() !== '' && !w.startsWith("#"))
+            .slice(param.ignoreHeader ? 1 : 0)
+            .map(parseLine);
+
+        const rawWords = rows.map(r => r[param.columnIndex - 1]);
+        const words = param.ignoreSpecialCharacters ? rawWords.map(w => this.cleanWord(w)) : rawWords;
+
         if (param.importReading || param.importMeaning) {
             let customEntry: Record<number, {r?: string, m?: string}> = {};
             const reading = param.importReading ? rows.map(r => r[param.readingColumnIndex - 1]) : [];
