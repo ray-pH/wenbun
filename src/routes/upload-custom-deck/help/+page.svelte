@@ -31,7 +31,7 @@
 
         <h2>Custom Deck Input Format</h2>
 
-        <p>You can import custom decks from text. There are two supported formats: Simple and Anki Text.</p>
+        <p>You can import custom decks from text. There are three supported formats: Simple, CSV, and Anki Text.</p>
     
         <div class="section">
             <h3>Simple Format</h3>
@@ -45,26 +45,82 @@
         </div>
 
         <div class="section">
-            <h3>Anki Text Format</h3>
-            <p>This format is for tab-separated text, which is a common export format from Anki.</p>
-            <p>Each line represents a card, with fields separated by tabs. You will need to specify which column contains the Chinese words or characters you want to study.</p>
+            <h3>CSV (Comma-Separated Values)</h3>
+            <p>This format is common for spreadsheet exports (Excel, Google Sheets). Fields are separated by commas, and values containing commas are usually enclosed in double quotes.</p>
+            <p>You can choose to ignore the first line of the CSV if it contains headers (like "Word", "Pinyin", "Meaning").</p>
+            <p>Example:</p>
+            <pre><code>Word,Reading,Meaning
+你好,nǐ hǎo,Hello
+学习,xué xí,to study
+</code></pre>
+        </div>
+
+        <div class="section">
+            <h3>Anki Text / Tab-Separated Format</h3>
+            <p>This format uses tabs to separate fields. It is a common export format from Anki and Pleco.</p>
             <p>Lines starting with <code>#</code> are treated as comments and will be ignored.</p>
             
             <p>Example:</p>
             <pre><code>你好	nǐ hǎo	Hello
 学习	xué xí	to study
 </code></pre>
-            <p>In the example above, the words are in the first column (column 1).</p>
             
             <h4>How to Export from Anki</h4>
-            <p>To get a file in this format from the Anki desktop application's export dialog:</p>
+            <p>To get a file in this format from the Anki desktop application:</p>
             <ol>
                 <li>Choose the deck you wish to export.</li>
                 <li>For the <b>'Export format'</b>, select <b>Notes in Plain Text</b>.</li>
-                <li>It is recommended to disable the <b>'Include HTML and media references'</b> and <b>'Include tags'</b> options to get a clean text file.</li>
-                <li>Click the <b>'Export'</b> button and save the file.</li>
+                <li>It is recommended to disable the <b>'Include HTML and media references'</b> and <b>'Include tags'</b> options.</li>
+                <li>Click <b>'Export'</b>.</li>
             </ol>
 
+            <h4>How to Export from Pleco</h4>
+            <p>To export your flashcards from the Pleco mobile app:</p>
+            <ol>
+                <li>Go to <b>Flashcards</b> -> <b>Import/Export</b> -> <b>Export Cards</b>.</li>
+                <li>Keep the default settings (Text file, tab-separated).</li>
+                <li>Once exported, you can upload the text file here.</li>
+            </ol>
+        </div>
+
+        <div class="section">
+            <h3>Advanced Options</h3>
+            <p>When using CSV or Anki Text formats, you have several advanced options:</p>
+            <ul>
+                <li>
+                    <i class="fa-solid fa-list-ol"></i>
+                    <b>Column Index</b>: Specify which column (starting from 1) contains the words or characters.
+                </li>
+                <li>
+                    <i class="fa-solid fa-file-import"></i>
+                    <b>Import Reading/Meaning</b>: If your file already contains pronunciations or definitions, you can choose to import them instead of using the app's default dictionary. You must specify which column these fields are in.
+                </li>
+                <li>
+                    <i class="fa-solid fa-filter"></i>
+                    <b>Ignore Special Characters</b>: Automatically removes common punctuation marks (。？，) from the word column. This is useful if your word list contains full sentences or bracketed information.
+                </li>
+            </ul>
+
+            <h4>Example Configuration</h4>
+            <p>If you have a CSV file where the columns are mixed, like this:</p>
+            <pre><code># Category,Definition,Word,Pinyin
+Greeting,Hello,你好,nǐ hǎo
+School,to study,学习,xué xí</code></pre>
+            <p>To import this correctly, you would set:</p>
+            <ul>
+                <li>
+                    <i class="fa-solid fa-list-ol"></i>
+                    <b>Column Index</b>: 3 (for the word "你好")
+                </li>
+                <li>
+                    <i class="fa-solid fa-file-import"></i>
+                    <b>Meaning Column Index</b>: 2 (for the definition "Hello")
+                </li>
+                <li>
+                    <i class="fa-solid fa-file-import"></i>
+                    <b>Reading Column Index</b>: 4 (for the pinyin "nǐ hǎo")
+                </li>
+            </ul>
         </div>
     </div>
 </div>

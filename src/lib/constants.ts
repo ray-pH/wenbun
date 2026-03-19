@@ -142,6 +142,10 @@ export const SETTINGS_LABEL_DATA = {
         label: "Show Reading On Fail/Reveal",
         help: "When enabled, the reading will be shown after the fail/reveal button is pressed.",
     },
+    showDeckLastStudyTime: {
+        label: "Show Deck Last Study Time",
+        help: "When enabled, the last study time of each deck will be shown.",
+    },
     enableNextKeyButtons: {
         label: "Enable Next Button Keys",
         help: "When enabled, you can press the next key to move to the next card.",

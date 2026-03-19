@@ -98,6 +98,7 @@ export interface WenbunConfig {
     showReadingOnFail?: boolean;
     enableNextButtonKey: boolean,
     nextButtonKeyCodes: (string|undefined)[];
+    showDeckLastStudyTime?: boolean;
     
     // Review
     gradingMethod?: 'auto' | 'manual';
@@ -152,6 +153,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     showReadingOnFail: false,
     enableNextButtonKey: false,
     nextButtonKeyCodes: ["Space"],
+    showDeckLastStudyTime: false,
     
     gradingMethod: 'auto',
     isAutoNextOnSuccess: false,
@@ -484,7 +486,7 @@ export class App {
         return this.getInitDeckData(deck, deckInfo?.tags ?? []);
     }
     
-    getInitDeckData(words: string[], tags: DECK_TAGS[]): DeckData {
+    getInitDeckData(words: string[], tags: DECK_TAGS[], customEntry?: Record<number, {r?: string, m?: string}>): DeckData {
         const deckData: DeckData = {
             deck: words,
             tags,
@@ -498,6 +500,7 @@ export class App {
             doneTodayNewCardCount: 0,
             doneTodayPreviouslyStudiedCardCount: 0,
             doneTodayReviewCount: 0,
+            customEntry,
         }
         return deckData;
     }
@@ -519,7 +522,7 @@ export class App {
         this.splitDeckIntoGroupOfN(deckId, DEFAULT_GROUP_CONTENT_COUNT)
     }
     
-    extendDeck(deckId: string, words: string[], ignoredIds: number[] = []) {
+    extendDeck(deckId: string, words: string[], customEntry?: Record<number, {r?: string, m?: string}>, ignoredIds: number[] = []) {
         const deckData = this.deckData[deckId];
         if (!deckData) return;
         if (this.isDeckMeta(deckId)) return;
@@ -530,6 +533,13 @@ export class App {
         
         deckData.deck.push(...words);
         deckData.ignoredIds?.push(...ignoredIds);
+        
+        if (customEntry) {
+            if (!deckData.customEntry) deckData.customEntry = {};
+            for (const [id, entry] of Object.entries(customEntry)) {
+                deckData.customEntry[+id + startId] = entry;
+            }
+        }
         
         const lastGroup = deckData.groups[deckData.groups.length - 1];
         lastGroup.cardIds.push(...newCardIds);
@@ -1248,16 +1258,20 @@ export class App {
             delete deckData.customEntry[cardId];
         }
     }
-    getCustomEntryDict(deckId: string) {
+    static getCustomEntryDictFromDeckData(deck: string[], customEntry?: Record<number, {r?: string, m?: string}>) {
         let res: Record<string, {reading?: string, meaning?: string}> = {};
-        const deckData = this.deckData[deckId];
-        if (!deckData) return {};
-        if (!deckData.customEntry) return {};
-        Object.entries(deckData.customEntry).forEach(([id, entry]) => {
-            const word = deckData.deck[+id];
+        if (!customEntry) return {};
+        Object.entries(customEntry).forEach(([id, entry]) => {
+            const word = deck[+id];
             res[word] = {reading: entry.r, meaning: entry.m};
         });
         return res;
+    }
+    
+    getCustomEntryDict(deckId: string) {
+        const deckData = this.deckData[deckId];
+        if (!deckData) return {};
+        return App.getCustomEntryDictFromDeckData(deckData.deck, deckData.customEntry);
     }
     
     fixDeckIdBug(deckId: string): void {
@@ -1351,6 +1365,18 @@ export class App {
     isDeckMeta(deckId: string): boolean {
         const deck = this.deckData[deckId];
         return !!deck?.isMetaDeck;
+    }
+    
+    getDeckLastStudied(deckId: string): Date {
+        if (this.isDeckMeta(deckId)) {
+            const subDeckIds = this.deckData[deckId].subDeckIds ?? [];
+            const lastStudied = subDeckIds.map(id => this.getDeckLastStudied(id));
+            return lastStudied.reduce((a, b) => a > b ? a : b, new Date(0));
+        } else {
+            const deckData = this.deckData[deckId];
+            return Object.values(deckData.schedule).map(s => s.last_review)
+                .filter(s => s).reduce((a, b) => a! > b! ? a : b, new Date(0)) ?? new Date(0);
+        }
     }
 }
 

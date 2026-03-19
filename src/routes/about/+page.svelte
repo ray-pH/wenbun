@@ -23,6 +23,43 @@
     <div class="changelog-container">
         Changelog
         
+        <h4>v0.24.0 (2026-03-19)</h4>
+        <ul>
+            <li>
+                <b>Review</b>:
+                <ul>
+                    <li>Reading can now be <b>revealed manually</b> instead of being auto-shown in some cases. You can use this for hint.</li>
+                </ul>
+            </li>
+            <li>
+                <b>Decks</b>:
+                <ul>
+                    <li>Added an option to <b>show last studied time</b> for each deck.</li>
+                </ul>
+            </li>
+            <li>
+                <b>Custom Deck</b>:
+                <ul>
+                    <li>Added support for importing <b>CSV files</b> (e.g., Excel, Google Sheets).</li>
+                    <li>Added <b>advanced import options</b>:
+                        <ul>
+                            <li>Column selection for word, reading, and meaning.</li>
+                            <li>Option to ignore CSV header row.</li>
+                            <li>Option to ignore punctuation in words.</li>
+                        </ul>
+                    </li>
+                    <li>Improved support for <b>Anki / tab-separated imports</b> with the same advanced options.</li>
+                    <li>Custom decks can now include <b>reading and meaning directly</b> from imported data.</li>
+                </ul>
+            </li>
+            <li>
+                <b>UI (Mobile)</b>:
+                <ul>
+                    <li>Improved layout to respect <b>safe area insets</b> (notches, system bars).</li>
+                </ul>
+            </li>
+        </ul>
+        
         <h4>v0.23.2 (2026-02-22)</h4>
         <ul>
             <li>

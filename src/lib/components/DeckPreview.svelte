@@ -3,6 +3,7 @@
     import { SLUG_NO_DATA_IN_DICT_PREVIEW, SLUG_NO_DATA_IN_HANZI_WRITER } from "$lib/constants";
     import { DEFAULT_CUSTOM_DECK, type CustomDeck } from "$lib/customDeck";
     import { onMount } from "svelte";
+    import { App } from "$lib/app";
 
     export let deck: CustomDeck = DEFAULT_CUSTOM_DECK;
     export let filterShowIssueOnly = false;
@@ -13,6 +14,7 @@
     let doneInit = false;
     onMount(async () => {
         await wordlist.init(deck.lang, deck?.isEnableCustomDictionary);
+        if (deck.customEntry) wordlist.registerCustomEntryDict(App.getCustomEntryDictFromDeckData(deck.words, deck.customEntry));
         checkIssue();
         doneInit = true;
     })
@@ -21,7 +23,7 @@
         issueCount = 0;
         const ids: number[] = [];
         deck.words.forEach((word, i) => {
-            if (!wordlist.isWordSupportedByHanziWriter(word) || !wordlist.getWordData(word)) {
+            if (!wordlist.isWordSupportedByHanziWriter(word) || !(wordlist.getWordData(word) || wordlist.isCustomEntry(word))) {
                 ids.push(i);
             }
         });
@@ -44,9 +46,7 @@
     <div class="card" class:is-show-error-only={filterShowIssueOnly && issueCount > 0}>
         <span class="word chinese-font">{word}</span>
         <span class="reading">{wordlist.getReading(word, deck.lang) || '-'}</span>
-        <span class="meaning">
-            {wordData?.meaning ?? '-'}
-        </span>
+        <span class="meaning">{wordlist.getMeaning(word) || '-'}</span>
         {#if !wordlist.isWordSupportedByHanziWriter(word)}
             <span class="word-error not-supported" 
                 style="cursor: pointer;"
@@ -57,7 +57,7 @@
             >
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </span>
-        {:else if !wordData}
+        {:else if !wordData && !wordlist.isCustomEntry(word)}
             <span class="word-error no-dict" 
                 style="cursor: pointer;"
                 title={SLUG_NO_DATA_IN_DICT_PREVIEW}

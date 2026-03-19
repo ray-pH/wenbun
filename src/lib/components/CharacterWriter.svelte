@@ -73,7 +73,7 @@
     
     let completedCharCount: number = $state(0);
     let meaningStr = characterData?.meanings.join("; ");
-    let isDictationModeRevealReading = $state(false);
+    let isRevealReading = $state(false);
     let isDictationModeRevealMeaning = $state(false);
     
     function getChineseTone(tags: string[]): number | undefined {
@@ -387,14 +387,14 @@
         };
     });
     
-    const isShowReading = $derived(() => {
-        if (app.getConfig().zh.alwaysShowReading) return true;
-        if (isShowReadingOnFail && autoReviewData?.isFailAndReveal) return true;
-        if (isComplete) return true;
-        if (cardConfig.isFirstTime) return true;
-        if (isDictationMode) return true;
-        return false;
-    });
+    // const isShowReading = $derived(() => {
+    //     if (app.getConfig().zh.alwaysShowReading) return true;
+    //     if (isShowReadingOnFail && autoReviewData?.isFailAndReveal) return true;
+    //     if (isComplete) return true;
+    //     if (cardConfig.isFirstTime) return true;
+    //     if (isDictationMode) return true;
+    //     return false;
+    // });
 </script>
 
 <style>
@@ -662,10 +662,10 @@
             {SLUG_WORD_NOT_SUPPORTED_BY_HANZI_WRITER}
         {/if}
     </div>
-    <div class="reading-container" class:is-hidden={!isShowReading()}>
+    <div class="reading-container">
         <div class="reading">
-            {#if isDictationMode && !isDictationModeRevealReading && !app.getConfig().zh.alwaysShowReading && !isComplete && !cardConfig.isFirstTime}
-                <button class="reveal-button" onclick={() => isDictationModeRevealReading = true} aria-label="Reveal Reading">
+            {#if !isRevealReading && !app.getConfig().zh.alwaysShowReading && !isComplete && !cardConfig.isFirstTime}
+                <button class="reveal-button" onclick={() => isRevealReading = true} aria-label="Reveal Reading">
                     <i class="fa-solid fa-eye"></i>
                 </button>
             {:else}
