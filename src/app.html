@@ -5,7 +5,7 @@
     <link rel="manifest" href="%sveltekit.assets%/manifest.json" />
     <meta name="theme-color" content="#3E92CC" />
     <link rel="icon" href="%sveltekit.assets%/favicon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
@@ -22,12 +22,15 @@
         --wenbun-green: #419E6F;
         --wenbun-orange: #DA8C22;
         --wenbun-red: #DB6B6C;
+        --safe-top: env(safe-area-inset-top);
+        --safe-bottom: env(safe-area-inset-bottom);
     }
     body {
         max-width: 100vw;
         overflow-x: hidden;
         margin: 0;
         padding: 0;
+        padding-top: var(--safe-top, 0);
         background-color: #E0E0E0;
         font-family: 'Noto Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }

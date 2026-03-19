@@ -51,7 +51,7 @@
 <style>
     .topbar-wrapper {
         position: fixed;
-        top: 3em;
+        top: calc(3em + var(--safe-top, 0));
         left: 0;
         right: 0;
         display: flex;

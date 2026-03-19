@@ -97,6 +97,7 @@
         height: 2em;
         background-color: var(--wenbun-blue);
         padding: 0.5em;
+        padding-top: max(var(--safe-top, 0), 0.5em);
         color: white;
         z-index: 99999;
     }
