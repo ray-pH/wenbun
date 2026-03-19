@@ -22,24 +22,49 @@
     let allCustomDeckIdAndNamePairs: {id: string, label?: string}[] = [];
     
     let inputType = CUSTOM_DECK_INPUT_TYPE.Simple;
-    let ankiInputWordColumn: number = 1;
+    let paramInputWordColumn: number = 1;
+    let paramIgnoreSpecialCharacters = false;
+    let paramIncludeReading = false;
+    let paramIncludeMeaning = false;
+    let paramReadingColumn: number = 2;
+    let paramMeaningColumn: number = 3;
+    let paramIgnoreCSVHeader = true;
     
     let _updateCounter = 0;
     function update() { _updateCounter++ }
     
     function onInputChanged() {
-        window.localStorage.setItem(LOCAL_STORAGE_KEY, input);
-        const newParsed = getParsed();
-        if (newParsed) {
-            customDeck = {...customDeck, ...newParsed};
-        }
-        update();
+        window.requestAnimationFrame(() => {
+            window.localStorage.setItem(LOCAL_STORAGE_KEY, input);
+            const newParsed = getParsed();
+            if (newParsed) {
+                customDeck = {...customDeck, ...newParsed};
+            }
+            update();
+        });
     }
     
     function getParsed(): Partial<CustomDeck> {
         switch (inputType) {
             case CUSTOM_DECK_INPUT_TYPE.Simple: return parser.parseSimple(input);
-            case CUSTOM_DECK_INPUT_TYPE.AnkiText: return parser.parseAnkiText(input, ankiInputWordColumn);
+            case CUSTOM_DECK_INPUT_TYPE.CSV: return parser.parseCSV(input, {
+                columnIndex: paramInputWordColumn,
+                ignoreSpecialCharacters: paramIgnoreSpecialCharacters,
+                importReading: paramIncludeReading,
+                readingColumnIndex: paramReadingColumn,
+                importMeaning: paramIncludeMeaning,
+                meaningColumnIndex: paramMeaningColumn,
+                ignoreHeader: paramIgnoreCSVHeader,
+            });
+            case CUSTOM_DECK_INPUT_TYPE.AnkiText: return parser.parseAnkiText(input, {
+                columnIndex: paramInputWordColumn,
+                ignoreSpecialCharacters: paramIgnoreSpecialCharacters,
+                importReading: paramIncludeReading,
+                readingColumnIndex: paramReadingColumn,
+                importMeaning: paramIncludeMeaning,
+                meaningColumnIndex: paramMeaningColumn,
+                ignoreHeader: false,
+            });
         }
     }
     
@@ -78,7 +103,7 @@
             const confirm = window.confirm("You have issues in your deck. Card with issues will be ignored. Are you sure you want to add this deck?");
             if (!confirm) return;
         }
-        app.extendDeck(existingDeckId, customDeck.words, issueIds);
+        app.extendDeck(existingDeckId, customDeck.words, customDeck.customEntry, issueIds);
         await app.save(false, true);
         goto(`${base}/`);
     }
@@ -115,18 +140,55 @@
                 <select bind:value={inputType} onchange={onInputChanged}>
                     <option value={CUSTOM_DECK_INPUT_TYPE.Simple}>Simple</option>
                     <option value={CUSTOM_DECK_INPUT_TYPE.AnkiText}>Anki Text</option>
+                    <option value={CUSTOM_DECK_INPUT_TYPE.CSV}>CSV</option>
                 </select>
             </label>
             <a href="{base}/upload-custom-deck/help" aria-label="Help" class="help-link">
                 <i class="fa-solid fa-circle-question"></i>
             </a>
         </div>
-        {#if inputType === CUSTOM_DECK_INPUT_TYPE.AnkiText}
+        {#if inputType === CUSTOM_DECK_INPUT_TYPE.CSV}
             <div>
-                <label> Column Index:
-                    <input type="number" bind:value={ankiInputWordColumn} step="1" min="0" oninput={onInputChanged}>
+                <label> Ignore CSV Header:
+                    <input type="checkbox" bind:checked={paramIgnoreCSVHeader} oninput={onInputChanged}>
                 </label>
             </div>
+        {/if}
+        {#if inputType === CUSTOM_DECK_INPUT_TYPE.AnkiText || inputType === CUSTOM_DECK_INPUT_TYPE.CSV}
+            <div>
+                <label> Column Index:
+                    <input type="number" bind:value={paramInputWordColumn} step="1" min="0" oninput={onInputChanged}>
+                </label>
+            </div>
+            <div>
+                <label> Ignore Special Character:
+                    <input type="checkbox" bind:checked={paramIgnoreSpecialCharacters} oninput={onInputChanged}>
+                </label>
+            </div>
+            <div>
+                <label> Import Reading:
+                    <input type="checkbox" bind:checked={paramIncludeReading} oninput={onInputChanged}>
+                </label>
+            </div>
+            {#if paramIncludeReading}
+                <div>
+                    <label> Reading Column Index:
+                        <input type="number" bind:value={paramReadingColumn} step="1" min="0" oninput={onInputChanged}>
+                    </label>
+                </div>
+            {/if}
+            <div>
+                <label> Import Meaning:
+                    <input type="checkbox" bind:checked={paramIncludeMeaning} oninput={onInputChanged}>
+                </label>
+            </div>
+            {#if paramIncludeMeaning}
+                <div>
+                    <label> Meaning Column Index:
+                        <input type="number" bind:value={paramMeaningColumn} step="1" min="0" oninput={onInputChanged}>
+                    </label>
+                </div>
+            {/if}
         {/if}
         <textarea 
             bind:value={input} 

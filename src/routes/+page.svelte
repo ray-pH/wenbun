@@ -9,10 +9,6 @@
     import { LoginStatus, ManualSyncStatus, SyncMode } from '$lib/profile';
     import Loading from '$lib/components/Loading.svelte';
     import { registerSW } from 'virtual:pwa-register';
-    import { isTauri } from '@tauri-apps/api/core';
-    
-    const NEW_DOMAIN = 'https://app.wenbun.com';
-    const DEV_DOMAIN = 'https://wenbun-dev.photon-ray.xyz/'
     
     registerSW({
         immediate: true,
@@ -28,6 +24,7 @@
     let app = new App();
     let isAutomaticallyLoggedOut = false;
     let isNewUpdateExist = false;
+    let isShowLastStudied = false;
     let deckOrder: string[] = [];
     
     $: {
@@ -50,6 +47,7 @@
         // Initialize deckOrder after app init
         deckOrder = [...app.decks];
         app = app;
+        isShowLastStudied = app.getConfig().showDeckLastStudyTime;
         isAppInitialized = true;
         isNewUpdateExist = app.isNewUpdateExist();
         const changed = await app.initProfile();
@@ -57,6 +55,7 @@
         if (changed) {
             app = app;
             deckOrder = [...app.decks];
+            isShowLastStudied = app.getConfig().showDeckLastStudyTime;
         }
         isNewUpdateExist = app.isNewUpdateExist();
         
@@ -113,8 +112,11 @@
         isSyncing = false;
     }
     
-    let isShowDomainMigration = false;
-    let isInDev = window.location.hostname.endsWith('dev.photon-ray.xyz');
+    function getDeckLastStudiedString(deckId: string): string {
+        const date = new Date(app.getDeckLastStudied(deckId));
+        if (date.getTime() === 0) return '-';
+        else return date.toLocaleString();
+    }
    	
    	// Initialize drag drop manager when component mounts
    	onMount(() => {
@@ -122,10 +124,6 @@
  			onReorder: handleReorder
   		});
         
-        if (!isTauri() && typeof window !== 'undefined') {
-            isShowDomainMigration = window.location.hostname !== 'app.wenbun.com';
-        }
-  		
   		return () => {
  			// Cleanup on component destroy
  			if (dragDropManager) {
@@ -143,24 +141,6 @@
 ></TopBar>
 <div class="main-container">
     <div class="top-container">
-        {#if isShowDomainMigration && !isInDev}
-            <div style="display: flex; align-items: center;">
-                <!-- <div class="domain-notice">
-                    <p>
-                        You are visiting an old domain. 
-                        <br><br>
-                        We will be keeping this domain until the end of October 2025
-                        because some user local data might still be stored here.
-                        <br><br>
-                        We're now moving the project to <a href={NEW_DOMAIN} target="_blank">{NEW_DOMAIN}</a>.
-                    </p>
-                    <a href={NEW_DOMAIN} target="_blank" class="button">
-                        <i class="fa-solid fa-globe"></i>
-                        Go to the new domain
-                    </a>
-                </div> -->
-            </div>
-        {/if}
         <a class="a-button" style="background-color: #A0D0F0;" href="{base}/about/">
             <div style="display: flex; align-items: center; justify-content: space-between;">
                 <span>Changelog</span>
@@ -246,27 +226,35 @@
 
 {#snippet deckCard(info: typeof DeckInfo[number], disable: boolean)}
     <a class="deck-card" class:disabled={disable} href="{base}/overview?id={info.id}" draggable="false">
-        <div class="left">
-            <span class="deck-card-title">{info.title}</span>
-            <span 
-                class="deck-card-subtitle"
-                style={`--subtitle-color: ${info.color ?? '#00000080'}`}
-            >{info.subtitle}</span>
+        <div class="deck-card-info">
+            <div class="left">
+                <span class="deck-card-title">{info.title}</span>
+                <span 
+                    class="deck-card-subtitle"
+                    style={`--subtitle-color: ${info.color ?? '#00000080'}`}
+                >{info.subtitle}</span>
+            </div>
+            <div class="right" class:no-new={isSeparateLearnAndReview}>
+                <span class="deck-count-learn-relearn" title="learning">
+                    {app.recursiveMetaDeckCount(info.id, app.getLearningRelearningCardsCount.bind(app)) || ''}
+                </span>
+                <span class="deck-count-review" title="review">
+                    {app.recursiveMetaDeckCount(info.id, app.getScheduledReviewCardsCount.bind(app)) || ''}
+                </span>
+                <span class="deck-count-new" title="new">
+                    {app.recursiveMetaDeckCount(info.id, app.getScheduledNewOrWarmUpCardsCount.bind(app)) || ''}
+                </span>
+                <span class="deck-count-previously-studied" title="previously studied">
+                    {app.recursiveMetaDeckCount(info.id, app.getScheduledPreviouslyStudiedCardsCount.bind(app)) || ''}
+                </span>
+            </div>
         </div>
-        <div class="right" class:no-new={isSeparateLearnAndReview}>
-            <span class="deck-count-learn-relearn" title="learning">
-                {app.recursiveMetaDeckCount(info.id, app.getLearningRelearningCardsCount.bind(app)) || ''}
-            </span>
-            <span class="deck-count-review" title="review">
-                {app.recursiveMetaDeckCount(info.id, app.getScheduledReviewCardsCount.bind(app)) || ''}
-            </span>
-            <span class="deck-count-new" title="new">
-                {app.recursiveMetaDeckCount(info.id, app.getScheduledNewOrWarmUpCardsCount.bind(app)) || ''}
-            </span>
-            <span class="deck-count-previously-studied" title="previously studied">
-                {app.recursiveMetaDeckCount(info.id, app.getScheduledPreviouslyStudiedCardsCount.bind(app)) || ''}
-            </span>
-        </div>
+        {#if isShowLastStudied}
+            <div class="deck-card-last-studied">
+                Last Studied: 
+                {getDeckLastStudiedString(info.id)}
+            </div>
+        {/if}
     </a>
 {/snippet}
 
@@ -335,6 +323,19 @@
         border-radius: 0.5em;
         padding: 1em;
         flex-grow: 1;
+        /*display: flex;*/
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        gap: 1em;
+        
+        &.disabled {
+            pointer-events: none;
+        }
+    }
+    .deck-card-info {
+        all: unset;
+        flex-grow: 1;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -352,9 +353,11 @@
         .right {
             color: var(--wenbun-blue);
         }
-        &.disabled {
-            pointer-events: none;
-        }
+    }
+    .deck-card-last-studied {
+        margin-top: 0.2em;
+        font-size: 0.9em;
+        opacity: 0.4;
     }
     .deck-card {
         .right {
@@ -452,27 +455,6 @@
         margin-top: 0.5em;
         width: calc(100vw - 2em);
         max-width: 24em;
-    }
-    .domain-notice {
-        margin: 1em;
-        padding: 1em;
-        border-radius: 0.5em;
-        background: #fff3cd;
-        color: #856404;
-        border: 1px solid #ffeeba;
-        text-align: center;
-        max-width: 20em;
-    }
-    .domain-notice .button {
-        display: inline-block;
-        margin-top: 0.5em;
-        padding: 0.5em 1em;
-        border-radius: 0.5em;
-        background-color: var(--wenbun-blue);
-        color: white;
-        font-weight: bold;
-        cursor: pointer;
-        text-decoration: none;
     }
     a {
         color: var(--wenbun-blue);

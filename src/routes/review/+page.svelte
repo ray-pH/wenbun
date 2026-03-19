@@ -565,7 +565,7 @@
     }
     .bottom-container {
         position: fixed;
-        bottom: 0;
+        bottom: var(--safe-bottom, 0);
         padding-bottom: 3em;
         box-sizing: border-box;
         background-color: #E0E0E0;
@@ -644,7 +644,7 @@
         content: '';
         position: absolute;
         left: 10%;
-        bottom: 0;
+        bottom: var(--safe-bottom, 0);
         width: 80%;
         height: 0.3em;
         background-color: var(--color, var(--wenbun-blue)); /* or any color */
