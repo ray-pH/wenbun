@@ -49,8 +49,5 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
-  },
-  "files.watcherExclude": {
-    "**/node_modules": true,
   }
 }
