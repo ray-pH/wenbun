@@ -49,6 +49,12 @@
 * **Stay Connected:** Follow updates, join discussions, give feedback, and report bugs on our [Discord server](https://discord.gg/pVUuqJqywt).  
 * **Develop:**  
 
+Clone with submodules
+
+```
+git clone --recurse-submodules https://github.com/ray-pH/wenbun.git
+```
+
 Install dependencies:  
 ```bash
 npm install

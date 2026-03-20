@@ -23,6 +23,14 @@
     <div class="changelog-container">
         Changelog
         
+        <h4>v0.24.1 (2026-03-20)</h4>
+        <ul>
+            <li>
+                <b>Custom Deck</b>:
+                Add more chars in the ignored char list.
+            </li>
+        </ul>
+        
         <h4>v0.24.0 (2026-03-19)</h4>
         <ul>
             <li>

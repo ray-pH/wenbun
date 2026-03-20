@@ -127,11 +127,29 @@ export class CustomDeckParser {
         }
     }
     
+    // Remove punctuation
+    // See https://en.wikipedia.org/wiki/Chinese_punctuation
     cleanWord(word: string): string {
         word = word.replaceAll("。", "");
         word = word.replaceAll("？", "");
         word = word.replaceAll("，", "");
-        
+        word = word.replaceAll("、", "");
+        word = word.replaceAll("—", "");
+        word = word.replaceAll("！", "");
+        word = word.replaceAll("：", "");
+        word = word.replaceAll("；", "");
+        word = word.replaceAll("（", "");
+        word = word.replaceAll("）", "");
+        word = word.replaceAll("…", "");
+        word = word.replaceAll("”", "");
+        word = word.replaceAll("“", "");
+        word = word.replaceAll("‘", "");
+        word = word.replaceAll("’", "");
+        word = word.replaceAll("《", "");
+        word = word.replaceAll("》", "");
+        word = word.replaceAll("﹏", "");
+        word = word.replaceAll("·", "");
+
         return word;
     }
 }
