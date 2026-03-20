@@ -23,6 +23,14 @@
     <div class="changelog-container">
         Changelog
         
+        <h4>v0.24.2 (2026-03-21)</h4>
+        <ul>
+            <li>
+                <b>UI</b>:
+                Don't show audio loading if not playing audio. This will reduce visual distraction.
+            </li>
+        </ul>
+        
         <h4>v0.24.1 (2026-03-20)</h4>
         <ul>
             <li>
