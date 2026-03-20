@@ -23,7 +23,7 @@
     
     let inputType = CUSTOM_DECK_INPUT_TYPE.Simple;
     let paramInputWordColumn: number = 1;
-    let paramIgnoreSpecialCharacters = false;
+    let paramIgnoreSpecialCharacters = true;
     let paramIncludeReading = false;
     let paramIncludeMeaning = false;
     let paramReadingColumn: number = 2;
