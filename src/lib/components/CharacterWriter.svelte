@@ -25,6 +25,7 @@
     let isStopPlayAudio = $state(false); // so we know to play audio only once
     let unmounted = $state(false);
     let isDisableLoadingIndicator = false;
+    let isAudioButtonPressed = $state(false);
     
     let isAudioLoaded = $state(false);
     let isStrokeDataLoaded = $state(false);
@@ -71,6 +72,10 @@
         autoReviewData = $bindable()
     }: Props = $props();
     
+    const isDontShowAudioLoadingIfNotPlaying = $derived(
+        !(isDictationMode && !cardConfig.isFirstTime)
+    );
+
     let completedCharCount: number = $state(0);
     let meaningStr = characterData?.meanings.join("; ");
     let isRevealReading = $state(false);
@@ -200,7 +205,14 @@
         Promise.all(flatUrls.map(async (u) => {
             const url = await getAudioUrl(cardConfig.lang, u);
             return waitForAudioLoaded(url);
-        })).then(() => isAudioLoaded = true);
+        })).then(() => {
+            const shouldPlayAudioAfterLoad = isAudioButtonPressed;
+            isAudioLoaded = true;
+            isAudioButtonPressed = false;
+            if (shouldPlayAudioAfterLoad) {
+                void playAudio();
+            }
+        });
         
         audios = await Promise.all(urls.map(async (rawUs) => {
             const us = await Promise.all(rawUs.map(u => getAudioUrl(cardConfig.lang, u)));
@@ -238,6 +250,14 @@
         const a = audios[index];
         if (!a) return;
         await a.playAsync();
+    }
+
+    async function tryPlayAudio() {
+        if (!isAudioLoaded) {
+            isAudioButtonPressed = true;
+            return;
+        }
+        await playAudio();
     }
     
     function toggleRequestManualGrade() {
@@ -673,12 +693,12 @@
             {/if}
         </div>
         {#if audios.length > 0}
-            {#if !isAudioLoaded && !isDisableLoadingIndicator}
+            {#if !isAudioLoaded && !isDisableLoadingIndicator && (!isDontShowAudioLoadingIfNotPlaying || isAudioButtonPressed)}
                 <button class="audio-button" onclick={() => {}} aria-label="Loading Audio">
                     <i class="fa-solid fa-circle-notch fa-spin loading-icon"></i>
                 </button>
             {:else}
-                <button class="audio-button" onclick={() => playAudio()} aria-label="Play Audio">
+                <button class="audio-button" onclick={() => tryPlayAudio()} aria-label="Play Audio">
                     <i class="fa-solid fa-volume-low"></i>
                 </button>
             {/if}
