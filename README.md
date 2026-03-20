@@ -52,7 +52,7 @@
 Clone with submodules
 
 ```
-git clone --recurse-submodules https://github.com/WateryStoneTree/wenbun.git
+git clone --recurse-submodules https://github.com/ray-pH/wenbun.git
 ```
 
 Install dependencies:  
