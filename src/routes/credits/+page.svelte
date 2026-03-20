@@ -7,7 +7,7 @@
         "tonga000", "Jirun", "kuzicki", "haniku", "zoylentgreen", "CathB", "david", "Spider",
         "PKdor", "grayroof66", "JacksonRiley", "jimmy_deep", "san",
         "Yusuf Abdullah bin Adheem", "Maxim修朙", "319", "jorescer", "david",
-        "Kenneth", "Meeeee", "ns3242", "N_220", "renrin",
+        "Kenneth", "Meeeee", "ns3242", "N_220", "renrin", "prophecy",
     ]
 </script>
 
@@ -35,6 +35,12 @@
                 <a href="https://github.com/aaleta" target="_blank">
                     <i class="fa-brands fa-github"></i>
                     (aaleta)
+                </a>
+            </div>
+            <div class="entry">
+                <a href="https://github.com/WateryStoneTree" target="_blank">
+                    <i class="fa-brands fa-github"></i>
+                    WateryStoneTree
                 </a>
             </div>
         </div>
