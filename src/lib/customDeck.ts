@@ -102,10 +102,26 @@ export class CustomDeckParser {
             cells.push(current);
             return cells;
         };
+        let input_nl_normalized = input
+            .replace(/\r/gm, "")
+            .replace(/\n+/gm, "\n");
 
-        const rows = input
+        // Replace any and all new lines enclosed in "..." with a ';'
+        let one_line_entries = "";
+        let q = 0;
+        for (let i = 0; i < input_nl_normalized.length; i++) {
+            if (input_nl_normalized.at(i) == '"') {
+                q += 1;
+            } else if (input_nl_normalized.at(i) == '\n' && q % 2 == 1) {
+                // Skip new line within ".."
+                one_line_entries += " ; ";
+                continue;
+            }
+            one_line_entries += input_nl_normalized.at(i);
+        }
+
+        const rows = one_line_entries
             .split("\n")
-            .map((line) => line.replace(/\r$/, ""))
             .filter(w => w.trim() !== '' && !w.startsWith("#"))
             .slice(param.ignoreHeader ? 1 : 0)
             .map(parseLine);
@@ -149,6 +165,10 @@ export class CustomDeckParser {
         word = word.replaceAll("》", "");
         word = word.replaceAll("﹏", "");
         word = word.replaceAll("·", "");
+        // Remove any extended ASCII character.
+        // Not fail safe, but good enough to remove all
+        // English mixed in with Chinese.
+        word = word.replaceAll(/[\x00-\xff]/g, "");
 
         return word;
     }
