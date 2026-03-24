@@ -165,10 +165,6 @@ export class CustomDeckParser {
         word = word.replaceAll("》", "");
         word = word.replaceAll("﹏", "");
         word = word.replaceAll("·", "");
-        // Remove any extended ASCII character.
-        // Not fail safe, but good enough to remove all
-        // English mixed in with Chinese.
-        word = word.replaceAll(/[\x00-\xff]/g, "");
 
         return word;
     }
