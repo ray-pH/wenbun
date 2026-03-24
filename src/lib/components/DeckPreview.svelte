@@ -23,7 +23,7 @@
         issueCount = 0;
         const ids: number[] = [];
         deck.words.forEach((word, i) => {
-            if (!wordlist.isWordSupportedByHanziWriter(word) || !(wordlist.getWordData(word) || wordlist.isCustomEntry(word))) {
+            if (!wordlist.isWordSupportedByHanziWriter(word) || !(wordlist.getWordData(word) || wordlist.isCustomEntryAll(word))) {
                 ids.push(i);
             }
         });
@@ -57,7 +57,7 @@
             >
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </span>
-        {:else if !wordData && !wordlist.isCustomEntry(word)}
+        {:else if !wordData && !wordlist.isCustomEntryAll(word)}
             <span class="word-error no-dict" 
                 style="cursor: pointer;"
                 title={SLUG_NO_DATA_IN_DICT_PREVIEW}
