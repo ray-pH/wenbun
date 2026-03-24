@@ -43,6 +43,7 @@
     let showDictModal = false;
     let forceStopAudioOnNextCard = false;
     let isWordSupportedByHanziWriter = true;
+    let isCharSupportedByHanziWriter: boolean[] = [];
     let nextButtonAction: (() => void) | undefined = undefined;
     onMount(async () => {
         // no need to sync in here
@@ -142,7 +143,9 @@
         currentDeckId = deckId;
         scheduledTimeStr = app.getRatingScheduledTimeStr(currentDeckId, cardId);
         cardState = app.getWenbunCustomState(currentDeckId, cardId);
-        isWordSupportedByHanziWriter = wordlist.isWordSupportedByHanziWriter(app.deckData[currentDeckId]?.deck[cardId]);
+        const word = app.deckData[currentDeckId]?.deck[cardId] ?? '';
+        isCharSupportedByHanziWriter = Array.from(word).map((char) => wordlist.isCharSupportedByHanziWriter(char));
+        isWordSupportedByHanziWriter = isCharSupportedByHanziWriter.every(Boolean);
         _changeCounter++;
     }
     
@@ -366,7 +369,7 @@
                     app={app} 
                     isShowHealthBar={isAutoGrading && app.getConfig().showAutoGradingBar}
                     isShowReadingOnFail={app.getConfig().showReadingOnFail}
-                    isSupportedByHanziWriter={isWordSupportedByHanziWriter}
+                    isCharSupportedByHanziWriter={isCharSupportedByHanziWriter}
                     isDictationMode={isDictationMode}
                     bind:this={characterWriterRef}
                     characterData={characterWriterDataFromId(currentCardId)} 
@@ -381,15 +384,7 @@
                 />
             {/key}
         </div>
-        {#if !isWordSupportedByHanziWriter}
-            {@render ReviewButtons([
-          		{ label: "Ignore", sublabel: "", className: "review-button-fail", isComplete: true, 
-                    onclick: () => ignoreCard() },
-          		{ label: "" },
-          		{ label: "" },
-          		{ label: "" },
-           	])}
-        {:else if data.isExtraStudy}
+        {#if data.isExtraStudy}
            	{@render ReviewButtons([
           		{ label: "Again", sublabel: "(Put Back)", className: "review-button-fail", isComplete, 
                     onclick: () => extraStudyAgain(), alternate: failButtonAlternate
@@ -527,7 +522,7 @@
         align-items: center;
         justify-content: center;
         width: 100%;
-        margin-bottom: 5em;
+        margin-bottom: calc(5em + var(--safe-bottom, 0em));
     }
     .character-writer-container {
         margin: 0;
@@ -565,13 +560,13 @@
     }
     .bottom-container {
         position: fixed;
-        bottom: var(--safe-bottom, 0);
-        padding-bottom: 3em;
+        bottom: 0;
+        padding-bottom: calc(3em + var(--safe-bottom, 0em));
         box-sizing: border-box;
         background-color: #E0E0E0;
         width: 100vw;
         @media (max-width: 600px) {
-            padding-bottom: 0.6em;
+            padding-bottom: calc(0.6em + var(--safe-bottom, 0em));
         }
     }
     .review-button-container {
@@ -644,7 +639,7 @@
         content: '';
         position: absolute;
         left: 10%;
-        bottom: var(--safe-bottom, 0);
+        bottom: 0;
         width: 80%;
         height: 0.3em;
         background-color: var(--color, var(--wenbun-blue)); /* or any color */

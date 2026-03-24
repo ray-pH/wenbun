@@ -164,6 +164,10 @@ export class ChineseCharacterWordlist {
         const customEntry = this.customEntryDict[word] ?? {};
         return {reading: !!customEntry.reading, meaning: !!customEntry.meaning};
     }
+    isCustomEntryAll(word: string): boolean {
+        const customEntry = this.isCustomEntry(word);
+        return customEntry.reading && customEntry.meaning;
+    }
     
     getCharacterWriterData(word: string, config: CharacterWriterDataConfig = {}): CharacterWriterData | undefined {
         word = word.replace(/\r/g, '');

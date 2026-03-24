@@ -17,6 +17,7 @@
     let issueCount = 0;
     let issueIds: number[] = [];
     let isShowIssuesOnly = false;
+    let isAllowHanziWriterUnsupported = false;
     let addToExistingDeck = false;
     let existingDeckId = "";
     let allCustomDeckIdAndNamePairs: {id: string, label?: string}[] = [];
@@ -222,8 +223,14 @@
         </div>
         {#key _updateCounter}
             <div class="deck-preview-container">
-                <DeckPreview deck={customDeck} filterShowIssueOnly={isShowIssuesOnly} 
-                    bind:issueCount={issueCount} bind:issueIds={issueIds}></DeckPreview>
+                <DeckPreview
+                    deck={customDeck}
+                    customEntry={customDeck.customEntry}
+                    filterShowIssueOnly={isShowIssuesOnly}
+                    isAllowHanziWriterUnsupported={isAllowHanziWriterUnsupported}
+                    bind:issueCount={issueCount}
+                    bind:issueIds={issueIds}
+                ></DeckPreview>
             </div>
         {/key}
     </div>
@@ -257,6 +264,9 @@
             <SettingsItem key="deckEnableCustomDictionary">
                 <input type="checkbox" bind:checked={customDeck.isEnableCustomDictionary} onchange={onInputChanged} disabled={addToExistingDeck}>
             </SettingsItem>
+            <SettingsItem key="allowHanziWriterUnsupported">
+                <input type="checkbox" bind:checked={isAllowHanziWriterUnsupported}>
+            </SettingsItem>
             <SettingsItem key="addToExistingDeck">
                 <input type="checkbox" bind:checked={addToExistingDeck} onchange={onInputChanged}>
             </SettingsItem>
@@ -284,6 +294,7 @@
         width: 90vw;
         max-width: 30em;
         margin: auto;
+        margin-bottom: 2em;
     }
     textarea {
         font-size: 1em;

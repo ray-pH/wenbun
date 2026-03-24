@@ -191,7 +191,7 @@
         border-radius: 8px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         width: 100%;
-        max-height: calc(100vh - 8em); /* Ensure it doesn't exceed screen height */
+        max-height: calc(100vh - var(--safe-top, 0px) - 8em); /* Ensure it doesn't exceed screen height and respects safe top */
         display: flex;
         flex-direction: column;
         padding-top: 0.75rem;
@@ -208,7 +208,7 @@
 
     /* The scrollable content area */
     .modal-container {
-        padding: 0 1rem 1rem 1rem;
+        padding: 0 1rem calc(1rem + var(--safe-bottom, 0px)) 1rem;
         overflow: auto; /* This makes the content scrollable */
         /* Critical: prevent scroll from bubbling to the page (blocks PTR) */
         overscroll-behavior: contain;
