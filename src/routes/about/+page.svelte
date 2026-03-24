@@ -23,6 +23,26 @@
     <div class="changelog-container">
         Changelog
         
+        <h4>v0.25.0 (2026-03-24)</h4>
+        <ul>
+            <li>
+                <b>Review / Deck</b>:
+                Improved handling for characters unsupported by Hanzi Writer to prevent review issues.
+            </li>
+            <li>
+                <b>Import</b>:
+                Fixed CSV parsing for quoted fields containing newlines.
+            </li>
+            <li>
+                <b>UI</b>:
+                Fixed bottom safe-area issues in the review screen and slideable popup on mobile devices.
+            </li>
+            <li>
+                <b>Custom Deck</b>:
+                Fixed an issue where non-dictionary words were not being reported correctly.
+            </li>
+        </ul>
+        
         <h4>v0.24.2 (2026-03-21)</h4>
         <ul>
             <li>
