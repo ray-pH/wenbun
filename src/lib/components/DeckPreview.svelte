@@ -6,24 +6,36 @@
     import { App } from "$lib/app";
 
     export let deck: CustomDeck = DEFAULT_CUSTOM_DECK;
+    export let customEntry: CustomDeck["customEntry"] = undefined;
     export let filterShowIssueOnly = false;
     export let issueCount = 0;
     export let issueIds: number[] = [];
+    export let isAllowHanziWriterUnsupported = false;
     
     let wordlist = new ChineseCharacterWordlist();
     let doneInit = false;
-    onMount(async () => {
+
+    async function syncDeckState() {
+        doneInit = false;
         await wordlist.init(deck.lang, deck?.isEnableCustomDictionary);
-        if (deck.customEntry) wordlist.registerCustomEntryDict(App.getCustomEntryDictFromDeckData(deck.words, deck.customEntry));
+        wordlist.resetCustomEntryDict();
+        if (customEntry) {
+            wordlist.registerCustomEntryDict(App.getCustomEntryDictFromDeckData(deck.words, customEntry));
+        }
         checkIssue();
         doneInit = true;
+    }
+
+    onMount(async () => {
+        await syncDeckState();
     })
     
     function checkIssue() {
         issueCount = 0;
         const ids: number[] = [];
         deck.words.forEach((word, i) => {
-            if (!wordlist.isWordSupportedByHanziWriter(word) || !(wordlist.getWordData(word) || wordlist.isCustomEntryAll(word))) {
+            const strokeSupported = wordlist.isWordSupportedByHanziWriter(word) || isAllowHanziWriterUnsupported;
+            if (!strokeSupported || !(wordlist.getWordData(word) || wordlist.isCustomEntryAll(word))) {
                 ids.push(i);
             }
         });
@@ -47,7 +59,7 @@
         <span class="word chinese-font">{word}</span>
         <span class="reading">{wordlist.getReading(word, deck.lang) || '-'}</span>
         <span class="meaning">{wordlist.getMeaning(word) || '-'}</span>
-        {#if !wordlist.isWordSupportedByHanziWriter(word)}
+        {#if !wordlist.isWordSupportedByHanziWriter(word) && !isAllowHanziWriterUnsupported}
             <span class="word-error not-supported" 
                 style="cursor: pointer;"
                 title={SLUG_NO_DATA_IN_HANZI_WRITER}

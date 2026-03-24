@@ -77,9 +77,11 @@ export const HANZI_WRITER_DATA_CHARS_SRC = `${base}/wenbun-assets/hanzi_writer_d
 export const HANZI_WRITER_DATA_DIR_SRC = `${base}/wenbun-assets/hanzi-writer-data/`;
 
 export const SLUG_NO_DATA_IN_DICT = "ERROR: information about this word is not available in the dictionary. Please report this issue to the developer.";
-export const SLUG_NO_DATA_IN_HANZI_WRITER = "Character(s) in this word are not supported by Hanzi Writer. This word will be ignored";
-export const SLUG_NO_DATA_IN_DICT_PREVIEW = "This word doesn't exist in the dictionary, try enabling extra dictionary"
+export const SLUG_NO_DATA_IN_HANZI_WRITER = "Character(s) in this word are not supported by Hanzi Writer. This word will be ignored. If you want to allow this, check the checkbox below.";
+export const SLUG_NO_DATA_IN_DICT_PREVIEW = "This word doesn't exist in the dictionary. Try enabling custom dictionary or import your own reading and meaning."
 export const SLUG_WORD_NOT_SUPPORTED_BY_HANZI_WRITER = "One or more characters in this word are not supported by Hanzi Writer. Press Ignore to skip this word. Or contact the developer if you think this is a mistake."
+export const SLUG_UNSUPPORTED_CHAR_INTERACTION_WARNING = "This character is not supported by Hanzi Writer yet. If you think this is a mistake, please report it to the developer."
+export const SLUG_UNSUPPORTED_CHAR_INTERACTION_NEXT = "Tap to move to the next character."
 
 export const DEFAULT_FSRS_PARAM =  [
     0.212, 1.2931, 2.3065, 8.2956, 6.4133, 0.8334, 3.0194, 0.001, 1.8722, 0.1666, 
@@ -263,6 +265,10 @@ export const SETTINGS_LABEL_DATA = {
     deckEnableCustomDictionary: {
         label: "Enable Custom Dictionary",
         help: "When enabled, the custom dictionary (CC-CEDICT) will be used to look up words in the deck. (initial loading may take a while)",
+    },
+    allowHanziWriterUnsupported: {
+        label: "Allow Hanzi Writer Unsupported",
+        help: "When enabled, words that are not supported by Hanzi Writer are not marked as issues. Unsupported character(s) will still be shown, but they will not be graded per stroke.",
     },
     addToExistingDeck: {
         label: "Add To Existing Deck",

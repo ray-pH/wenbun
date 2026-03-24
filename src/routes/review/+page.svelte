@@ -43,6 +43,7 @@
     let showDictModal = false;
     let forceStopAudioOnNextCard = false;
     let isWordSupportedByHanziWriter = true;
+    let isCharSupportedByHanziWriter: boolean[] = [];
     let nextButtonAction: (() => void) | undefined = undefined;
     onMount(async () => {
         // no need to sync in here
@@ -142,7 +143,9 @@
         currentDeckId = deckId;
         scheduledTimeStr = app.getRatingScheduledTimeStr(currentDeckId, cardId);
         cardState = app.getWenbunCustomState(currentDeckId, cardId);
-        isWordSupportedByHanziWriter = wordlist.isWordSupportedByHanziWriter(app.deckData[currentDeckId]?.deck[cardId]);
+        const word = app.deckData[currentDeckId]?.deck[cardId] ?? '';
+        isCharSupportedByHanziWriter = Array.from(word).map((char) => wordlist.isCharSupportedByHanziWriter(char));
+        isWordSupportedByHanziWriter = isCharSupportedByHanziWriter.every(Boolean);
         _changeCounter++;
     }
     
@@ -366,7 +369,7 @@
                     app={app} 
                     isShowHealthBar={isAutoGrading && app.getConfig().showAutoGradingBar}
                     isShowReadingOnFail={app.getConfig().showReadingOnFail}
-                    isSupportedByHanziWriter={isWordSupportedByHanziWriter}
+                    isCharSupportedByHanziWriter={isCharSupportedByHanziWriter}
                     isDictationMode={isDictationMode}
                     bind:this={characterWriterRef}
                     characterData={characterWriterDataFromId(currentCardId)} 
@@ -381,15 +384,7 @@
                 />
             {/key}
         </div>
-        {#if !isWordSupportedByHanziWriter}
-            {@render ReviewButtons([
-          		{ label: "Ignore", sublabel: "", className: "review-button-fail", isComplete: true, 
-                    onclick: () => ignoreCard() },
-          		{ label: "" },
-          		{ label: "" },
-          		{ label: "" },
-           	])}
-        {:else if data.isExtraStudy}
+        {#if data.isExtraStudy}
            	{@render ReviewButtons([
           		{ label: "Again", sublabel: "(Put Back)", className: "review-button-fail", isComplete, 
                     onclick: () => extraStudyAgain(), alternate: failButtonAlternate

@@ -8,7 +8,7 @@
     import { base } from '$app/paths';
     import { AudioSequence } from '$lib/audioSequence';
     import { AutoReview, AutoReviewGradeClass, AutoReviewGradeFAClass, AutoReviewGradeLabel, type AutoReviewData } from '$lib/autoReview';
-    import { CHARACTER_WRITER_DRAWING_WIDTH, HANZI_WRITER_DATA_DIR_SRC, SLUG_WORD_NOT_SUPPORTED_BY_HANZI_WRITER } from "$lib/constants";
+    import { CHARACTER_WRITER_DRAWING_WIDTH, HANZI_WRITER_DATA_DIR_SRC, SLUG_UNSUPPORTED_CHAR_INTERACTION_NEXT, SLUG_UNSUPPORTED_CHAR_INTERACTION_WARNING } from "$lib/constants";
     
     let width = $state(500);
     let height = $state(500);
@@ -17,6 +17,7 @@
     let gridStroke = "#DDD";
     let isAudioArtificial = $state(false);
     const NEXT_CHAR_DELAY = 500;
+    const UNSUPPORTED_FIRST_TIME_DISPLAY_MS = 2000;
     const INDICATOR_FLASH_MS = 1600; // show indicator briefly after fail+reveal
     // const correctSound = new Audio(`${base}/assets/sounds/rightanswer-95219.mp3`);
     const correctSound = new Audio(`${base}/assets/sounds/correct-choice-43861.mp3`);
@@ -56,7 +57,7 @@
 		autoReviewData: AutoReviewData;
 		isShowHealthBar: boolean;
 		isShowReadingOnFail: boolean;
-		isSupportedByHanziWriter: boolean;
+        isCharSupportedByHanziWriter: boolean[];
 		writingMode: WritingMode;
 		app: App;
 	}
@@ -67,7 +68,7 @@
         isShowHealthBar = false,
         isShowReadingOnFail = false,
         isDictationMode = false,
-        isSupportedByHanziWriter = true,
+        isCharSupportedByHanziWriter = [],
         writingMode = WritingMode.Default,
         autoReviewData = $bindable()
     }: Props = $props();
@@ -80,6 +81,73 @@
     let meaningStr = characterData?.meanings.join("; ");
     let isRevealReading = $state(false);
     let isDictationModeRevealMeaning = $state(false);
+    let isUnsupportedCharRevealed = $state(false);
+    let unsupportedFirstTimeTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
+    
+    function isCurrentCharSupportedByHanziWriter(): boolean {
+        return isCharSupportedByHanziWriter[completedCharCount] ?? true;
+    }
+
+    function clearUnsupportedFirstTimeTimeout() {
+        if (unsupportedFirstTimeTimeout !== undefined) {
+            clearTimeout(unsupportedFirstTimeTimeout);
+            unsupportedFirstTimeTimeout = undefined;
+        }
+    }
+
+    function scheduleUnsupportedFirstTimeAutoAdvance() {
+        clearUnsupportedFirstTimeTimeout();
+        unsupportedFirstTimeTimeout = setTimeout(() => {
+            advanceUnsupportedChar();
+        }, UNSUPPORTED_FIRST_TIME_DISPLAY_MS);
+    }
+
+    function onUnsupportedCharReady() {
+        isStrokeDataLoaded = true;
+        if (cardConfig.isFirstTime) {
+            isUnsupportedCharRevealed = true;
+            scheduleUnsupportedFirstTimeAutoAdvance();
+        } else {
+            isUnsupportedCharRevealed = false;
+        }
+    }
+
+    function advanceUnsupportedChar() {
+        clearUnsupportedFirstTimeTimeout();
+        isUnsupportedCharRevealed = false;
+        isStopPlayAudio = true;
+        const nextCount = completedCharCount + 1;
+        completedCharCount = nextCount;
+        if (nextCount >= characterData!.characters.length) {
+            onComplete({...autoReviewData});
+            isComplete = true;
+            surpressGradeIndicator = false;
+            window.setTimeout(async () => {
+                if (!isDictationMode && audios.length) await playAudio();
+                onReadyToGoNext();
+            }, NEXT_CHAR_DELAY);
+            return;
+        }
+        if (isCurrentCharSupportedByHanziWriter()) {
+            window.setTimeout(() => {
+                setupHanziWriter(completedCharCount);
+            }, NEXT_CHAR_DELAY);
+        } else {
+            onUnsupportedCharReady();
+        }
+    }
+
+    function onUnsupportedCharacterInteraction() {
+        if (!characterData?.characters?.length) return;
+        if (!isUnsupportedCharRevealed) {
+            isUnsupportedCharRevealed = true;
+            if (cardConfig.isFirstTime) {
+                scheduleUnsupportedFirstTimeAutoAdvance();
+            }
+            return;
+        }
+        advanceUnsupportedChar();
+    }
     
     function getChineseTone(tags: string[]): number | undefined {
         for (const tag of tags) {
@@ -98,7 +166,11 @@
             }
             animationDontGoToNextChar = false;
             window.setTimeout(() => {
-                setupHanziWriter(completedCharCount);
+                if (isCurrentCharSupportedByHanziWriter()) {
+                    setupHanziWriter(completedCharCount);
+                } else {
+                    onUnsupportedCharReady();
+                }
                 // play sound
             }, NEXT_CHAR_DELAY);
         } else {
@@ -115,7 +187,11 @@
                 }, NEXT_CHAR_DELAY);
             } else {
                 window.setTimeout(() => {
-                    setupHanziWriter(completedCharCount);
+                    if (isCurrentCharSupportedByHanziWriter()) {
+                        setupHanziWriter(completedCharCount);
+                    } else {
+                        onUnsupportedCharReady();
+                    }
                     // play sound
                 }, NEXT_CHAR_DELAY);
             }
@@ -308,8 +384,12 @@
     async function setupHealthBarCssVar() {
         let total = 0;
         for (const char of characterData?.characters ?? "") {
-            const charData = await HanziWriter.loadCharacterData(char);
-            if (charData) total += charData.strokes.length;
+            try {
+                const charData = await HanziWriter.loadCharacterData(char);
+                if (charData) total += charData.strokes.length;
+            } catch(e) {
+                console.warn(`Failed to load stroke data for character ${char}:`, e);
+            }
         }
         const {hard, again} = AutoReview.getGradeMistakeCountLimits(total);
         healthBarAgainLimit = again;
@@ -398,9 +478,16 @@
         });
         window.addEventListener('resize', updateWidth);
         strokeSpeed = app.getStrokeSpeed();
-        setupHanziWriter(0);
+
+        if (isCurrentCharSupportedByHanziWriter()) {
+            setupHanziWriter(0);
+        } else {
+            onUnsupportedCharReady();
+        }
+
         const cleanupApplePencilFix = experimentalApplePencilFix();
         return () => {
+            clearUnsupportedFirstTimeTimeout();
             unmounted = true;
             window.removeEventListener('resize', updateWidth);
             if (cleanupApplePencilFix) cleanupApplePencilFix();
@@ -625,6 +712,12 @@
           var(--wenbun-orange) max(var(--rel-mistake),var(--rel-cutoff))
         );
     }
+    @keyframes unsupported-char-first-time-fade {
+        0% { opacity: 0; }
+        15% { opacity: 1; }
+        85% { opacity: 1; }
+        100% { opacity: 0; }
+    }
     
     .reveal-button {
         all: unset;
@@ -678,9 +771,7 @@
         {:else}
             <div>{meaningStr}</div>
         {/if}
-        {#if !isSupportedByHanziWriter}
-            {SLUG_WORD_NOT_SUPPORTED_BY_HANZI_WRITER}
-        {/if}
+
     </div>
     <div class="reading-container">
         <div class="reading">
@@ -732,6 +823,31 @@
             <line x1={width/2} y1={p} x2={width/2} y2={height - p} stroke={gridStroke} />
             <line x1={p} y1={height/2} x2={width - p} y2={height/2} stroke={gridStroke} />
             </svg>
+            {#if !isCurrentCharSupportedByHanziWriter()}
+                <button
+                    aria-label="Unsupported character interaction"
+                    style="position: absolute; inset: 0; border: none; background: transparent; cursor: pointer;"
+                    onpointerdown={() => onUnsupportedCharacterInteraction()}
+                    onpointermove={(e) => {
+                        if (!isUnsupportedCharRevealed && e.buttons > 0) onUnsupportedCharacterInteraction();
+                    }}
+                ></button>
+            {/if}
+            {#if !isCurrentCharSupportedByHanziWriter() && isUnsupportedCharRevealed}
+                <div style={`position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.6em; padding: 1em; text-align: center; pointer-events: none; ${cardConfig.isFirstTime ? `animation: unsupported-char-first-time-fade ${UNSUPPORTED_FIRST_TIME_DISPLAY_MS}ms ease-in-out forwards;` : ''}`}>
+                    <div class="chinese-font" style="font-size: 8em; line-height: 1;">
+                        {characterData?.characters?.[completedCharCount] ?? ''}
+                    </div>
+                    {#if !cardConfig.isFirstTime}
+                        <div style="color: #A64547; font-weight: 700; font-size: 1.1em;">
+                            {SLUG_UNSUPPORTED_CHAR_INTERACTION_NEXT}
+                        </div>
+                        <div style="max-width: 24em; color: #00000080; font-size: 0.9em;">
+                            {SLUG_UNSUPPORTED_CHAR_INTERACTION_WARNING}
+                        </div>
+                    {/if}
+                </div>
+            {/if}
         </div>
         <div class="bottom-container">
             {#if characterData?.characters}
@@ -776,7 +892,7 @@
                 <span>{strokeSpeed}x</span>
             </button>
         {/if}
-        {#if !isStrokeDataLoaded && !isDisableLoadingIndicator}
+        {#if isCurrentCharSupportedByHanziWriter() && !isStrokeDataLoaded && !isDisableLoadingIndicator}
             <div class="stroke-data-loading-indicator">
                 <i class="fa-solid fa-circle-notch fa-spin loading-icon"></i>
             </div>
