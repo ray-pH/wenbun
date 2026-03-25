@@ -69,3 +69,26 @@ Desktop/Mobile (Tauri):
 ```bash
 npm run tauri dev
 ```
+
+### Troubleshooting
+
+**npm run dev fails with `ENOSPC: System limit for number of file watchers reached, watch <SOME_DIR>`**
+
+You can either [increase the number of watchers](https://stackoverflow.com/questions/22475849/node-js-what-is-enospc-error-and-how-to-solve)
+or ignore the directory in vite (example with `static/wenbun-assets`):
+
+```diff
+diff --git a/vite.config.js b/vite.config.js
+index ddedcb4d..ae269c02 100644
+--- a/vite.config.js
++++ b/vite.config.js
+@@ -50,7 +50,7 @@ export default defineConfig(async () => ({
+       : undefined,
+     watch: {
+       // 3. tell vite to ignore watching `src-tauri`
+-      ignored: ["**/src-tauri/**"],
++      ignored: ["**/src-tauri/**", "**/static/wenbun-assets/**"],
+     },
+   },
+ }));
+```
