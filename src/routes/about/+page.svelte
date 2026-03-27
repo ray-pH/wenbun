@@ -23,6 +23,14 @@
     <div class="changelog-container">
         Changelog
         
+        <h4>v0.25.1 (2026-03-28)</h4>
+        <ul>
+            <li>
+                <b>UI</b>:
+                Fix character block display for long sentences.
+            </li>
+        </ul>
+        
         <h4>v0.25.0 (2026-03-24)</h4>
         <ul>
             <li>
