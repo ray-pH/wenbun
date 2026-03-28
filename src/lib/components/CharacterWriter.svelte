@@ -551,10 +551,7 @@
     .character-box-container {
         font-size: 2em;
         color: #00000090;
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
         align-self: end;
-        overflow: scroll;
         span {
             margin-left: 0.2em;
         }
