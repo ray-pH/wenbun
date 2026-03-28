@@ -552,9 +552,6 @@
         font-size: 2em;
         color: #00000090;
         align-self: end;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: flex-end;
         span {
             margin-left: 0.2em;
         }
@@ -589,7 +586,7 @@
         flex-direction: row;
         gap: 0.5em;
         align-items: center;
-        flex: 0 1 auto;
+        flex: 0 0 auto;         /* keep natural width; indicator shrinks first */
         min-width: 0;           /* safety for inner flex items */
     }
     .dict-button {
@@ -852,7 +849,7 @@
                 </div>
             {/if}
         </div>
-        <div class="bottom-container" style:max-width={`${width}px`}>
+        <div class="bottom-container">
             {#if characterData?.characters}
                 {#if cardConfig.isFirstTime}
                     <div class="new-element-indicator">New Card</div>
