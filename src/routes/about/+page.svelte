@@ -23,6 +23,14 @@
     <div class="changelog-container">
         Changelog
         
+        <h4>v0.25.2 (2026-03-29)</h4>
+        <ul>
+            <li>
+                <b>UI</b>:
+                Temporarely revert long sentences UI update as it introduce weird vertical layout in some devices.
+            </li>
+        </ul>
+        
         <h4>v0.25.1 (2026-03-28)</h4>
         <ul>
             <li>
