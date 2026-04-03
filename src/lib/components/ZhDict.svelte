@@ -2,7 +2,9 @@
     import { ChineseMandarinReading, stripIDC, tagChineseChars, TONE_PREFIX, toneFromPinyin, type ChineseCharacterWordlist, type IChineseCharDecomposition, type TaggedChunk } from "$lib/chinese";
     import { pinyinToZhuyin } from "pinyin-zhuyin";
     import ZhDict from "$lib/components/ZhDict.svelte";
-
+    import { openUrl } from "@tauri-apps/plugin-opener";
+    import { isTauri } from "@tauri-apps/api/core";
+    
     interface Props {
         charData: {
             characters: string;
@@ -68,6 +70,14 @@
         const tone = getTone(char);
         return toneColors[tone-1];
     }
+    function openExternal(url: string) {
+        if (isTauri()) {
+            openUrl(url);
+        } else {
+            open(url, '_blank');
+        }
+    }
+
 </script>
 
 <div class="dict-container">
@@ -94,16 +104,18 @@
     
 {#snippet DictMainContent()}
     {#if isShowPlecoLink}
-        <a class="extern-a-button pleco" href="plecoapi://x-callback-url/s?q={word}">
+        <button class="extern-a-button pleco"
+            onclick={() => openExternal(`plecoapi://x-callback-url/s?q=${word}`)}>
             <img src="/assets/imgs/pleco-favicon.ico" alt="Pleco">
             <span>Pleco</span>
-        </a>
+        </button>
     {/if}
     {#if isShowDongLink}
-        <a class="extern-a-button dong" href="https://www.dong-chinese.com/wiki/{word}" target="_blank">
+        <button class="extern-a-button dong"
+            onclick={() => openExternal(`https://www.dong-chinese.com/wiki/${word}`)}>
             <img src="/assets/imgs/dong-favicon.png" alt="Dong Chinese">
             <span>Dong-Chinese</span>
-        </a>
+        </button>
     {/if}
     {#if isComposite}
         <div class="row">
@@ -323,6 +335,8 @@
     }
     
     .extern-a-button {
+        all: unset;
+        cursor: pointer;
         display: flex;
         align-items: center;
         gap: 0.2em;
