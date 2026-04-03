@@ -78,10 +78,12 @@
     );
 
     let completedCharCount: number = $state(0);
+    // svelte-ignore state_referenced_locally
     let meaningStr = characterData?.meanings.join("; ");
     let isRevealReading = $state(false);
     let isDictationModeRevealMeaning = $state(false);
     let isUnsupportedCharRevealed = $state(false);
+    // svelte-ignore state_referenced_locally
     let isLongText = (characterData?.characters.length ?? 0) > 3;
     let unsupportedFirstTimeTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
     
