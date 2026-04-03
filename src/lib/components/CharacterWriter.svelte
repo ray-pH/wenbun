@@ -82,6 +82,7 @@
     let isRevealReading = $state(false);
     let isDictationModeRevealMeaning = $state(false);
     let isUnsupportedCharRevealed = $state(false);
+    let isLongText = (characterData?.characters.length ?? 0) > 3;
     let unsupportedFirstTimeTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
     
     function isCurrentCharSupportedByHanziWriter(): boolean {
@@ -552,6 +553,11 @@
         font-size: 2em;
         color: #00000090;
         align-self: end;
+        &.long-text {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
         span {
             margin-left: 0.2em;
         }
@@ -588,6 +594,9 @@
         align-items: center;
         flex: 0 0 auto;         /* keep natural width; indicator shrinks first */
         min-width: 0;           /* safety for inner flex items */
+        &.long-text {
+            flex: 0 1 auto;
+        }
     }
     .dict-button {
         background-color: #FFFFFF90;
@@ -849,7 +858,7 @@
                 </div>
             {/if}
         </div>
-        <div class="bottom-container">
+        <div class="bottom-container" style:max-width={`${width}px`}>
             {#if characterData?.characters}
                 {#if cardConfig.isFirstTime}
                     <div class="new-element-indicator">New Card</div>
@@ -862,12 +871,12 @@
                 {:else}
                     <div class="new-element-indicator is-hidden"></div>
                 {/if}
-                <div class="right-side">
+                <div class="right-side" class:long-text={isLongText}>
                     <button class="button dict-button" onclick={() => onOpenDict()}>
                         <i class="fa-solid fa-book"></i>
                         Dict
                     </button>
-                    <div class="character-box-container chinese-font">
+                    <div class="character-box-container chinese-font" class:long-text={isLongText}>
                         {#each characterData.characters as character, i}
                             {#if i < completedCharCount || cardConfig.isFirstTime || (writingMode === WritingMode.External && isComplete)}
                                 <span>{character}</span>
