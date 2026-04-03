@@ -23,6 +23,16 @@
     <div class="changelog-container">
         Changelog
         
+        <h4>v0.25.3 (2026-04-03)</h4>
+        <ul>
+            <li>
+                <b>Android</b>: Fix external dictionary buttons (Pleco & Dong) for Android.
+            </li>
+            <li>
+                <b>UI</b>: Fix character block display for long sentences.
+            </li>
+        </ul>
+        
         <h4>v0.25.2 (2026-03-29)</h4>
         <ul>
             <li>
