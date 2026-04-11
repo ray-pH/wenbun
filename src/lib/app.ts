@@ -475,6 +475,10 @@ export class App {
                 deckData.lastScheduleCheckDate = today.getTime();
                 changed = true;
             }
+            // check for possibly undefined schedule
+            if (deckData.schedule === undefined) {
+                deckData.schedule = {};
+            }
         }
         if (changed) await this.save();
     }
