@@ -280,7 +280,7 @@
     
     $: failButtonAlternate = {
         label: "Reveal", sublabel: "(Fail)", className: "review-button-fail", onclick: () => failAndReveal(),
-        isComplete: !autoReviewData?.isFailAndReveal,
+        isComplete: true,
     }
     function failAndReveal() {
         if (characterWriterRef) {
@@ -368,7 +368,7 @@
                 <CharacterWriter 
                     app={app} 
                     isShowHealthBar={isAutoGrading && app.getConfig().showAutoGradingBar}
-                    isShowReadingOnFail={app.getConfig().showReadingOnFail}
+                    isFailWholeWord={app.getConfig().failWholeWord}
                     isCharSupportedByHanziWriter={isCharSupportedByHanziWriter}
                     isDictationMode={isDictationMode}
                     bind:this={characterWriterRef}
@@ -409,7 +409,7 @@
                 { label: "", 
                     alternate: { 
                         ...failButtonAlternate,
-                        isComplete: !autoReviewData?.isFailAndReveal && !isFirstWarmUp(currentCardId, _changeCounter),
+                        isComplete: !isFirstWarmUp(currentCardId, _changeCounter),
                     } 
                 },
           		{ label: "" },

@@ -108,6 +108,7 @@ export interface WenbunConfig {
     showAutoGradingBar?: boolean;
     showHintAfterMissesCount?: number;
     writingMode?: WritingMode;
+    failWholeWord?: boolean;
     
     // FSRS
     learningSteps?: FSRS.Steps;
@@ -162,6 +163,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     showAutoGradingBar: false,
     showHintAfterMissesCount: 3,
     writingMode: WritingMode.Default,
+    failWholeWord: false,
     
     learningSteps: ["1m", "10m"],
     previouslyStudiedLearningSteps: ["1m", "5d"],
@@ -1027,24 +1029,43 @@ export class App {
     getTodaysScheduledCards(deckId: string): number[] {
         const deckData = this.deckData[deckId];
         if (!deckData) return [];
-        const today = getDaysSinceEpochLocal(new Date());
+        const now = new Date();
+        const today = getDaysSinceEpochLocal(now);
         const tomorrow = today + 1;
-        const todaysCards = Object.entries(deckData.schedule).filter(([id, s]) => {
+        
+        type Entry = [string, FSRS.Card];
+        let overdueLearningRelearningCards: Entry[] = [];
+        let reviewCards: Entry[] = [];
+        let futureLearningRelearningCards: Entry[] = [];
+        
+        for (const [id, s] of Object.entries(deckData.schedule)) {
             const isIgnored = !!deckData.ignoredIds?.includes(+id);
-            if (isIgnored) return false;
+            if (isIgnored) continue;
             
-            const due = getDaysSinceEpochLocal(new Date(s.due));
-            //TODO: make sure this is correct
+            const due = new Date(s.due);
             if (s.state === FSRS.State.Review) {
                 // for review cards, use date
-                return due < tomorrow;
+                const dueDay = getDaysSinceEpochLocal(due);
+                if (dueDay < tomorrow) {
+                    reviewCards.push([id,s]);
+                }
             } else {
                 // learning and relearning cards is always valid
-                return true;
+                // logic to make sure for short learning/relearning cards, it doens't get bunched at the top
+                // https://discord.com/channels/1400149314323615885/1489994517301039245
+                // for relearning cards, split into 2 groups, one with due time <0 and one with due time >= 0
+                if (due < now) {
+                    overdueLearningRelearningCards.push([id,s]);
+                } else {
+                    futureLearningRelearningCards.push([id,s]);
+                }
             }
-        });
-        // sort by time
-        todaysCards.sort((a, b) => new Date(a[1].due).getTime() - new Date(b[1].due).getTime());
+        }
+        
+        reviewCards.push(...overdueLearningRelearningCards);
+        reviewCards.sort((a, b) => new Date(a[1].due).getTime() - new Date(b[1].due).getTime());
+        futureLearningRelearningCards.sort((a, b) => new Date(a[1].due).getTime() - new Date(b[1].due).getTime());
+        const todaysCards = [...reviewCards, ...futureLearningRelearningCards];
         return todaysCards.map((s) => +s[0]);
     }
     
