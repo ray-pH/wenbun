@@ -20,6 +20,11 @@
             Credits
         </a>
     </div>
+    <div style="margin-bottom: 1em">
+        <a class="button" href="{base}/faq" aria-label="FAQ" style="padding-left: 8em; padding-right: 8em">
+            FAQ
+        </a>
+    </div>
     <div class="changelog-container">
         Changelog
         
