@@ -28,6 +28,19 @@
     <div class="changelog-container">
         Changelog
         
+        <h4>v0.26.0 (2026-04-11)</h4>
+        <ul>
+            <li>
+                <b>FAQ</b>: Add new searchable FAQ page, with quick access from About and Settings.
+            </li>
+            <li>
+                <b>Review</b>: Fail/Reveal now fails only the current character by default, with a new <b>Fail Whole Word</b> setting to restore full-word behavior.
+            </li>
+            <li>
+                <b>Scheduling</b>: Fix short-term learning/relearning scheduling so overdue and future cards are ordered more reliably during study.
+            </li>
+        </ul>
+
         <h4>v0.25.4 (2026-04-11)</h4>
         <ul>
             <li>
