@@ -285,6 +285,7 @@ export class App {
     
     async afterInitRoutine(): Promise<void> {
         this.updateFSRS();
+        this.ensureMetaDeckValidSubdeckId();
         await this.processTodaySchedule();
     }
     
@@ -479,6 +480,16 @@ export class App {
             }
         }
         if (changed) await this.save();
+    }
+    
+    ensureMetaDeckValidSubdeckId() {
+        const deckIds = Object.keys(this.deckData);
+        for (const deckId of deckIds) {
+            const deckData = this.deckData[deckId];
+            if (deckData.subDeckIds) {
+                deckData.subDeckIds = deckData.subDeckIds.filter(id => !!this.deckData[id]);
+            }
+        }
     }
     
     async getInitDeckDataById(deckId: string): Promise<DeckData | undefined> {
