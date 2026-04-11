@@ -89,8 +89,11 @@ export function dateDiffFormatted(start: Date, end: Date): string {
 }
 
 export function getDaysSinceEpochLocal(date = new Date()): number {
-    const localMidnight = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    return Math.floor(localMidnight.getTime() / (1000 * 60 * 60 * 24));
+    // Use local calendar fields (Y/M/D), but convert to a UTC midnight timestamp.
+    // This keeps day indexing stable across DST transitions where local-midnight
+    // deltas can be 23h or 25h.
+    const utcMidnightFromLocalDate = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+    return Math.floor(utcMidnightFromLocalDate / (1000 * 60 * 60 * 24));
 }
 
 export function parseIntOrUndefined(value: string) {

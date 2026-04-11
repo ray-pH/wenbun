@@ -285,6 +285,7 @@ export class App {
     
     async afterInitRoutine(): Promise<void> {
         this.updateFSRS();
+        this.ensureMetaDeckValidSubdeckId();
         await this.processTodaySchedule();
     }
     
@@ -477,12 +478,18 @@ export class App {
                 deckData.lastScheduleCheckDate = today.getTime();
                 changed = true;
             }
-            // check for possibly undefined schedule
-            if (deckData.schedule === undefined) {
-                deckData.schedule = {};
-            }
         }
         if (changed) await this.save();
+    }
+    
+    ensureMetaDeckValidSubdeckId() {
+        const deckIds = Object.keys(this.deckData);
+        for (const deckId of deckIds) {
+            const deckData = this.deckData[deckId];
+            if (deckData.subDeckIds) {
+                deckData.subDeckIds = deckData.subDeckIds.filter(id => !!this.deckData[id]);
+            }
+        }
     }
     
     async getInitDeckDataById(deckId: string): Promise<DeckData | undefined> {

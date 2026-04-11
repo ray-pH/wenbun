@@ -28,6 +28,24 @@
     <div class="changelog-container">
         Changelog
         
+        <h4>v0.26.1 (2026-04-11)</h4>
+        <ul>
+            <li>
+                <b>Bugfix</b>:
+                <ul>
+                    <li>
+                        Fix day-index calculation to avoid timezone/DST shift issues in scheduling.
+                    </li>
+                    <li>
+                        Automatically clean invalid meta-deck source deck IDs during app initialization to prevent broken meta deck references.
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <b>FAQ</b>: Add meta-deck FAQ entries covering what meta decks are, card selection behavior, source-deck updates, and current limitations.
+            </li>
+        </ul>
+
         <h4>v0.26.0 (2026-04-11)</h4>
         <ul>
             <li>
