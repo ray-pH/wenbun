@@ -92,3 +92,7 @@ index ddedcb4d..ae269c02 100644
    },
  }));
 ```
+
+### Deployment Note For Publishing
+
+For Android builds, ensure the correct version name is set in `src-tauri/gen/android/app/tauri.properties`. You may need to update this file manually before deployment.
