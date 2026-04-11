@@ -23,6 +23,30 @@
             category: 'Decks'
         },
         {
+            question: 'What is a meta deck in Wenbun?',
+            answer: 'A meta deck is a combined study view over multiple existing decks. Internally it is flagged as a meta deck and stores a list of source deck IDs, while the real cards and schedules remain in the original decks.',
+            tags: ['meta deck', 'combined deck', 'isMetaDeck', 'subDeckIds', 'source decks'],
+            category: 'Decks'
+        },
+        {
+            question: 'How does card selection work in a meta deck?',
+            answer: 'The app checks each source deck for its next eligible card, classifies candidates (new/warm-up, previously studied, review), then applies your normal card-order settings to choose what to show next. Scheduling still uses each source deck’s own data.',
+            tags: ['meta deck', 'card selection', 'scheduling', 'new/review mix', 'source deck schedule'],
+            category: 'SRS'
+        },
+        {
+            question: 'Will a meta deck reflect updates made to its source decks?',
+            answer: 'Yes. Because data stays in source decks, changes there are reflected in the meta deck. If a source deck is removed, invalid subdeck references are cleaned up automatically.',
+            tags: ['meta deck', 'source deck', 'updates', 'sync', 'deck changes', 'cleanup'],
+            category: 'Decks'
+        },
+        {
+            question: 'Can I add cards directly to a meta deck?',
+            answer: 'No. Meta decks are intended as aggregators, not independent card stores. Add/edit cards in the source deck(s) instead. Also note meta decks are still marked experimental, and some actions like quick adjust and extra study are disabled for them.',
+            tags: ['meta deck', 'edit', 'add cards', 'experimental', 'quick adjust', 'extra study'],
+            category: 'Decks'
+        },
+        {
             question: 'What does "Previously Studied" mean?',
             answer: '"Previously Studied" is a pool for cards you already know from outside Wenbun. It helps you seed reviews faster without treating those cards as completely new.',
             tags: ['previously studied', 'known cards', 'seed', 'review'],
