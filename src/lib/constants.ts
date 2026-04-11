@@ -209,6 +209,10 @@ export const SETTINGS_LABEL_DATA = {
         label: "Writing Mode",
         help: "- [Default] Write each stroke on-screen for automatic grading. \n - [External] write on paper or elsewhere outside the app."
     },
+    failWholeWord: {
+        label: "Fail Whole Word",
+        help: "When enabled, clicking \"Fail/Reveal\" will fail the entire word, instead of just the current character.",
+    },
     
     isShowPlecoLink: {
         label: "Show Pleco Link",

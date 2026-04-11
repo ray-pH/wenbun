@@ -108,6 +108,7 @@ export interface WenbunConfig {
     showAutoGradingBar?: boolean;
     showHintAfterMissesCount?: number;
     writingMode?: WritingMode;
+    failWholeWord?: boolean;
     
     // FSRS
     learningSteps?: FSRS.Steps;
@@ -162,6 +163,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     showAutoGradingBar: false,
     showHintAfterMissesCount: 3,
     writingMode: WritingMode.Default,
+    failWholeWord: false,
     
     learningSteps: ["1m", "10m"],
     previouslyStudiedLearningSteps: ["1m", "5d"],

@@ -297,6 +297,9 @@
                 <SettingsItem key="separateLearnAndReview">
                     <input type="checkbox" bind:checked={config.isSeparateLearnAndReview}>
                 </SettingsItem>
+                <SettingsItem key="failWholeWord">
+                    <input type="checkbox" bind:checked={config.failWholeWord}>
+                </SettingsItem>
             </div>
         </div>
         
@@ -323,9 +326,9 @@
                 <SettingsItem key="playSuccessSound">
                     <input type="checkbox" bind:checked={config.playSuccessSound}>
                 </SettingsItem>
-                <SettingsItem key="showReadingOnFail">
+                <!-- <SettingsItem key="showReadingOnFail">
                     <input type="checkbox" bind:checked={config.showReadingOnFail}>
-                </SettingsItem>
+                </SettingsItem> -->
                 <SettingsItem key="showDeckLastStudyTime">
                     <input type="checkbox" bind:checked={config.showDeckLastStudyTime}>
                 </SettingsItem>

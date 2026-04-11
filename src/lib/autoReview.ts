@@ -4,7 +4,7 @@ export interface AutoReviewData {
     correctStrokeCount: number;
     incorrectStrokeCount: number;
     totalStrokeCount: number;
-    isFailAndReveal: boolean;
+    revealedCharIndex?: number[];
 }
 
 export const AutoReviewGradeLabel: Record<FSRS.Grade, string> = {
@@ -30,7 +30,7 @@ export const AutoReviewGradeFAClass: Record<FSRS.Grade, string> = {
 
 export namespace AutoReview {
     export function getGrade(data: AutoReviewData): FSRS.Grade {
-        if (data.isFailAndReveal) {
+        if (data.revealedCharIndex && data.revealedCharIndex.length > 0) {
             return FSRS.Rating.Again;
         }
         const mistakeRate = data.correctStrokeCount === 0
@@ -65,7 +65,6 @@ export namespace AutoReview {
                 correctStrokeCount: totalCharStrokeCount,
                 incorrectStrokeCount: i,
                 totalStrokeCount: totalCharStrokeCount + i,
-                isFailAndReveal: false
             });
             if (hard === - 1 && grade === FSRS.Rating.Hard) {
                 hard = i;

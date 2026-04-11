@@ -56,7 +56,8 @@
 		autoGrade: FSRS.Grade | undefined;
 		autoReviewData: AutoReviewData;
 		isShowHealthBar: boolean;
-		isShowReadingOnFail: boolean;
+		// isShowReadingOnFail: boolean;
+		isFailWholeWord: boolean;
         isCharSupportedByHanziWriter: boolean[];
 		writingMode: WritingMode;
 		app: App;
@@ -66,7 +67,8 @@
         isRequestManualGrade = $bindable(), 
         characterData, app, cardConfig, autoGrade,
         isShowHealthBar = false,
-        isShowReadingOnFail = false,
+        // isShowReadingOnFail = false,
+        isFailWholeWord = false,
         isDictationMode = false,
         isCharSupportedByHanziWriter = [],
         writingMode = WritingMode.Default,
@@ -254,7 +256,9 @@
                     autoReviewData.totalStrokeCount++;
                 },
             });
-            if (autoReviewData.isFailAndReveal) {
+            const showOutlineBecauseRevealed = autoReviewData.revealedCharIndex && autoReviewData.revealedCharIndex.includes(index);
+            const showOUtlineBecaueFailWholeWord = isFailWholeWord && autoReviewData.revealedCharIndex && autoReviewData.revealedCharIndex.length > 0;
+            if (showOutlineBecauseRevealed || showOUtlineBecaueFailWholeWord) {
                 writer.showOutline();
             }
         } else {
@@ -357,7 +361,8 @@
     let surpressGradeIndicator = $state(false);
     export function failAndReveal() {
         if (!writer) return;
-        autoReviewData.isFailAndReveal = true;
+        if (autoReviewData.revealedCharIndex == undefined) autoReviewData.revealedCharIndex = [];
+        autoReviewData.revealedCharIndex.push(completedCharCount);
         writer.showOutline();
         window.setTimeout(() => {
             surpressGradeIndicator = true;
@@ -470,7 +475,7 @@
             correctStrokeCount: 0,
             incorrectStrokeCount: 0,
             totalStrokeCount: 0,
-            isFailAndReveal: false,
+            revealedCharIndex: [],
         };
         setupHealthBarCssVar();
         updateWidth();
