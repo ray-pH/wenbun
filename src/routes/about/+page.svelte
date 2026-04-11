@@ -23,6 +23,13 @@
     <div class="changelog-container">
         Changelog
         
+        <h4>v0.25.4 (2026-04-11)</h4>
+        <ul>
+            <li>
+                <b>Bugfix</b>: Fix issue with missing deck schedule that lead to deck not being able to be displayed.
+            </li>
+        </ul>
+        
         <h4>v0.25.3 (2026-04-03)</h4>
         <ul>
             <li>
