@@ -507,11 +507,19 @@
         <div class="settings-section">
             <!-- <div class="section-title"></div> -->
             <div class="section-container">
+                <a class="button" href="{base}/about" aria-label="About">
+                    <i class="fa-solid fa-circle-info"></i>&nbsp;
+                    About
+                </a>
+                <a class="button" href="{base}/faq" aria-label="FAQ">
+                    <i class="fa-solid fa-circle-question"></i>&nbsp;
+                    FAQ
+                </a>
                 <a class="button" href="https://github.com/ray-pH/wenbun" aria-label="GitHub Repository" target="_blank">
                     <i class="fa-brands fa-github"></i>&nbsp;
                     GitHub Repository
                 </a>
-                <a class="button" href="https://discord.gg/pVUuqJqywt" aria-label="GitHub Repository" target="_blank">
+                <a class="button" href="https://discord.gg/pVUuqJqywt" aria-label="Discord Community Server" target="_blank">
                     <i class="fa-brands fa-discord"></i>&nbsp;
                     Discord Community Server
                 </a>
