@@ -24,6 +24,8 @@
 ## Community
 
 * Join us on [Discord](https://discord.gg/pVUuqJqywt)
+* Backend server repo: [wenbun-server](https://github.com/ray-pH/wenbun-server) — currently only used for profile data sync.
+* Core functionality (learning, reviews, writing practice, and scheduling) is client-side and does not require the backend.
 
 ## Development Credits
 
