@@ -1,7 +1,7 @@
 <script lang="ts">
     import { base } from '$app/paths';
     import { onMount } from "svelte";
-    import { App, NewCardOrder, WritingMode, type WenbunConfig } from "$lib/app";
+    import { App, NewCardOrder, WritingMode, type DataExportReminderPeriod, type WenbunConfig } from "$lib/app";
     import TopBar from "$lib/components/TopBar.svelte";
     import _ from "lodash";
     import SettingsItem from "./SettingsItem.svelte";
@@ -22,16 +22,32 @@
     let config: DeepRequired<WenbunConfig>;
     let initialConfig: DeepRequired<WenbunConfig>;
     let isOnlineProfileLoaded = false;
+    let isLoggedIn = false;
+    let dataExportReminderEnabled = true;
+    let initialDataExportReminderEnabled = true;
+    let dataExportReminderPeriod: DataExportReminderPeriod = 'daily';
+    let initialDataExportReminderPeriod: DataExportReminderPeriod = 'daily';
     let pwaInstallComponent: PWAInstallElement;
+
+    function scrollToReminderHashTarget() {
+        if (typeof window === "undefined") return;
+        if (window.location.hash !== "#data-export-reminder") return;
+        const el = document.getElementById("data-export-reminder");
+        if (!el) return;
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
     onMount(async () => {
         await app.init();
         initComponent();
         const changed = await app.initProfile();
+        isLoggedIn = app.profile.isLoggedIn;
         if (await app.profile.getSyncMode() === SyncMode.manual) {
             await app.profile.getManualSyncStatus(app);
         }
         isOnlineProfileLoaded = true;
         if (changed) initComponent();
+        scrollToReminderHashTarget();
     })
     
     function initComponent() {
@@ -42,19 +58,34 @@
         fsrsParamsString = config.FSRSParams.join(",");
         profileStr = app.exportProfileStr();
         initialProfileStr = profileStr;
+
+        const reminderMeta = app.getDataExportReminderMeta();
+        dataExportReminderEnabled = reminderMeta.isEnabled;
+        initialDataExportReminderEnabled = reminderMeta.isEnabled;
+        dataExportReminderPeriod = reminderMeta.period;
+        initialDataExportReminderPeriod = reminderMeta.period;
+
         if (data.leniency) config.strokeLeniency = parseFloat(data.leniency);
         if (data.fadeDuration) config.strokeFadeDuration = parseInt(data.fadeDuration);
         app = app;
     }
     
-    $: isConfigChanged = !_.isEqual(config, initialConfig);
+    $: isConfigChanged =
+        !_.isEqual(config, initialConfig) ||
+        dataExportReminderEnabled !== initialDataExportReminderEnabled ||
+        dataExportReminderPeriod !== initialDataExportReminderPeriod;
     
     async function saveConfig() {
+        app.setDataExportReminderMeta(dataExportReminderEnabled, dataExportReminderPeriod);
         await app.saveConfig(config);
         initialConfig = _.cloneDeep(config);
+        initialDataExportReminderEnabled = dataExportReminderEnabled;
+        initialDataExportReminderPeriod = dataExportReminderPeriod;
     }
     function discardChanges() {
         config = _.cloneDeep(initialConfig);
+        dataExportReminderEnabled = initialDataExportReminderEnabled;
+        dataExportReminderPeriod = initialDataExportReminderPeriod;
     }
     
     async function resetConfigToDefault() {
@@ -465,6 +496,30 @@
                 </SettingsItem>
             </div>
         </div>
+
+        {#if !isTauri() && !isLoggedIn}
+            <div class="settings-section" id="data-export-reminder">
+                <div class="section-title">Data Export Reminder</div>
+                <div class="section-container">
+                    <div class="note">
+                        Browser storage may be cleared by browser/site data cleanup. Enable reminders to periodically export your profile as a backup.
+                    </div>
+                    <SettingsItem key="dataExportReminderEnabled">
+                        <input type="checkbox" bind:checked={dataExportReminderEnabled}>
+                    </SettingsItem>
+                    <SettingsItem key="dataExportReminderPeriod">
+                        <select bind:value={dataExportReminderPeriod} disabled={!dataExportReminderEnabled}>
+                            <option value="daily">daily</option>
+                            <option value="2day">2day</option>
+                            <option value="3day">3day</option>
+                            <option value="4day">4day</option>
+                            <option value="weekly">weekly</option>
+                            <option value="monthly">monthly</option>
+                        </select>
+                    </SettingsItem>
+                </div>
+            </div>
+        {/if}
         
         <!--
         <div class="settings-section">
@@ -562,6 +617,23 @@
         padding: 0 1em;
         max-width: 25em;
         box-sizing: border-box;
+    }
+    :global(#data-export-reminder) {
+        scroll-margin-top: 6em;
+    }
+    :global(#data-export-reminder:target) {
+        border-radius: 0.5em;
+        animation: flash-reminder-section 1.8s ease-out;
+    }
+    @keyframes flash-reminder-section {
+        0% {
+            box-shadow: 0 0 0 0 rgba(62, 146, 204, 0.65);
+            background-color: rgba(62, 146, 204, 0.18);
+        }
+        100% {
+            box-shadow: 0 0 0 0.8em rgba(62, 146, 204, 0);
+            background-color: transparent;
+        }
     }
     .settings-section::after {
         width: 90%;
