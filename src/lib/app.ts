@@ -28,6 +28,7 @@ export const DEFAULT_GROUP_CONTENT_COUNT = 30;
 const DEFAULT_WARMUP_MAX_COUNT = 3;
 const GENERATED_DECK_ID_LENGTH = 8;
 
+export type DataExportReminderPeriod = 'daily' | '2day' | '3day' | '4day' | 'weekly' | 'monthly';
 export type Lang = 'zh' | 'yue';
 
 export enum WenBunCustomState {
@@ -205,6 +206,11 @@ export interface ProfileDataMeta {
     _profileVersion?: number,
     clientVersion?: string, // semver
     modifiedAt?: string,
+    dataExportReminder?: {
+        isEnabled?: boolean,
+        period?: DataExportReminderPeriod,
+        lastExportedAt?: string,
+    },
 }
 
 export interface ProfileData {
@@ -231,6 +237,7 @@ export class App {
     meta: ProfileDataMeta = {};
     lastSyncTime: string = new Date(0).toISOString();
     isLoadDone = false;
+    isDataExportReminderDue = false;
     fsrs!: FSRS.FSRS;
     fsrsPrevStudied!: FSRS.FSRS;
 
@@ -287,6 +294,7 @@ export class App {
         this.updateFSRS();
         this.ensureMetaDeckValidSubdeckId();
         await this.processTodaySchedule();
+        this.computeDataExportReminderDue();
     }
     
     /**
@@ -573,6 +581,58 @@ export class App {
             id = generateRandomString(GENERATED_DECK_ID_LENGTH);
         } while (this.decks.includes(id));
         return id;
+    }
+    
+    getDataExportReminderPeriodDays(period: DataExportReminderPeriod): number {
+        switch (period) {
+            case 'daily': return 1;
+            case '2day': return 2;
+            case '3day': return 3;
+            case '4day': return 4;
+            case 'weekly': return 7;
+            case 'monthly': return 30;
+        }
+    }
+    
+    getDataExportReminderMeta(): { isEnabled: boolean, period: DataExportReminderPeriod, lastExportedAt?: string } {
+        const data = this.meta.dataExportReminder ?? {};
+        return {
+            isEnabled: data.isEnabled ?? true,
+            period: data.period ?? 'daily',
+            lastExportedAt: data.lastExportedAt,
+        };
+    }
+    
+    setDataExportReminderMeta(isEnabled: boolean, period: DataExportReminderPeriod): void {
+        const prev = this.meta.dataExportReminder ?? {};
+        this.meta.dataExportReminder = {
+            ...prev,
+            isEnabled,
+            period,
+        };
+        this.storage.save(STORE_KEY_META, this.meta).catch(console.error);
+        this.computeDataExportReminderDue();
+    }
+    
+    computeDataExportReminderDue(now = new Date()): boolean {
+        const reminderMeta = this.getDataExportReminderMeta();
+        if (!reminderMeta.isEnabled) {
+            this.isDataExportReminderDue = false;
+            return false;
+        }
+        if (!reminderMeta.lastExportedAt) {
+            this.isDataExportReminderDue = true;
+            return true;
+        }
+        const lastExported = new Date(reminderMeta.lastExportedAt);
+        if (isNaN(lastExported.getTime())) {
+            this.isDataExportReminderDue = true;
+            return true;
+        }
+        const dayDiff = getDaysSinceEpochLocal(now) - getDaysSinceEpochLocal(lastExported);
+        const due = dayDiff >= this.getDataExportReminderPeriodDays(reminderMeta.period);
+        this.isDataExportReminderDue = due;
+        return due;
     }
     
     getConfig(): DeepRequired<WenbunConfig> {
@@ -1130,6 +1190,13 @@ export class App {
             filename: `wenbun-profile-${date}.txt`,
             mimeType: "text/plain",
         });
+        const prev = this.meta.dataExportReminder ?? {};
+        this.meta.dataExportReminder = {
+            ...prev,
+            lastExportedAt: new Date().toISOString(),
+        };
+        await this.storage.save(STORE_KEY_META, this.meta);
+        this.computeDataExportReminderDue();
     }
     
     async tryUploadProfile(): Promise<boolean> {
