@@ -466,6 +466,7 @@
             </div>
         </div>
         
+        <!--
         <div class="settings-section">
             <div class="section-title">Experimental</div>
             <div class="section-container">
@@ -474,6 +475,7 @@
                 </SettingsItem>
             </div>
         </div>
+        -->
                 
         <div class="settings-section">
             <div class="section-title">Offline Data</div>
