@@ -5,9 +5,11 @@
         children?: Snippet;
         /** number → px, string → any CSS unit ("5em", "2rem", "120px") */
         distance?: number | string;
+        /** When false, the floating reveal bar stays hidden. */
+        isShow?: boolean;
     }
 
-    let { children, distance = 200 }: Props = $props();
+    let { children, distance = 200, isShow = true }: Props = $props();
 
     let revealed = $state(false);
     let distancePx = 200;
@@ -32,11 +34,17 @@
     });
 
     function handleScroll() {
-        revealed = window.scrollY > distancePx;
+        revealed = isShow && window.scrollY > distancePx;
     }
 
     $effect(() => {
         if (typeof window === "undefined") return;
+        if (!isShow) {
+            revealed = false;
+            return;
+        }
+
+        handleScroll();
         window.addEventListener("scroll", handleScroll, { passive: true });
         return () => window.removeEventListener("scroll", handleScroll);
     });

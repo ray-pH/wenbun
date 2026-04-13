@@ -199,7 +199,7 @@
     <button class="button" onclick={() => addKeyButton()}>Add New Key</button>
 {/snippet}
 
-<TopRevealBar>
+<TopRevealBar isShow={isConfigChanged}>
     {@render topSettingsContent()}
 </TopRevealBar>
 <div class="main-container">
