@@ -3,7 +3,7 @@
     import HanziWriter from 'hanzi-writer';
     import { onMount } from 'svelte';
     import { getAudioUrl, TONE_PREFIX, WENBUN_TTS_URL } from '$lib/chinese';
-    import { type CharacterWriterData, type CharacterWriterConfig, parseIntOrUndefined, lerp, linmap } from '$lib/util';
+    import { type CharacterWriterData, type CharacterWriterConfig, parseIntOrUndefined, lerp, linmap, TRUE } from '$lib/util';
     import { WritingMode, type App } from '$lib/app';
     import { base } from '$app/paths';
     import { AudioSequence } from '$lib/audioSequence';
@@ -413,6 +413,9 @@
     
     
     function experimentalApplePencilFix() {
+        if (TRUE) return; // deprecated
+        // keep the functionality, just in case
+        
         if (!app.getConfig()._experimentalFixApplePencil) return;
     
         const writerEl = document.getElementById('grid-background-target');

@@ -224,3 +224,5 @@ export function streamDownload(
         finished: promise
     };
 }
+
+export const TRUE = "true";
