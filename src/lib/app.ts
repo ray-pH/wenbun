@@ -1,5 +1,6 @@
 import * as FSRS from "ts-fsrs"
 import { dateDiffFormatted, generateRandomString, getDaysSinceEpochLocal, getDeckFilename, getDefaultDeckInfo, isBuiltinDeck, loadDeck, semverBiggerThan, sum, takeRandom, type DeepRequired } from "./util"
+import { getNow as getSimulatedNow } from "./simulateDate";
 import { BrowserIndexedDBStorage, type IStorage, TauriStorage } from "./storage";
 import _, { reduce } from "lodash";
 import { ChineseToneColorPalette, DECK_TAGS, DeckInfo, DEFAULT_FSRS_PARAM } from "./constants";
@@ -259,6 +260,9 @@ export class App {
         this.profile = new Profile(this.storage);
     }
     
+    getNow(): Date {
+        return getSimulatedNow();
+    }
     
     updateFSRS() {
         const config = this.getConfig();
@@ -390,7 +394,7 @@ export class App {
         if (!isChanged) return;
         
         this.updateFontSize();
-        this.meta.modifiedAt = new Date().toISOString();
+        this.meta.modifiedAt = this.getNow().toISOString();
         this.meta._profileVersion = 1;
         if (updateMetaClientVersion) this.meta.clientVersion = __APP_VERSION__;
         await Promise.all([
@@ -410,8 +414,9 @@ export class App {
             else this.profile.trySyncProfile(this, strategy).catch(console.error);
         }
     }
-    async updateLastSyncTime(time = new Date()) {
-        this.lastSyncTime = time.toISOString();
+    async updateLastSyncTime(time?: Date) {
+        const resolvedTime = time ?? this.getNow();
+        this.lastSyncTime = resolvedTime.toISOString();
         await this.storage.save(STORE_KEY_LAST_SYNC_TIME, this.lastSyncTime);
     }
     
@@ -472,7 +477,7 @@ export class App {
     }
     
     async processTodaySchedule(): Promise<void> {
-        const today = new Date();
+        const today = this.getNow();
         const todaysDate = getDaysSinceEpochLocal(today);
         let changed = false;
         for (const deckId of Object.keys(this.deckData)) {
@@ -614,7 +619,7 @@ export class App {
         this.computeDataExportReminderDue();
     }
     
-    computeDataExportReminderDue(now = new Date()): boolean {
+    computeDataExportReminderDue(now?: Date): boolean {
         const reminderMeta = this.getDataExportReminderMeta();
         if (!reminderMeta.isEnabled) {
             this.isDataExportReminderDue = false;
@@ -629,7 +634,8 @@ export class App {
             this.isDataExportReminderDue = true;
             return true;
         }
-        const dayDiff = getDaysSinceEpochLocal(now) - getDaysSinceEpochLocal(lastExported);
+        const currentNow = now ?? this.getNow();
+        const dayDiff = getDaysSinceEpochLocal(currentNow) - getDaysSinceEpochLocal(lastExported);
         const due = dayDiff >= this.getDataExportReminderPeriodDays(reminderMeta.period);
         this.isDataExportReminderDue = due;
         return due;
@@ -653,7 +659,7 @@ export class App {
         const card = this.getCard(deckId, cardId, true);
         if (!card) return;
         const fsrs = this.fsrs;
-        const schedulingCards = fsrs.repeat(card, date ?? new Date()) as FSRS.RecordLog;
+        const schedulingCards = fsrs.repeat(card, date ?? this.getNow()) as FSRS.RecordLog;
         this.setCard(deckId, cardId, schedulingCards[grade].card);
     }
     
@@ -666,7 +672,7 @@ export class App {
         if (!card) return;
         const isPreviouslyStudied = this.deckData[deckId]?.previouslyStudied?.includes(cardId);
         const fsrs = isPreviouslyStudied ? this.fsrsPrevStudied : this.fsrs;
-        const schedulingCards = fsrs.repeat(card, date ?? new Date()) as FSRS.RecordLog;
+        const schedulingCards = fsrs.repeat(card, date ?? this.getNow()) as FSRS.RecordLog;
         this.setCard(deckId, cardId, schedulingCards[grade].card);
         this.pushReviewLog(deckId, cardId, schedulingCards[grade].log);
         
@@ -954,13 +960,13 @@ export class App {
         if (this.isWarmUpCard(deckId, cardId)) return 'Warm Up';
         const due = this.getCardDue(deckId, cardId);
         if (!due) return 'Not Started';
-        return dateDiffFormatted(new Date(), new Date(due));
+        return dateDiffFormatted(this.getNow(), new Date(due));
     }
     getShortCardDueFormatted(deckId: string, cardId: number): string {
         if (this.isWarmUpCard(deckId, cardId)) return '';
         const due = this.getCardDue(deckId, cardId);
         if (!due) return '';
-        return dateDiffFormatted(new Date(), new Date(due));
+        return dateDiffFormatted(this.getNow(), new Date(due));
     }
     getRatingScheduledTimeStr(deckId: string, cardId: number): Record<FSRS.Grade, string> {
         const card = this.getCard(deckId, cardId, true);
@@ -969,7 +975,7 @@ export class App {
         if (!card) return ratingScheduledTimeStr;
         const isPreviouslyStudied = this.deckData[deckId]?.previouslyStudied?.includes(cardId);
         const fsrs = isPreviouslyStudied ? this.fsrsPrevStudied : this.fsrs;
-        const schedulingCards = fsrs.repeat(card, new Date()) as FSRS.RecordLog;
+        const schedulingCards = fsrs.repeat(card, this.getNow()) as FSRS.RecordLog;
         for (const grade of FSRS_GRADES) {
             const now = schedulingCards[grade].log.review;
             const due = schedulingCards[grade].card.due;
@@ -1096,7 +1102,7 @@ export class App {
     getTodaysScheduledCards(deckId: string): number[] {
         const deckData = this.deckData[deckId];
         if (!deckData) return [];
-        const now = new Date();
+        const now = this.getNow();
         const today = getDaysSinceEpochLocal(now);
         const tomorrow = today + 1;
         
@@ -1184,7 +1190,7 @@ export class App {
     
     async downloadProfile(): Promise<void> {
         const profileStr = this.exportProfileStr();
-        const date = new Date().toLocaleDateString('en-CA');
+        const date = this.getNow().toLocaleDateString('en-CA');
         await this.fileManager.download({
             data: profileStr,
             filename: `wenbun-profile-${date}.txt`,
@@ -1193,7 +1199,7 @@ export class App {
         const prev = this.meta.dataExportReminder ?? {};
         this.meta.dataExportReminder = {
             ...prev,
-            lastExportedAt: new Date().toISOString(),
+            lastExportedAt: this.getNow().toISOString(),
         };
         await this.storage.save(STORE_KEY_META, this.meta);
         this.computeDataExportReminderDue();
