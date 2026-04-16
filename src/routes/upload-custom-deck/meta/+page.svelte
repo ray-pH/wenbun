@@ -61,9 +61,9 @@
     
     let deckIdNameMap = new Map<string, string>();
     onMount(async () => {
-        await app.init();
+        await app.init(null);
         initComponent();
-        const changed = await app.initProfile();
+        const changed = await app.initProfile(null);
         if (changed) initComponent();
         subdeckIds = ['hsk1-v3.0', '6rcyqmfc']
     })

@@ -26,10 +26,10 @@
     
     let app = new App();
     onMount(async () => {
-        await app.init();
+        await app.init(deckId||null);
         await checkAndfixBuiltinDeckIdAsLabel();
         initComponent();
-        const changed = await app.initProfile();
+        const changed = await app.initProfile(deckId||null);
         if (changed) initComponent();
         // debugRateCard();
     })
@@ -301,7 +301,7 @@
     ]
 </script>
 
-<TopBar title="Deck"></TopBar>
+<TopBar title="Deck" deckId={deckId}></TopBar>
 
 <!-- <SlideablePopup bind:isOpen={showEditModal} onClose={() => (showEditModal = false)}>
     test

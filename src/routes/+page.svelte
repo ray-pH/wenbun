@@ -38,7 +38,7 @@
     }
     $: activeDeckIds = deckOrder.length > 0 ? deckOrder : Object.keys(app.deckData);
     $: locked = isAutomaticallyLoggedOut;
-    $: isSeparateLearnAndReview = app.getConfig().isSeparateLearnAndReview;
+    $: isSeparateLearnAndReview = app.getConfig(null).isSeparateLearnAndReview;
     $: isShowDataExportReminder = !locked && !isTauri() && !app.profile.isLoggedIn && app.isDataExportReminderDue;
     $: lastExportedAtString = (() => {
         const lastExportedAt = app.getDataExportReminderMeta().lastExportedAt;
@@ -53,19 +53,19 @@
 
     let isAppInitialized = false;
     onMount(async () => {
-        await app.init();
+        await app.init(null);
         // Initialize deckOrder after app init
         deckOrder = [...app.decks];
         app = app;
-        isShowLastStudied = app.getConfig().showDeckLastStudyTime;
+        isShowLastStudied = app.getConfig(null).showDeckLastStudyTime;
         isAppInitialized = true;
         isNewUpdateExist = app.isNewUpdateExist();
-        const changed = await app.initProfile();
+        const changed = await app.initProfile(null);
         isAutomaticallyLoggedOut = app.profile.isAutomaticallyLoggedOut();
         if (changed) {
             app = app;
             deckOrder = [...app.decks];
-            isShowLastStudied = app.getConfig().showDeckLastStudyTime;
+            isShowLastStudied = app.getConfig(null).showDeckLastStudyTime;
         }
         isNewUpdateExist = app.isNewUpdateExist();
         

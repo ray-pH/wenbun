@@ -16,10 +16,11 @@
 		syncStatus?: ManualSyncStatus;
 		isSyncing?: boolean; // animation
 		syncButtonCallback?: () => Promise<void>;
+		deckId?: string; // for settings
 	}
     let { 
         title, noBack, backUrl, prohibitedBackUrls, isSettings, backConfirmCallback,
-        syncStatus, syncButtonCallback, isSyncing,
+        syncStatus, syncButtonCallback, isSyncing, deckId,
     }: Props = $props();
     
     function goBack() {
@@ -40,6 +41,15 @@
             });
         } else {
             performBackNavigation();
+        }
+    }
+    
+    function gotoSettings() {
+        if (isSettings) return;
+        if (!deckId) {
+            goto(`${base}/settings`);
+        } else {
+            goto(`${base}/settings?fromDeckId=${deckId}`);
         }
     }
 </script>
@@ -74,9 +84,9 @@
             </button>
         {/if}
         {#if !isSettings}
-            <a class="icon-button" href="{base}/settings" title="Settings" aria-label="Settings">
+            <button class="icon-button" onclick={gotoSettings} title="Settings" aria-label="Settings">
                 <i class="fa-solid fa-gear"></i>
-            </a>
+            </button>
         {/if}
     </div>
 </div>
