@@ -7,7 +7,7 @@
         "tonga000", "Jirun", "kuzicki", "haniku", "zoylentgreen", "CathB", "david", "Spider",
         "PKdor", "grayroof66", "JacksonRiley", "jimmy_deep", "san",
         "Yusuf Abdullah bin Adheem", "Maxim修朙", "319", "jorescer", "david",
-        "Kenneth", "Meeeee", "ns3242", "N_220", "renrin", "prophecy",
+        "Kenneth", "Meeeee", "ns3242", "N_220", "renrin", "prophecy", "bearjere",
     ]
 </script>
 
