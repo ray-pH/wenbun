@@ -322,7 +322,7 @@
         background-color: #FFFFFF90;
         border: 1px solid #00000020;
         border-radius: 0.5em;
-        width: calc(100vw - 2em);
+        width: calc(100vw - 4em);
         max-width: 30em;
         margin-bottom: 1em;
         padding: 0.75em;
