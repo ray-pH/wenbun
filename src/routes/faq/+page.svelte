@@ -47,6 +47,36 @@
             category: 'Decks'
         },
         {
+            question: 'How do deck-specific settings work?',
+            answer: 'Wenbun now supports per-deck settings overrides. Global settings are still your default, but a deck can have its own values for selected options. During review/study of that deck, Wenbun uses the deck-specific value when present, and falls back to global settings for everything else.',
+            tags: ['deck specific settings', 'per-deck', 'override', 'global settings', 'fallback'],
+            category: 'Decks'
+        },
+        {
+            question: 'How do I open deck-specific settings?',
+            answer: 'First open a deck context (Overview, Review, or the Deck page), then tap Settings from there. On the Settings screen, use the topmost "Go to Deck Specific Settings" button to open that deck’s specific settings page.',
+            tags: ['deck specific settings', 'open', 'go to deck specific settings', 'settings navigation', 'overview', 'review', 'deck page'],
+            category: 'Decks'
+        },
+        {
+            question: 'What do linked vs unlinked settings mean?',
+            answer: 'Linked means the deck follows the global value for that setting. Unlinked means the deck stores its own override for that setting. You can unlink a setting to customize it for one deck, or reset it back to global to relink it.',
+            tags: ['linked', 'unlinked', 'reset to global', 'override', 'deck config'],
+            category: 'Decks'
+        },
+        {
+            question: 'If I change a global setting, will deck-specific settings change too?',
+            answer: 'Only linked settings update from global changes. Any setting you unlinked for a deck keeps that deck’s own value until you relink it (reset to global).',
+            tags: ['global change', 'linked settings', 'unlinked settings', 'deck override behavior'],
+            category: 'Decks'
+        },
+        {
+            question: 'How do I configure a setting for only one deck?',
+            answer: 'Open that deck first (Overview, Review, or Deck page), tap Settings, then tap the topmost "Go to Deck Specific Settings" button. In deck-specific settings, unlink the setting you want to customize, change its value, and save. Only that deck will use the override; other decks keep using global settings unless you also change them.',
+            tags: ['single deck setting', 'deck-specific settings', 'unlink', 'override', 'only one deck', 'save'],
+            category: 'Decks'
+        },
+        {
             question: 'What does "Previously Studied" mean?',
             answer: '"Previously Studied" is a pool for cards you already know from outside Wenbun. It helps you seed reviews faster without treating those cards as completely new.',
             tags: ['previously studied', 'known cards', 'seed', 'review'],
