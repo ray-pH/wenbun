@@ -1,5 +1,5 @@
 import * as FSRS from "ts-fsrs"
-import { dateDiffFormatted, generateRandomString, getDaysSinceEpochLocal, getDeckFilename, getDefaultDeckInfo, isBuiltinDeck, loadDeck, semverBiggerThan, sum, takeRandom, type DeepRequired } from "./util"
+import { dateDiffFormatted, generateRandomString, getDaysSinceEpochLocal, getDeckFilename, getDefaultDeckInfo, getKeysRecursive, isBuiltinDeck, loadDeck, semverBiggerThan, sum, takeRandom, type DeepPartial, type DeepRequired } from "./util"
 import { getNow as getSimulatedNow } from "./simulateDate";
 import { BrowserIndexedDBStorage, type IStorage, TauriStorage } from "./storage";
 import _, { reduce } from "lodash";
@@ -80,6 +80,8 @@ export interface DeckData {
     // meta decks
     isMetaDeck?: boolean;
     subDeckIds?: string[];
+    // config
+    deckConfig?: DeepPartial<WenbunConfig>;
 }
 
 export interface WenbunConfig {
@@ -249,7 +251,7 @@ export class App {
     public profile: Profile;
 
     constructor() {
-        this.updateFSRS();
+        this.updateFSRS(null);
         if (isTauri()) {
             this.storage = new TauriStorage(STORE_FILENAME);
         } else {
@@ -264,8 +266,8 @@ export class App {
         return getSimulatedNow();
     }
     
-    updateFSRS() {
-        const config = this.getConfig();
+    updateFSRS(deckId: string|null) {
+        const config = this.getConfig(deckId);
         const params = FSRS.generatorParameters({
             request_retention: config.desiredRetention,
             // maximum_interval: number;
@@ -287,15 +289,15 @@ export class App {
         this.fsrsPrevStudied = new FSRS.FSRS(prevStudiedParams);
     }
     
-    async init(): Promise<void> {
+    async init(deckId: string|null): Promise<void> {
         await this.load();
         this.updateFontSize();
         this.extraStudyHandler.init();
-        await this.afterInitRoutine();
+        await this.afterInitRoutine(deckId);
     }
     
-    async afterInitRoutine(): Promise<void> {
-        this.updateFSRS();
+    async afterInitRoutine(deckId: string|null): Promise<void> {
+        this.updateFSRS(deckId);
         this.ensureMetaDeckValidSubdeckId();
         await this.processTodaySchedule();
         this.computeDataExportReminderDue();
@@ -304,14 +306,14 @@ export class App {
     /**
      * @returns boolean: `true` if data changed
      */
-    async initProfile(skipSync: boolean = false): Promise<boolean> {
+    async initProfile(deckId: string|null, skipSync: boolean = false): Promise<boolean> {
         try {
             await this.profile.init();
             const isAutoSync = (await this.profile.getSyncMode()) === SyncMode.auto;
             if (this.profile.isLoggedIn && !skipSync && isAutoSync) {
                 const strategy = isTauri() || this.profile.justLoggenIn ? SyncConflicAutoResolve.ask : SyncConflicAutoResolve.normalPull;
                 const changed = await this.profile.trySyncProfile(this, strategy);
-                if (changed) await this.afterInitRoutine();
+                if (changed) await this.afterInitRoutine(deckId);
                 return changed;
             } else {
                 return false;
@@ -362,7 +364,7 @@ export class App {
         return this.getFontSizePx() / 16;
     }
     getFontSizePx(): number {
-        const config = this.getConfig();
+        const config = this.getConfig(null);
         switch (config.uiScale) {
             case 'small': return 10;
             case 'normal': return 16;
@@ -641,8 +643,20 @@ export class App {
         return due;
     }
     
-    getConfig(): DeepRequired<WenbunConfig> {
-        return _.merge({}, DEFAULT_CONFIG, this.config);
+    // if deckId is null, return global config
+    getConfig(deckId: string|null): DeepRequired<WenbunConfig> {
+        const globalConfig = _.merge({}, DEFAULT_CONFIG, this.config);
+        if (deckId && this.deckData[deckId]) {
+            const deckData = this.deckData[deckId];
+            return _.merge({}, globalConfig, deckData.deckConfig ?? {});
+        } else {
+            return globalConfig;
+        }
+    }
+    
+    getDeckPartialConfig(deckId?: string): DeepPartial<WenbunConfig> {
+        if (!deckId) return {};
+        return this.deckData[deckId]?.deckConfig ?? {};
     }
     
     async resetConfigToDefault(): Promise<void> {
@@ -652,6 +666,21 @@ export class App {
     
     async saveConfig(config: WenbunConfig): Promise<void> {
         this.config = config;
+        await this.save();
+    }
+
+    async saveDeckConfig(deckId: string, config: WenbunConfig, unlinkedKeys: string[]): Promise<void> {
+        if (!this.deckData[deckId]) return;
+        const currentDeckConfig = _.cloneDeep(this.getDeckPartialConfig(deckId));
+        const currentUnlinkedKeys = getKeysRecursive(currentDeckConfig);
+        const toRemove = [...currentUnlinkedKeys].filter(k => !unlinkedKeys.includes(k));
+        for (const toRemoveKey of toRemove) {
+            _.unset(currentDeckConfig, toRemoveKey);
+        }
+        for (const unlinkedKey of unlinkedKeys) {
+            _.set(currentDeckConfig, unlinkedKey, _.get(config, unlinkedKey));
+        }
+        this.deckData[deckId].deckConfig = currentDeckConfig;
         await this.save();
     }
     
@@ -819,8 +848,9 @@ export class App {
         newOrWarmUp: T,  totalNewOrWarmUpCount: number,
         previouslyStudied: T,  previouslyStudiedCount: number,
         today: T, todayCount: number,
+        deckId: string|null = null
     ): T[] {
-        const config = this.getConfig();
+        const config = this.getConfig(deckId);
         const head = [];
         const mid = [today];
         const tail = [];
@@ -912,7 +942,7 @@ export class App {
     getPreviouslyStudiedCard(deckId: string): number | undefined {
         const deckData = this.deckData[deckId];
         if (!deckData) return undefined;
-        if (this.getConfig().startPreviouslyStudiedCardFromTheBack) {
+        if (this.getConfig(deckId).startPreviouslyStudiedCardFromTheBack) {
             return deckData.previouslyStudied?.[deckData.previouslyStudied.length - 1];
         } else {
             return deckData.previouslyStudied[0];
@@ -1017,12 +1047,12 @@ export class App {
     getScheduledReviewCardsCount(deckId: string, includeLearning = false): number {
         const deckData = this.deckData[deckId];
         const todaysReviewCards = this.getTodaysReviewCards(deckId, includeLearning);
-        const config = this.getConfig();
+        const config = this.getConfig(deckId);
         const count = Math.min(todaysReviewCards.length, config.maxReviewsPerDay - deckData.doneTodayReviewCount);
         return Math.max(0, count);
     }
     getScheduledNewOrWarmUpCardsCount(deckId: string): number {
-        const config = this.getConfig();
+        const config = this.getConfig(deckId);
         const deckData = this.deckData[deckId];
         const newCount = this.getNewCardsCount(deckId);
         const warmUpCount = this.getWarmUpCardsCount(deckId);
@@ -1034,7 +1064,7 @@ export class App {
         return scheduledOrWarmUpCount - this.getWarmUpCardsCount(deckId);
     }
     getScheduledPreviouslyStudiedCardsCount(deckId: string): number {
-        const config = this.getConfig();
+        const config = this.getConfig(deckId);
         const deckData = this.deckData[deckId];
         const count = Math.min(this.getPreviouslyStudiedCardCount(deckId), config.newPreviouslyStudiedCardPerDay - deckData.doneTodayPreviouslyStudiedCardCount);
         return Math.max(0, count);
@@ -1144,7 +1174,7 @@ export class App {
     
     getChineseToneColor(tone?: number): string | undefined {
         if (!tone) return undefined;
-        const config = this.getConfig();
+        const config = this.getConfig(null);
         if (!config.zh.isColorBasedOnTone) return undefined;
         const colors = config.zh.toneColors;
         return colors[tone - 1];
@@ -1258,8 +1288,8 @@ export class App {
         }
     }
     
-    isAutoGrading(): boolean {
-        return this.getConfig().gradingMethod === 'auto';
+    isAutoGrading(deckId: string|null): boolean {
+        return this.getConfig(deckId).gradingMethod === 'auto';
     }
     
     storeAutoGradeLog(correctCount: number, mistakeCount: number, grade: FSRS.Grade) {
@@ -1405,7 +1435,7 @@ export class App {
     /** tweak the `doneTodayNewCardCount` so that the scheduled new card will match the target */
     tweakNewCardCount(deckId: string, target: number) {
         const deckData = this.deckData[deckId];
-        const count = this.getConfig().newCardPerDay - deckData.doneTodayNewCardCount;
+        const count = this.getConfig(deckId).newCardPerDay - deckData.doneTodayNewCardCount;
         const diff = target - count;
         this.adjustCardLimit(deckId, diff, 0, 0);
     }
@@ -1449,7 +1479,7 @@ export class App {
     }
     
     getBlacklistAudioSrc(): string[] {
-        return this.getConfig().zh.audioSrcBlacklist ?? [];
+        return this.getConfig(null).zh.audioSrcBlacklist ?? [];
     }
     ensureAudioSrcBlacklist() {
         if (!this.config.zh.audioSrcBlacklist) this.config.zh.audioSrcBlacklist = [];

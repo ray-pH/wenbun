@@ -8,7 +8,7 @@
     let reviewLogStr: "";
     
     onMount(async () => {
-        await app.init();
+        await app.init(null);
         app = app;
     });
     

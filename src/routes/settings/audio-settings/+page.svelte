@@ -15,9 +15,9 @@
     
     onMount(async () => {
         processDict();
-        await app.init();
+        await app.init(null);
         initComponent();
-        const changed = await app.initProfile();
+        const changed = await app.initProfile(null);
         if (changed) initComponent();
     })
     
@@ -29,7 +29,7 @@
     }
     
     function initComponent() {
-        srcBlacklist = app.getConfig().zh.audioSrcBlacklist;
+        srcBlacklist = app.getConfig(null).zh.audioSrcBlacklist;
         init = true;
         app = app;
     }
@@ -73,12 +73,12 @@
     async function blacklistSrc(src: string) {
         app.blacklistAudioSrc(src);
         await app.save();
-        srcBlacklist = app.getConfig().zh.audioSrcBlacklist;
+        srcBlacklist = app.getConfig(null).zh.audioSrcBlacklist;
     }
     async function unblacklistSrc(src: string) {
         app.unblacklistAudioSrc(src);
         await app.save();
-        srcBlacklist = app.getConfig().zh.audioSrcBlacklist;
+        srcBlacklist = app.getConfig(null).zh.audioSrcBlacklist;
     }
     
 </script>

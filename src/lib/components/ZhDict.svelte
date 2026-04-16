@@ -23,7 +23,9 @@
         isShowPlecoLink, isShowDongLink,
         isOpenChildrenDict = $bindable()
     }: Props = $props();
+    // svelte-ignore state_referenced_locally
     let word = charData.characters ?? "";
+    // svelte-ignore state_referenced_locally
     let wordColors = charData.tones.map(tone => toneColors[tone-1]) ?? [];
     let wordData = $derived(wordlist.getWordDecompData(word));
     let isComposite = word.length > 1;

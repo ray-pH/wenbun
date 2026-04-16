@@ -119,9 +119,9 @@
         if (cachedInput) {
             input = cachedInput;
         }
-        await app.init();
+        await app.init(null);
         initComponent();
-        const changed = await app.initProfile();
+        const changed = await app.initProfile(null);
         if (changed) initComponent();
     })
     function initComponent() {

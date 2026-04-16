@@ -61,6 +61,7 @@
         isCharSupportedByHanziWriter: boolean[];
 		writingMode: WritingMode;
 		app: App;
+		deckId: string;
 	}
     let { 
         onComplete, onOpenDict, onReadyToGoNext,
@@ -72,7 +73,8 @@
         isDictationMode = false,
         isCharSupportedByHanziWriter = [],
         writingMode = WritingMode.Default,
-        autoReviewData = $bindable()
+        autoReviewData = $bindable(),
+        deckId,
     }: Props = $props();
     
     const isDontShowAudioLoadingIfNotPlaying = $derived(
@@ -179,7 +181,7 @@
                 // play sound
             }, NEXT_CHAR_DELAY);
         } else {
-            if (app.getConfig().playSuccessSound) correctSound.play();
+            if (app.getConfig(deckId).playSuccessSound) correctSound.play();
             completedCharCount = completedCharCount + 1;
             if (completedCharCount == characterData?.characters.length) {
                 // done;
@@ -224,8 +226,8 @@
             // drawing
             drawingWidth: CHARACTER_WRITER_DRAWING_WIDTH,
             drawingColor: "#555",
-            showHintAfterMisses: app.getConfig().showHintAfterMissesCount,
-            strokeFadeDuration: app.getConfig().strokeFadeDuration,
+            showHintAfterMisses: app.getConfig(deckId).showHintAfterMissesCount,
+            strokeFadeDuration: app.getConfig(deckId).strokeFadeDuration,
             // auto stroke animation
             strokeAnimationSpeed: strokeSpeed,
             delayBetweenStrokes: linmap(strokeSpeed, 1, MAX_STROKE_SPEED, 1000, 10),
@@ -246,7 +248,7 @@
         });
         if (!cardConfig.isFirstTime && !externalAndDone) {
             writer.quiz({
-                leniency: app.getConfig().strokeLeniency,
+                leniency: app.getConfig(deckId).strokeLeniency,
                 onMistake: () => { 
                     autoReviewData.incorrectStrokeCount++; 
                     autoReviewData.totalStrokeCount++;
@@ -416,7 +418,7 @@
         if (TRUE) return; // deprecated
         // keep the functionality, just in case
         
-        if (!app.getConfig()._experimentalFixApplePencil) return;
+        if (!app.getConfig(deckId)._experimentalFixApplePencil) return;
     
         const writerEl = document.getElementById('grid-background-target');
         if (!writerEl) return;
@@ -794,7 +796,7 @@
     </div>
     <div class="reading-container">
         <div class="reading">
-            {#if !isRevealReading && !app.getConfig().zh.alwaysShowReading && !isComplete && !cardConfig.isFirstTime}
+            {#if !isRevealReading && !app.getConfig(deckId).zh.alwaysShowReading && !isComplete && !cardConfig.isFirstTime}
                 <button class="reveal-button" onclick={() => isRevealReading = true} aria-label="Reveal Reading">
                     <i class="fa-solid fa-eye"></i>
                 </button>

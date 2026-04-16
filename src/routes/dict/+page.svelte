@@ -4,12 +4,12 @@
     import { onMount } from "svelte";
     import { ChineseCharacterWordlist, toneFromPinyin } from "$lib/chinese";
     
-    export let data: {char?: string};
+    export let data: {char?: string, deckId?: string|null};
     
     let app = new App();
     let wordlist = new ChineseCharacterWordlist();
     onMount(async () => {
-        await app.init();
+        await app.init(data.deckId ?? null);
         await wordlist.init('zh', false);
         app = app;
     })
@@ -31,7 +31,7 @@
             charData={getDictCharData(data.char ?? "")} 
             wordlist={wordlist}
             toneColors={app.getChineseToneColorArray()}
-            zhReading={app.getConfig().zh.mandarinReading}
+            zhReading={app.getConfig(data.deckId ?? null).zh.mandarinReading}
         ></ZhDict>
     {/key}
 </div>

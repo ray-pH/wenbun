@@ -47,8 +47,8 @@
     let nextButtonAction: (() => void) | undefined = undefined;
     onMount(async () => {
         // no need to sync in here
-        await app.init();
-        await app.initProfile(true);
+        await app.init(metaDeckId);
+        await app.initProfile(metaDeckId, true);
         const tags = app.deckData[metaDeckId]?.tags;
         isZhCantonese = tags?.includes(DECK_TAGS.ZH_YUE);
         const isUseExtraDict = getIsUseExtraDict(tags);
@@ -60,11 +60,11 @@
         wordlist.registerCustomEntryDict(app.getCustomEntryDict(metaDeckId));
         app = app;
         isZhTraditional = tags?.includes(DECK_TAGS.ZH_TRAD);
-        isAutoGrading = app.isAutoGrading() && app.getConfig().writingMode !== WritingMode.External;
-        isGradeWarmUpCards = app.getConfig().gradeWarmUpCards;
+        isAutoGrading = app.isAutoGrading(metaDeckId) && app.getConfig(metaDeckId).writingMode !== WritingMode.External;
+        isGradeWarmUpCards = app.getConfig(metaDeckId).gradeWarmUpCards;
         isPageReady = true;
         if (data.isExtraStudy) app.extraStudyHandler.registerReviewCardIdsOverride(cardIds);
-        forceStopAudioOnNextCard = app.getConfig().zh.forceStopAudioOnNextCard;
+        forceStopAudioOnNextCard = app.getConfig(metaDeckId).zh.forceStopAudioOnNextCard;
         setupNextKeyListener();
         nextCard();
     })
@@ -167,7 +167,7 @@
     
     function characterWriterDataFromId(id: number): CharacterWriterData | undefined {
         const word = app.getCardWord(currentDeckId, id);
-        const config = app.getConfig();
+        const config = app.getConfig(metaDeckId);
         return wordlist.getCharacterWriterData(word, {
             convertToTraditional: isZhTraditional,
             mandarinReading: config.zh.mandarinReading,
@@ -200,7 +200,7 @@
             isFinalWarmUp: isFinalWarmUp(id),
             warmUpCount,
             warmUpMaxCount: app.getMaxWarmUpCount(),
-            isGradeWarmUpCards: app.getConfig().gradeWarmUpCards,
+            isGradeWarmUpCards: app.getConfig(metaDeckId).gradeWarmUpCards,
             isShowOutline: isFirstTime || isFirstWarmUp,
             lang: isZhCantonese ? 'yue' : 'zh',
         }
@@ -210,7 +210,7 @@
         if (isAutoGrading) autoGrade = AutoReview.getGrade(data);
     }
     function onReadyToGoNext() {
-        const config = app.getConfig();
+        const config = app.getConfig(metaDeckId);
         if (!config.isAutoNextOnSuccess || !isAutoGrading) return;
         if (autoGrade === undefined) return;
         if (autoGrade === FSRS.Rating.Again) return;
@@ -309,7 +309,7 @@
     }
     
     function setupNextKeyListener() {
-        const config = app.getConfig();
+        const config = app.getConfig(metaDeckId);
         if (!config.enableNextButtonKey) return;
         nextKeyButtonCodes = config.nextButtonKeyCodes.filter(code => !!code) as string[];
         window.addEventListener("keydown", keyDownHandler);
@@ -321,7 +321,7 @@
 </script>
 
 
-<TopBar title={title}></TopBar>
+<TopBar title={title} deckId={metaDeckId}></TopBar>
 <div class="container">
     {#if isDoneToday} 
         <div style="margin-top: 2em">You have done today's review.</div>
@@ -367,8 +367,9 @@
             {#key [currentCardId, isNewCardInteractedWith, isCardChanged]}
                 <CharacterWriter 
                     app={app} 
-                    isShowHealthBar={isAutoGrading && app.getConfig().showAutoGradingBar}
-                    isFailWholeWord={app.getConfig().failWholeWord}
+                    deckId={metaDeckId}
+                    isShowHealthBar={isAutoGrading && app.getConfig(metaDeckId).showAutoGradingBar}
+                    isFailWholeWord={app.getConfig(metaDeckId).failWholeWord}
                     isCharSupportedByHanziWriter={isCharSupportedByHanziWriter}
                     isDictationMode={isDictationMode}
                     bind:this={characterWriterRef}
@@ -380,7 +381,7 @@
                     cardConfig={getCardConfig(currentCardId)}
                     autoGrade={autoGrade}
                     bind:autoReviewData={autoReviewData}
-                    writingMode={app.getConfig().writingMode}
+                    writingMode={app.getConfig(metaDeckId).writingMode}
                 />
             {/key}
         </div>
@@ -466,9 +467,9 @@
             charData={getDictCharData(currentCardId)} 
             wordlist={wordlist}
             toneColors={app.getChineseToneColorArray()}
-            zhReading={app.getConfig().zh.mandarinReading}
-            isShowPlecoLink={app.getConfig().isShowPlecoLink}
-            isShowDongLink={app.getConfig().isShowDongLink}
+            zhReading={app.getConfig(metaDeckId).zh.mandarinReading}
+            isShowPlecoLink={app.getConfig(metaDeckId).isShowPlecoLink}
+            isShowDongLink={app.getConfig(metaDeckId).isShowDongLink}
         ></ZhDict>
     {/if}
 </SlideablePopup>
