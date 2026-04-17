@@ -6,7 +6,7 @@
     import _ from "lodash";
     import SettingsItem from "./SettingsItem.svelte";
     import * as FSRS from "ts-fsrs"
-    import { getKeysRecursive, type DeepPartial, type DeepRequired } from "$lib/util";
+    import { getKeysRecursive, type DeepRequired } from "$lib/util";
     import { ChineseToneColorPalette } from "$lib/constants";
     import { ChineseMandarinReading } from '$lib/chinese';
     import ProfileLogin from './ProfileLogin.svelte';
