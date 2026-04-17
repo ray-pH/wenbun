@@ -39,7 +39,6 @@
     $: activeDeckIds = deckOrder.length > 0 ? deckOrder : Object.keys(app.deckData);
     $: locked = isAutomaticallyLoggedOut;
     $: isSeparateLearnAndReview = app.getConfig(null).isSeparateLearnAndReview;
-    $: isShowDataExportReminder = !locked && !isTauri() && !app.profile.isLoggedIn && app.isDataExportReminderDue;
     $: lastExportedAtString = (() => {
         const lastExportedAt = app.getDataExportReminderMeta().lastExportedAt;
         if (!lastExportedAt) return '';
@@ -67,6 +66,7 @@
             deckOrder = [...app.decks];
             isShowLastStudied = app.getConfig(null).showDeckLastStudyTime;
         }
+        isShowDataExportReminder = !locked && !isTauri() && !app.profile.isLoggedIn && app.isDataExportReminderDue;
         isNewUpdateExist = app.isNewUpdateExist();
         
         const isManualSync = (await app.profile.getSyncMode()) === SyncMode.manual;
