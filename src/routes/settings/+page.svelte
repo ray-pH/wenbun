@@ -110,6 +110,9 @@
 
     function resetSettingToGlobal(path: string) {
         unlinkedKeys = unlinkedKeys.filter((k) => k !== path);
+        const globalValue = _.get(app.getConfig(null), path);
+        _.set(config, path, _.cloneDeep(globalValue));
+        config = config;
     }
 
     function unlinkSettingFromGlobal(path: string) {
