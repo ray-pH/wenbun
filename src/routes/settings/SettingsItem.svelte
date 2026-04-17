@@ -24,14 +24,16 @@
         gap: 0.5em;
         margin-bottom: 0.15em;
     }
-    .settings-children-row {
+    .settings-row {
         display: flex;
-        align-items: center;
+        align-items: top;
         gap: 0.4em;
     }
-    .settings-children.linked {
-        opacity: 0.5;
+    .settings-label.linked {
         pointer-events: none;
+        .settings-children {
+            opacity: 0.5;
+        }
     }
     .reset-button,
     .unlink-button {
@@ -51,6 +53,7 @@
         display: flex;
         flex-direction: row;
         justify-content: space-between;
+        flex: 1;
         gap: 1em;
         .settings-label-help {
             color: #00000090;
@@ -62,14 +65,19 @@
 </style>
 
 <div class="settings-item">
-    <label class="settings-label">
-        <div>
-            <div class="settings-label-title-row">
-                <div class="settings-label-title">{data.label}</div>
+    <div class="settings-row">
+        <label class="settings-label" class:linked={props.isDeckSettings && !props.isNotLinked?.(resolvedInputKey)}>
+            <div>
+                <div class="settings-label-title-row">
+                    <div class="settings-label-title">{data.label}</div>
+                </div>
+                <div class="settings-label-help">{data.help}</div>
             </div>
-            <div class="settings-label-help">{data.help}</div>
-        </div>
-        <div class="settings-children-row">
+            <div class="settings-children">
+                {@render props.children?.()}
+            </div>
+        </label>
+        <div>
             {#if props.isDeckSettings && !props.isNotLinked?.(resolvedInputKey)}
                 <button class="unlink-button" type="button" aria-label="Unlink from global settings" title="Unlink from global settings" onclick={() => props.onUnlink?.(resolvedInputKey)}>
                     <i class="fa-solid fa-link-slash"></i>
@@ -80,9 +88,6 @@
                     <i class="fa-solid fa-rotate-left"></i>
                 </button>
             {/if}
-            <div class="settings-children" class:linked={props.isDeckSettings && !props.isNotLinked?.(resolvedInputKey)}>
-                {@render props.children?.()}
-            </div>
         </div>
-    </label>
+    </div>
 </div>
