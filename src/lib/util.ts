@@ -14,6 +14,17 @@ export type DeepRequired<T> =
                                   T
 interface DeepRequiredArray<T> extends Array<DeepRequired<T>> {}
 
+export type DeepPartial<T> =
+  // Leave functions as-is
+  T extends (...args: any[]) => any ? T :
+  // Recurse into arrays
+  T extends Array<infer U>       ? DeepPartialArray<U> :
+  // Recurse into plain objects
+  T extends object               ? { [K in keyof T]?: DeepPartial<T[K]> } :
+  // Primitives, etc.
+                                  T
+interface DeepPartialArray<T> extends Array<DeepPartial<T>> {}
+
 export interface CharacterWriterData {
     characters: string;
     reading: string;
@@ -224,3 +235,48 @@ export function streamDownload(
         finished: promise
     };
 }
+
+export function getKeysRecursive(obj: any, prefix = ''): Set<string> {
+    const out = new Set<string>();
+    if (obj === null || typeof obj !== 'object') {
+        if (prefix) out.add(prefix);
+        return out;
+    }
+
+    if (Array.isArray(obj)) {
+        if (prefix) out.add(prefix);
+        return out;
+    }
+
+    for (const key of Object.keys(obj)) {
+        const childPrefix = prefix ? `${prefix}.${key}` : key;
+        const child = getKeysRecursive(obj[key], childPrefix);
+        for (const item of child) out.add(item);
+    }
+    return out;
+}
+
+export function getNestedValue(obj: any, path: string): any {
+    const parts = path.split('.');
+    let current = obj;
+    for (const part of parts) {
+        if (current == null) return undefined;
+        current = current[part];
+    }
+    return current;
+}
+
+export function setNestedValue(obj: any, path: string, value: any): void {
+    const parts = path.split('.');
+    let current = obj;
+    for (let i = 0; i < parts.length - 1; i++) {
+        const part = parts[i];
+        if (current[part] == null || typeof current[part] !== 'object') {
+            current[part] = {};
+        }
+        current = current[part];
+    }
+    current[parts[parts.length - 1]] = value;
+}
+
+export const TRUE = "true";

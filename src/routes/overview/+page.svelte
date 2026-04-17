@@ -22,10 +22,11 @@
     let isOnlineProfileLoaded = false;
     let isMetaDeck = false;
     let subDeckIds: string[] = [];
+    let deckId = data.deckId||null;
     onMount(async () => {
-        await app.init();
+        await app.init(deckId);
         initComponent();
-        const changed = await app.initProfile();
+        const changed = await app.initProfile(deckId);
         isOnlineProfileLoaded = true;
         if (changed) initComponent();
     })
@@ -36,7 +37,7 @@
         isInitialized = true;
         isTodayDone = app.getNextCard(data.deckId ?? '') === undefined;
         isNoMoreReview = app.getNextCard(data.deckId ?? '', ReviewMode.ReviewOnly) === undefined;
-        studyNewCardCount = app.getConfig().newCardPerDay;
+        studyNewCardCount = app.getConfig(deckId).newCardPerDay;
         isNewCardsStillExist = app.getNewCardsCount(data.deckId ?? '') > 0;
         isMetaDeck = app.isDeckMeta(data.deckId ?? '');
         if (isMetaDeck) subDeckIds = app.deckData[data.deckId ?? '']?.subDeckIds ?? [];
@@ -49,7 +50,7 @@
     $: progressBarData = app.getDeckProgressNormalized(deckInfo.id);
     $: progress = deckProgress.youngCount + deckProgress.matureCount;
     $: progressTotal = deckProgress.totalCount - deckProgress.ignoredCount;
-    $: isSeparateLearnAndReview = app.getConfig().isSeparateLearnAndReview;
+    $: isSeparateLearnAndReview = app.getConfig(deckId).isSeparateLearnAndReview;
     
     let extraStudyAccordionState = false;
     let extraStudyCount = 20;
@@ -116,7 +117,7 @@
     }
 </script>
 
-<TopBar title="Overview"></TopBar>
+<TopBar title="Overview" deckId={data.deckId}></TopBar>
 <div class="container">
     {#if isInitialized}
         <div class="deck-info">

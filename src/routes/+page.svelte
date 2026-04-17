@@ -9,6 +9,7 @@
     import { LoginStatus, ManualSyncStatus, SyncMode } from '$lib/profile';
     import Loading from '$lib/components/Loading.svelte';
     import { registerSW } from 'virtual:pwa-register';
+    import { isTauri } from '@tauri-apps/api/core';
     
     registerSW({
         immediate: true,
@@ -26,6 +27,8 @@
     let isNewUpdateExist = false;
     let isShowLastStudied = false;
     let deckOrder: string[] = [];
+    let isShowDataExportReminder = false;
+    let isBackupReminderExpanded = false;
     
     $: {
         // Update deckOrder when app.decks changes
@@ -35,7 +38,14 @@
     }
     $: activeDeckIds = deckOrder.length > 0 ? deckOrder : Object.keys(app.deckData);
     $: locked = isAutomaticallyLoggedOut;
-    $: isSeparateLearnAndReview = app.getConfig().isSeparateLearnAndReview;
+    $: isSeparateLearnAndReview = app.getConfig(null).isSeparateLearnAndReview;
+    $: isShowDataExportReminder = !locked && !isTauri() && !app.profile.isLoggedIn && app.isDataExportReminderDue;
+    $: lastExportedAtString = (() => {
+        const lastExportedAt = app.getDataExportReminderMeta().lastExportedAt;
+        if (!lastExportedAt) return '';
+        const date = new Date(lastExportedAt);
+        return isNaN(date.getTime()) ? '' : date.toLocaleString();
+    })();
 
     function arraysEqual(a: string[], b: string[]) {
         return a.length === b.length && a.every((val, index) => val === b[index]);
@@ -43,19 +53,19 @@
 
     let isAppInitialized = false;
     onMount(async () => {
-        await app.init();
+        await app.init(null);
         // Initialize deckOrder after app init
         deckOrder = [...app.decks];
         app = app;
-        isShowLastStudied = app.getConfig().showDeckLastStudyTime;
+        isShowLastStudied = app.getConfig(null).showDeckLastStudyTime;
         isAppInitialized = true;
         isNewUpdateExist = app.isNewUpdateExist();
-        const changed = await app.initProfile();
+        const changed = await app.initProfile(null);
         isAutomaticallyLoggedOut = app.profile.isAutomaticallyLoggedOut();
         if (changed) {
             app = app;
             deckOrder = [...app.decks];
-            isShowLastStudied = app.getConfig().showDeckLastStudyTime;
+            isShowLastStudied = app.getConfig(null).showDeckLastStudyTime;
         }
         isNewUpdateExist = app.isNewUpdateExist();
         
@@ -72,6 +82,11 @@
         if (!confirm) return;
         app.profile.updateLoginStatus(LoginStatus.loggedOut);
         isAutomaticallyLoggedOut = app.profile.isAutomaticallyLoggedOut();
+    }
+
+    async function exportProfileData() {
+        await app.downloadProfile();
+        app = app;
     }
     
    	let dragDropManager: DragDropManager;
@@ -154,6 +169,41 @@
             <a class="a-button" href="{base}/deck-browser/">Add New Deck</a>
         {/if}
     </div>
+    {#if isShowDataExportReminder}
+        <div class="data-export-reminder" class:is-expanded={isBackupReminderExpanded}>
+            <div class="reminder-header">
+                <button
+                    class="reminder-toggle"
+                    onclick={() => isBackupReminderExpanded = !isBackupReminderExpanded}
+                    aria-expanded={isBackupReminderExpanded}
+                    aria-label="Toggle backup reminder details"
+                >
+                    <span class="title">
+                        <i class="fa-solid fa-circle-info"></i>
+                        Backup reminder
+                    </span>
+                    <i class="fa-solid fa-chevron-{isBackupReminderExpanded ? 'up' : 'down'}"></i>
+                </button>
+                <button class="button export-now-button" onclick={() => exportProfileData()}>
+                    <i class="fa-solid fa-download"></i>&nbsp;
+                    Export
+                </button>
+            </div>
+
+            {#if isBackupReminderExpanded}
+                <div class="details">
+                    You are currently using WenBun in a browser without login. Browser/site data can be cleared unexpectedly, which may erase your progress.
+                    Please export your profile data regularly and keep backups in a safe place.
+                </div>
+                {#if lastExportedAtString}
+                    <div class="last-exported">Last export: {lastExportedAtString}</div>
+                {/if}
+                <div class="actions">
+                    <a href="{base}/settings/#data-export-reminder">Disable or change reminder period in settings</a>
+                </div>
+            {/if}
+        </div>
+    {/if}
     <div class="hr"></div>
     {#if !locked}
         <div class="top-button-container">
@@ -267,6 +317,66 @@
         height: 100%;
         width: 100%;
         margin: 1em 0;
+    }
+    .data-export-reminder {
+        background-color: #FFFFFF90;
+        border: 1px solid #00000020;
+        border-radius: 0.5em;
+        width: calc(100vw - 4em);
+        max-width: 30em;
+        margin-bottom: 1em;
+        padding: 0.75em;
+        color: inherit;
+
+        .reminder-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75em;
+        }
+
+        .reminder-toggle {
+            all: unset;
+            cursor: pointer;
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75em;
+        }
+
+        .title {
+            font-weight: bold;
+            display: inline-flex;
+            gap: 0.5em;
+            align-items: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .export-now-button {
+            margin-top: 0;
+            white-space: nowrap;
+        }
+
+        .details {
+            margin-top: 0.75em;
+        }
+
+        .last-exported {
+            margin-top: 0.5em;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .actions {
+            margin-top: 0.75em;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5em;
+        }
     }
     .hr {
         width: calc(100vw - 2em);

@@ -17,9 +17,9 @@
     let filterText = "";
     let filteredDeckInfo = DeckInfo;
     onMount(async () => {
-        await app.init();
+        await app.init(null);
         initComponent();
-        const changed = await app.initProfile();
+        const changed = await app.initProfile(null);
         if (changed) initComponent();
     })
     

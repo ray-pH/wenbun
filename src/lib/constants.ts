@@ -278,6 +278,15 @@ export const SETTINGS_LABEL_DATA = {
         label: "Add To Existing Deck",
         help: "When enabled, the new cards will be added to an existing deck.",
     },
+
+    dataExportReminderEnabled: {
+        label: "Data Export Reminder",
+        help: "When enabled, the app will remind you to export your profile data periodically while using the browser without login.",
+    },
+    dataExportReminderPeriod: {
+        label: "Data Export Reminder Period",
+        help: "How often to show the reminder: daily, 2day, 3day, 4day, weekly, or monthly.",
+    },
     
     //
     experimentalApplePencilFix: {

@@ -1,12 +1,12 @@
 <script lang="ts">
     import { base } from '$app/paths';
     import { onMount } from "svelte";
-    import { App, NewCardOrder, WritingMode, type WenbunConfig } from "$lib/app";
+    import { App, NewCardOrder, WritingMode, type DataExportReminderPeriod, type WenbunConfig } from "$lib/app";
     import TopBar from "$lib/components/TopBar.svelte";
     import _ from "lodash";
     import SettingsItem from "./SettingsItem.svelte";
     import * as FSRS from "ts-fsrs"
-    import { type DeepRequired } from "$lib/util";
+    import { getKeysRecursive, type DeepRequired } from "$lib/util";
     import { ChineseToneColorPalette } from "$lib/constants";
     import { ChineseMandarinReading } from '$lib/chinese';
     import ProfileLogin from './ProfileLogin.svelte';
@@ -15,59 +15,116 @@
     import type { PWAInstallElement } from '@khmyznikov/pwa-install';
     import { isTauri } from '@tauri-apps/api/core';
     import TopRevealBar from '$lib/components/TopRevealBar.svelte';
+    import { goto } from '$app/navigation';
     
-    export let data: {leniency?: string, fadeDuration?: string};
+    export let data: {leniency?: string, fadeDuration?: string, fromDeckId?: string, deckId?: string};
     
     let app = new App();
     let config: DeepRequired<WenbunConfig>;
     let initialConfig: DeepRequired<WenbunConfig>;
+    let unlinkedKeys: string[] = [];
+    let initialUnlinkedKeys: string[] = [];
     let isOnlineProfileLoaded = false;
+    let isLoggedIn = false;
+    let dataExportReminderEnabled = true;
+    let initialDataExportReminderEnabled = true;
+    let dataExportReminderPeriod: DataExportReminderPeriod = 'daily';
+    let initialDataExportReminderPeriod: DataExportReminderPeriod = 'daily';
     let pwaInstallComponent: PWAInstallElement;
-    onMount(async () => {
-        await app.init();
+    
+    $: fromDeckDeckInfo = app.getDeckInfo(data.fromDeckId ?? '');
+    $: deckDeckInfo = app.getDeckInfo(data.deckId ?? '');
+    $: topBarTitle = data.deckId && isAppInitialized && deckDeckInfo?.title
+        ? `Settings - ${deckDeckInfo.title}${deckDeckInfo.subtitle ? ` ${deckDeckInfo.subtitle}` : ''}`
+        : 'Settings';
+
+    $: deckSettingsItemProps = ({
+        isDeckSettings: !!data.deckId,
+        isNotLinked: isNotLinkedToGlobalSettings,
+        onReset: resetSettingToGlobal,
+        onUnlink: unlinkSettingFromGlobal,
+    });
+    
+    let isAppInitialized = false;
+    let lastRouteKey = '';
+    $: routeKey = `${data.deckId}|${data.fromDeckId}`;
+    $: if (isAppInitialized && routeKey !== lastRouteKey) {
+        lastRouteKey = routeKey;
         initComponent();
-        const changed = await app.initProfile();
+    }
+    
+
+    function scrollToReminderHashTarget() {
+        if (typeof window === "undefined") return;
+        if (window.location.hash !== "#data-export-reminder") return;
+        const el = document.getElementById("data-export-reminder");
+        if (!el) return;
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    onMount(async () => {
+        await app.init(null);
+        isAppInitialized = true;
+        initComponent();
+        const changed = await app.initProfile(null);
+        isLoggedIn = app.profile.isLoggedIn;
         if (await app.profile.getSyncMode() === SyncMode.manual) {
             await app.profile.getManualSyncStatus(app);
         }
         isOnlineProfileLoaded = true;
         if (changed) initComponent();
+        scrollToReminderHashTarget();
     })
     
     function initComponent() {
-        config = _.cloneDeep(app.getConfig());
+        config = _.cloneDeep(app.getConfig(data.deckId ?? null));
         initialConfig = _.cloneDeep(config);
         learningStepsString = config.learningSteps.join(" ");
         previouslyStudiedLearningStepsString = config.previouslyStudiedLearningSteps.join(" ");
         fsrsParamsString = config.FSRSParams.join(",");
         profileStr = app.exportProfileStr();
         initialProfileStr = profileStr;
+
+        const reminderMeta = app.getDataExportReminderMeta();
+        dataExportReminderEnabled = reminderMeta.isEnabled;
+        initialDataExportReminderEnabled = reminderMeta.isEnabled;
+        dataExportReminderPeriod = reminderMeta.period;
+        initialDataExportReminderPeriod = reminderMeta.period;
+
         if (data.leniency) config.strokeLeniency = parseFloat(data.leniency);
         if (data.fadeDuration) config.strokeFadeDuration = parseInt(data.fadeDuration);
         app = app;
+        
+        if (data.deckId) {
+            unlinkedKeys = [...getKeysRecursive(app.getDeckPartialConfig(data.deckId))];
+            initialUnlinkedKeys = _.cloneDeep(unlinkedKeys);
+        } else {
+            unlinkedKeys = [];
+            initialUnlinkedKeys = [];
+        }
     }
     
-    $: isConfigChanged = !_.isEqual(config, initialConfig);
-    
-    async function saveConfig() {
-        await app.saveConfig(config);
-        initialConfig = _.cloneDeep(config);
+    function isNotLinkedToGlobalSettings(path: string): boolean {
+        return unlinkedKeys.includes(path);
     }
-    function discardChanges() {
-        config = _.cloneDeep(initialConfig);
+
+    function resetSettingToGlobal(path: string) {
+        unlinkedKeys = unlinkedKeys.filter((k) => k !== path);
+        const globalValue = _.get(app.getConfig(null), path);
+        _.set(config, path, _.cloneDeep(globalValue));
+        config = config;
     }
-    
-    async function resetConfigToDefault() {
-        const confirm = window.confirm("Are you sure you want to reset to the default settings?");
-        if (!confirm) return;
-        await app.resetConfigToDefault();
-        config = _.cloneDeep(app.getConfig());
-        initialConfig = _.cloneDeep(config);
+
+    function unlinkSettingFromGlobal(path: string) {
+        if (!unlinkedKeys.includes(path)) {
+            unlinkedKeys = [...unlinkedKeys, path];
+        }
     }
-    
-    async function resetDebugProfile(): Promise<void> {
-        const confirm = window.confirm("Are you sure you want to reset to the debug profile?");
-        if (!confirm) return;
+
+    $: isConfigChanged = !_.isEqual(config, initialConfig) || !_.isEqual(_.sortBy(unlinkedKeys), _.sortBy(initialUnlinkedKeys)) || dataExportReminderEnabled !== initialDataExportReminderEnabled || dataExportReminderPeriod !== initialDataExportReminderPeriod; async function saveConfig() { app.setDataExportReminderMeta(dataExportReminderEnabled, dataExportReminderPeriod); if (data.deckId) { await app.saveDeckConfig(data.deckId, config, unlinkedKeys); } else {
+            await app.saveConfig(config); } initialConfig = _.cloneDeep(config); initialUnlinkedKeys = _.cloneDeep(unlinkedKeys);
+        initialDataExportReminderEnabled = dataExportReminderEnabled; initialDataExportReminderPeriod = dataExportReminderPeriod; } function discardChanges() { config = _.cloneDeep(initialConfig); unlinkedKeys = _.cloneDeep(initialUnlinkedKeys); dataExportReminderEnabled = initialDataExportReminderEnabled; dataExportReminderPeriod = initialDataExportReminderPeriod; }
+    async function resetConfigToDefault() { const confirm = window.confirm("Are you sure you want to reset to the default settings?"); if (!confirm) return; await app.resetConfigToDefault(); config = _.cloneDeep(app.getConfig(data.deckId ?? null)); initialConfig = _.cloneDeep(config); } async function resetDebugProfile(): Promise<void> { const confirm = window.confirm("Are you sure you want to reset to the debug profile?"); if (!confirm) return;
         await app.debug();
         app = app;
     }
@@ -169,9 +226,15 @@
         config.nextButtonKeyCodes = config.nextButtonKeyCodes.filter((_, i) => i !== index);
     }
     
+    function gotoDeckSettings() {
+        if (data.fromDeckId) {
+            goto(`${base}/settings?deckId=${data.fromDeckId}`);
+        }
+    }
+    
 </script>
 
-<TopBar title="Settings" isSettings={true} backConfirmCallback={backConfirmCallback} 
+<TopBar title={topBarTitle} isSettings={true} backConfirmCallback={backConfirmCallback} 
     prohibitedBackUrls={[`${base}/settings/leniency-calibration`, `${base}/auth-token`]}>
 </TopBar>
 
@@ -199,7 +262,7 @@
     <button class="button" onclick={() => addKeyButton()}>Add New Key</button>
 {/snippet}
 
-<TopRevealBar>
+<TopRevealBar isShow={isConfigChanged}>
     {@render topSettingsContent()}
 </TopRevealBar>
 <div class="main-container">
@@ -207,6 +270,18 @@
         <div class="top-settings-section">
             {@render topSettingsContent()}
         </div>
+        {#if data.fromDeckId}
+            <div class="settings-section no-line" style="margin-bottom: 1em">
+                <div class="section-container">
+                    <button class="button" onclick={gotoDeckSettings} style="display: block">
+                        <i class="fa-solid fa-arrow-right"></i>&nbsp;
+                        Go to Deck Specific Settings 
+                        <span style="font-weight: bold;">({fromDeckDeckInfo?.title}{fromDeckDeckInfo?.subtitle ? ` ${fromDeckDeckInfo.subtitle}` : ''})</span>
+                    </button>
+                </div>
+            </div>
+        {/if}
+        {#if !data.deckId}
         <div class="settings-section">
             <div class="section-title">Profile</div>
             <div class="section-container">
@@ -237,67 +312,68 @@
                 </button>
             </div>
         </div>
+        {/if}
         
         <div class="settings-section">
             <div class="section-title">Learning</div>
             <div class="section-container">
                 {#if config.writingMode === WritingMode.External}
-                    <SettingsItem key="gradingMethod">
+                    <SettingsItem key="gradingMethod" {...deckSettingsItemProps}>
                         <select disabled value="manual">
                             <option value="auto">auto</option>
                             <option value="manual">manual</option>
                         </select>
                     </SettingsItem>
                 {:else}
-                    <SettingsItem key="gradingMethod">
+                    <SettingsItem key="gradingMethod" {...deckSettingsItemProps}>
                         <select bind:value={config.gradingMethod}>
                             <option value="auto">auto</option>
                             <option value="manual">manual</option>
                         </select>
                     </SettingsItem>
                 {/if}
-                <SettingsItem key="writingMode">
+                <SettingsItem key="writingMode" {...deckSettingsItemProps}>
                     <select bind:value={config.writingMode}>
                         <option value="{WritingMode.Default}">Default</option>
                         <option value="{WritingMode.External}">External</option>
                     </select>
                 </SettingsItem>
-                <SettingsItem key="newCardPerDay">
+                <SettingsItem key="newCardPerDay" {...deckSettingsItemProps}>
                     <input type="number" bind:value={config.newCardPerDay}>
                 </SettingsItem>
-                <SettingsItem key="maxReviewsPerDay">
+                <SettingsItem key="maxReviewsPerDay" {...deckSettingsItemProps}>
                     <input type="number" bind:value={config.maxReviewsPerDay}>
                 </SettingsItem>
-                <SettingsItem key="newCardOrder">
+                <SettingsItem key="newCardOrder" {...deckSettingsItemProps}>
                     <select bind:value={config.newCardOrder}>
                         <option value={NewCardOrder.Mix}>Mix</option>
                         <option value={NewCardOrder.AfterReviews}>After Reviews</option>
                         <option value={NewCardOrder.BeforeReviews}>Before Reviews</option>
                     </select>
                 </SettingsItem>
-                <SettingsItem key="newPreviouslyStudiedCardPerDay">
+                <SettingsItem key="newPreviouslyStudiedCardPerDay" {...deckSettingsItemProps}>
                     <input type="number" bind:value={config.newPreviouslyStudiedCardPerDay}>
                 </SettingsItem>
-                <SettingsItem key="newPreviouslyStudiedCardOrder">
+                <SettingsItem key="newPreviouslyStudiedCardOrder" {...deckSettingsItemProps}>
                     <select bind:value={config.newPreviouslyStudiedCardOrder}>
                         <option value={NewCardOrder.Mix}>Mix</option>
                         <option value={NewCardOrder.AfterReviews}>After Reviews</option>
                         <option value={NewCardOrder.BeforeReviews}>Before Reviews</option>
                     </select>
                 </SettingsItem>
-                <SettingsItem key="isAutoNextOnSuccess">
+                <SettingsItem key="isAutoNextOnSuccess" {...deckSettingsItemProps}>
                     <input type="checkbox" disabled={config.gradingMethod === 'manual'} bind:checked={config.isAutoNextOnSuccess}>
                 </SettingsItem>
-                <SettingsItem key="gradeWarmUpCards">
+                <SettingsItem key="gradeWarmUpCards" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.gradeWarmUpCards}>
                 </SettingsItem>
-                <SettingsItem key="startPreviouslyStudiedCardFromTheBack">
+                <SettingsItem key="startPreviouslyStudiedCardFromTheBack" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.startPreviouslyStudiedCardFromTheBack}>
                 </SettingsItem>
-                <SettingsItem key="separateLearnAndReview">
+                <SettingsItem key="separateLearnAndReview" inputKey="isSeparateLearnAndReview" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.isSeparateLearnAndReview}>
                 </SettingsItem>
-                <SettingsItem key="failWholeWord">
+                <SettingsItem key="failWholeWord" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.failWholeWord}>
                 </SettingsItem>
             </div>
@@ -306,7 +382,8 @@
         <div class="settings-section">
             <div class="section-title">UI, Audio & Input</div>
             <div class="section-container">
-                <SettingsItem key="uiScale">
+                {#if !data.deckId}
+                <SettingsItem key="uiScale" {...deckSettingsItemProps}>
                     <select bind:value={config.uiScale}>
                         <option value="small">small</option>
                         <option value="normal">normal</option>
@@ -314,29 +391,32 @@
                     </select>
                 </SettingsItem>
                 {#if config.uiScale === 'custom'}
-                    <SettingsItem key="customFontSize">
+                    <SettingsItem key="customFontSize" {...deckSettingsItemProps}>
                         <input type="number" step="1" min="8" max="32" bind:value={config.customFontSize}>
                     </SettingsItem>
                 {/if}
+                {/if}
                 {#if config.gradingMethod === 'auto'}
-                    <SettingsItem key="showHealthBar">
+                    <SettingsItem key="showHealthBar" inputKey="showAutoGradingBar" {...deckSettingsItemProps}>
                         <input type="checkbox" bind:checked={config.showAutoGradingBar}>
                     </SettingsItem>
                 {/if}
-                <SettingsItem key="playSuccessSound">
+                <SettingsItem key="playSuccessSound" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.playSuccessSound}>
                 </SettingsItem>
                 <!-- <SettingsItem key="showReadingOnFail">
                     <input type="checkbox" bind:checked={config.showReadingOnFail}>
                 </SettingsItem> -->
-                <SettingsItem key="showDeckLastStudyTime">
+                {#if !data.deckId}
+                <SettingsItem key="showDeckLastStudyTime" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.showDeckLastStudyTime}>
                 </SettingsItem>
-                <SettingsItem key="enableNextKeyButtons">
+                {/if}
+                <SettingsItem key="enableNextKeyButtons" inputKey="enableNextButtonKey" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.enableNextButtonKey}>
                 </SettingsItem>
                 {#if config.enableNextButtonKey}
-                    <SettingsItem key="nextKeyButtons">
+                    <SettingsItem key="nextKeyButtons" inputKey="nextButtonKeyCodes" {...deckSettingsItemProps}>
                         {@render nextButtonKeyConfig()}
                     </SettingsItem>
                 {/if}
@@ -346,13 +426,13 @@
         <div class="settings-section">
             <div class="section-title">Character Writer</div>
             <div class="section-container">
-                <SettingsItem key="showHintAfterMissesCount">
+                <SettingsItem key="showHintAfterMissesCount" {...deckSettingsItemProps}>
                     <input type="number" step="1" min="0" bind:value={config.showHintAfterMissesCount}>
                 </SettingsItem>
-                <SettingsItem key="strokeLeniency">
+                <SettingsItem key="strokeLeniency" {...deckSettingsItemProps}>
                     <input type="number" step="0.01" bind:value={config.strokeLeniency}>
                 </SettingsItem>
-                <SettingsItem key="strokeFadeDuration">
+                <SettingsItem key="strokeFadeDuration" {...deckSettingsItemProps}>
                     <input type="number" step="1" bind:value={config.strokeFadeDuration}>
                 </SettingsItem>
                 <a class="button" href="{base}/settings/leniency-calibration" aria-label="Test Leniency Calibration">
@@ -366,30 +446,30 @@
         <div class="settings-section">
             <div class="section-title">FSRS</div>
             <div class="section-container">
-                <SettingsItem key="learningSteps">
+                <SettingsItem key="learningSteps" {...deckSettingsItemProps}>
                     <input type="text" 
                         bind:value={learningStepsString} 
                         class:invalid={!isLearningStepsStringValid}
                     >
                 </SettingsItem>
-                <SettingsItem key="previouslyStudiedLearningSteps">
+                <SettingsItem key="previouslyStudiedLearningSteps" {...deckSettingsItemProps}>
                     <input type="text" 
                         bind:value={previouslyStudiedLearningStepsString} 
                         class:invalid={!isPreviouslyStudiedLearningStepsStringValid}
                     >
                 </SettingsItem>
-                <SettingsItem key="desiredRetention">
+                <SettingsItem key="desiredRetention" {...deckSettingsItemProps}>
                     <div style="display: flex; flex-direction: row; align-items: center; gap: 0.5em;">
                         <input type="number" bind:value={config.desiredRetention} step="0.01">
                     </div>
                 </SettingsItem>
-                <SettingsItem key="enableShortTerm">
+                <SettingsItem key="enableShortTerm" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.enableShortTerm}>
                 </SettingsItem>
-                <SettingsItem key="enableFuzz">
+                <SettingsItem key="enableFuzz" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.enableFuzz}>
                 </SettingsItem>
-                <SettingsItem key="FSRSParams">
+                <SettingsItem key="FSRSParams" {...deckSettingsItemProps}>
                     <textarea bind:value={fsrsParamsString} class:invalid={!isFSRSParamsStringValid}></textarea>
                 </SettingsItem>
             </div>
@@ -398,25 +478,27 @@
         <div class="settings-section">
             <div class="section-title">Chinese</div>
             <div class="section-container">
-                <SettingsItem key="zhAlwaysShowReading">
+                <SettingsItem key="zhAlwaysShowReading" inputKey="zh.alwaysShowReading" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.zh.alwaysShowReading}>
                 </SettingsItem>
-                <SettingsItem key="zhMandarinReading">
+                <SettingsItem key="zhMandarinReading" inputKey="zh.mandarinReading" {...deckSettingsItemProps}>
                     <select bind:value={config.zh.mandarinReading}>
                         <option value={ChineseMandarinReading.Pinyin}>Pinyin (wén)</option>
                         <option value={ChineseMandarinReading.PinyinNumeric}>Numeric (wen2)</option>
                         <option value={ChineseMandarinReading.Zhuyin}>Zhuyin (ㄨㄣˊ)</option>
                     </select>
                 </SettingsItem>
-                <SettingsItem key="zhPlayAudio">
+                <SettingsItem key="zhPlayAudio" inputKey="zh.playAudio" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.zh.playAudio}>
                 </SettingsItem>
-                <SettingsItem key="zhUseAiGeneratedAudioForMissingAudio">
+                <SettingsItem key="zhUseAiGeneratedAudioForMissingAudio" inputKey="zh.useAiGeneratedAudioForMissingAudio" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.zh.useAiGeneratedAudioForMissingAudio}>
                 </SettingsItem>
-                <SettingsItem key="zhForceStopAudioOnNextCard">
+                <SettingsItem key="zhForceStopAudioOnNextCard" inputKey="zh.forceStopAudioOnNextCard" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.zh.forceStopAudioOnNextCard}>
                 </SettingsItem>
+                
+                {#if !data.deckId}
                 <a class="button" href="{base}/settings/audio-settings" aria-label="Audio Settings">
                     <i class="fa-solid fa-sliders"></i>&nbsp;
                     More Audio Settings
@@ -451,21 +533,47 @@
                 <SettingsItem key="zhToneNeutral">
                     <input type="color" bind:value={config.zh.toneColors[4]}>
                 </SettingsItem>
+                {/if}
             </div>
         </div>
         
         <div class="settings-section">
             <div class="section-title">Dictionary</div>
             <div class="section-container">
-                <SettingsItem key="isShowPlecoLink">
+                <SettingsItem key="isShowPlecoLink" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.isShowPlecoLink}>
                 </SettingsItem>
-                <SettingsItem key="isShowDongLink">
+                <SettingsItem key="isShowDongLink" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.isShowDongLink}>
                 </SettingsItem>
             </div>
         </div>
+
+        {#if !isTauri() && !isLoggedIn && !data.deckId}
+            <div class="settings-section" id="data-export-reminder">
+                <div class="section-title">Data Export Reminder</div>
+                <div class="section-container">
+                    <div class="note">
+                        Browser storage may be cleared by browser/site data cleanup. Enable reminders to periodically export your profile as a backup.
+                    </div>
+                    <SettingsItem key="dataExportReminderEnabled">
+                        <input type="checkbox" bind:checked={dataExportReminderEnabled}>
+                    </SettingsItem>
+                    <SettingsItem key="dataExportReminderPeriod">
+                        <select bind:value={dataExportReminderPeriod} disabled={!dataExportReminderEnabled}>
+                            <option value="daily">daily</option>
+                            <option value="2day">2day</option>
+                            <option value="3day">3day</option>
+                            <option value="4day">4day</option>
+                            <option value="weekly">weekly</option>
+                            <option value="monthly">monthly</option>
+                        </select>
+                    </SettingsItem>
+                </div>
+            </div>
+        {/if}
         
+        <!--
         <div class="settings-section">
             <div class="section-title">Experimental</div>
             <div class="section-container">
@@ -474,7 +582,9 @@
                 </SettingsItem>
             </div>
         </div>
+        -->
                 
+        {#if !data.deckId}
         <div class="settings-section">
             <div class="section-title">Offline Data</div>
             <div class="section-container">
@@ -493,7 +603,9 @@
                 </a>
             </div>
         </div>
+        {/if}
         
+        {#if !data.deckId}
         <div class="settings-section">
             <div class="section-container">
                 <button class="button" onclick={() => resetConfigToDefault()}>Reset to Default Settings</button>
@@ -503,7 +615,9 @@
                 </a>
             </div>
         </div>
+        {/if}
         
+        {#if !data.deckId}
         <div class="settings-section">
             <!-- <div class="section-title"></div> -->
             <div class="section-container">
@@ -525,6 +639,7 @@
                 </a>
             </div>
         </div>
+        {/if}
     {/if}
 </div>
 {#if !isTauri()}
@@ -561,7 +676,24 @@
         max-width: 25em;
         box-sizing: border-box;
     }
-    .settings-section::after {
+    :global(#data-export-reminder) {
+        scroll-margin-top: 6em;
+    }
+    :global(#data-export-reminder:target) {
+        border-radius: 0.5em;
+        animation: flash-reminder-section 1.8s ease-out;
+    }
+    @keyframes flash-reminder-section {
+        0% {
+            box-shadow: 0 0 0 0 rgba(62, 146, 204, 0.65);
+            background-color: rgba(62, 146, 204, 0.18);
+        }
+        100% {
+            box-shadow: 0 0 0 0.8em rgba(62, 146, 204, 0);
+            background-color: transparent;
+        }
+    }
+    .settings-section:not(.no-line)::after {
         width: 90%;
         height: 1px;
         background-color: #00000090;
