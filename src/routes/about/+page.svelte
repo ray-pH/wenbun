@@ -28,6 +28,34 @@
     <div class="changelog-container">
         Changelog
         
+        <h4>v0.27.0 (2026-04-17)</h4>
+        <ul>
+            <li>
+                <b>Deck-specific settings</b>: Add per-deck overrides with linked/unlinked controls.
+                <ul>
+                    <li>Open settings from deck contexts (Overview/Review/Deck) and jump to that deck’s settings.</li>
+                    <li>Deck settings use local override when unlinked, and fallback to global when linked.</li>
+                    <li>Add per-setting controls to <b>unlink from global</b> or <b>reset to global</b>.</li>
+                </ul>
+            </li>
+            <li>
+                <b>Data Export Reminder</b>: Add reminder flow for browser users without login.
+                <ul>
+                    <li>Configurable reminder period: daily, 2day, 3day, 4day, weekly, monthly.</li>
+                    <li>Reminder tracks <b>last exported</b> time after profile export.</li>
+                </ul>
+            </li>
+            <li>
+                <b>Debug</b>: Add <b>simulate date</b> page (localhost only) for testing schedule/time flows.
+            </li>
+            <li>
+                <b>FAQ</b>: Add deck-specific settings guidance.
+            </li>
+            <li>
+                <b>UI</b>: Update backup reminder size and improve settings top reveal behavior.
+            </li>
+        </ul>
+        
         <h4>v0.26.1 (2026-04-11)</h4>
         <ul>
             <li>
