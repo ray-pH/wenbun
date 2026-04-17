@@ -34,7 +34,9 @@
     
     $: fromDeckDeckInfo = app.getDeckInfo(data.fromDeckId ?? '');
     $: deckDeckInfo = app.getDeckInfo(data.deckId ?? '');
-    $: topBarTitle = data.deckId ? `Settings - ${deckDeckInfo?.title} ${deckDeckInfo?.subtitle ? ` ${deckDeckInfo.subtitle}` : ''}` : 'Settings';
+    $: topBarTitle = data.deckId && isAppInitialized && deckDeckInfo?.title
+        ? `Settings - ${deckDeckInfo.title}${deckDeckInfo.subtitle ? ` ${deckDeckInfo.subtitle}` : ''}`
+        : 'Settings';
 
     $: deckSettingsItemProps = ({
         isDeckSettings: !!data.deckId,
