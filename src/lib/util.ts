@@ -2,7 +2,6 @@ import { base } from "$app/paths";
 import { isTauri } from "@tauri-apps/api/core";
 import type { Lang } from "./app";
 import { DeckInfo } from "./constants";
-import _ from "lodash";
 
 export type DeepRequired<T> =
   // Leave functions as-is
