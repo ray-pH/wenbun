@@ -7,6 +7,7 @@
     import { AutoReview, type AutoReviewData } from '$lib/autoReview';
     import SlideablePopup from '$lib/components/SlideablePopup.svelte';
     import ZhDict from '$lib/components/ZhDict.svelte';
+    import TopBar from '$lib/components/TopBar.svelte';
     import { parseIntOrUndefined, type CharacterWriterConfig, type CharacterWriterData } from '$lib/util';
 
     const TRY_WORD = '文';
@@ -119,6 +120,7 @@
     });
 </script>
 
+<TopBar title="Try here" noBack={true} isSettings={true}></TopBar>
 <div class="try-here-container">
     {#if isReady && characterData}
         {#key writerKey}
@@ -142,15 +144,29 @@
         {/key}
 
         <div class="actions">
-            {#if phase === 'training'}
-                <button class="button learn-button" onclick={() => startReviewFromTraining()}>
-                    Learn
-                </button>
-            {:else}
-                <button class="button retry-button" onclick={() => resetWriter()}>
-                    Try Again
-                </button>
-            {/if}
+            <div class="review-button-container">
+                {#if phase === 'training'}
+                    <button
+                        class="review-button review-button-easy is-complete main-button"
+                        onclick={() => startReviewFromTraining()}
+                    >
+                        <div class="review-button-inner">
+                            <div class="review-time">&nbsp;</div>
+                            <div class="review-label">Learn</div>
+                        </div>
+                    </button>
+                {:else}
+                    <button
+                        class="review-button review-button-easy is-complete main-button"
+                        onclick={() => resetWriter()}
+                    >
+                        <div class="review-button-inner">
+                            <div class="review-time">&nbsp;</div>
+                            <div class="review-label">Try Again</div>
+                        </div>
+                    </button>
+                {/if}
+            </div>
         </div>
     {:else}
         <div class="loading">Loading…</div>
@@ -175,22 +191,80 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 0.5em 0 1em;
+        padding: 0.5em 0 calc(6em + var(--safe-bottom, 0em));
     }
 
     .actions {
-        margin-top: 0.75em;
+        position: fixed;
+        bottom: 0;
+        width: 100vw;
         display: flex;
+        justify-content: center;
+        padding: 0.5em 0 calc(0.8em + var(--safe-bottom, 0em));
+        box-sizing: border-box;
+        background-color: #E0E0E0;
+        z-index: 20;
+    }
+
+    .review-button-container {
+        width: 100vw;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
         justify-content: center;
     }
 
-    .learn-button,
-    .retry-button {
-        min-width: 8em;
+    .review-button {
+        all: unset;
+        position: relative;
+        cursor: pointer;
+        color: var(--color, var(--wenbun-blue));
+        padding: 0.5em 0;
+        flex-grow: 1;
+        max-width: 8.5em;
+        border-radius: 0.5em;
+        background-color: #E0E0E090;
+        text-align: center;
     }
 
-    .learn-button {
-        font-weight: 700;
+    .review-button.main-button {
+        min-width: min(8.5em, 35vw);
+    }
+
+    .review-button-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .review-time {
+        min-height: 1.1em;
+        font-size: 0.9em;
+    }
+
+    .review-label {
+        font-weight: bold;
+        padding: 0.2em 0;
+    }
+
+    .review-button.review-button-easy {
+        --color: var(--wenbun-blue);
+    }
+
+    .review-button:hover {
+        background-color: lightgray;
+    }
+
+    .review-button::after {
+        content: '';
+        position: absolute;
+        left: 10%;
+        bottom: 0;
+        width: 80%;
+        height: 0.3em;
+        background-color: var(--color, var(--wenbun-blue));
+        border-radius: 0.2em;
+        z-index: 1;
     }
 
     .loading {
