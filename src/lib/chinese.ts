@@ -3,6 +3,7 @@ import { CHINESE_CC_CEDICT_SRC, CHINESE_CUSTOM_NOTES_SRC, CHINESE_DICT_SRC, CHIN
 import { parseIntOrUndefined, type CharacterWriterData } from "./util";
 import * as OpenCC from 'opencc-js';
 import type { Lang } from "./app";
+import split from "pinyin-split";
 
 export const TONE_PREFIX = 'tone-';
 export const WENBUN_TTS_URL = import.meta.env.VITE_WENBUN_TTS_URL;
@@ -190,7 +191,8 @@ export class ChineseCharacterWordlist {
         const tags: string[][] = []
         
         const pinyinReading = wordData?.pinyin_num ?? reading ?? "";
-        pinyinReading.split(' ').forEach((r, i) => {
+        const pinyinSyllables = splitPinyinSyllables(pinyinReading);
+        pinyinSyllables.split(' ').forEach((r, i) => {
             const tone = toneFromPinyin(r);
             tags[i] = [`${TONE_PREFIX}${tone}`];
         });
@@ -216,7 +218,7 @@ export class ChineseCharacterWordlist {
                 return [[WENBUN_TTS_URL + '/tts?text=' + encodeURIComponent(word)]];
             } else {
                 // generate audio url from pinyin
-                const pinyin_num = this.getWordData(word)?.pinyin_num ?? toPinyinNum(this.getReading(word, this.lang)) ?? "";
+                const pinyin_num = this.getWordData(word)?.pinyin_num ?? toPinyinNum(splitPinyinSyllables(this.getReading(word, this.lang))) ?? "";
                 const syls = pinyin_num.split(' ');
                 return [syls.map(s => `${WENBUN_AUDIO_ZH_PREFIX_SRC}${s}.mp3`)];
             }
@@ -353,4 +355,7 @@ export function tagChineseChars(input: string): TaggedChunk[] {
     }
     if (buf) out.push({ text: buf });
     return out;
+}
+export function splitPinyinSyllables(pinyin: string): string {
+    return split(pinyin).join(' ');
 }
