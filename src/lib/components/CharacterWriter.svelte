@@ -9,6 +9,8 @@
     import { AudioSequence } from '$lib/audioSequence';
     import { AutoReview, AutoReviewGradeClass, AutoReviewGradeFAClass, AutoReviewGradeLabel, type AutoReviewData } from '$lib/autoReview';
     import { CHARACTER_WRITER_DRAWING_WIDTH, HANZI_WRITER_DATA_DIR_SRC, SLUG_UNSUPPORTED_CHAR_INTERACTION_NEXT, SLUG_UNSUPPORTED_CHAR_INTERACTION_WARNING } from "$lib/constants";
+    import ManualWriter from "$lib/manualWriter";
+    import ManualWriterResultPreview from './ManualWriterResultPreview.svelte';
     
     let width = $state(500);
     let height = $state(500);
@@ -43,6 +45,12 @@
         width = Math.min(document.documentElement.clientWidth - emPx, 500) * getUiScale();
         height = width;
         gridLinePad = 0.5 * getEmInPx() * getUiScale();
+
+        // Keep ManualWriter controls anchored inside the current SVG bounds
+        // when viewport width changes.
+        if (writingMode === WritingMode.Manual && activeManualWriter) {
+            activeManualWriter.updateDimensions({ width, height });
+        }
     }
     
     interface Props {
@@ -164,7 +172,7 @@
         }
     }
     let animationDontGoToNextChar = $state(false);
-    function completeChar() {
+    function completeChar(delayOverride?: number) {
         isStopPlayAudio = true;
         if (unmounted) return;
         if (cardConfig.isFirstTime || writingMode === WritingMode.External) {
@@ -179,7 +187,7 @@
                     onUnsupportedCharReady();
                 }
                 // play sound
-            }, NEXT_CHAR_DELAY);
+            }, delayOverride ?? NEXT_CHAR_DELAY);
         } else {
             if (app.getConfig(deckId).playSuccessSound) correctSound.play();
             completedCharCount = completedCharCount + 1;
@@ -191,7 +199,7 @@
                 window.setTimeout(async () => {
                     if (!isDictationMode && audios.length) await playAudio();
                     onReadyToGoNext();
-                }, NEXT_CHAR_DELAY);
+                }, delayOverride ?? NEXT_CHAR_DELAY);
             } else {
                 window.setTimeout(() => {
                     if (isCurrentCharSupportedByHanziWriter()) {
@@ -200,11 +208,14 @@
                         onUnsupportedCharReady();
                     }
                     // play sound
-                }, NEXT_CHAR_DELAY);
+                }, delayOverride ?? NEXT_CHAR_DELAY);
             }
         }
     }
     let writer: HanziWriter;
+    let activeManualWriter: ManualWriter | null = null;
+    let manualWriter = $state<Record<number, ManualWriter>>({});
+    let isShowManualResultPreview = $state(false);
     function setupHanziWriter(index: number) {
         if (unmounted) return;
         if (!characterData) return;
@@ -244,20 +255,29 @@
             },
             onLoadCharDataSuccess: () => {
                 isStrokeDataLoaded = true;
+                if (activeManualWriter) {
+                    window.requestAnimationFrame(() => {
+                        activeManualWriter?.putLayerOnTop();
+                    });
+                }
             }
         });
         if (!cardConfig.isFirstTime && !externalAndDone) {
-            writer.quiz({
-                leniency: app.getConfig(deckId).strokeLeniency,
-                onMistake: () => { 
-                    autoReviewData.incorrectStrokeCount++; 
-                    autoReviewData.totalStrokeCount++;
-                },
-                onCorrectStroke: () => { 
-                    autoReviewData.correctStrokeCount++; 
-                    autoReviewData.totalStrokeCount++;
-                },
-            });
+            if (writingMode === WritingMode.Manual) {
+                setupManualWriter(index);
+            } else {
+                writer.quiz({
+                    leniency: app.getConfig(deckId).strokeLeniency,
+                    onMistake: () => { 
+                        autoReviewData.incorrectStrokeCount++; 
+                        autoReviewData.totalStrokeCount++;
+                    },
+                    onCorrectStroke: () => { 
+                        autoReviewData.correctStrokeCount++; 
+                        autoReviewData.totalStrokeCount++;
+                    },
+                });
+            }
             const showOutlineBecauseRevealed = autoReviewData.revealedCharIndex && autoReviewData.revealedCharIndex.includes(index);
             const showOUtlineBecaueFailWholeWord = isFailWholeWord && autoReviewData.revealedCharIndex && autoReviewData.revealedCharIndex.length > 0;
             if (showOutlineBecauseRevealed || showOUtlineBecaueFailWholeWord) {
@@ -279,6 +299,45 @@
                 });
             },  NEXT_CHAR_DELAY);
         }
+    }
+    
+    function setupManualWriter(index: number) {
+        if (!characterData) return;
+        isStrokeDataLoaded = true;
+        
+        if (activeManualWriter) {
+            activeManualWriter.cancelQuiz();
+            activeManualWriter.hideCharacter();
+            activeManualWriter.hideOutline();
+        }
+        const tone = getChineseTone(characterData.tags[index] ?? []);
+        manualWriter[index] = ManualWriter.create('grid-background-target', characterData.characters[index], {
+            width,
+            height,
+            drawingWidth: CHARACTER_WRITER_DRAWING_WIDTH,
+            drawingColor: app.getChineseToneColor(tone) ?? "#555",
+            strokeAnimationSpeed: strokeSpeed,
+            delayBetweenStrokes: linmap(strokeSpeed, 1, MAX_STROKE_SPEED, 1000, 10),
+            delayBetweenLoops: linmap(strokeSpeed, 1, MAX_STROKE_SPEED, 2000, 10),
+            onNext: () => {
+                const isLastChar = index === characterData!.characters.length - 1;
+                if (!isLastChar) {
+                    completeChar(0);
+                    // setupManualWriter(index + 1);
+                } else {
+                    activeManualWriter?.cancelQuiz();
+                    activeManualWriter?.hideCharacter();
+                    activeManualWriter?.hideOutline();
+                    completeChar(0);
+                    // onComplete({...autoReviewData});
+                    // isComplete = true;
+                    // surpressGradeIndicator = false;
+                    isShowManualResultPreview = true;
+                }
+            }
+        })
+        activeManualWriter = manualWriter[index];
+        activeManualWriter.quiz();
     }
     
     async function setupAudios() {
@@ -476,6 +535,7 @@
     }
     
     onMount(() => {
+        manualWriter = {};
         autoReviewData = {
             correctStrokeCount: 0,
             incorrectStrokeCount: 0,
@@ -502,6 +562,10 @@
         return () => {
             clearUnsupportedFirstTimeTimeout();
             unmounted = true;
+            for (const writer of Object.values(manualWriter)) {
+                writer.destroy();
+            }
+            activeManualWriter = null;
             window.removeEventListener('resize', updateWidth);
             if (cleanupApplePencilFix) cleanupApplePencilFix();
         };
@@ -552,9 +616,22 @@
         }
     }
     .grid-background {
+        position: relative;
         background-color: #FFFFFF90;
         border-radius: 0.5em;
         touch-action: none;
+    }
+    .manual-result-overlay {
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        background: #E0E0E0;
+        border-radius: 0.5em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.4em;
+        overflow: hidden;
     }
     .character-container {
         position: relative;
@@ -646,6 +723,7 @@
     }
     .auto-review-indicator-container {
         all: unset;
+        z-index: 100;
         cursor: pointer;
         background-color : var(--color);
         color: white;
@@ -867,6 +945,15 @@
                             {SLUG_UNSUPPORTED_CHAR_INTERACTION_WARNING}
                         </div>
                     {/if}
+                </div>
+            {/if}
+            {#if writingMode === WritingMode.Manual && isShowManualResultPreview}
+                <div class="manual-result-overlay">
+                    <ManualWriterResultPreview
+                        characterData={characterData}
+                        manualWriter={manualWriter}
+                        toneColors={app.getChineseToneColorArray()}
+                    />
                 </div>
             {/if}
         </div>
