@@ -317,7 +317,7 @@
         <div class="settings-section">
             <div class="section-title">Learning</div>
             <div class="section-container">
-                {#if config.writingMode === WritingMode.External}
+                {#if config.writingMode === WritingMode.External || config.writingMode === WritingMode.Manual}
                     <SettingsItem key="gradingMethod" {...deckSettingsItemProps}>
                         <select disabled value="manual">
                             <option value="auto">auto</option>
@@ -335,6 +335,7 @@
                 <SettingsItem key="writingMode" {...deckSettingsItemProps}>
                     <select bind:value={config.writingMode}>
                         <option value="{WritingMode.Default}">Default</option>
+                        <option value="{WritingMode.Manual}">Manual</option>
                         <option value="{WritingMode.External}">External</option>
                     </select>
                 </SettingsItem>

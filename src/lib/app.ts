@@ -57,7 +57,7 @@ export enum ReviewMode {
 
 export enum WritingMode {
     Default = "Default",
-    // Manual = "Manual",
+    Manual = "Manual",
     External = "External",
 }
 
