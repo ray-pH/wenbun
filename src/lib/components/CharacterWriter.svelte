@@ -562,6 +562,10 @@
         return () => {
             clearUnsupportedFirstTimeTimeout();
             unmounted = true;
+            for (const writer of Object.values(manualWriter)) {
+                writer.destroy();
+            }
+            activeManualWriter = null;
             window.removeEventListener('resize', updateWidth);
             if (cleanupApplePencilFix) cleanupApplePencilFix();
         };
