@@ -60,7 +60,9 @@
         wordlist.registerCustomEntryDict(app.getCustomEntryDict(metaDeckId));
         app = app;
         isZhTraditional = tags?.includes(DECK_TAGS.ZH_TRAD);
-        isAutoGrading = app.isAutoGrading(metaDeckId) && app.getConfig(metaDeckId).writingMode !== WritingMode.External;
+        isAutoGrading = app.isAutoGrading(metaDeckId) 
+            && app.getConfig(metaDeckId).writingMode !== WritingMode.External
+            && app.getConfig(metaDeckId).writingMode !== WritingMode.Manual;
         isGradeWarmUpCards = app.getConfig(metaDeckId).gradeWarmUpCards;
         isPageReady = true;
         if (data.isExtraStudy) app.extraStudyHandler.registerReviewCardIdsOverride(cardIds);
