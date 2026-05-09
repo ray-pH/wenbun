@@ -27,6 +27,19 @@
     </div>
     <div class="changelog-container">
         Changelog
+
+        <h4>v0.28.0 (2026-05-09)</h4>
+        <ul>
+            <li>
+                <b>Review</b>: Add new <b>manual writing mode</b>.
+                <ul>
+                    <li>Show a manual-writing result preview overlay at the end of review.</li>
+                </ul>
+            </li>
+            <li>
+                <b>Chinese import</b>: Improve custom reading import by splitting pinyin syllables before tone tagging/audio generation.
+            </li>
+        </ul>
         
         <h4>v0.27.0 (2026-04-17)</h4>
         <ul>
