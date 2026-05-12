@@ -185,7 +185,7 @@ export class ChineseCharacterWordlist {
             }
         }
         
-        const characters = config.convertToTraditional ? this.converter.convert(word) : word;
+        const characters = config.convertToTraditional ? this.converter.convert(word, this.patchTraditionalConversion) : word;
         const meanings = [meaning];
         const audioUrl = config.isPlayAudio ? this.getAudioUrlArray(word) : [];
         const tags: string[][] = []
@@ -198,6 +198,12 @@ export class ChineseCharacterWordlist {
         });
         
         return <CharacterWriterData>{ characters, reading, meanings, audioUrl, tags };
+    }
+
+    patchTraditionalConversion(traditional: string): string {
+        let res = traditional;
+        res = res.replace(/汙/g, '污');
+        return res;
     }
     
     getWordData(word: string): ChineseDict[string] | undefined {
@@ -278,7 +284,7 @@ export class ChineseCharacterWordlist {
     }
     
     toTraditional(char: string): string {
-        return this.converter.convert(char);
+        return this.converter.convert(char, this.patchTraditionalConversion);
     }
     toSimplified(char: string): string {
         return this.simplifiedConverter.convert(char);
@@ -295,8 +301,9 @@ export class ChineseCharacterConverter {
     constructor(from: OpenCC.Locale, to: OpenCC.Locale) {
         this.converter = OpenCC.Converter({from, to});
     }
-    convert(text: string): string {
-        return this.converter(text);
+    convert(text: string, patch?: (text: string) => string): string {
+        const res = this.converter(text);
+        return patch ? patch(res) : res;
     }
 }
 

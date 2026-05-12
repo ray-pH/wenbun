@@ -27,6 +27,13 @@
     </div>
     <div class="changelog-container">
         Changelog
+        
+        <h4>v0.28.1 (2026-05-12)</h4>
+        <ul>
+            <li>
+                <b>Character</b>: Patch issue with <code>汙</code> not supported in hanzi writer. Use <code>污</code> variant instead.
+            </li>
+        </ul>
 
         <h4>v0.28.0 (2026-05-09)</h4>
         <ul>
