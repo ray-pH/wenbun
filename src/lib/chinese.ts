@@ -203,6 +203,12 @@ export class ChineseCharacterWordlist {
     patchTraditionalConversion(traditional: string): string {
         let res = traditional;
         res = res.replace(/汙/g, '污');
+        res = res.replace(/溼/g, '濕');
+        res = res.replace(/揹/g, '背');
+        res = res.replace(/嚐/g, '嘗');
+        res = res.replace(/柺/g, '拐');
+        res = res.replace(/譁/g, '嘩');
+        res = res.replace(/絃/g, '弦');
         return res;
     }
     

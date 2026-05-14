@@ -14,9 +14,11 @@
         id: string;
         totalWordCount: number;
         totalWordsWithDictData: number;
-        totalWordsSupportedByHanziWriter: number;
+        totalWordsSupportedByHanziWriterSimplified: number;
+        totalWordsSupportedByHanziWriterTraditional: number;
         missingWords: string[];
-        missingWordsFromHanziWriter: string[];
+        missingWordsFromHanziWriterSimplified: string[];
+        missingWordsFromHanziWriterTraditional: string[];
     }[] = []
     
     onMount(async() => {
@@ -29,6 +31,7 @@
         );
         decks = decks.sort((a, b) => a.id.localeCompare(b.id));
         checkDictionaryHealth(decks);
+        console.log(zhWordlist.isWordSupportedByHanziWriter("湿"));
     });
     
     function checkDictionaryHealth(deck: DeckWords[]) {
@@ -36,15 +39,20 @@
             const missingWords = getMissingWordsFromDict(d.words);
             const totalWordCount = d.words.length;
             const totalWordsWithDictData = totalWordCount - missingWords.length;
-            const missingWordsFromHanziWriter = getMissingWordsFromHanziWriter(missingWords);
-            const totalWordsSupportedByHanziWriter =  totalWordsWithDictData - missingWordsFromHanziWriter.length;
+            const wordsWithDictData = d.words.filter(w => isWordExist(w));
+            const missingWordsFromHanziWriterSimplified = getMissingWordsFromHanziWriter(wordsWithDictData, 'simplified');
+            const missingWordsFromHanziWriterTraditional = getMissingWordsFromHanziWriter(wordsWithDictData, 'traditional');
+            const totalWordsSupportedByHanziWriterSimplified = totalWordsWithDictData - missingWordsFromHanziWriterSimplified.length;
+            const totalWordsSupportedByHanziWriterTraditional = totalWordsWithDictData - missingWordsFromHanziWriterTraditional.length;
             dictionaryCheckResult.push({
                 id: d.id, 
                 totalWordCount, 
-                totalWordsWithDictData, 
-                totalWordsSupportedByHanziWriter,
+                totalWordsWithDictData,
+                totalWordsSupportedByHanziWriterSimplified,
+                totalWordsSupportedByHanziWriterTraditional,
                 missingWords,
-                missingWordsFromHanziWriter
+                missingWordsFromHanziWriterSimplified,
+                missingWordsFromHanziWriterTraditional
             });
             dictionaryCheckResult = dictionaryCheckResult;
         }
@@ -56,11 +64,16 @@
     function getMissingWordsFromDict(words: string[]): string[] {
         return words.filter(w => !isWordExist(w));
     }
-    function getMissingWordsFromHanziWriter(words: string[]): string[] {
-        return words.filter(w => !zhWordlist.isWordSupportedByHanziWriter(w));
+    function getMissingWordsFromHanziWriter(words: string[], script: 'simplified' | 'traditional'): string[] {
+        const convertedWords = words.map(w => script === 'traditional' ? zhWordlist.toTraditional(w) : zhWordlist.toSimplified(w)); 
+        return convertedWords.filter(w => {
+            return !zhWordlist.isWordSupportedByHanziWriter(w);
+        });
     }
     function isWordExist(word: string): boolean {
-        return !!zhWordlist.dict[word] || !!zhWordlist.dict[zhWordlist.toSimplified(word)];
+        const simplified = zhWordlist.toSimplified(word);
+        const traditional = zhWordlist.toTraditional(word);
+        return !!zhWordlist.dict[word] || !!zhWordlist.dict[simplified] || !!zhWordlist.dict[traditional];
     }
 </script>
 
@@ -77,12 +90,22 @@
     {/each}
     
     <br><br>
-    Word support by HanziWriter check
+    Word support by HanziWriter check (simplified/traditional/total)
     {#each dictionaryCheckResult as d}
-        <div class:is-healthy={d.totalWordsSupportedByHanziWriter === d.totalWordsWithDictData}>
-            {d.id}: {d.totalWordsSupportedByHanziWriter}/{d.totalWordsWithDictData} 
-            {#if d.missingWordsFromHanziWriter.length > 0}
-                [missing words: {take(d.missingWordsFromHanziWriter, 5).join(', ')}, ...]
+        <div class:is-healthy={d.totalWordsSupportedByHanziWriterSimplified === d.totalWordsWithDictData && d.totalWordsSupportedByHanziWriterTraditional === d.totalWordsWithDictData}>
+            {d.id}: {d.totalWordsSupportedByHanziWriterSimplified}/{d.totalWordsSupportedByHanziWriterTraditional}/{d.totalWordsWithDictData}
+            {#if d.missingWordsFromHanziWriterSimplified.length > 0 || d.missingWordsFromHanziWriterTraditional.length > 0}
+                [
+                {#if d.missingWordsFromHanziWriterSimplified.length > 0}
+                    missing simplified: {take(d.missingWordsFromHanziWriterSimplified, 5).join(', ')}
+                {/if}
+                {#if d.missingWordsFromHanziWriterSimplified.length > 0 && d.missingWordsFromHanziWriterTraditional.length > 0}
+                    ;
+                {/if}
+                {#if d.missingWordsFromHanziWriterTraditional.length > 0}
+                    missing traditional: {take(d.missingWordsFromHanziWriterTraditional, 5).join(', ')}
+                {/if}
+                ]
             {/if}
         </div>
     {/each}
