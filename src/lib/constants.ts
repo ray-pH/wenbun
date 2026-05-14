@@ -207,7 +207,7 @@ export const SETTINGS_LABEL_DATA = {
     },
     writingMode: {
         label: "Writing Mode",
-        help: "- [Default] Write each stroke on-screen for automatic grading. \n - [External] write on paper or elsewhere outside the app."
+        help: "- [Default] Write each stroke on-screen for automatic grading.\n - [Manual] Write freely on-screen with flexible stroke order (no strict stroke-order grading), then manually grade your answer.\n - [External] Write on paper or elsewhere outside the app."
     },
     failWholeWord: {
         label: "Fail Whole Word",
