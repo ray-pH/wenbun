@@ -28,6 +28,21 @@
     <div class="changelog-container">
         Changelog
         
+        <h4>v0.28.2 (2026-05-14)</h4>
+        <ul>
+            <li>
+                <b>Character</b>: Patch more traditional characters that's not supported in hanzi writer.
+                <div class="note">
+                    <code>溼</code> -> <code>濕</code><br>
+                    <code>揹</code> -> <code>背</code><br>
+                    <code>嚐</code> -> <code>嘗</code><br>
+                    <code>柺</code> -> <code>拐</code><br>
+                    <code>譁</code> -> <code>嘩</code><br>
+                    <code>絃</code> -> <code>弦</code><br>
+                </div>
+            </li>
+        </ul>
+        
         <h4>v0.28.1 (2026-05-12)</h4>
         <ul>
             <li>
@@ -839,6 +854,10 @@
         border-radius: 0.3em;
         font-size: 0.9em;
         margin-top: 0.5em;
+    }
+
+    .note > code {
+        background-color: white;
     }
 
     .privacy-policy-link {
