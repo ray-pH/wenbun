@@ -15,7 +15,6 @@
     import ZhDict from '$lib/components/ZhDict.svelte';
     import SlideablePopup from '$lib/components/SlideablePopup.svelte';
     import { ExtraStudyMode } from '$lib/appExtraStudyHandler';
-    import Popup from '$lib/components/Popup.svelte';
     import { hanziWriterJSONCache } from '$lib/store.svelte';
     
     const inFlyParam = { delay: 100, y : -100, duration: 300, easing: cubicOut };
