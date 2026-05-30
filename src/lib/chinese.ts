@@ -1,9 +1,10 @@
 import { pinyinToZhuyin } from "pinyin-zhuyin";
-import { CHINESE_CC_CEDICT_SRC, CHINESE_CUSTOM_NOTES_SRC, CHINESE_DICT_SRC, CHINESE_MAKEMEAHANZI_SRC, HANZI_WRITER_DATA_CHARS_SRC, SLUG_NO_DATA_IN_DICT, WENBUN_AUDIO_URL, WENBUN_AUDIO_ZH_PREFIX_SRC, WENBUN_CACHE_AUDIO_URL, YUE_AUDIO_DICT_SRC, ZH_AUDIO_DICT_SRC } from "./constants";
+import { CHINESE_CC_CEDICT_SRC, CHINESE_CUSTOM_NOTES_SRC, CHINESE_DICT_SRC, CHINESE_MAKEMEAHANZI_SRC, HANZI_WRITER_DATA_CHARS_SRC, HANZI_WRITER_DATA_DIR_SRC, SLUG_NO_DATA_IN_DICT, WENBUN_AUDIO_URL, WENBUN_AUDIO_ZH_PREFIX_SRC, WENBUN_CACHE_AUDIO_URL, YUE_AUDIO_DICT_SRC, ZH_AUDIO_DICT_SRC } from "./constants";
 import { parseIntOrUndefined, type CharacterWriterData } from "./util";
 import * as OpenCC from 'opencc-js';
 import type { Lang } from "./app";
 import split from "pinyin-split";
+import { hanziWriterJSONCache } from "./store.svelte";
 
 export const TONE_PREFIX = 'tone-';
 export const WENBUN_TTS_URL = import.meta.env.VITE_WENBUN_TTS_URL;
@@ -371,4 +372,19 @@ export function tagChineseChars(input: string): TaggedChunk[] {
 }
 export function splitPinyinSyllables(pinyin: string): string {
     return split(pinyin).join(' ');
+}
+
+export async function fetchHanziWriterCharData(char: string): Promise<any> {
+    if (hanziWriterJSONCache.has(char)) {
+        return hanziWriterJSONCache.get(char);
+    }
+
+    const r = await fetch(HANZI_WRITER_DATA_DIR_SRC + char + '.json');
+    if (!r.ok) {
+        throw new Error(`Failed to load stroke data for character ${char}: ${r.status} ${r.statusText}`);
+    }
+
+    const data = await r.json();
+    hanziWriterJSONCache.set(char, data);
+    return data;
 }

@@ -1,9 +1,9 @@
 <script lang="ts">
     import { onMount, tick } from 'svelte';
     import HanziWriter from 'hanzi-writer';
-    import { TONE_PREFIX } from '$lib/chinese';
+    import { fetchHanziWriterCharData, TONE_PREFIX } from '$lib/chinese';
     import { parseIntOrUndefined, type CharacterWriterData } from '$lib/util';
-    import { CHARACTER_WRITER_DRAWING_WIDTH, HANZI_WRITER_DATA_DIR_SRC } from '$lib/constants';
+    import { CHARACTER_WRITER_DRAWING_WIDTH } from '$lib/constants';
     import ManualWriter from '$lib/manualWriter';
 
     interface Props {
@@ -137,8 +137,7 @@
                 delayBetweenStrokes: 200,
                 delayBetweenLoops: 500,
                 charDataLoader: (loadedChar, onComplete) => {
-                    fetch(HANZI_WRITER_DATA_DIR_SRC + loadedChar + '.json')
-                        .then(r => r.json())
+                    fetchHanziWriterCharData(loadedChar)
                         .then(data => onComplete(data));
                 }
             });
