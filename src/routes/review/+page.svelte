@@ -4,8 +4,8 @@
     import CharacterWriter from "$lib/components/CharacterWriter.svelte";
     import * as FSRS from "ts-fsrs"
     import { onDestroy, onMount } from "svelte";
-    import { isBuiltinDeck, parseIntOrUndefined, type CharacterWriterConfig, type CharacterWriterData } from "$lib/util";
-    import { ChineseCharacterWordlist, ChineseMandarinReading, TONE_PREFIX } from "$lib/chinese";
+    import { interleaveArrays, isBuiltinDeck, parseIntOrUndefined, type CharacterWriterConfig, type CharacterWriterData } from "$lib/util";
+    import { ChineseCharacterWordlist, ChineseMandarinReading, fetchHanziWriterCharData, TONE_PREFIX } from "$lib/chinese";
     import TopBar from "$lib/components/TopBar.svelte";
     import { DECK_TAGS } from '$lib/constants';
     import { AutoReview, type AutoReviewData } from '$lib/autoReview';
@@ -15,9 +15,12 @@
     import ZhDict from '$lib/components/ZhDict.svelte';
     import SlideablePopup from '$lib/components/SlideablePopup.svelte';
     import { ExtraStudyMode } from '$lib/appExtraStudyHandler';
+    import Popup from '$lib/components/Popup.svelte';
+    import { hanziWriterJSONCache } from '$lib/store.svelte';
     
     const inFlyParam = { delay: 100, y : -100, duration: 300, easing: cubicOut };
     const outFadeParam = { duration: 200 };
+    const CHARACTER_WRITER_CACHE_CONCURRENCY = 5;
 
     export let data: {deckId?: string, isExtraStudy?: boolean, cardIds?: string, mode?: string, reviewMode: ReviewMode};
     let metaDeckId = data.deckId || '';
@@ -45,6 +48,7 @@
     let isWordSupportedByHanziWriter = true;
     let isCharSupportedByHanziWriter: boolean[] = [];
     let nextButtonAction: (() => void) | undefined = undefined;
+    let isDestroyed = false;
     onMount(async () => {
         // no need to sync in here
         await app.init(metaDeckId);
@@ -68,9 +72,11 @@
         if (data.isExtraStudy) app.extraStudyHandler.registerReviewCardIdsOverride(cardIds);
         forceStopAudioOnNextCard = app.getConfig(metaDeckId).zh.forceStopAudioOnNextCard;
         setupNextKeyListener();
+        tryCacheCharacterWriterData();
         nextCard();
     })
     onDestroy(() => {
+        isDestroyed = true;
         destroyNextKeyListener();
     })
     
@@ -319,6 +325,39 @@
     
     function destroyNextKeyListener() {
         window.removeEventListener("keydown", keyDownHandler);
+    }
+
+    async function tryCacheCharacterWriterData() {
+        const cards = app.getTodaysCardGrouped(metaDeckId);
+        const newOrWarmupsWords = cards.newOrWarmUp.map(c => app.getCardWord(c.deckId, c.cardId)).filter(Boolean);
+        const previouslyStudiedWords = cards.previouslyStudied.map(c => app.getCardWord(c.deckId, c.cardId)).filter(Boolean);
+        const reviewWords = cards.review.map(c => app.getCardWord(c.deckId, c.cardId)).filter(Boolean);
+        const interleaved = interleaveArrays([newOrWarmupsWords, previouslyStudiedWords, reviewWords]);
+
+        const charsToFetch: string[] = [];
+        const seen = new Set<string>();
+        for (const word of interleaved) {
+            for (const char of word) {
+                if (hanziWriterJSONCache.has(char) || seen.has(char)) continue;
+                seen.add(char);
+                charsToFetch.push(char);
+            }
+        }
+
+        for (let i = 0; i < charsToFetch.length; i += CHARACTER_WRITER_CACHE_CONCURRENCY) {
+            if (isDestroyed) return;
+
+            const batch = charsToFetch.slice(i, i + CHARACTER_WRITER_CACHE_CONCURRENCY);
+            await Promise.all(batch.map(async (char) => {
+                try {
+                    const data = await fetchHanziWriterCharData(char);
+                    hanziWriterJSONCache.set(char, data);
+                    console.log(`preload ${char}`);
+                } catch {
+                    hanziWriterJSONCache.set(char, null);
+                }
+            }));
+        }
     }
 </script>
 
