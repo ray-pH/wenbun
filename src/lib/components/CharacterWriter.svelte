@@ -451,10 +451,21 @@
     let healthBarAgainLimit = $state(0);
     let healthBarHardLimit = $state(0);
     async function setupHealthBarCssVar() {
+        if (!isShowHealthBar) return;
         let total = 0;
         for (const char of characterData?.characters ?? "") {
             try {
-                const charData = await HanziWriter.loadCharacterData(char);
+                const charData = await HanziWriter.loadCharacterData(char, {
+                    charDataLoader: (char, onComplete, onError) => {
+                        fetch(HANZI_WRITER_DATA_DIR_SRC + char + '.json')
+                            .then((r) => {
+                                if (!r.ok) throw new Error(`Failed to load stroke data for character ${char}: ${r.status} ${r.statusText}`);
+                                return r.json();
+                            })
+                            .then((data) => onComplete(data))
+                            .catch((e) => onError?.(e));
+                    }
+                });
                 if (charData) total += charData.strokes.length;
             } catch(e) {
                 console.warn(`Failed to load stroke data for character ${char}:`, e);
@@ -542,7 +553,9 @@
             totalStrokeCount: 0,
             revealedCharIndex: [],
         };
-        setupHealthBarCssVar();
+        if (isShowHealthBar) {
+            void setupHealthBarCssVar();
+        }
         updateWidth();
         setupAudios().then(() => {
             if (isDictationMode) {
