@@ -1513,6 +1513,51 @@ export class App {
                 .filter(s => s).reduce((a, b) => a! > b! ? a : b, new Date(0)) ?? new Date(0);
         }
     }
+
+    getTodaysCardGrouped(deckId: string): {
+        newOrWarmUp: {cardId: number, deckId: string}[], 
+        previouslyStudied: {cardId: number, deckId: string}[], 
+        review: {cardId: number, deckId: string}[]
+    } {
+        const empty = {
+            newOrWarmUp: [] as {cardId: number, deckId: string}[],
+            previouslyStudied: [] as {cardId: number, deckId: string}[],
+            review: [] as {cardId: number, deckId: string}[],
+        };
+        const deckData = this.deckData[deckId];
+        if (!deckData) return empty;
+        
+        if (this.isDeckMeta(deckId)) {
+            const subDeckIds = deckData.subDeckIds ?? [];
+            return subDeckIds.reduce((acc, id) => {
+                const grouped = this.getTodaysCardGrouped(id);
+                acc.newOrWarmUp.push(...grouped.newOrWarmUp);
+                acc.previouslyStudied.push(...grouped.previouslyStudied);
+                acc.review.push(...grouped.review);
+                return acc;
+            }, empty);
+        }
+        
+        const warmUpIds = Object.keys(deckData.warmUpIds ?? {}).map(Number);
+        const scheduledNewOrWarmUpCount = this.getScheduledNewOrWarmUpCardsCount(deckId);
+        const scheduledNewCount = Math.max(0, this.getScheduledNewCardsCount(deckId));
+        const newIds = this.getNewCards(deckId).slice(0, scheduledNewCount);
+        const newOrWarmUpIds = [...warmUpIds, ...newIds].slice(0, scheduledNewOrWarmUpCount);
+        
+        const previouslyStudiedCount = this.getScheduledPreviouslyStudiedCardsCount(deckId);
+        const previouslyStudiedIds = this.getConfig(deckId).startPreviouslyStudiedCardFromTheBack
+            ? deckData.previouslyStudied.slice(-previouslyStudiedCount).reverse()
+            : deckData.previouslyStudied.slice(0, previouslyStudiedCount);
+        
+        const reviewCount = this.getScheduledReviewCardsCount(deckId, true);
+        const reviewIds = this.getTodaysScheduledCards(deckId).slice(0, reviewCount);
+        
+        return {
+            newOrWarmUp: newOrWarmUpIds.map(cardId => ({ cardId, deckId })),
+            previouslyStudied: previouslyStudiedIds.map(cardId => ({ cardId, deckId })),
+            review: reviewIds.map(cardId => ({ cardId, deckId })),
+        };
+    }
 }
 
 // Decorators

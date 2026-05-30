@@ -279,4 +279,21 @@ export function setNestedValue(obj: any, path: string, value: any): void {
     current[parts[parts.length - 1]] = value;
 }
 
+export function interleaveArrays<T>(arrays: T[][]): T[] {
+    const result: T[] = [];
+    let remaining = arrays.length;
+    let i = 0;
+    while (remaining > 0) {
+        remaining = 0;
+        for (const arr of arrays) {
+            if (i < arr.length) {
+                result.push(arr[i]);
+                remaining++;
+            }
+        }
+        i++;
+    }
+    return result;
+}
+
 export const TRUE = "true";

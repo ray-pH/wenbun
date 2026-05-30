@@ -28,6 +28,16 @@
     <div class="changelog-container">
         Changelog
         
+        <h4>v0.28.4 (2026-05-30)</h4>
+        <ul>
+            <li>
+                <b>Review</b>: Character writing in reviews now feels faster and smoother.
+                <ul>
+                    <li>Wenbun now prepares writing data ahead of time, so characters are ready sooner when you need them.</li>
+                </ul>
+            </li>
+        </ul>
+
         <h4>v0.28.2 (2026-05-14)</h4>
         <ul>
             <li>

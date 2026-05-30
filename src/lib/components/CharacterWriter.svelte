@@ -2,13 +2,13 @@
     import * as FSRS from "ts-fsrs"
     import HanziWriter from 'hanzi-writer';
     import { onMount } from 'svelte';
-    import { getAudioUrl, TONE_PREFIX, WENBUN_TTS_URL } from '$lib/chinese';
+    import { fetchHanziWriterCharData, getAudioUrl, TONE_PREFIX, WENBUN_TTS_URL } from '$lib/chinese';
     import { type CharacterWriterData, type CharacterWriterConfig, parseIntOrUndefined, lerp, linmap, TRUE } from '$lib/util';
     import { WritingMode, type App } from '$lib/app';
     import { base } from '$app/paths';
     import { AudioSequence } from '$lib/audioSequence';
     import { AutoReview, AutoReviewGradeClass, AutoReviewGradeFAClass, AutoReviewGradeLabel, type AutoReviewData } from '$lib/autoReview';
-    import { CHARACTER_WRITER_DRAWING_WIDTH, HANZI_WRITER_DATA_DIR_SRC, SLUG_UNSUPPORTED_CHAR_INTERACTION_NEXT, SLUG_UNSUPPORTED_CHAR_INTERACTION_WARNING } from "$lib/constants";
+    import { CHARACTER_WRITER_DRAWING_WIDTH, SLUG_UNSUPPORTED_CHAR_INTERACTION_NEXT, SLUG_UNSUPPORTED_CHAR_INTERACTION_WARNING } from "$lib/constants";
     import ManualWriter from "$lib/manualWriter";
     import ManualWriterResultPreview from './ManualWriterResultPreview.svelte';
     
@@ -249,8 +249,7 @@
             // load locally
             charDataLoader: (char, onComplete) => {
                 isStrokeDataLoaded = false;
-                fetch(HANZI_WRITER_DATA_DIR_SRC + char + '.json')
-                    .then(r => r.json())
+                fetchHanziWriterCharData(char)
                     .then(data => onComplete(data));
             },
             onLoadCharDataSuccess: () => {
@@ -451,10 +450,17 @@
     let healthBarAgainLimit = $state(0);
     let healthBarHardLimit = $state(0);
     async function setupHealthBarCssVar() {
+        if (!isShowHealthBar) return;
         let total = 0;
         for (const char of characterData?.characters ?? "") {
             try {
-                const charData = await HanziWriter.loadCharacterData(char);
+                const charData = await HanziWriter.loadCharacterData(char, {
+                    charDataLoader: (char, onComplete, onError) => {
+                        fetchHanziWriterCharData(char)
+                            .then((data) => onComplete(data))
+                            .catch((e) => onError?.(e));
+                    }
+                });
                 if (charData) total += charData.strokes.length;
             } catch(e) {
                 console.warn(`Failed to load stroke data for character ${char}:`, e);
@@ -542,7 +548,9 @@
             totalStrokeCount: 0,
             revealedCharIndex: [],
         };
-        setupHealthBarCssVar();
+        if (isShowHealthBar) {
+            void setupHealthBarCssVar();
+        }
         updateWidth();
         setupAudios().then(() => {
             if (isDictationMode) {
