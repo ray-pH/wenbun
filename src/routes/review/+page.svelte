@@ -349,11 +349,10 @@
             const batch = charsToFetch.slice(i, i + CHARACTER_WRITER_CACHE_CONCURRENCY);
             await Promise.all(batch.map(async (char) => {
                 try {
-                    const data = await fetchHanziWriterCharData(char);
-                    hanziWriterJSONCache.set(char, data);
+                    await fetchHanziWriterCharData(char);
+                    // fetchHanziWriterCharData will cache the result, so no need to do anything with the result here
                     console.log(`preload ${char}`);
                 } catch {
-                    hanziWriterJSONCache.set(char, null);
                 }
             }));
         }
