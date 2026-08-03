@@ -371,7 +371,23 @@ export function tagChineseChars(input: string): TaggedChunk[] {
     return out;
 }
 export function splitPinyinSyllables(pinyin: string): string {
-    return split(pinyin).join(' ');
+    const normalized = pinyin.trim();
+    if (!normalized) return '';
+
+    // Dictionary readings are already syllable-separated (e.g. "lv3 xing2", "hū luè").
+    // Keep that segmentation as-is so special ü/v forms are not mis-split.
+    const preSplit = normalized.split(/\s+/).filter(Boolean);
+    if (preSplit.length > 1) {
+        return preSplit.join(' ');
+    }
+
+    // Handle compact numeric forms such as "nve4dai4".
+    const numericSyllables = normalized.match(/[a-züv:]+[1-5]/gi);
+    if (numericSyllables && numericSyllables.join('') === normalized.replace(/\s+/g, '')) {
+        return numericSyllables.join(' ');
+    }
+
+    return split(normalized).join(' ');
 }
 
 export async function fetchHanziWriterCharData(char: string): Promise<any> {
