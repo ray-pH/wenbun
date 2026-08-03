@@ -28,6 +28,17 @@
     <div class="changelog-container">
         Changelog
         
+        <h4>v0.28.5 (2026-08-03)</h4>
+        <ul>
+            <li>
+                <b>Chinese import</b>: Fix tone coloring for pinyin containing <code>ü</code>/<code>v</code> forms.
+                <ul>
+                    <li>Preserve existing syllable boundaries for already spaced pinyin, preventing incorrect tone tags in words such as <code>旅行</code> (<code>lǚ xíng</code>), <code>忽略</code> (<code>hū luè</code>), and <code>虐待</code> (<code>nüè dài</code>).</li>
+                    <li>Add unit tests for accent and numeric pinyin forms, including compact forms and apostrophe-separated syllables.</li>
+                </ul>
+            </li>
+        </ul>
+
         <h4>v0.28.4 (2026-05-30)</h4>
         <ul>
             <li>
