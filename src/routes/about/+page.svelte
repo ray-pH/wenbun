@@ -27,6 +27,11 @@
     </div>
     <div class="changelog-container">
         Changelog
+
+        <h4>v0.29.0 (2026-08-08)</h4>
+        <ul>
+            <li><b>Server optimization</b></li>
+        </ul>
         
         <h4>v0.28.5 (2026-08-03)</h4>
         <ul>
