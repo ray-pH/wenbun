@@ -961,7 +961,9 @@ export class App {
     }
     
     pushReviewLog(deckId: string, cardId: number, log: FSRS.ReviewLog): void {
-        this.reviewLogs.push({deckId, cardId, log});
+        const reviewLog = {deckId, cardId, log};
+        this.reviewLogs.push(reviewLog);
+        void this.profile.uploadReviewLog(reviewLog).catch(console.error);
     }
     setCard(deckId: string, cardId: number, card: FSRS.Card): void {
         const deckData = this.deckData[deckId];

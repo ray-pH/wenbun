@@ -6,8 +6,8 @@ export const IS_USE_TOKEN_AUTH = isTauri();
 export enum ApiRoute {
     Profile = "/profile",
     ProfileData = "/profiledata",
+    ProfileDataMetadata = "/profiledata/metadata",
     ReviewLog = "/reviewlog",
-    ReviewLogMostRecent = "/reviewlog/mostrecent",
     AuthGoogle = "/auth/google",
     AuthLogout = "/auth/logout",
     AuthGoogleToken = "/auth/google/token",

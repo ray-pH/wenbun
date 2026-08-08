@@ -4,7 +4,6 @@ import { goto } from '$app/navigation';
 import { base } from "$app/paths";
 import { page } from '$app/state';
 import { ApiRoute, apiUrl, apiAuthUrl, apiFetch, IS_USE_TOKEN_AUTH } from "./api";
-import _ from "lodash";
 import type { IStorage } from "./storage";
 import { isOnlineClient } from "./util";
 import { isTauri } from "@tauri-apps/api/core";
@@ -68,6 +67,12 @@ export interface SyncConflictInfo {
     remoteDeckInfo: DeckInfoSummary[];
 }
 
+interface ProfileDataMetadata {
+    updatedAt: string;
+    modifiedAt: string | null;
+    profileVersion: string | null;
+}
+
 export class Profile {
     isLoggedIn: boolean = false;
     isSyncConflict: boolean = false;
@@ -114,72 +119,60 @@ export class Profile {
     async trySyncProfile(app: App, syncConflictAutoResolveStrategy = SyncConflicAutoResolve.ask): Promise<boolean> {
         if (!this.isLoggedIn) return false;
         try {
-            const [remoteProfileData, latestServerReviewLog] = await Promise.all([
-                this.getProfileData(),
-                this.getLatestReviewLog(),
-            ]);
-            if (remoteProfileData === null) {
-                // upload profiledata and logs
-                const success = await Promise.all([
-                    this.updateProfileData(app.exportProfile(false)),
-                    this.pushReviewLog(latestServerReviewLog, app.reviewLogs, true),
-                ])
-                if (success.every(s => s)) {
+            const remoteMetadata = await this.getProfileDataMetadata();
+            if (remoteMetadata === null) {
+                const success = await this.updateProfileData(app.exportProfile(false));
+                if (success) {
                     app.lastSyncTime = new Date().toISOString();
                     await app.updateLastSyncTime();
                 }
                 return false;
-            } else {
-                // check
-                const localModifiedAt = new Date(app.meta.modifiedAt ?? 0);
-                const remoteModifiedAt = new Date(remoteProfileData.meta.modifiedAt ?? 0);
-                const lastSyncTime = new Date(app.lastSyncTime ?? 0);
-                const syncDecisionFromTime = this.getSyncDecision(localModifiedAt, remoteModifiedAt, lastSyncTime);
-                let syncDecision = (_.isEqual(remoteProfileData, app.exportProfile(false))) ? SyncDecision.none : syncDecisionFromTime;
-                syncDecision = await this.autoResolveSyncConflict(syncDecision, syncConflictAutoResolveStrategy, app);
-                switch (syncDecision) {
-                    case SyncDecision.conflict: {
-                        this.onConflict(app, remoteProfileData, lastSyncTime);
-                        return false;
+            }
+
+            const localModifiedAt = new Date(app.meta.modifiedAt ?? 0);
+            const remoteModifiedAt = new Date(remoteMetadata.modifiedAt ?? 0);
+            const lastSyncTime = new Date(app.lastSyncTime ?? 0);
+            let syncDecision = this.getSyncDecision(localModifiedAt, remoteModifiedAt, lastSyncTime);
+            syncDecision = await this.autoResolveSyncConflict(syncDecision, syncConflictAutoResolveStrategy, app);
+
+            switch (syncDecision) {
+                case SyncDecision.conflict: {
+                    const remoteProfileData = await this.getProfileData();
+                    if (remoteProfileData === null) return false;
+                    this.onConflict(app, remoteProfileData, lastSyncTime);
+                    return false;
+                }
+                case SyncDecision.push: {
+                    const success = await this.updateProfileData(app.exportProfile(false));
+                    if (success) {
+                        app.lastSyncTime = new Date().toISOString();
+                        await app.updateLastSyncTime();
+                    } else {
+                        window.alert("Failed to push profile data to server")
                     }
-                    case SyncDecision.push: {
-                        const success = await Promise.all([
-                            this.updateProfileData(app.exportProfile(false)),
-                            this.pushReviewLog(latestServerReviewLog, app.reviewLogs),
-                        ])
-                        if (success.every(s => s)) {
-                            app.lastSyncTime = new Date().toISOString();
-                            await app.updateLastSyncTime();
-                        } else {
-                            window.alert("Failed to push profile data to server")
-                        }
-                        this.isSyncConflict = false;
-                        return false;
+                    this.isSyncConflict = false;
+                    return false;
+                }
+                case SyncDecision.pull: {
+                    const remoteProfileData = await this.getProfileData();
+                    if (remoteProfileData === null) return false;
+                    const success = await app.tryImportProfile(remoteProfileData, false, true);
+                    if (success) {
+                        app.lastSyncTime = new Date().toISOString();
+                        await app.updateLastSyncTime();
+                    } else {
+                        window.alert("Failed to pull profile data from server")
                     }
-                    case SyncDecision.pull: {
-                        const success = await Promise.all([
-                            app.tryImportProfile(remoteProfileData, false, true),
-                            this.pullReviewLog(app),
-                        ])
-                        if (success.every(s => s)) {
-                            app.lastSyncTime = new Date().toISOString();
-                            await app.updateLastSyncTime();
-                        } else {
-                            window.alert("Failed to pull profile data from server")
-                        }
-                        this.isSyncConflict = false;
-                        return true;
-                    }
-                    case SyncDecision.none: {
-                        // do nothing
-                        this.isSyncConflict = false;
-                        return false;
-                    }
+                    this.isSyncConflict = false;
+                    return true;
+                }
+                case SyncDecision.none: {
+                    this.isSyncConflict = false;
+                    return false;
                 }
             }
         } catch (e) {
             console.error(e);
-            //TODO: not sure if something went wrong whether to return true or false
             return false;
         }
     }
@@ -230,14 +223,12 @@ export class Profile {
     }
     
     async tryForcePull(app: App) {
-        // will use the remote data, but push the current local data as backup to the server
+        // Use the remote profile while storing the current local profile as a backup.
+        // Review logs remain local and are never downloaded during profile sync.
         const remoteProfileData = await this.getProfileData();
-        const success = await Promise.all([
-            this.updateProfileData(app.exportProfile(false), "pull"),
-            this.pullReviewLog(app, true),
-        ]);
+        const success = await this.updateProfileData(app.exportProfile(false), "pull");
         const success2 = await app.tryImportProfile(remoteProfileData, false, true);
-        if (success.every(s => s) && success2) {
+        if (success && success2) {
             app.lastSyncTime = new Date().toISOString();
             await app.updateLastSyncTime();
             this.isSyncConflict = false;
@@ -247,11 +238,8 @@ export class Profile {
     }
     
     async tryForcePush(app: App) {
-        const success = await Promise.all([
-            this.updateProfileData(app.exportProfile(false), "push"),
-            this.pushReviewLog(null, app.reviewLogs ?? [], true),
-        ])
-        if (success.every(s => s)) {
+        const success = await this.updateProfileData(app.exportProfile(false), "push");
+        if (success) {
             app.lastSyncTime = new Date().toISOString();
             await app.updateLastSyncTime();
             this.isSyncConflict = false;
@@ -278,6 +266,16 @@ export class Profile {
         return this.profileInfo?.name ?? this.profileInfo?.email ?? "(no name)";
     }
     
+    async getProfileDataMetadata(): Promise<ProfileDataMetadata | null> {
+        const res = await apiFetch(apiUrl(ApiRoute.ProfileDataMetadata));
+        if (res.status === 204) {
+            return null;
+        } else if (res.ok) {
+            return await res.json();
+        }
+        throw new Error(`Unexpected status: ${res.status}`);
+    }
+
     async getProfileData(): Promise<ProfileData | null> {
         const res = await apiFetch(apiUrl(ApiRoute.ProfileData));
         if (res.status === 204) {
@@ -302,100 +300,17 @@ export class Profile {
         return res.ok;
     }
     
-    async getLatestReviewLog(): Promise<ReviewLog | null> {
-        const res = await apiFetch(apiUrl(ApiRoute.ReviewLogMostRecent));
-        if (res.status === 204) {
-            return null;
-        } else if (res.ok) {
-            const reviewLog = await res.json();
-            return reviewLog;
-        } else {
-            throw new Error(`Unexpected status: ${res.status}`);
-        }
-    }
-    
-    async pushReviewLog(latestServerReviewLog: ReviewLog | null, localReviewLogs?: ReviewLog[], force = false) {
-        if (!localReviewLogs || localReviewLogs.length === 0) {
-            return true;
-        } else if (latestServerReviewLog === null || force) {
-            // push all
-            const res = await apiFetch(apiUrl(ApiRoute.ReviewLog, { force }), {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(localReviewLogs),
-            });
-            return res.ok;
-        } else {
-            // push all after latestServerReviewLog
-            const latestServerMs = +new Date(latestServerReviewLog.log?.review ?? 0);
-            const cut = localReviewLogs.findLastIndex(l => {
-                const v = l.log?.review;
-                const ms = +new Date(v ?? 0);
-                return ms <= latestServerMs;
-            });
-            const localReviewLogsAfterLatestServerReviewLog = localReviewLogs.slice(cut + 1);
-            const res = await apiFetch(apiUrl(ApiRoute.ReviewLog), {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(localReviewLogsAfterLatestServerReviewLog),
-            });
-            return res.ok;
-        }
-    }
-    
-    async pullReviewLog(app: App, force = false): Promise<boolean> {
-        try {
-            const pulledReviewLogs = await this.getReviewLogs(app.reviewLogs, force);
-            if (pulledReviewLogs === null) return true; // server may have no review logs
-            if (force) {
-                app.reviewLogs = pulledReviewLogs;
-            } else {
-                app.reviewLogs.push(...pulledReviewLogs);
-            }
-            app.save(false);
-            return true;
-        } catch (e) {
-            console.error(e);
-            return false;
-        }
-    }
-    
-    async getReviewLogs(localReviewLogs: ReviewLog[], force = false): Promise<ReviewLog[] | null> {
-        if (force) {
-            const fromDate = new Date(0).toISOString();
-            const res = await apiFetch(apiUrl(ApiRoute.ReviewLog, { from: fromDate }), {
-                method: "GET",
-            });
-            
-            if (res.status === 204) {
-                return null;
-            } else if (res.ok) {
-                const reviewLogs = await res.json();
-                return reviewLogs.map((l: any) => l.review_log);
-            } else {
-                throw new Error(`Unexpected status: ${res.status}`);
-            }
-        } else {
-            // pull only after latest local review log
-            const latestLocalReviewLog = localReviewLogs[localReviewLogs.length - 1];
-            const latestLocalDate = new Date(latestLocalReviewLog?.log?.review ?? 0).toISOString();
-            const res = await apiFetch(apiUrl(ApiRoute.ReviewLog, { from: latestLocalDate }), {
-                method: "GET",
-            });
-            
-            if (res.status === 204) {
-                return null;
-            } else if (res.ok) {
-                const reviewLogs = await res.json();
-                return reviewLogs;
-            } else {
-                throw new Error(`Unexpected status: ${res.status}`);
-            }
-        }
+    async uploadReviewLog(reviewLog: ReviewLog): Promise<boolean> {
+        if (!this.isLoggedIn) return false;
+
+        const res = await apiFetch(apiUrl(ApiRoute.ReviewLog), {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(reviewLog),
+        });
+        return res.ok;
     }
     
     async loginGoogle(app: App) {
@@ -450,30 +365,27 @@ export class Profile {
     async getManualSyncStatus(app: App): Promise<ManualSyncStatus | undefined> {
         if (!this.isLoggedIn) return undefined;
         try {
-            const remoteProfileData = await this.getProfileData();
-            if (remoteProfileData === null) {
-                return ManualSyncStatus.canPush;
-            } else {
-                // check
-                const localModifiedAt = new Date(app.meta.modifiedAt ?? 0);
-                const remoteModifiedAt = new Date(remoteProfileData.meta.modifiedAt ?? 0);;
-                const lastSyncTime = new Date(app.lastSyncTime ?? 0);
-                const syncDecisionFromTime = this.getSyncDecision(localModifiedAt, remoteModifiedAt, lastSyncTime);
-                let syncDecision = (_.isEqual(remoteProfileData, app.exportProfile(false))) ? SyncDecision.none : syncDecisionFromTime;
-                switch (syncDecision) {
-                    case SyncDecision.push: return ManualSyncStatus.canPush;
-                    case SyncDecision.pull: return ManualSyncStatus.canPull;
-                    case SyncDecision.none: return ManualSyncStatus.noSync;
-                    case SyncDecision.conflict: {
-                        this.onConflict(app, remoteProfileData, lastSyncTime, false);
-                        return ManualSyncStatus.conflict;
-                    }
+            const remoteMetadata = await this.getProfileDataMetadata();
+            if (remoteMetadata === null) return ManualSyncStatus.canPush;
+
+            const localModifiedAt = new Date(app.meta.modifiedAt ?? 0);
+            const remoteModifiedAt = new Date(remoteMetadata.modifiedAt ?? 0);
+            const lastSyncTime = new Date(app.lastSyncTime ?? 0);
+            const syncDecision = this.getSyncDecision(localModifiedAt, remoteModifiedAt, lastSyncTime);
+            switch (syncDecision) {
+                case SyncDecision.push: return ManualSyncStatus.canPush;
+                case SyncDecision.pull: return ManualSyncStatus.canPull;
+                case SyncDecision.none: return ManualSyncStatus.noSync;
+                case SyncDecision.conflict: {
+                    const remoteProfileData = await this.getProfileData();
+                    if (remoteProfileData === null) return undefined;
+                    this.onConflict(app, remoteProfileData, lastSyncTime, false);
+                    return ManualSyncStatus.conflict;
                 }
             }
         } catch (e) {
             return undefined;
         }
-        return undefined;
     }
     
     static async sendAccountDeletionRequest(email: string) {
