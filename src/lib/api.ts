@@ -7,7 +7,6 @@ export enum ApiRoute {
     Profile = "/profile",
     ProfileData = "/profiledata",
     ReviewLog = "/reviewlog",
-    ReviewLogMostRecent = "/reviewlog/mostrecent",
     AuthGoogle = "/auth/google",
     AuthLogout = "/auth/logout",
     AuthGoogleToken = "/auth/google/token",
