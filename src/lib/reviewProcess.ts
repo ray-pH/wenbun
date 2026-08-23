@@ -1,4 +1,16 @@
+import * as FSRS from "ts-fsrs";
 import { WenBunCustomState } from "./app";
+
+export function shouldHandleAutomaticSuccess(
+    isAutoNextOnSuccess: boolean,
+    isAutoGrading: boolean,
+    autoGrade: FSRS.Grade | undefined,
+): boolean {
+    return isAutoNextOnSuccess
+        && isAutoGrading
+        && autoGrade !== undefined
+        && autoGrade !== FSRS.Rating.Again;
+}
 
 export type AutomaticSuccessReviewActions = {
     isExtraStudy: boolean;
