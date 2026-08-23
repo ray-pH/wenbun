@@ -16,6 +16,7 @@
     import SlideablePopup from '$lib/components/SlideablePopup.svelte';
     import { ExtraStudyMode } from '$lib/appExtraStudyHandler';
     import { hanziWriterJSONCache } from '$lib/store.svelte';
+    import { handleAutomaticSuccess } from '$lib/reviewProcess';
     
     const inFlyParam = { delay: 100, y : -100, duration: 300, easing: cubicOut };
     const outFadeParam = { duration: 200 };
@@ -221,7 +222,17 @@
         if (!config.isAutoNextOnSuccess || !isAutoGrading) return;
         if (autoGrade === undefined) return;
         if (autoGrade === FSRS.Rating.Again) return;
-        acceptAutoGrade();
+        void handleAutomaticSuccess({
+            isExtraStudy: !!data.isExtraStudy,
+            cardState,
+            isFinalWarmUp: isFinalWarmUp(currentCardId!),
+            isGradeWarmUpCards,
+            onStartWarmUp: onLearnNewCard,
+            onAdvanceWarmUp: warmUpNext,
+            onFinishWarmUp: finishWarmUp,
+            onExtraStudyGood: extraStudyGood,
+            onAcceptGrade: acceptAutoGrade,
+        });
     }
     async function onReviewButtonClick(grade: FSRS.Grade) {
         app.rateCard(currentDeckId, currentCardId!, grade);
