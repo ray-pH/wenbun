@@ -28,6 +28,17 @@
     <div class="changelog-container">
         Changelog
         
+        <h4>v0.28.6 (2026-08-23)</h4>
+        <ul>
+            <li>
+                <b>Review</b>: Fix <b>Auto Next On Success</b> handling for new cards and extra study.
+                <ul>
+                    <li>New cards now progress through all warm-up steps before being scheduled.</li>
+                    <li>Completed extra-study cards are now removed from the current extra-study session.</li>
+                </ul>
+            </li>
+        </ul>
+
         <h4>v0.28.5 (2026-08-03)</h4>
         <ul>
             <li>
