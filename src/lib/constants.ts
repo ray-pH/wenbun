@@ -95,6 +95,10 @@ export const YUE_AUDIO_DICT_SRC = `${base}/wenbun-assets/audio_dict/yue_audio_di
 export const WENBUN_AUDIO_ZH_PREFIX_SRC = `/hugolpz-audio-cmn-64k/syllabs/cmn-`
 
 export const SETTINGS_LABEL_DATA = {
+    startOfDayTime: {
+        label: "New Day Starts At",
+        help: "Sets when daily limits reset and review cards become due for the next day.",
+    },
     newCardPerDay: {
         label: "New Card Per Day",
         help: "Specifies the number of new cards to learn each day.",

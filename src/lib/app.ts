@@ -86,6 +86,7 @@ export interface DeckData {
 
 export interface WenbunConfig {
     // learning
+    startOfDayTime?: string;
     newCardPerDay?: number;
     maxReviewsPerDay?: number;
     newCardOrder?: NewCardOrder;
@@ -143,6 +144,7 @@ export interface WenbunConfig {
 }
 
 const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
+    startOfDayTime: "00:00",
     newCardPerDay: 5,
     maxReviewsPerDay: 200,
     newCardOrder: NewCardOrder.Mix,
@@ -480,11 +482,12 @@ export class App {
     
     async processTodaySchedule(): Promise<void> {
         const today = this.getNow();
-        const todaysDate = getDaysSinceEpochLocal(today);
+        const startOfDayTime = this.getConfig(null).startOfDayTime;
+        const todaysDate = getDaysSinceEpochLocal(today, startOfDayTime);
         let changed = false;
         for (const deckId of Object.keys(this.deckData)) {
             const deckData = this.deckData[deckId];
-            const lastScheduleCheckDate = getDaysSinceEpochLocal(new Date(deckData.lastScheduleCheckDate));
+            const lastScheduleCheckDate = getDaysSinceEpochLocal(new Date(deckData.lastScheduleCheckDate), startOfDayTime);
             if (lastScheduleCheckDate < todaysDate) {
                 // do the daily routine
                 deckData.doneTodayNewCardCount = 0;
@@ -1135,7 +1138,8 @@ export class App {
         const deckData = this.deckData[deckId];
         if (!deckData) return [];
         const now = this.getNow();
-        const today = getDaysSinceEpochLocal(now);
+        const startOfDayTime = this.getConfig(null).startOfDayTime;
+        const today = getDaysSinceEpochLocal(now, startOfDayTime);
         const tomorrow = today + 1;
         
         type Entry = [string, FSRS.Card];
@@ -1150,7 +1154,7 @@ export class App {
             const due = new Date(s.due);
             if (s.state === FSRS.State.Review) {
                 // for review cards, use date
-                const dueDay = getDaysSinceEpochLocal(due);
+                const dueDay = getDaysSinceEpochLocal(due, startOfDayTime);
                 if (dueDay < tomorrow) {
                     reviewCards.push([id,s]);
                 }

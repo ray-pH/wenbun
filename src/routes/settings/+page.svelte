@@ -317,6 +317,11 @@
         <div class="settings-section">
             <div class="section-title">Learning</div>
             <div class="section-container">
+                {#if !data.deckId}
+                    <SettingsItem key="startOfDayTime">
+                        <input type="time" bind:value={config.startOfDayTime} />
+                    </SettingsItem>
+                {/if}
                 {#if config.writingMode === WritingMode.External || config.writingMode === WritingMode.Manual}
                     <SettingsItem key="gradingMethod" {...deckSettingsItemProps}>
                         <select disabled value="manual">
