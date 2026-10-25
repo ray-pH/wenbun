@@ -16,7 +16,7 @@
     import SlideablePopup from '$lib/components/SlideablePopup.svelte';
     import { ExtraStudyMode } from '$lib/appExtraStudyHandler';
     import { hanziWriterJSONCache } from '$lib/store.svelte';
-    import { handleAutomaticSuccess } from '$lib/reviewProcess';
+    import { handleAutomaticSuccess, shouldHandleAutomaticSuccess } from '$lib/reviewProcess';
     
     const inFlyParam = { delay: 100, y : -100, duration: 300, easing: cubicOut };
     const outFadeParam = { duration: 200 };
@@ -219,9 +219,7 @@
     }
     function onReadyToGoNext() {
         const config = app.getConfig(metaDeckId);
-        if (!config.isAutoNextOnSuccess || !isAutoGrading) return;
-        if (autoGrade === undefined) return;
-        if (autoGrade === FSRS.Rating.Again) return;
+        if (!shouldHandleAutomaticSuccess(config.isAutoNextOnSuccess, isAutoGrading, autoGrade)) return;
         void handleAutomaticSuccess({
             isExtraStudy: !!data.isExtraStudy,
             cardState,
