@@ -28,6 +28,13 @@
     <div class="changelog-container">
         Changelog
 
+        <h4>v0.29.1 (2026-11-15)</h4>
+        <ul>
+            <li>
+                <b>Appearance</b>: Restore WenBun Light's original colors and styling while keeping the other color schemes unchanged.
+            </li>
+        </ul>
+
         <h4>v0.29.0 (2026-11-15)</h4>
         <ul>
             <li>
