@@ -109,7 +109,7 @@
         }
         &:has(.not-supported) {
             background-color: var(--wenbun-red);
-            color: var(--theme-on-red, var(--theme-on-accent, white));
+            color: var(--theme-deck-preview-unsupported-text, var(--theme-on-red, var(--theme-on-accent, white)));
         }
         &:has(.no-dict) {
             background-color: #DA8C2250;

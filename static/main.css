@@ -34,5 +34,5 @@
 input:invalid,
 input.invalid {
     background-color: var(--wenbun-red);
-    color: var(--theme-on-red, var(--theme-on-accent, white));
+    color: var(--theme-invalid-input-text, var(--theme-on-red, var(--theme-on-accent, white)));
 }
