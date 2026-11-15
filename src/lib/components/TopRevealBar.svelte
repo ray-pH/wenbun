@@ -80,7 +80,8 @@
     }
 
     .topbar-panel {
-        background: #fff;
+        background: var(--theme-top-reveal-bar-panel-surface, var(--theme-surface, #fff));
+        color: var(--theme-text, inherit);
         border-radius: 8px;
         margin: 0.5rem;
         padding: 0.75rem 1rem;

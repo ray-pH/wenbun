@@ -315,7 +315,7 @@
         font-weight: bold;
         .deck-card-subtitle {
             font-weight: normal;
-            color: #00000080;
+            color: var(--theme-overview-deck-subtitle, var(--theme-muted, #00000080));
         }
     }
     .count-table {
@@ -350,7 +350,7 @@
         max-width: 22em;
         justify-content: space-between;
         cursor: pointer;
-        border-bottom: 1px solid #00000020;
+        border-bottom: 1px solid var(--theme-overview-section-border, var(--theme-border, #00000020));
     }
     .section-title-button:disabled {
         opacity: 0.5;
@@ -392,13 +392,13 @@
             max-width: 22em;
         }
         .section-help {
-            color: #00000090;
+            color: var(--theme-overview-section-help, var(--theme-muted, #00000090));
             margin-bottom: 0.6em;
         }
         .section-description {
             margin: 0.6em 0;
             .subdesc {
-                color: #00000090;
+                color: var(--theme-overview-section-subdescription, var(--theme-muted, #00000090));
             }
         }
     }
@@ -410,7 +410,7 @@
         padding: 0 1em;
         padding-bottom: 1em;
         box-sizing: border-box;
-        background-color: #E0E0E0;
+        background-color: var(--theme-overview-bottom-background, var(--theme-background, #E0E0E0));
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -447,7 +447,7 @@
     
     .info-container {
         max-width: 22em;
-        background-color: white;
+        background-color: var(--theme-overview-info-background, var(--theme-surface, white));
         padding: 0.5em;
         border-radius: 0.5em;
     }
@@ -463,7 +463,7 @@
         margin-bottom: 1em;
     }
     .subdeck-card {
-        background-color: white;
+        background-color: var(--theme-overview-subdeck-background, var(--theme-surface, white));
         padding: 0.5em;
         border-radius: 0.5em;
     }

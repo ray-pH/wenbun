@@ -107,16 +107,16 @@
         row-gap: 0.5em;
     }
     .entry {
-        background-color: #FFFFFF90;
+        background-color: var(--theme-credits-entry-background, var(--theme-surface, #FFFFFF90));
         padding: 0.3em 0.8em;
         border-radius: 0.5rem;
     }
     .note {
-        background-color: #00000050;
+        background-color: var(--theme-credits-note-background, var(--theme-overlay, #00000050));
         padding: 2em;
         font-size: 0.9em;
         border-radius: 0.5rem;
-        color: white;
+        color: var(--theme-credits-note-text, var(--theme-on-accent, white));
     }
     a {
         color: var(--wenbun-blue);
@@ -131,7 +131,7 @@
     }
     .sep {
         height: 1px;
-        background-color: gray;
+        background-color: var(--theme-credits-divider, var(--theme-border, gray));
         width: 90vw;
         max-width: 28em;
         margin-top: 1em;

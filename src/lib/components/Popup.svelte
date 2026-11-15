@@ -28,7 +28,7 @@
     .modal-backdrop {
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.5);
+        background: var(--theme-popup-backdrop, var(--theme-overlay, rgba(0, 0, 0, 0.5)));
         display: flex;
         align-items: center;
         justify-content: center;
@@ -44,7 +44,8 @@
     }
 
     .modal-container {
-        background: #fff;
+        background: var(--theme-popup-surface, var(--theme-surface, #fff));
+        color: var(--theme-text, inherit);
         border-radius: 8px;
         padding: 1rem;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -56,7 +57,8 @@
 
     .modal-close {
         align-self: flex-end;
-        background: #fff;
+        background: var(--theme-popup-close-button-surface, var(--theme-surface, #fff));
+        color: var(--theme-text, inherit);
         border: none;
         border-radius: 0.75em;
         padding: 0.5em 0.75em;

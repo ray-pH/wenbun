@@ -141,7 +141,7 @@
     .modal-backdrop {
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.5);
+        background: var(--theme-slideable-popup-backdrop, var(--theme-overlay, rgba(0, 0, 0, 0.5)));
         display: flex;
         align-items: flex-end; /* Aligns modal to the bottom */
         justify-content: center;
@@ -175,7 +175,8 @@
 
     /* Close button styled like the original */
     .modal-close {
-        background: #fff;
+        background: var(--theme-slideable-popup-close-button-surface, var(--theme-surface, #fff));
+        color: var(--theme-text, inherit);
         border: none;
         border-radius: 0.75em;
         padding: 0.5em 0.75em;
@@ -187,7 +188,8 @@
 
     /* The main content panel */
     .modal-panel {
-        background: #fff;
+        background: var(--theme-slideable-popup-panel-surface, var(--theme-surface, #fff));
+        color: var(--theme-text, inherit);
         border-radius: 8px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         width: 100%;
@@ -200,7 +202,7 @@
     .modal-drag-handle {
         width: 40px;
         height: 4px;
-        background-color: #dcdcdc;
+        background-color: var(--theme-slideable-popup-handle, var(--theme-border, #dcdcdc));
         border-radius: 2px;
         margin: 0 auto 0.5rem;
         flex-shrink: 0;

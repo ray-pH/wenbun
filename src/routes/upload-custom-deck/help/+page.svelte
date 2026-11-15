@@ -138,7 +138,7 @@ School,to study,学习,xué xí</code></pre>
         max-width: 32em;
     }
     pre {
-        background-color: #f0f0f0;
+        background-color: var(--theme-upload-deck-help-code-background, var(--theme-surface-alt, #f0f0f0));
         padding: 1em;
         border-radius: 0.3em;
         white-space: pre-wrap;
@@ -146,7 +146,7 @@ School,to study,学习,xué xí</code></pre>
     .section {
         padding-bottom: 1em;
         margin-bottom: 1em;
-        border-bottom: 1px solid #ccc;
+        border-bottom: 1px solid var(--theme-upload-deck-help-section-border, var(--theme-border, #ccc));
     }
     .section:last-child {
         border-bottom: none;

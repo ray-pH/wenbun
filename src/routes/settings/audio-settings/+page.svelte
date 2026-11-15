@@ -142,7 +142,7 @@
     .source-card {
         width: 90vw;
         max-width: 30em;
-        background-color: #FFFFFF90;
+        background-color: var(--theme-settings-audio-source-background, var(--theme-surface, #FFFFFF90));
         border-radius: 0.5em;
         padding: 1em;
         margin-bottom: 1em;
@@ -161,7 +161,7 @@
         all: unset;
         display: block;
         padding: 0.5em 1em;
-        background-color: white;
+        background-color: var(--theme-settings-audio-button-background, var(--theme-surface, white));
         border-radius: 0.5em;
         &:hover {
             opacity: 0.5;
@@ -170,7 +170,7 @@
     }
     
     .label {
-        color: #00000090;
+        color: var(--theme-settings-audio-label, var(--theme-muted, #00000090));
     }
     
     .status {

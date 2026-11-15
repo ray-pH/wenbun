@@ -27,7 +27,32 @@
     </div>
     <div class="changelog-container">
         Changelog
-        
+
+        <h4>v0.29.0 (2026-11-15)</h4>
+        <ul>
+            <li>
+                <b>Review scheduling</b>: Add a configurable <b>Start of Day</b> for daily schedules and review cards.
+            </li>
+            <li>
+                <b>FSRS</b>: Add a <b>Maximum Interval</b> setting for global and deck-specific scheduling.
+                <ul>
+                    <li>Optionally adjust existing review cards that exceed the limit. Due dates can move earlier, and some cards may become overdue.</li>
+                </ul>
+            </li>
+            <li>
+                <b>Chinese reading</b>: Show alternative Mandarin readings when available, including pinyin and zhuyin. Custom readings remain unchanged.
+            </li>
+            <li>
+                <b>Appearance</b>: Add profile-backed color schemes, including <b>dark mode</b>, with a preview in Settings.
+            </li>
+            <li>
+                <b>Settings</b>: Add search with typo-tolerant matching to help find settings.
+            </li>
+            <li>
+                <b>FAQ</b>: Expand guidance and link related settings. Clarify how failed cards can be retried on the same day.
+            </li>
+        </ul>
+
         <h4>v0.28.6 (2026-08-23)</h4>
         <ul>
             <li>
@@ -873,7 +898,7 @@
         text-align: center;
         margin-bottom: 1em;
         gap: 0.5em;
-        background-color: #FFFFFF90;
+        background-color: var(--theme-about-beta-notice-background, var(--theme-surface, #FFFFFF90));
         padding: 2em;
         border-radius: 0.5em;
     }
@@ -881,7 +906,7 @@
         max-width: 32em;
     }
     .note {
-        background-color: #f0f0f0;
+        background-color: var(--theme-about-note-background, var(--theme-surface-alt, #f0f0f0));
         padding: 0.5em;
         border-radius: 0.3em;
         font-size: 0.9em;
@@ -889,7 +914,7 @@
     }
 
     .note > code {
-        background-color: white;
+        background-color: var(--theme-about-note-code-background, var(--theme-surface, white));
     }
 
     .privacy-policy-link {
@@ -902,7 +927,7 @@
     }
     
     code {
-        background-color: #f0f0f0;
+        background-color: var(--theme-about-code-background, var(--theme-surface-alt, #f0f0f0));
         padding: 0.2em 0.4em;
         border-radius: 0.3em;
     }

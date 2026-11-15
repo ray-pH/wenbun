@@ -16,6 +16,15 @@ function withTZ<T>(tz: string, run: () => T): T {
 }
 
 describe("getDaysSinceEpochLocal", () => {
+    it("starts a day at the configured local time", () => {
+        withTZ("UTC", () => {
+            const beforeStart = new Date(2026, 2, 10, 3, 59, 0);
+            const atStart = new Date(2026, 2, 10, 4, 0, 0);
+
+            expect(getDaysSinceEpochLocal(atStart, "04:00") - getDaysSinceEpochLocal(beforeStart, "04:00")).toBe(1);
+        });
+    });
+
     it("increments by 1 on consecutive dates in a stable timezone day", () => {
         withTZ("UTC", () => {
             const day1 = new Date(2026, 2, 10, 12, 0, 0);

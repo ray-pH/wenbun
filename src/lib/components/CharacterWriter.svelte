@@ -10,13 +10,14 @@
     import { AutoReview, AutoReviewGradeClass, AutoReviewGradeFAClass, AutoReviewGradeLabel, type AutoReviewData } from '$lib/autoReview';
     import { CHARACTER_WRITER_DRAWING_WIDTH, SLUG_UNSUPPORTED_CHAR_INTERACTION_NEXT, SLUG_UNSUPPORTED_CHAR_INTERACTION_WARNING } from "$lib/constants";
     import ManualWriter from "$lib/manualWriter";
+    import { getWriterStrokeColor } from '$lib/theme';
     import ManualWriterResultPreview from './ManualWriterResultPreview.svelte';
     
     let width = $state(500);
     let height = $state(500);
     let gridLinePad = $state(30);
     let p = $derived(gridLinePad);
-    let gridStroke = "#DDD";
+    let gridStroke = "var(--theme-writer-grid-line, var(--theme-border, #DDD))";
     let isAudioArtificial = $state(false);
     const NEXT_CHAR_DELAY = 500;
     const UNSUPPORTED_FIRST_TIME_DISPLAY_MS = 2000;
@@ -233,10 +234,10 @@
             showCharacter: false, 
             showOutline: cardConfig.isShowOutline || externalAndDone,
             highlightOnComplete: false,
-            strokeColor: app.getChineseToneColor(tone) ?? "#555",
+            strokeColor: app.getChineseToneColor(tone) ?? getWriterStrokeColor(),
             // drawing
             drawingWidth: CHARACTER_WRITER_DRAWING_WIDTH,
-            drawingColor: "#555",
+            drawingColor: getWriterStrokeColor(),
             showHintAfterMisses: app.getConfig(deckId).showHintAfterMissesCount,
             strokeFadeDuration: app.getConfig(deckId).strokeFadeDuration,
             // auto stroke animation
@@ -314,7 +315,7 @@
             width,
             height,
             drawingWidth: CHARACTER_WRITER_DRAWING_WIDTH,
-            drawingColor: app.getChineseToneColor(tone) ?? "#555",
+            drawingColor: app.getChineseToneColor(tone) ?? getWriterStrokeColor(),
             strokeAnimationSpeed: strokeSpeed,
             delayBetweenStrokes: linmap(strokeSpeed, 1, MAX_STROKE_SPEED, 1000, 10),
             delayBetweenLoops: linmap(strokeSpeed, 1, MAX_STROKE_SPEED, 2000, 10),
@@ -606,15 +607,17 @@
         flex-direction: row;
         gap: 0.5em;
         margin-bottom: 0.5em;
+        max-width: 100%;
     }
     .is-hidden {
         visibility: hidden;
     }
     .reading {
         font-size: 1.2em;
-        background-color: #FFFFFF90;
+        background-color: var(--theme-writer-reading-surface, var(--theme-surface, #FFFFFF90));
         padding: 0.2em 0.4em;
         border-radius: 0.5rem;
+        overflow-wrap: anywhere;
     }
     .audio-button {
         all: unset;
@@ -625,7 +628,7 @@
     }
     .grid-background {
         position: relative;
-        background-color: #FFFFFF90;
+        background-color: var(--theme-writer-grid-surface, var(--theme-surface, #FFFFFF90));
         border-radius: 0.5em;
         touch-action: none;
     }
@@ -633,7 +636,7 @@
         position: absolute;
         inset: 0;
         z-index: 3;
-        background: #E0E0E0;
+        background: var(--theme-writer-result-overlay-surface, var(--theme-surface-alt, #E0E0E0));
         border-radius: 0.5em;
         display: flex;
         align-items: center;
@@ -648,7 +651,7 @@
     }
     .character-box-container {
         font-size: 2em;
-        color: #00000090;
+        color: var(--theme-writer-character-text, var(--theme-muted, #00000090));
         align-self: end;
         &.long-text {
             display: flex;
@@ -696,9 +699,9 @@
         }
     }
     .dict-button {
-        background-color: #FFFFFF90;
+        background-color: var(--theme-writer-dictionary-button-surface, var(--theme-surface, #FFFFFF90));
         height: fit-content;
-        color: black;
+        color: var(--theme-writer-dictionary-button-text, var(--theme-text, black));
     }
     
     @property --p {
@@ -711,10 +714,10 @@
         &.is-complete { --p: var(--next-progress, 100%)}
         transition: --p 300ms ease;
         
-        color: white;
+        color: var(--theme-writer-new-element-indicator-text, var(--theme-on-accent, white));
         background:
           linear-gradient(var(--wenbun-blue) 0 0) 0 / var(--p) 100% no-repeat,
-          #BBB;
+          var(--theme-writer-new-element-indicator-track, var(--theme-muted, #BBB));
         border-radius: 0.5rem;
         &.is-hidden {
             visibility: hidden;
@@ -734,7 +737,7 @@
         z-index: 100;
         cursor: pointer;
         background-color : var(--color);
-        color: white;
+        color: var(--theme-writer-auto-review-indicator-text, var(--theme-on-accent, white));
         width: 8em;
         height: 8em;
         display: flex;
@@ -786,7 +789,7 @@
         position: absolute;
         top: 1em;
         left: 1em;
-        background-color: #E0E0E0;
+        background-color: var(--theme-writer-stroke-speed-button-surface, var(--theme-surface-alt, #E0E0E0));
         padding: 0.2em 0.5em;
         border-radius: 0.5rem;
     }
@@ -887,7 +890,7 @@
                     <i class="fa-solid fa-eye"></i>
                 </button>
             {:else}
-                {characterData?.reading}
+                {characterData?.readings?.join(' / ') ?? characterData?.reading}
             {/if}
         </div>
         {#if audios.length > 0}
@@ -949,7 +952,7 @@
                         <div style="color: #A64547; font-weight: 700; font-size: 1.1em;">
                             {SLUG_UNSUPPORTED_CHAR_INTERACTION_NEXT}
                         </div>
-                        <div style="max-width: 24em; color: #00000080; font-size: 0.9em;">
+                        <div style="max-width: 24em; color: var(--theme-writer-unsupported-warning-text, var(--theme-muted, #00000080)); font-size: 0.9em;">
                             {SLUG_UNSUPPORTED_CHAR_INTERACTION_WARNING}
                         </div>
                     {/if}

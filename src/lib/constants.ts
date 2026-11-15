@@ -70,6 +70,7 @@ export const ChineseToneColorPalette = {
 }
 
 export const CHINESE_DICT_SRC = `${base}/wenbun-assets/zh/zh_dict.json`;
+export const CHINESE_MANDARIN_ALTERNATIVES_SRC = `${base}/wenbun-assets/zh/zh_mandarin_alternatives.json`;
 export const CHINESE_CC_CEDICT_SRC = `${base}/wenbun-assets/zh/zh_cc_cedict_array.json`;
 export const CHINESE_MAKEMEAHANZI_SRC = `${base}/wenbun-assets/zh/zh_makemeahanzi.jsonl`;
 export const CHINESE_CUSTOM_NOTES_SRC = `${base}/wenbun-assets/zh/zh_note.jsonl`;
@@ -95,6 +96,10 @@ export const YUE_AUDIO_DICT_SRC = `${base}/wenbun-assets/audio_dict/yue_audio_di
 export const WENBUN_AUDIO_ZH_PREFIX_SRC = `/hugolpz-audio-cmn-64k/syllabs/cmn-`
 
 export const SETTINGS_LABEL_DATA = {
+    startOfDayTime: {
+        label: "New Day Starts At",
+        help: "Sets when daily limits reset and review cards become due for the next day.",
+    },
     newCardPerDay: {
         label: "New Card Per Day",
         help: "Specifies the number of new cards to learn each day.",
@@ -128,6 +133,10 @@ export const SETTINGS_LABEL_DATA = {
         help: "When enabled, the app will treat learning and review as separate sessions, with individual buttons to begin each.",
     },
     
+    colorScheme: {
+        label: "Color Scheme",
+        help: "Choose the app color scheme.",
+    },
     uiScale: {
         label: "UI Scale",
         help: "Specifies the UI scale.",
@@ -168,6 +177,10 @@ export const SETTINGS_LABEL_DATA = {
     desiredRetention: {
         label: "Desired Retention",
         help: "Defines the target probability of successful recall. Higher values increase review frequency (recommended range: 0.8–0.9).",
+    },
+    maximumInterval: {
+        label: "Maximum Review Interval (days)",
+        help: "Limits future review intervals to this many days. Lower values may increase your workload. Existing due dates and explicit learning steps are not changed.",
     },
     enableShortTerm: {
         label: "Enable Short Term",

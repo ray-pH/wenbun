@@ -1,5 +1,9 @@
 <script lang="ts">
     import { afterNavigate, goto } from '$app/navigation';
+    import { onMount } from 'svelte';
+    import { App } from '$lib/app';
+
+    onMount(() => { new App().load().catch(console.error); });
     import { base } from '$app/paths';
     import Loading from '$lib/components/Loading.svelte';
     import Popup from '$lib/components/Popup.svelte';

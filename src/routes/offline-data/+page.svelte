@@ -246,7 +246,7 @@
         color: var(--wenbun-red);
     }
     .note {
-        color: #00000090;
+        color: var(--theme-offline-data-note, var(--theme-muted, #00000090));
     }
     a {
         color: var(--wenbun-blue);

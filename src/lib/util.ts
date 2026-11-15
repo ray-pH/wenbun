@@ -28,6 +28,7 @@ interface DeepPartialArray<T> extends Array<DeepPartial<T>> {}
 export interface CharacterWriterData {
     characters: string;
     reading: string;
+    readings?: string[];
     meanings: string[];
     tags: string[][]; // separate tags for each character
     audioUrl: string[][];
@@ -99,11 +100,14 @@ export function dateDiffFormatted(start: Date, end: Date): string {
     // return `${diff.milliseconds}ms`
 }
 
-export function getDaysSinceEpochLocal(date = new Date()): number {
-    // Use local calendar fields (Y/M/D), but convert to a UTC midnight timestamp.
-    // This keeps day indexing stable across DST transitions where local-midnight
-    // deltas can be 23h or 25h.
-    const utcMidnightFromLocalDate = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+export function getDaysSinceEpochLocal(date = new Date(), startOfDayTime = "00:00"): number {
+    const [hours, minutes] = startOfDayTime.split(":").map(Number);
+    const adjustedDate = new Date(date);
+    adjustedDate.setHours(adjustedDate.getHours() - hours, adjustedDate.getMinutes() - minutes);
+
+    // Use local calendar fields, but convert to a UTC midnight timestamp. This
+    // keeps day indexing stable across DST transitions where days are not 24h.
+    const utcMidnightFromLocalDate = Date.UTC(adjustedDate.getFullYear(), adjustedDate.getMonth(), adjustedDate.getDate());
     return Math.floor(utcMidnightFromLocalDate / (1000 * 60 * 60 * 24));
 }
 

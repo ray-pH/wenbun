@@ -1,13 +1,16 @@
 <script lang="ts">
     import { base } from '$app/paths';
-    import { onMount } from "svelte";
+    import { onDestroy, onMount, tick } from "svelte";
+    import { applyColorScheme } from '$lib/theme';
     import { App, NewCardOrder, WritingMode, type DataExportReminderPeriod, type WenbunConfig } from "$lib/app";
     import TopBar from "$lib/components/TopBar.svelte";
     import _ from "lodash";
     import SettingsItem from "./SettingsItem.svelte";
+
     import * as FSRS from "ts-fsrs"
     import { getKeysRecursive, type DeepRequired } from "$lib/util";
     import { ChineseToneColorPalette } from "$lib/constants";
+    import themes from '$lib/themes.json';
     import { ChineseMandarinReading } from '$lib/chinese';
     import ProfileLogin from './ProfileLogin.svelte';
     import { SyncMode, type ManualSyncStatus } from '$lib/profile';
@@ -15,13 +18,22 @@
     import type { PWAInstallElement } from '@khmyznikov/pwa-install';
     import { isTauri } from '@tauri-apps/api/core';
     import TopRevealBar from '$lib/components/TopRevealBar.svelte';
-    import { goto } from '$app/navigation';
+    import { afterNavigate, goto } from '$app/navigation';
     
     export let data: {leniency?: string, fadeDuration?: string, fromDeckId?: string, deckId?: string};
     
     let app = new App();
     let config: DeepRequired<WenbunConfig>;
     let initialConfig: DeepRequired<WenbunConfig>;
+    let isPreviewingColorScheme = false;
+
+    function restoreSavedColorScheme() {
+        if (isPreviewingColorScheme) {
+            applyColorScheme(app.getConfig(null).colorScheme);
+            isPreviewingColorScheme = false;
+        }
+    }
+    onDestroy(restoreSavedColorScheme);
     let unlinkedKeys: string[] = [];
     let initialUnlinkedKeys: string[] = [];
     let isOnlineProfileLoaded = false;
@@ -31,6 +43,7 @@
     let dataExportReminderPeriod: DataExportReminderPeriod = 'daily';
     let initialDataExportReminderPeriod: DataExportReminderPeriod = 'daily';
     let pwaInstallComponent: PWAInstallElement;
+    let searchQuery = '';
     
     $: fromDeckDeckInfo = app.getDeckInfo(data.fromDeckId ?? '');
     $: deckDeckInfo = app.getDeckInfo(data.deckId ?? '');
@@ -54,18 +67,27 @@
     }
     
 
-    function scrollToReminderHashTarget() {
-        if (typeof window === "undefined") return;
-        if (window.location.hash !== "#data-export-reminder") return;
-        const el = document.getElementById("data-export-reminder");
-        if (!el) return;
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
+    async function scrollToHashTarget() {
+        await tick();
+        const hash = window.location.hash.slice(1);
+        if (!hash) return;
+        try {
+            document.getElementById(decodeURIComponent(hash))?.scrollIntoView({ block: 'start' });
+        } catch {
+            // Ignore malformed URL fragments.
+        }
     }
+
+    afterNavigate(() => {
+        if (isAppInitialized) void scrollToHashTarget();
+    });
+
 
     onMount(async () => {
         await app.init(null);
         isAppInitialized = true;
         initComponent();
+        await scrollToHashTarget();
         const changed = await app.initProfile(null);
         isLoggedIn = app.profile.isLoggedIn;
         if (await app.profile.getSyncMode() === SyncMode.manual) {
@@ -73,10 +95,11 @@
         }
         isOnlineProfileLoaded = true;
         if (changed) initComponent();
-        scrollToReminderHashTarget();
+        await scrollToHashTarget();
     })
     
     function initComponent() {
+        restoreSavedColorScheme();
         config = _.cloneDeep(app.getConfig(data.deckId ?? null));
         initialConfig = _.cloneDeep(config);
         learningStepsString = config.learningSteps.join(" ");
@@ -121,9 +144,52 @@
         }
     }
 
-    $: isConfigChanged = !_.isEqual(config, initialConfig) || !_.isEqual(_.sortBy(unlinkedKeys), _.sortBy(initialUnlinkedKeys)) || dataExportReminderEnabled !== initialDataExportReminderEnabled || dataExportReminderPeriod !== initialDataExportReminderPeriod; async function saveConfig() { app.setDataExportReminderMeta(dataExportReminderEnabled, dataExportReminderPeriod); if (data.deckId) { await app.saveDeckConfig(data.deckId, config, unlinkedKeys); } else {
+    $: maximumInterval = config?.maximumInterval;
+    $: isMaximumIntervalValid = Number.isSafeInteger(maximumInterval) && maximumInterval >= 1 && maximumInterval <= FSRS.default_maximum_interval;
+    $: overMaximumIntervalCards = isAppInitialized && isMaximumIntervalValid
+        ? app.scanOverMaximumIntervalCards(data.deckId || null, maximumInterval)
+        : [];
+    let isAdjustingIntervals = false;
+    async function adjustMaximumIntervals() {
+        if (isAdjustingIntervals || !isMaximumIntervalValid) return;
+        const deckId = data.deckId || null;
+        const limit = maximumInterval;
+        const isUnlinked = unlinkedKeys.includes('maximumInterval');
+        const count = app.scanOverMaximumIntervalCards(deckId, limit).length;
+        if (count > 0 && !window.confirm(`Save the maximum interval and adjust ${count} review card${count === 1 ? '' : 's'}? Due dates will only move earlier, and some cards may become overdue. This cannot be undone.`)) return;
+        isAdjustingIntervals = true;
+        let settingSaved = false;
+        try {
+            if (deckId) {
+                const savedConfig = app.getConfig(deckId);
+                const savedKeys = [...getKeysRecursive(app.getDeckPartialConfig(deckId))].filter(key => key !== 'maximumInterval');
+                if (isUnlinked) savedKeys.push('maximumInterval');
+                savedConfig.maximumInterval = limit;
+                await app.saveDeckConfig(deckId, savedConfig, savedKeys);
+            } else {
+                await app.saveConfig({ ..._.cloneDeep(app.config), maximumInterval: limit });
+            }
+            settingSaved = true;
+            initialConfig = { ...initialConfig, maximumInterval: limit };
+            if (deckId) {
+                initialUnlinkedKeys = initialUnlinkedKeys.filter(key => key !== 'maximumInterval');
+                if (isUnlinked) initialUnlinkedKeys = [...initialUnlinkedKeys, 'maximumInterval'];
+            }
+            await app.adjustOverMaximumIntervalCards(deckId, deckId ? limit : undefined);
+        } catch (error) {
+            console.error("Failed to save maximum interval or adjust review intervals", error);
+            window.alert(settingSaved
+                ? "The maximum interval was saved, but the cards could not be adjusted. Please try again."
+                : "Could not save the maximum interval. Please check your settings and try again.");
+        } finally {
+            if (isPreviewingColorScheme) applyColorScheme(config.colorScheme);
+            app = app;
+            isAdjustingIntervals = false;
+        }
+    }
+    $: isConfigChanged = !_.isEqual(config, initialConfig) || !_.isEqual(_.sortBy(unlinkedKeys), _.sortBy(initialUnlinkedKeys)) || dataExportReminderEnabled !== initialDataExportReminderEnabled || dataExportReminderPeriod !== initialDataExportReminderPeriod; async function saveConfig() { if (!isMaximumIntervalValid) return; app.setDataExportReminderMeta(dataExportReminderEnabled, dataExportReminderPeriod); if (data.deckId) { await app.saveDeckConfig(data.deckId, config, unlinkedKeys); } else {
             await app.saveConfig(config); } initialConfig = _.cloneDeep(config); initialUnlinkedKeys = _.cloneDeep(unlinkedKeys);
-        initialDataExportReminderEnabled = dataExportReminderEnabled; initialDataExportReminderPeriod = dataExportReminderPeriod; } function discardChanges() { config = _.cloneDeep(initialConfig); unlinkedKeys = _.cloneDeep(initialUnlinkedKeys); dataExportReminderEnabled = initialDataExportReminderEnabled; dataExportReminderPeriod = initialDataExportReminderPeriod; }
+        initialDataExportReminderEnabled = dataExportReminderEnabled; initialDataExportReminderPeriod = dataExportReminderPeriod; } function discardChanges() { restoreSavedColorScheme(); config = _.cloneDeep(initialConfig); unlinkedKeys = _.cloneDeep(initialUnlinkedKeys); dataExportReminderEnabled = initialDataExportReminderEnabled; dataExportReminderPeriod = initialDataExportReminderPeriod; }
     async function resetConfigToDefault() { const confirm = window.confirm("Are you sure you want to reset to the default settings?"); if (!confirm) return; await app.resetConfigToDefault(); config = _.cloneDeep(app.getConfig(data.deckId ?? null)); initialConfig = _.cloneDeep(config); } async function resetDebugProfile(): Promise<void> { const confirm = window.confirm("Are you sure you want to reset to the debug profile?"); if (!confirm) return;
         await app.debug();
         app = app;
@@ -240,8 +306,8 @@
 
 {#snippet topSettingsContent()}
     <div class="top-settings-section floating">
-        <button class="button" onclick={() => saveConfig()} disabled={!isConfigChanged}>Save</button>
-        <button class="button" onclick={() => discardChanges()} disabled={!isConfigChanged}>Discard Changes</button>
+        <button class="button" onclick={() => saveConfig()} disabled={!isConfigChanged || !isMaximumIntervalValid || isAdjustingIntervals}>Save</button>
+        <button class="button" onclick={() => discardChanges()} disabled={!isConfigChanged || isAdjustingIntervals}>Discard Changes</button>
     </div>
 {/snippet}
 
@@ -265,10 +331,15 @@
 <TopRevealBar isShow={isConfigChanged}>
     {@render topSettingsContent()}
 </TopRevealBar>
-<div class="main-container">
+<div class="main-container" class:searching={searchQuery.trim()}>
     {#if config}
         <div class="top-settings-section">
             {@render topSettingsContent()}
+        </div>
+        <div class="settings-section search-area">
+            <label for="settings-search">Search settings</label>
+            <input id="settings-search" type="search" placeholder="Search settings..." bind:value={searchQuery} />
+            <p class="search-empty" aria-live="polite">No matching settings found. Try a different search.</p>
         </div>
         {#if data.fromDeckId}
             <div class="settings-section no-line" style="margin-bottom: 1em">
@@ -282,7 +353,7 @@
             </div>
         {/if}
         {#if !data.deckId}
-        <div class="settings-section">
+        <div class="settings-section" id="profile">
             <div class="section-title">Profile</div>
             <div class="section-container">
                 {#if app}
@@ -314,77 +385,92 @@
         </div>
         {/if}
         
-        <div class="settings-section">
+        <div class="settings-section" id="learning">
             <div class="section-title">Learning</div>
             <div class="section-container">
+                {#if !data.deckId}
+                    <SettingsItem key="startOfDayTime" {searchQuery} keywords="reset midnight rollover timezone daily">
+                        <input type="time" bind:value={config.startOfDayTime} />
+                    </SettingsItem>
+                {/if}
                 {#if config.writingMode === WritingMode.External || config.writingMode === WritingMode.Manual}
-                    <SettingsItem key="gradingMethod" {...deckSettingsItemProps}>
+                    <SettingsItem key="gradingMethod" {searchQuery} keywords="automatic manual rating score" {...deckSettingsItemProps}>
                         <select disabled value="manual">
                             <option value="auto">auto</option>
                             <option value="manual">manual</option>
                         </select>
                     </SettingsItem>
                 {:else}
-                    <SettingsItem key="gradingMethod" {...deckSettingsItemProps}>
+                    <SettingsItem key="gradingMethod" {searchQuery} keywords="automatic manual rating score" {...deckSettingsItemProps}>
                         <select bind:value={config.gradingMethod}>
                             <option value="auto">auto</option>
                             <option value="manual">manual</option>
                         </select>
                     </SettingsItem>
                 {/if}
-                <SettingsItem key="writingMode" {...deckSettingsItemProps}>
+                <SettingsItem key="writingMode" {searchQuery} keywords="handwriting paper external pen input" {...deckSettingsItemProps}>
                     <select bind:value={config.writingMode}>
                         <option value="{WritingMode.Default}">Default</option>
                         <option value="{WritingMode.Manual}">Manual</option>
                         <option value="{WritingMode.External}">External</option>
                     </select>
                 </SettingsItem>
-                <SettingsItem key="newCardPerDay" {...deckSettingsItemProps}>
+                <SettingsItem key="newCardPerDay" {searchQuery} keywords="daily limit quota new learning" {...deckSettingsItemProps}>
                     <input type="number" bind:value={config.newCardPerDay}>
                 </SettingsItem>
-                <SettingsItem key="maxReviewsPerDay" {...deckSettingsItemProps}>
+                <SettingsItem key="maxReviewsPerDay" {searchQuery} keywords="daily limit quota maximum due" {...deckSettingsItemProps}>
                     <input type="number" bind:value={config.maxReviewsPerDay}>
                 </SettingsItem>
-                <SettingsItem key="newCardOrder" {...deckSettingsItemProps}>
+                <SettingsItem key="newCardOrder" {searchQuery} keywords="sequence shuffle mix queue" {...deckSettingsItemProps}>
                     <select bind:value={config.newCardOrder}>
                         <option value={NewCardOrder.Mix}>Mix</option>
                         <option value={NewCardOrder.AfterReviews}>After Reviews</option>
                         <option value={NewCardOrder.BeforeReviews}>Before Reviews</option>
                     </select>
                 </SettingsItem>
-                <SettingsItem key="newPreviouslyStudiedCardPerDay" {...deckSettingsItemProps}>
+                <SettingsItem key="newPreviouslyStudiedCardPerDay" {searchQuery} keywords="daily limit quota familiar known" {...deckSettingsItemProps}>
                     <input type="number" bind:value={config.newPreviouslyStudiedCardPerDay}>
                 </SettingsItem>
-                <SettingsItem key="newPreviouslyStudiedCardOrder" {...deckSettingsItemProps}>
+                <SettingsItem key="newPreviouslyStudiedCardOrder" {searchQuery} keywords="sequence shuffle familiar known queue" {...deckSettingsItemProps}>
                     <select bind:value={config.newPreviouslyStudiedCardOrder}>
                         <option value={NewCardOrder.Mix}>Mix</option>
                         <option value={NewCardOrder.AfterReviews}>After Reviews</option>
                         <option value={NewCardOrder.BeforeReviews}>Before Reviews</option>
                     </select>
                 </SettingsItem>
-                <SettingsItem key="isAutoNextOnSuccess" {...deckSettingsItemProps}>
+                <SettingsItem key="isAutoNextOnSuccess" {searchQuery} keywords="advance automatically correct" {...deckSettingsItemProps}>
                     <input type="checkbox" disabled={config.gradingMethod === 'manual'} bind:checked={config.isAutoNextOnSuccess}>
                 </SettingsItem>
-                <SettingsItem key="gradeWarmUpCards" {...deckSettingsItemProps}>
+                <SettingsItem key="gradeWarmUpCards" {searchQuery} keywords="learning steps again fail rating" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.gradeWarmUpCards}>
                 </SettingsItem>
-                <SettingsItem key="startPreviouslyStudiedCardFromTheBack" {...deckSettingsItemProps}>
+                <SettingsItem key="startPreviouslyStudiedCardFromTheBack" {searchQuery} keywords="reverse order familiar known" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.startPreviouslyStudiedCardFromTheBack}>
                 </SettingsItem>
-                <SettingsItem key="separateLearnAndReview" inputKey="isSeparateLearnAndReview" {...deckSettingsItemProps}>
+                <SettingsItem key="separateLearnAndReview" {searchQuery} keywords="sessions split separate study" inputKey="isSeparateLearnAndReview" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.isSeparateLearnAndReview}>
                 </SettingsItem>
-                <SettingsItem key="failWholeWord" {...deckSettingsItemProps}>
+                <SettingsItem key="failWholeWord" {searchQuery} keywords="reveal mistake entire character" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.failWholeWord}>
                 </SettingsItem>
             </div>
         </div>
         
-        <div class="settings-section">
+        <div class="settings-section" id="ui-audio-input">
             <div class="section-title">UI, Audio & Input</div>
             <div class="section-container">
                 {#if !data.deckId}
-                <SettingsItem key="uiScale" {...deckSettingsItemProps}>
+                <SettingsItem key="colorScheme" {searchQuery} keywords="theme dark light appearance night">
+                    <select bind:value={config.colorScheme} onchange={(event) => {
+                        applyColorScheme(event.currentTarget.value);
+                        isPreviewingColorScheme = true;
+                    }}>
+                        {#each themes as theme (theme.id)}
+                            <option value={theme.id}>{theme.name}</option>
+                        {/each}
+                    </select>
+                </SettingsItem>
+                <SettingsItem key="uiScale" {searchQuery} keywords="zoom interface text display size" {...deckSettingsItemProps}>
                     <select bind:value={config.uiScale}>
                         <option value="small">small</option>
                         <option value="normal">normal</option>
@@ -392,48 +478,48 @@
                     </select>
                 </SettingsItem>
                 {#if config.uiScale === 'custom'}
-                    <SettingsItem key="customFontSize" {...deckSettingsItemProps}>
+                    <SettingsItem key="customFontSize" {searchQuery} keywords="text letters zoom accessibility" {...deckSettingsItemProps}>
                         <input type="number" step="1" min="8" max="32" bind:value={config.customFontSize}>
                     </SettingsItem>
                 {/if}
                 {/if}
                 {#if config.gradingMethod === 'auto'}
-                    <SettingsItem key="showHealthBar" inputKey="showAutoGradingBar" {...deckSettingsItemProps}>
+                    <SettingsItem key="showHealthBar" {searchQuery} keywords="progress mistakes score indicator" inputKey="showAutoGradingBar" {...deckSettingsItemProps}>
                         <input type="checkbox" bind:checked={config.showAutoGradingBar}>
                     </SettingsItem>
                 {/if}
-                <SettingsItem key="playSuccessSound" {...deckSettingsItemProps}>
+                <SettingsItem key="playSuccessSound" {searchQuery} keywords="ding chime mute volume audio" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.playSuccessSound}>
                 </SettingsItem>
-                <!-- <SettingsItem key="showReadingOnFail">
+                <!-- <SettingsItem key="showReadingOnFail" {searchQuery}>
                     <input type="checkbox" bind:checked={config.showReadingOnFail}>
                 </SettingsItem> -->
                 {#if !data.deckId}
-                <SettingsItem key="showDeckLastStudyTime" {...deckSettingsItemProps}>
+                <SettingsItem key="showDeckLastStudyTime" {searchQuery} keywords="history activity recent" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.showDeckLastStudyTime}>
                 </SettingsItem>
                 {/if}
-                <SettingsItem key="enableNextKeyButtons" inputKey="enableNextButtonKey" {...deckSettingsItemProps}>
+                <SettingsItem key="enableNextKeyButtons" {searchQuery} keywords="keyboard shortcut hotkey advance" inputKey="enableNextButtonKey" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.enableNextButtonKey}>
                 </SettingsItem>
                 {#if config.enableNextButtonKey}
-                    <SettingsItem key="nextKeyButtons" inputKey="nextButtonKeyCodes" {...deckSettingsItemProps}>
+                    <SettingsItem key="nextKeyButtons" {searchQuery} keywords="keyboard shortcut hotkey keybind advance" inputKey="nextButtonKeyCodes" {...deckSettingsItemProps}>
                         {@render nextButtonKeyConfig()}
                     </SettingsItem>
                 {/if}
             </div>
         </div>
         
-        <div class="settings-section">
+        <div class="settings-section" id="character-writer">
             <div class="section-title">Character Writer</div>
             <div class="section-container">
-                <SettingsItem key="showHintAfterMissesCount" {...deckSettingsItemProps}>
+                <SettingsItem key="showHintAfterMissesCount" {searchQuery} keywords="clue help mistakes errors" {...deckSettingsItemProps}>
                     <input type="number" step="1" min="0" bind:value={config.showHintAfterMissesCount}>
                 </SettingsItem>
-                <SettingsItem key="strokeLeniency" {...deckSettingsItemProps}>
+                <SettingsItem key="strokeLeniency" {searchQuery} keywords="strictness tolerance handwriting accuracy sensitivity calibration" {...deckSettingsItemProps}>
                     <input type="number" step="0.01" bind:value={config.strokeLeniency}>
                 </SettingsItem>
-                <SettingsItem key="strokeFadeDuration" {...deckSettingsItemProps}>
+                <SettingsItem key="strokeFadeDuration" {searchQuery} keywords="handwriting disappear time speed" {...deckSettingsItemProps}>
                     <input type="number" step="1" bind:value={config.strokeFadeDuration}>
                 </SettingsItem>
                 <a class="button" href="{base}/settings/leniency-calibration" aria-label="Test Leniency Calibration">
@@ -444,58 +530,72 @@
         </div>
         
         
-        <div class="settings-section">
+        <div class="settings-section" id="fsrs">
             <div class="section-title">FSRS</div>
             <div class="section-container">
-                <SettingsItem key="learningSteps" {...deckSettingsItemProps}>
+                <SettingsItem key="learningSteps" {searchQuery} keywords="fsrs scheduling intervals new" {...deckSettingsItemProps}>
                     <input type="text" 
                         bind:value={learningStepsString} 
                         class:invalid={!isLearningStepsStringValid}
                     >
                 </SettingsItem>
-                <SettingsItem key="previouslyStudiedLearningSteps" {...deckSettingsItemProps}>
+                <SettingsItem key="previouslyStudiedLearningSteps" {searchQuery} keywords="fsrs scheduling intervals familiar known" {...deckSettingsItemProps}>
                     <input type="text" 
                         bind:value={previouslyStudiedLearningStepsString} 
                         class:invalid={!isPreviouslyStudiedLearningStepsStringValid}
                     >
                 </SettingsItem>
-                <SettingsItem key="desiredRetention" {...deckSettingsItemProps}>
+                <SettingsItem key="desiredRetention" {searchQuery} keywords="fsrs recall memory target workload" {...deckSettingsItemProps}>
                     <div style="display: flex; flex-direction: row; align-items: center; gap: 0.5em;">
                         <input type="number" bind:value={config.desiredRetention} step="0.01">
                     </div>
                 </SettingsItem>
-                <SettingsItem key="enableShortTerm" {...deckSettingsItemProps}>
+                <SettingsItem key="maximumInterval" {searchQuery} keywords="fsrs scheduling limit days maximum" {...deckSettingsItemProps}>
+                    <input type="number" min="1" max={FSRS.default_maximum_interval} step="1" required bind:value={config.maximumInterval} disabled={isAdjustingIntervals}>
+                </SettingsItem>
+                {#if isAppInitialized && isMaximumIntervalValid && overMaximumIntervalCards.length > 0}
+                    <div class="interval-warning" aria-live="polite">
+                        <div>{overMaximumIntervalCards.length} existing review card{overMaximumIntervalCards.length === 1 ? '' : 's'} exceed{overMaximumIntervalCards.length === 1 ? 's' : ''} the maximum interval. {data.deckId ? 'The selected limit applies to all decks in this scope.' : 'Deck-specific overrides use their own limits.'}</div>
+                        <div>Adjusting brings due dates forward from the last review and updates their intervals. Some cards may become overdue.</div>
+                        <button class="button" onclick={adjustMaximumIntervals} disabled={isAdjustingIntervals}>
+                            Adjust existing cards
+                        </button>
+                    </div>
+                {:else if isAppInitialized && !isMaximumIntervalValid}
+                    <div>Enter a whole number between 1 and {FSRS.default_maximum_interval} to check existing review cards.</div>
+                {/if}
+                <SettingsItem key="enableShortTerm" {searchQuery} keywords="fsrs scheduling relearning same day" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.enableShortTerm}>
                 </SettingsItem>
-                <SettingsItem key="enableFuzz" {...deckSettingsItemProps}>
+                <SettingsItem key="enableFuzz" {searchQuery} keywords="fsrs scheduling random variation" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.enableFuzz}>
                 </SettingsItem>
-                <SettingsItem key="FSRSParams" {...deckSettingsItemProps}>
+                <SettingsItem key="FSRSParams" {searchQuery} keywords="scheduler algorithm weights parameters advanced" {...deckSettingsItemProps}>
                     <textarea bind:value={fsrsParamsString} class:invalid={!isFSRSParamsStringValid}></textarea>
                 </SettingsItem>
             </div>
         </div>
         
-        <div class="settings-section">
+        <div class="settings-section" id="chinese">
             <div class="section-title">Chinese</div>
             <div class="section-container">
-                <SettingsItem key="zhAlwaysShowReading" inputKey="zh.alwaysShowReading" {...deckSettingsItemProps}>
+                <SettingsItem key="zhAlwaysShowReading" {searchQuery} keywords="pinyin zhuyin pronunciation phonetics" inputKey="zh.alwaysShowReading" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.zh.alwaysShowReading}>
                 </SettingsItem>
-                <SettingsItem key="zhMandarinReading" inputKey="zh.mandarinReading" {...deckSettingsItemProps}>
+                <SettingsItem key="zhMandarinReading" {searchQuery} keywords="pinyin zhuyin bopomofo pronunciation phonetics numeric" inputKey="zh.mandarinReading" {...deckSettingsItemProps}>
                     <select bind:value={config.zh.mandarinReading}>
                         <option value={ChineseMandarinReading.Pinyin}>Pinyin (wén)</option>
                         <option value={ChineseMandarinReading.PinyinNumeric}>Numeric (wen2)</option>
                         <option value={ChineseMandarinReading.Zhuyin}>Zhuyin (ㄨㄣˊ)</option>
                     </select>
                 </SettingsItem>
-                <SettingsItem key="zhPlayAudio" inputKey="zh.playAudio" {...deckSettingsItemProps}>
+                <SettingsItem key="zhPlayAudio" {searchQuery} keywords="sound pronunciation voice speech listen" inputKey="zh.playAudio" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.zh.playAudio}>
                 </SettingsItem>
-                <SettingsItem key="zhUseAiGeneratedAudioForMissingAudio" inputKey="zh.useAiGeneratedAudioForMissingAudio" {...deckSettingsItemProps}>
+                <SettingsItem key="zhUseAiGeneratedAudioForMissingAudio" {searchQuery} keywords="speech synthesis voice tts pronunciation" inputKey="zh.useAiGeneratedAudioForMissingAudio" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.zh.useAiGeneratedAudioForMissingAudio}>
                 </SettingsItem>
-                <SettingsItem key="zhForceStopAudioOnNextCard" inputKey="zh.forceStopAudioOnNextCard" {...deckSettingsItemProps}>
+                <SettingsItem key="zhForceStopAudioOnNextCard" {searchQuery} keywords="sound playback interrupt voice" inputKey="zh.forceStopAudioOnNextCard" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.zh.forceStopAudioOnNextCard}>
                 </SettingsItem>
                 
@@ -504,10 +604,10 @@
                     <i class="fa-solid fa-sliders"></i>&nbsp;
                     More Audio Settings
                 </a>
-                <SettingsItem key="zhIsColorBasedOnTone">
+                <SettingsItem key="zhIsColorBasedOnTone" {searchQuery} keywords="pinyin hanzi colour pronunciation">
                     <input type="checkbox" bind:checked={config.zh.isColorBasedOnTone}>
                 </SettingsItem>
-                <SettingsItem key="zhToneColors">
+                <SettingsItem key="zhToneColors" {searchQuery} keywords="pinyin hanzi colour palette">
                     <div>
                         <div>Load Preset</div>
                         <div>
@@ -519,32 +619,32 @@
                         </div>
                     </div>
                 </SettingsItem>
-                <SettingsItem key="zhTone1">
+                <SettingsItem key="zhTone1" {searchQuery} keywords="first tone color colour pinyin">
                     <input type="color" bind:value={config.zh.toneColors[0]}>
                 </SettingsItem>
-                <SettingsItem key="zhTone2">
+                <SettingsItem key="zhTone2" {searchQuery} keywords="second tone color colour pinyin">
                     <input type="color" bind:value={config.zh.toneColors[1]}>
                 </SettingsItem>
-                <SettingsItem key="zhTone3">
+                <SettingsItem key="zhTone3" {searchQuery} keywords="third tone color colour pinyin">
                     <input type="color" bind:value={config.zh.toneColors[2]}>
                 </SettingsItem>
-                <SettingsItem key="zhTone4">
+                <SettingsItem key="zhTone4" {searchQuery} keywords="fourth tone color colour pinyin">
                     <input type="color" bind:value={config.zh.toneColors[3]}>
                 </SettingsItem>
-                <SettingsItem key="zhToneNeutral">
+                <SettingsItem key="zhToneNeutral" {searchQuery} keywords="fifth tone color colour pinyin">
                     <input type="color" bind:value={config.zh.toneColors[4]}>
                 </SettingsItem>
                 {/if}
             </div>
         </div>
         
-        <div class="settings-section">
+        <div class="settings-section" id="dictionary">
             <div class="section-title">Dictionary</div>
             <div class="section-container">
-                <SettingsItem key="isShowPlecoLink" {...deckSettingsItemProps}>
+                <SettingsItem key="isShowPlecoLink" {searchQuery} keywords="dictionary lookup chinese" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.isShowPlecoLink}>
                 </SettingsItem>
-                <SettingsItem key="isShowDongLink" {...deckSettingsItemProps}>
+                <SettingsItem key="isShowDongLink" {searchQuery} keywords="dictionary lookup chinese" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.isShowDongLink}>
                 </SettingsItem>
             </div>
@@ -557,10 +657,10 @@
                     <div class="note">
                         Browser storage may be cleared by browser/site data cleanup. Enable reminders to periodically export your profile as a backup.
                     </div>
-                    <SettingsItem key="dataExportReminderEnabled">
+                    <SettingsItem key="dataExportReminderEnabled" {searchQuery} keywords="backup save download profile notification">
                         <input type="checkbox" bind:checked={dataExportReminderEnabled}>
                     </SettingsItem>
-                    <SettingsItem key="dataExportReminderPeriod">
+                    <SettingsItem key="dataExportReminderPeriod" {searchQuery} keywords="backup frequency schedule notification">
                         <select bind:value={dataExportReminderPeriod} disabled={!dataExportReminderEnabled}>
                             <option value="daily">daily</option>
                             <option value="2day">2day</option>
@@ -578,7 +678,7 @@
         <div class="settings-section">
             <div class="section-title">Experimental</div>
             <div class="section-container">
-                <SettingsItem key="experimentalApplePencilFix">
+                <SettingsItem key="experimentalApplePencilFix" {searchQuery}>
                     <input type="checkbox" bind:checked={config._experimentalFixApplePencil}>
                 </SettingsItem>
             </div>
@@ -586,7 +686,7 @@
         -->
                 
         {#if !data.deckId}
-        <div class="settings-section">
+        <div class="settings-section" id="offline-data">
             <div class="section-title">Offline Data</div>
             <div class="section-container">
                 {#if !isTauri()}
@@ -661,7 +761,7 @@
     .top-settings-section {
         width: 100%;
         padding: 0 1em;
-        max-width: 25em;
+        max-width: 38em;
         box-sizing: border-box;
         display: flex;
         gap: 0.5em;
@@ -674,11 +774,46 @@
     .settings-section {
         width: 100%;
         padding: 0 1em;
-        max-width: 25em;
+        max-width: 38em;
         box-sizing: border-box;
-    }
-    :global(#data-export-reminder) {
         scroll-margin-top: 6em;
+    }
+    .search-area {
+        margin-bottom: 1.5em;
+    }
+    .search-area label {
+        display: block;
+        color: var(--theme-settings-help-text, var(--theme-muted, #00000090));
+        font-size: 0.85em;
+        margin-bottom: 0.4em;
+    }
+    .search-area input {
+        box-sizing: border-box;
+        width: 100%;
+        padding: 0.55em 0.7em;
+        border: 1px solid var(--theme-border, #00000033);
+        border-radius: 0.4em;
+        background: var(--theme-surface, transparent);
+        color: var(--theme-text, inherit);
+    }
+    .search-area input:focus-visible {
+        outline: 2px solid var(--theme-text, currentColor);
+        outline-offset: 2px;
+    }
+    .search-area::after {
+        opacity: 0.4;
+    }
+    .search-empty {
+        display: none;
+        color: var(--theme-settings-help-text, var(--theme-muted, #00000090));
+        font-size: 0.85em;
+        margin: 0.6em 0;
+    }
+    .searching:not(:has(:global(.settings-item:not([hidden])))) .search-empty {
+        display: block;
+    }
+    .searching .settings-section:not(.search-area):not(:has(:global(.settings-item:not([hidden])))) {
+        display: none;
     }
     :global(#data-export-reminder:target) {
         border-radius: 0.5em;
@@ -697,7 +832,7 @@
     .settings-section:not(.no-line)::after {
         width: 90%;
         height: 1px;
-        background-color: #00000090;
+        background-color: var(--theme-settings-section-divider, var(--theme-border, #00000090));
         content: '';
         display: block;
         align-self: center;
@@ -718,8 +853,19 @@
             width: 5em;
         }
     }
+    .interval-warning {
+        background-color: color-mix(in srgb, #e9ad24 20%, var(--theme-surface, white));
+        color: var(--theme-text, black);
+        border-radius: 0.5em;
+        padding: 0.75em;
+        font-size: 0.9em;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5em;
+    }
     .settings-label-help {
-        color: #00000090;
+        color: var(--theme-settings-help-text, var(--theme-muted, #00000090));
         font-size: 0.8em;
     }
     .profile-textarea {
