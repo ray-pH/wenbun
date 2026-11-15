@@ -178,6 +178,10 @@ export const SETTINGS_LABEL_DATA = {
         label: "Desired Retention",
         help: "Defines the target probability of successful recall. Higher values increase review frequency (recommended range: 0.8–0.9).",
     },
+    maximumInterval: {
+        label: "Maximum Review Interval (days)",
+        help: "Limits future review intervals to this many days. Lower values may increase your workload. Existing due dates and explicit learning steps are not changed.",
+    },
     enableShortTerm: {
         label: "Enable Short Term",
         help: "When enabled, failed cards can reappear in the same session. When disabled, the short-term review schedule (less than 24 hours) is bypassed.",

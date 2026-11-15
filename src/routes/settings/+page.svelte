@@ -133,7 +133,8 @@
         }
     }
 
-    $: isConfigChanged = !_.isEqual(config, initialConfig) || !_.isEqual(_.sortBy(unlinkedKeys), _.sortBy(initialUnlinkedKeys)) || dataExportReminderEnabled !== initialDataExportReminderEnabled || dataExportReminderPeriod !== initialDataExportReminderPeriod; async function saveConfig() { app.setDataExportReminderMeta(dataExportReminderEnabled, dataExportReminderPeriod); if (data.deckId) { await app.saveDeckConfig(data.deckId, config, unlinkedKeys); } else {
+    $: isMaximumIntervalValid = config && Number.isSafeInteger(config.maximumInterval) && config.maximumInterval >= 1 && config.maximumInterval <= FSRS.default_maximum_interval;
+    $: isConfigChanged = !_.isEqual(config, initialConfig) || !_.isEqual(_.sortBy(unlinkedKeys), _.sortBy(initialUnlinkedKeys)) || dataExportReminderEnabled !== initialDataExportReminderEnabled || dataExportReminderPeriod !== initialDataExportReminderPeriod; async function saveConfig() { if (!isMaximumIntervalValid) return; app.setDataExportReminderMeta(dataExportReminderEnabled, dataExportReminderPeriod); if (data.deckId) { await app.saveDeckConfig(data.deckId, config, unlinkedKeys); } else {
             await app.saveConfig(config); } initialConfig = _.cloneDeep(config); initialUnlinkedKeys = _.cloneDeep(unlinkedKeys);
         initialDataExportReminderEnabled = dataExportReminderEnabled; initialDataExportReminderPeriod = dataExportReminderPeriod; } function discardChanges() { restoreSavedColorScheme(); config = _.cloneDeep(initialConfig); unlinkedKeys = _.cloneDeep(initialUnlinkedKeys); dataExportReminderEnabled = initialDataExportReminderEnabled; dataExportReminderPeriod = initialDataExportReminderPeriod; }
     async function resetConfigToDefault() { const confirm = window.confirm("Are you sure you want to reset to the default settings?"); if (!confirm) return; await app.resetConfigToDefault(); config = _.cloneDeep(app.getConfig(data.deckId ?? null)); initialConfig = _.cloneDeep(config); } async function resetDebugProfile(): Promise<void> { const confirm = window.confirm("Are you sure you want to reset to the debug profile?"); if (!confirm) return;
@@ -252,7 +253,7 @@
 
 {#snippet topSettingsContent()}
     <div class="top-settings-section floating">
-        <button class="button" onclick={() => saveConfig()} disabled={!isConfigChanged}>Save</button>
+        <button class="button" onclick={() => saveConfig()} disabled={!isConfigChanged || !isMaximumIntervalValid}>Save</button>
         <button class="button" onclick={() => discardChanges()} disabled={!isConfigChanged}>Discard Changes</button>
     </div>
 {/snippet}
@@ -490,6 +491,9 @@
                     <div style="display: flex; flex-direction: row; align-items: center; gap: 0.5em;">
                         <input type="number" bind:value={config.desiredRetention} step="0.01">
                     </div>
+                </SettingsItem>
+                <SettingsItem key="maximumInterval" {...deckSettingsItemProps}>
+                    <input type="number" min="1" max={FSRS.default_maximum_interval} step="1" required bind:value={config.maximumInterval}>
                 </SettingsItem>
                 <SettingsItem key="enableShortTerm" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.enableShortTerm}>

@@ -122,6 +122,7 @@ export interface WenbunConfig {
     learningSteps?: FSRS.Steps;
     previouslyStudiedLearningSteps?: FSRS.Steps;
     desiredRetention?: number;
+    maximumInterval?: number; // days
     enableShortTerm?: boolean;
     enableFuzz?: boolean;
     FSRSParams?: number[];
@@ -178,6 +179,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     learningSteps: ["1m", "10m"],
     previouslyStudiedLearningSteps: ["1m", "5d"],
     desiredRetention: 0.9,
+    maximumInterval: FSRS.default_maximum_interval,
     enableShortTerm: false,
     enableFuzz: false,
     FSRSParams: DEFAULT_FSRS_PARAM,
@@ -274,9 +276,11 @@ export class App {
     
     updateFSRS(deckId: string|null) {
         const config = this.getConfig(deckId);
+        const maximumInterval = Number.isSafeInteger(config.maximumInterval) && config.maximumInterval > 0
+            ? config.maximumInterval : FSRS.default_maximum_interval;
         const params = FSRS.generatorParameters({
             request_retention: config.desiredRetention,
-            // maximum_interval: number;
+            maximum_interval: maximumInterval,
             w: config.FSRSParams,
             enable_fuzz: config.enableFuzz,
             enable_short_term: config.enableShortTerm,
@@ -286,7 +290,7 @@ export class App {
         
         const prevStudiedParams = FSRS.generatorParameters({
             request_retention: config.desiredRetention,
-            // maximum_interval: number;
+            maximum_interval: maximumInterval,
             w: config.FSRSParams,
             enable_fuzz: config.enableFuzz,
             enable_short_term: config.enableShortTerm,
@@ -693,11 +697,31 @@ export class App {
         await this.save();
     }
     
+    private repeatCapped(fsrs: FSRS.FSRS, card: FSRS.Card, now: Date): FSRS.RecordLog {
+        const results = fsrs.repeat(card, now) as FSRS.RecordLog;
+        const maximum = fsrs.parameters.maximum_interval;
+        // Explicit learning steps are user-directed delays, not generated review intervals.
+        const steps = fsrs.parameters.enable_short_term
+            ? FSRS.BasicLearningStepsStrategy(fsrs.parameters, card.state,
+                (card.learning_steps || 0) + (card.state === FSRS.State.Learning ? 1 : 0))
+            : {};
+        for (const grade of FSRS_GRADES) {
+            const scheduled = results[grade].card;
+            if ((steps[grade]?.scheduled_minutes ?? 0) > 0) continue;
+            // FSRS may exceed its cap when enforcing increasing intervals across grades.
+            if (scheduled.scheduled_days > maximum) {
+                scheduled.scheduled_days = maximum;
+                scheduled.due = new Date(now.getTime() + maximum * 86400000);
+            }
+        }
+        return results;
+    }
+
     debugSimulateRateCard(deckId: string, cardId: number, grade: FSRS.Grade, date?: Date): void {
         const card = this.getCard(deckId, cardId, true);
         if (!card) return;
         const fsrs = this.fsrs;
-        const schedulingCards = fsrs.repeat(card, date ?? this.getNow()) as FSRS.RecordLog;
+        const schedulingCards = this.repeatCapped(fsrs, card, date ?? this.getNow());
         this.setCard(deckId, cardId, schedulingCards[grade].card);
     }
     
@@ -710,7 +734,7 @@ export class App {
         if (!card) return;
         const isPreviouslyStudied = this.deckData[deckId]?.previouslyStudied?.includes(cardId);
         const fsrs = isPreviouslyStudied ? this.fsrsPrevStudied : this.fsrs;
-        const schedulingCards = fsrs.repeat(card, date ?? this.getNow()) as FSRS.RecordLog;
+        const schedulingCards = this.repeatCapped(fsrs, card, date ?? this.getNow());
         this.setCard(deckId, cardId, schedulingCards[grade].card);
         this.pushReviewLog(deckId, cardId, schedulingCards[grade].log);
         
@@ -1016,7 +1040,7 @@ export class App {
         if (!card) return ratingScheduledTimeStr;
         const isPreviouslyStudied = this.deckData[deckId]?.previouslyStudied?.includes(cardId);
         const fsrs = isPreviouslyStudied ? this.fsrsPrevStudied : this.fsrs;
-        const schedulingCards = fsrs.repeat(card, this.getNow()) as FSRS.RecordLog;
+        const schedulingCards = this.repeatCapped(fsrs, card, this.getNow());
         for (const grade of FSRS_GRADES) {
             const now = schedulingCards[grade].log.review;
             const due = schedulingCards[grade].card.due;
