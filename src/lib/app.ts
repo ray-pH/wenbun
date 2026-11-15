@@ -63,6 +63,12 @@ export enum WritingMode {
     External = "External",
 }
 
+export interface OverMaximumIntervalCard {
+    deckId: string;
+    cardId: number;
+    maximumInterval: number;
+}
+
 export interface DeckData {
     label?: string;
     deck: string[];
@@ -274,10 +280,17 @@ export class App {
         return getSimulatedNow();
     }
     
+    private normalizeMaximumInterval(maximum: number): number {
+        return Number.isSafeInteger(maximum) && maximum > 0 ? maximum : FSRS.default_maximum_interval;
+    }
+
+    private getMaximumInterval(deckId: string|null): number {
+        return this.normalizeMaximumInterval(this.getConfig(deckId).maximumInterval);
+    }
+
     updateFSRS(deckId: string|null) {
         const config = this.getConfig(deckId);
-        const maximumInterval = Number.isSafeInteger(config.maximumInterval) && config.maximumInterval > 0
-            ? config.maximumInterval : FSRS.default_maximum_interval;
+        const maximumInterval = this.getMaximumInterval(deckId);
         const params = FSRS.generatorParameters({
             request_retention: config.desiredRetention,
             maximum_interval: maximumInterval,
@@ -697,6 +710,65 @@ export class App {
         await this.save();
     }
     
+    /** A global draft replaces inherited limits; a scoped draft applies to the entire selected scope. */
+    scanOverMaximumIntervalCards(deckId: string|null = null, draftMaximumInterval?: number): OverMaximumIntervalCard[] {
+        const visited = new Set<string>();
+        const result: OverMaximumIntervalCard[] = [];
+        const visit = (id: string) => {
+            if (visited.has(id)) return;
+            visited.add(id);
+            const data = this.deckData[id];
+            if (!data) return;
+            if (data.isMetaDeck) {
+                for (const subId of data.subDeckIds ?? []) visit(subId);
+                return;
+            }
+            const useDraft = draftMaximumInterval !== undefined &&
+                (deckId !== null || data.deckConfig?.maximumInterval === undefined);
+            const maximumInterval = useDraft
+                ? this.normalizeMaximumInterval(draftMaximumInterval) : this.getMaximumInterval(id);
+            for (const [cardId, card] of Object.entries(data.schedule)) {
+                if (card.state === FSRS.State.Review && card.scheduled_days > maximumInterval &&
+                    Number.isFinite(new Date(card.due).getTime())) {
+                    result.push({ deckId: id, cardId: Number(cardId), maximumInterval });
+                }
+            }
+        };
+        if (deckId === null) Object.keys(this.deckData).forEach(visit);
+        else visit(deckId);
+        return result;
+    }
+
+    /** Use saved limits globally, or optionally a selected limit for a deck or meta deck. */
+    async adjustOverMaximumIntervalCards(deckId: string|null = null, selectedMaximumInterval?: number): Promise<number> {
+        const cards = this.scanOverMaximumIntervalCards(deckId, deckId === null ? undefined : selectedMaximumInterval);
+        const now = this.getNow().getTime();
+        const originals = cards.map(({ deckId, cardId }) => {
+            const card = this.deckData[deckId].schedule[cardId];
+            return { card, due: card.due, scheduledDays: card.scheduled_days };
+        });
+        for (const entry of cards) {
+            const card = this.deckData[entry.deckId].schedule[entry.cardId];
+            const lastReview = card.last_review == null ? NaN : new Date(card.last_review).getTime();
+            const anchor = Number.isFinite(lastReview) ? lastReview : now;
+            const due = Math.min(new Date(card.due).getTime(), anchor + entry.maximumInterval * 86400000);
+            card.due = new Date(due);
+            card.scheduled_days = entry.maximumInterval;
+        }
+        if (cards.length) {
+            try {
+                await this.save();
+            } catch (error) {
+                for (const { card, due, scheduledDays } of originals) {
+                    card.due = due;
+                    card.scheduled_days = scheduledDays;
+                }
+                throw error;
+            }
+        }
+        return cards.length;
+    }
+
     private repeatCapped(fsrs: FSRS.FSRS, card: FSRS.Card, now: Date): FSRS.RecordLog {
         const results = fsrs.repeat(card, now) as FSRS.RecordLog;
         const maximum = fsrs.parameters.maximum_interval;

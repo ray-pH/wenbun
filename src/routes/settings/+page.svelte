@@ -133,7 +133,49 @@
         }
     }
 
-    $: isMaximumIntervalValid = config && Number.isSafeInteger(config.maximumInterval) && config.maximumInterval >= 1 && config.maximumInterval <= FSRS.default_maximum_interval;
+    $: maximumInterval = config?.maximumInterval;
+    $: isMaximumIntervalValid = Number.isSafeInteger(maximumInterval) && maximumInterval >= 1 && maximumInterval <= FSRS.default_maximum_interval;
+    $: overMaximumIntervalCards = isAppInitialized && isMaximumIntervalValid
+        ? app.scanOverMaximumIntervalCards(data.deckId || null, maximumInterval)
+        : [];
+    let isAdjustingIntervals = false;
+    async function adjustMaximumIntervals() {
+        if (isAdjustingIntervals || !isMaximumIntervalValid) return;
+        const deckId = data.deckId || null;
+        const limit = maximumInterval;
+        const isUnlinked = unlinkedKeys.includes('maximumInterval');
+        const count = app.scanOverMaximumIntervalCards(deckId, limit).length;
+        if (count > 0 && !window.confirm(`Save the maximum interval and adjust ${count} review card${count === 1 ? '' : 's'}? Due dates will only move earlier, and some cards may become overdue. This cannot be undone.`)) return;
+        isAdjustingIntervals = true;
+        let settingSaved = false;
+        try {
+            if (deckId) {
+                const savedConfig = app.getConfig(deckId);
+                const savedKeys = [...getKeysRecursive(app.getDeckPartialConfig(deckId))].filter(key => key !== 'maximumInterval');
+                if (isUnlinked) savedKeys.push('maximumInterval');
+                savedConfig.maximumInterval = limit;
+                await app.saveDeckConfig(deckId, savedConfig, savedKeys);
+            } else {
+                await app.saveConfig({ ..._.cloneDeep(app.config), maximumInterval: limit });
+            }
+            settingSaved = true;
+            initialConfig = { ...initialConfig, maximumInterval: limit };
+            if (deckId) {
+                initialUnlinkedKeys = initialUnlinkedKeys.filter(key => key !== 'maximumInterval');
+                if (isUnlinked) initialUnlinkedKeys = [...initialUnlinkedKeys, 'maximumInterval'];
+            }
+            await app.adjustOverMaximumIntervalCards(deckId, deckId ? limit : undefined);
+        } catch (error) {
+            console.error("Failed to save maximum interval or adjust review intervals", error);
+            window.alert(settingSaved
+                ? "The maximum interval was saved, but the cards could not be adjusted. Please try again."
+                : "Could not save the maximum interval. Please check your settings and try again.");
+        } finally {
+            if (isPreviewingColorScheme) applyColorScheme(config.colorScheme);
+            app = app;
+            isAdjustingIntervals = false;
+        }
+    }
     $: isConfigChanged = !_.isEqual(config, initialConfig) || !_.isEqual(_.sortBy(unlinkedKeys), _.sortBy(initialUnlinkedKeys)) || dataExportReminderEnabled !== initialDataExportReminderEnabled || dataExportReminderPeriod !== initialDataExportReminderPeriod; async function saveConfig() { if (!isMaximumIntervalValid) return; app.setDataExportReminderMeta(dataExportReminderEnabled, dataExportReminderPeriod); if (data.deckId) { await app.saveDeckConfig(data.deckId, config, unlinkedKeys); } else {
             await app.saveConfig(config); } initialConfig = _.cloneDeep(config); initialUnlinkedKeys = _.cloneDeep(unlinkedKeys);
         initialDataExportReminderEnabled = dataExportReminderEnabled; initialDataExportReminderPeriod = dataExportReminderPeriod; } function discardChanges() { restoreSavedColorScheme(); config = _.cloneDeep(initialConfig); unlinkedKeys = _.cloneDeep(initialUnlinkedKeys); dataExportReminderEnabled = initialDataExportReminderEnabled; dataExportReminderPeriod = initialDataExportReminderPeriod; }
@@ -253,8 +295,8 @@
 
 {#snippet topSettingsContent()}
     <div class="top-settings-section floating">
-        <button class="button" onclick={() => saveConfig()} disabled={!isConfigChanged || !isMaximumIntervalValid}>Save</button>
-        <button class="button" onclick={() => discardChanges()} disabled={!isConfigChanged}>Discard Changes</button>
+        <button class="button" onclick={() => saveConfig()} disabled={!isConfigChanged || !isMaximumIntervalValid || isAdjustingIntervals}>Save</button>
+        <button class="button" onclick={() => discardChanges()} disabled={!isConfigChanged || isAdjustingIntervals}>Discard Changes</button>
     </div>
 {/snippet}
 
@@ -493,8 +535,19 @@
                     </div>
                 </SettingsItem>
                 <SettingsItem key="maximumInterval" {...deckSettingsItemProps}>
-                    <input type="number" min="1" max={FSRS.default_maximum_interval} step="1" required bind:value={config.maximumInterval}>
+                    <input type="number" min="1" max={FSRS.default_maximum_interval} step="1" required bind:value={config.maximumInterval} disabled={isAdjustingIntervals}>
                 </SettingsItem>
+                {#if isAppInitialized && isMaximumIntervalValid && overMaximumIntervalCards.length > 0}
+                    <div class="interval-warning" aria-live="polite">
+                        <div>{overMaximumIntervalCards.length} existing review card{overMaximumIntervalCards.length === 1 ? '' : 's'} exceed{overMaximumIntervalCards.length === 1 ? 's' : ''} the maximum interval. {data.deckId ? 'The selected limit applies to all decks in this scope.' : 'Deck-specific overrides use their own limits.'}</div>
+                        <div>Adjusting brings due dates forward from the last review and updates their intervals. Some cards may become overdue.</div>
+                        <button class="button" onclick={adjustMaximumIntervals} disabled={isAdjustingIntervals}>
+                            Adjust existing cards
+                        </button>
+                    </div>
+                {:else if isAppInitialized && !isMaximumIntervalValid}
+                    <div>Enter a whole number between 1 and {FSRS.default_maximum_interval} to check existing review cards.</div>
+                {/if}
                 <SettingsItem key="enableShortTerm" {...deckSettingsItemProps}>
                     <input type="checkbox" bind:checked={config.enableShortTerm}>
                 </SettingsItem>
@@ -748,6 +801,17 @@
         input {
             width: 5em;
         }
+    }
+    .interval-warning {
+        background-color: color-mix(in srgb, #e9ad24 20%, var(--theme-surface, white));
+        color: var(--theme-text, black);
+        border-radius: 0.5em;
+        padding: 0.75em;
+        font-size: 0.9em;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5em;
     }
     .settings-label-help {
         color: var(--theme-settings-help-text, var(--theme-muted, #00000090));
