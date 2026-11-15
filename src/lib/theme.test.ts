@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { applyColorScheme, getWriterStrokeColor, getWriterToneColor } from './theme';
 import themes from './themes.json';
 import { App, type ColorScheme } from './app';
+import { ChineseToneColorPalette } from './constants';
 
 describe('color schemes', () => {
     afterEach(() => vi.unstubAllGlobals());
@@ -14,26 +15,26 @@ describe('color schemes', () => {
         expect(app.exportProfile().config.colorScheme).toBe('bamboo');
     });
 
-    it('uses theme-aware writer colors while preserving custom and light-theme tones', () => {
+    it('preserves configured tone colors in both light and dark themes', () => {
         const style = { colorScheme: 'light' };
         vi.stubGlobal('document', { documentElement: { style } });
         vi.stubGlobal('getComputedStyle', () => ({
-            getPropertyValue: (key: string) => key === '--theme-writer-stroke' ? '#eeeeee' : key === '--theme-writer-tone-purple' ? '#b998ff' : '',
+            getPropertyValue: (key: string) => key === '--theme-writer-stroke' ? '#eeeeee' : '',
         }));
 
         expect(getWriterStrokeColor()).toBe('#eeeeee');
-        expect(getWriterToneColor(undefined, undefined)).toBe('#eeeeee');
-        expect(getWriterToneColor('#555555', 5)).toBe('#555555');
-        expect(getWriterToneColor('#7C3AED', 3)).toBe('#7C3AED');
+        for (const mode of ['light', 'dark']) {
+            style.colorScheme = mode;
+            for (const color of ['#555555', '#7C3AED', '#123456']) {
+                expect(getWriterToneColor(color)).toBe(color);
+            }
+            expect(getWriterToneColor(undefined)).toBe('#eeeeee');
+        }
+    });
 
-        style.colorScheme = 'dark';
-        expect(getWriterToneColor('#555555', 5)).toBe('#eeeeee');
-        expect(getWriterToneColor('#7c3aed', 3)).toBe('#b998ff');
-        expect(getWriterToneColor('#7C3AED', 4)).toBe('#b998ff');
-        expect(getWriterToneColor('#555555', 1)).toBe('#555555');
-        expect(getWriterToneColor('#123456', 5)).toBe('#123456');
-        expect(getWriterToneColor('#3E92CC', 1)).toBe('#3E92CC');
-        expect(getWriterToneColor('', 5)).toBe('#eeeeee');
+    it('provides separate dark tone presets with the same tone ordering', () => {
+        expect(ChineseToneColorPalette['Default Dark']).toEqual(['#7BC6F3', '#7DD5A6', '#B998FF', '#F39496', '#E9F1F4']);
+        expect(ChineseToneColorPalette['Tofu Like Dark']).toEqual(['#F39496', '#7DD5A6', '#7BC6F3', '#B998FF', '#E9F1F4']);
     });
 
     it('applies each palette and falls back for an unknown saved scheme', () => {

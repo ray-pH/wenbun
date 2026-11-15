@@ -234,7 +234,7 @@
             showCharacter: false, 
             showOutline: cardConfig.isShowOutline || externalAndDone,
             highlightOnComplete: false,
-            strokeColor: getWriterToneColor(app.getChineseToneColor(tone), tone),
+            strokeColor: getWriterToneColor(app.getChineseToneColor(tone)),
             // drawing
             drawingWidth: CHARACTER_WRITER_DRAWING_WIDTH,
             drawingColor: getWriterStrokeColor(),
@@ -315,7 +315,7 @@
             width,
             height,
             drawingWidth: CHARACTER_WRITER_DRAWING_WIDTH,
-            drawingColor: getWriterToneColor(app.getChineseToneColor(tone), tone),
+            drawingColor: getWriterToneColor(app.getChineseToneColor(tone)),
             strokeAnimationSpeed: strokeSpeed,
             delayBetweenStrokes: linmap(strokeSpeed, 1, MAX_STROKE_SPEED, 1000, 10),
             delayBetweenLoops: linmap(strokeSpeed, 1, MAX_STROKE_SPEED, 2000, 10),

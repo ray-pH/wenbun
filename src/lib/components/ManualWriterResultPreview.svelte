@@ -55,7 +55,7 @@
 
     function getCharacterToneColor(index: number): string {
         const tone = getChineseTone(characterData?.tags[index] ?? []);
-        return getWriterToneColor(tone ? toneColors[tone - 1] : undefined, tone);
+        return getWriterToneColor(tone ? toneColors[tone - 1] : undefined);
     }
 
     function getManualTargetId(index: number): string {

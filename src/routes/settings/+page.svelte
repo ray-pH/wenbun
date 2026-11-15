@@ -199,7 +199,7 @@
     function loadChineseToneColorPreset(key: string) {
         const colors = (ChineseToneColorPalette as any)[key];
         if (colors) {
-            config.zh.toneColors = colors;
+            config.zh.toneColors = [...colors];
         }
         selectedTonePreset = '';
     }

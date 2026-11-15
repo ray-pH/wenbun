@@ -67,6 +67,8 @@ export const CHARACTER_WRITER_DRAWING_WIDTH = 20;
 export const ChineseToneColorPalette = {
     Default: ['#3E92CC', '#419E6F', '#7C3AED', '#DB6B6C', '#555555'],
     "Tofu Like": ['#DB6B6C','#419E6F', '#3E92CC', '#7C3AED', '#555555'],
+    "Default Dark": ['#7BC6F3', '#7DD5A6', '#B998FF', '#F39496', '#E9F1F4'],
+    "Tofu Like Dark": ['#F39496', '#7DD5A6', '#7BC6F3', '#B998FF', '#E9F1F4'],
 }
 
 export const CHINESE_DICT_SRC = `${base}/wenbun-assets/zh/zh_dict.json`;

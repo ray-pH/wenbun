@@ -166,7 +166,6 @@
     "mode": "dark",
     "colors": {
       "background": "#17232b",
-      "writer-tone-purple": "#b998ff",
       "surface": "#20313b",
       "surface-alt": "#29404b",
       "text": "#e9f1f4",
@@ -242,7 +241,6 @@
     "mode": "dark",
     "colors": {
       "background": "#211e2d",
-      "writer-tone-purple": "#b998ff",
       "surface": "#302b3e",
       "surface-alt": "#4e3b56",
       "text": "#f3edf6",
