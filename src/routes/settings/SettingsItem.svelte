@@ -1,11 +1,14 @@
 <script lang="ts">
     import { SETTINGS_LABEL_DATA } from "$lib/constants";
     import type { Snippet } from "svelte";
+    import { searchSettings } from './settings-search';
 
     interface Props {
         children?: Snippet
         key: keyof typeof SETTINGS_LABEL_DATA,
         inputKey?: string,
+        searchQuery?: string,
+        keywords?: string,
         isDeckSettings?: boolean,
         isNotLinked?: (inputKey: string) => boolean,
         onReset?: (inputKey: string) => void,
@@ -15,6 +18,9 @@
     const props: Props = $props();
     const data = $derived(SETTINGS_LABEL_DATA[props.key] ?? { label: '', help: '' });
     const resolvedInputKey = $derived(props.inputKey ?? props.key);
+    const matchesSearch = $derived(searchSettings([{
+        key: props.key, title: data.label, description: data.help, keywords: props.keywords,
+    }], props.searchQuery ?? '').length > 0);
 </script>
 
 <style>
@@ -62,9 +68,14 @@
             max-width: 18em;
         }
     }
+    @media (min-width: 40em) {
+        .settings-label .settings-label-help {
+            max-width: 30em;
+        }
+    }
 </style>
 
-<div class="settings-item">
+<div class="settings-item" hidden={!matchesSearch}>
     <div class="settings-row">
         <label class="settings-label" class:linked={props.isDeckSettings && !props.isNotLinked?.(resolvedInputKey)}>
             <div>
