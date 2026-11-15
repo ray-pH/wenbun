@@ -1,6 +1,6 @@
 .button {
     all: unset;
-    color: var(--theme-on-accent, white);
+    color: var(--theme-on-blue, var(--theme-on-accent, white));
     background-color: var(--wenbun-blue);
     border-radius: 0.5em;
     font-size: 0.9em;
@@ -11,6 +11,7 @@
     cursor: pointer;
     &.danger-button {
         background-color: var(--wenbun-red);
+        color: var(--theme-on-red, var(--theme-on-accent, white));
     }
     &.invert {
         border: var(--wenbun-blue) solid 1px;
@@ -33,4 +34,5 @@
 input:invalid,
 input.invalid {
     background-color: var(--wenbun-red);
+    color: var(--theme-on-red, var(--theme-on-accent, white));
 }

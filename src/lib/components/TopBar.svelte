@@ -108,7 +108,7 @@
         background-color: var(--wenbun-blue);
         padding: 0.5em;
         padding-top: max(var(--safe-top, 0), 0.5em);
-        color: var(--theme-top-bar-text, var(--theme-on-accent, white));
+        color: var(--theme-top-bar-text, var(--theme-on-blue, var(--theme-on-accent, white)));
         z-index: 99999;
     }
     .right {

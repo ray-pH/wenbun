@@ -1,11 +1,16 @@
 import themes from './themes.json';
 import type { ColorScheme } from './app';
 
+
 export function getWriterStrokeColor(): string {
     const style = getComputedStyle(document.documentElement);
     return style.getPropertyValue('--theme-writer-stroke').trim()
         || style.getPropertyValue('--theme-text').trim()
         || '#555';
+}
+
+export function getWriterToneColor(color: string | undefined): string {
+    return color || getWriterStrokeColor();
 }
 
 export function applyColorScheme(scheme: ColorScheme) {

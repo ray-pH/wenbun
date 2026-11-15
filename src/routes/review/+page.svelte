@@ -650,7 +650,7 @@
         flex-grow: 1;
         max-width: 8.5em;
         border-radius: 0.5em;
-        background-color: var(--theme-review-button-background, var(--theme-surface-alt, #E0E0E090));
+        background-color: transparent;
         text-align: center;
         &.main-button {
             min-width: min(8.5em, 35vw);
@@ -668,16 +668,16 @@
         }
         &.is-complete {
             &.review-button-fail {
-                --color: var(--wenbun-red);
+                --color: var(--theme-review-fail-text, var(--wenbun-red));
             }
             &.review-button-hard {
                 --color: var(--theme-review-button-hard-text, var(--theme-text, black));
             }
             &.review-button-good {
-                --color: var(--wenbun-green);
+                --color: var(--theme-review-good-text, var(--wenbun-green));
             }
             &.review-button-easy {
-                --color: var(--wenbun-blue);
+                --color: var(--theme-review-easy-text, var(--wenbun-blue));
             }
         }
     }
