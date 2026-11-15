@@ -105,7 +105,7 @@
             font-size: 1.2em;
         }
         &:nth-child(odd) {
-            background-color: #FFFFFF50;
+            background-color: var(--theme-deck-preview-odd-card-surface, var(--theme-surface, #FFFFFF50));
         }
         &:has(.not-supported) {
             background-color: var(--wenbun-red);

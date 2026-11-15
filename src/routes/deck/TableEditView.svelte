@@ -486,7 +486,7 @@
         max-width: 15em;
     }
     thead td{
-        background-color: white !important;
+        background-color: var(--theme-deck-table-header-background, var(--theme-surface, white)) !important;
         font-weight: 600;
     }
     thead td.clickable {
@@ -495,15 +495,15 @@
         transition: background-color 0.2s;
     }
     thead td.clickable:hover {
-        background-color: #f0f0f0 !important;
+        background-color: var(--theme-deck-table-header-hover-background, var(--theme-surface-alt, #f0f0f0)) !important;
     }
     thead td.clickable i {
         font-size: 0.8em;
         margin-left: 0.2em;
-        color: #999;
+        color: var(--theme-deck-table-sort-icon, var(--theme-muted, #999));
     }
     tr:nth-child(odd) > td {
-        background-color: #FFFFFF50;
+        background-color: var(--theme-deck-table-odd-row-background, var(--theme-row-surface, #FFFFFF50));
     }
     .chinese-font {
         font-size: 1.2em;
@@ -525,24 +525,24 @@
         font-size: 0.8em;
     }
     .not-custom {
-        color: #0006;
+        color: var(--theme-deck-table-non-custom-text, var(--theme-muted, #0006));
     }
     .edit-button {
         all: unset;
-        color: gray;
+        color: var(--theme-deck-table-edit-button, var(--theme-muted, gray));
         cursor: pointer;
         &:hover {
-            color: black;
+            color: var(--theme-deck-table-edit-button-hover, var(--theme-text, black));
         }
     }
     tr.selected {
         background-color: var(--wenbun-blue);
-        color: white !important;
+        color: var(--theme-deck-table-selected-text, var(--theme-on-accent, white)) !important;
         .not-custom {
-            color: #FFF6;
+            color: color-mix(in srgb, var(--theme-deck-table-selected-text, var(--theme-on-accent, white)) 40%, transparent);
         }
         .edit-button {
-            color: white;
+            color: var(--theme-deck-table-selected-text, var(--theme-on-accent, white));
         }
     }
     

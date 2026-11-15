@@ -6,10 +6,11 @@
     import SettingsItem from "../SettingsItem.svelte";
     import { CHARACTER_WRITER_DRAWING_WIDTH } from "$lib/constants";
     import { LENIENCY_CHARS } from "./leniency-chars";
+    import { getWriterStrokeColor } from '$lib/theme';
     
     let width = $state(500);
     let height = $state(500);
-    let gridStroke = "#DDD";
+    let gridStroke = "var(--theme-settings-calibration-grid-stroke, var(--theme-border, #DDD))";
     function getEmInPx(): number {
         return parseFloat(getComputedStyle(document.documentElement).fontSize);
     }
@@ -34,7 +35,7 @@
             showOutline: false,
             highlightOnComplete: false,
             strokeFadeDuration: fadeDuration,
-            strokeColor: "#555",
+            strokeColor: getWriterStrokeColor(),
             drawingWidth: CHARACTER_WRITER_DRAWING_WIDTH,
         });
         resetHanziWriter(leniency, chara);
@@ -122,7 +123,7 @@
     }
     .grid-background {
         padding: 2em;
-        background-color: #FFFFFF90;
+        background-color: var(--theme-settings-calibration-grid-background, var(--theme-surface, #FFFFFF90));
         border-radius: 0.5em;
     }
     .character-display {

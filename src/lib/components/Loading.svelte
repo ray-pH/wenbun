@@ -1,5 +1,5 @@
 <script lang="ts">
-    export let color: string = '#333';
+    export let color: string = 'var(--theme-loading-indicator-color, var(--theme-text, #333))';
 </script>
 
 <div class="loading" style="--color: {color}">

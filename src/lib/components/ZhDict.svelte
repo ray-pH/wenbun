@@ -273,7 +273,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        background-color: #E0E0E0;
+        background-color: var(--theme-dictionary-character-surface, var(--theme-surface-alt, #E0E0E0));
         border-radius: 0.5rem;
         padding: 0.2em;
         min-width: 4em;
@@ -287,7 +287,7 @@
     .row {
         display: flex;
         .label {
-            color: gray;
+            color: var(--theme-dictionary-label-text, var(--theme-muted, gray));
             margin-right: 0.5em;
             font-size: 0.8em;
             min-width: 7em;
@@ -296,7 +296,7 @@
     .sep {
         width: 100%;
         height: 1px;
-        background-color: gray;
+        background-color: var(--theme-dictionary-divider, var(--theme-border, gray));
         margin: 0.5em 0;
     }
     .chinese-font {
@@ -313,7 +313,7 @@
             color: var(--tone-color);
         }
         .simple-sep {
-            color: gray;
+            color: var(--theme-dictionary-separator-text, var(--theme-muted, gray));
         }
     }
     
@@ -327,7 +327,7 @@
     .dict-back-button {
         all: unset;
         margin-bottom: 0.5em;
-        background-color: #E0E0E0;
+        background-color: var(--theme-dictionary-back-button-surface, var(--theme-surface-alt, #E0E0E0));
         border-radius: 0.5rem;
         cursor: pointer;
         padding: 0.2em 0.5em;
@@ -343,7 +343,7 @@
         align-items: center;
         gap: 0.2em;
         width: fit-content;
-        color: white;
+        color: var(--theme-dictionary-external-link-text, var(--theme-on-accent, white));
         text-decoration: none;
         padding: 0.4em 0.6em;
         border-radius: 0.5em;

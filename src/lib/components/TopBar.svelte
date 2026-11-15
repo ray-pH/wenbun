@@ -108,7 +108,7 @@
         background-color: var(--wenbun-blue);
         padding: 0.5em;
         padding-top: max(var(--safe-top, 0), 0.5em);
-        color: white;
+        color: var(--theme-top-bar-text, var(--theme-on-accent, white));
         z-index: 99999;
     }
     .right {
@@ -130,7 +130,7 @@
         }
     }
     .icon-button:hover {
-        background-color: #00000050;
+        background-color: var(--theme-top-bar-icon-button-hover, var(--theme-overlay, #00000050));
     }
     .icon-button.sync {
         position: relative;

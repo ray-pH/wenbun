@@ -9,6 +9,7 @@ import { WebFileManager, type IFileManager } from "./fileManager";
 import { ChineseMandarinReading } from "./chinese";
 import { AppExtraStudyHandler } from "./appExtraStudyHandler";
 import { Profile, SyncConflicAutoResolve, SyncMode, type DeckInfoSummary } from "./profile";
+import { applyColorScheme } from "./theme";
 declare const __APP_VERSION__: string; // injected by vite
 const UNGROUPED_GROUP = "__ungrouped__"
 
@@ -31,6 +32,7 @@ const GENERATED_DECK_ID_LENGTH = 8;
 
 export type DataExportReminderPeriod = 'daily' | '2day' | '3day' | '4day' | 'weekly' | 'monthly';
 export type Lang = 'zh' | 'yue';
+export type ColorScheme = string;
 
 export enum WenBunCustomState {
     New = "New",
@@ -61,6 +63,12 @@ export enum WritingMode {
     External = "External",
 }
 
+export interface OverMaximumIntervalCard {
+    deckId: string;
+    cardId: number;
+    maximumInterval: number;
+}
+
 export interface DeckData {
     label?: string;
     deck: string[];
@@ -86,6 +94,7 @@ export interface DeckData {
 
 export interface WenbunConfig {
     // learning
+    startOfDayTime?: string;
     newCardPerDay?: number;
     maxReviewsPerDay?: number;
     newCardOrder?: NewCardOrder;
@@ -96,6 +105,7 @@ export interface WenbunConfig {
     isSeparateLearnAndReview?: boolean;
     
     // UI, Audio & Input
+    colorScheme?: ColorScheme;
     uiScale?: 'small' | 'normal' | 'custom'; // 10px, 16px
     customFontSize?: number;
     playSuccessSound?: boolean;
@@ -118,6 +128,7 @@ export interface WenbunConfig {
     learningSteps?: FSRS.Steps;
     previouslyStudiedLearningSteps?: FSRS.Steps;
     desiredRetention?: number;
+    maximumInterval?: number; // days
     enableShortTerm?: boolean;
     enableFuzz?: boolean;
     FSRSParams?: number[];
@@ -143,6 +154,7 @@ export interface WenbunConfig {
 }
 
 const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
+    startOfDayTime: "00:00",
     newCardPerDay: 5,
     maxReviewsPerDay: 200,
     newCardOrder: NewCardOrder.Mix,
@@ -152,6 +164,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     gradeWarmUpCards: false,
     isSeparateLearnAndReview: false,
     
+    colorScheme: 'wenbun-light',
     uiScale: 'normal',
     customFontSize: 16,
     playSuccessSound: true,
@@ -172,6 +185,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     learningSteps: ["1m", "10m"],
     previouslyStudiedLearningSteps: ["1m", "5d"],
     desiredRetention: 0.9,
+    maximumInterval: FSRS.default_maximum_interval,
     enableShortTerm: false,
     enableFuzz: false,
     FSRSParams: DEFAULT_FSRS_PARAM,
@@ -266,11 +280,20 @@ export class App {
         return getSimulatedNow();
     }
     
+    private normalizeMaximumInterval(maximum: number): number {
+        return Number.isSafeInteger(maximum) && maximum > 0 ? maximum : FSRS.default_maximum_interval;
+    }
+
+    private getMaximumInterval(deckId: string|null): number {
+        return this.normalizeMaximumInterval(this.getConfig(deckId).maximumInterval);
+    }
+
     updateFSRS(deckId: string|null) {
         const config = this.getConfig(deckId);
+        const maximumInterval = this.getMaximumInterval(deckId);
         const params = FSRS.generatorParameters({
             request_retention: config.desiredRetention,
-            // maximum_interval: number;
+            maximum_interval: maximumInterval,
             w: config.FSRSParams,
             enable_fuzz: config.enableFuzz,
             enable_short_term: config.enableShortTerm,
@@ -280,7 +303,7 @@ export class App {
         
         const prevStudiedParams = FSRS.generatorParameters({
             request_retention: config.desiredRetention,
-            // maximum_interval: number;
+            maximum_interval: maximumInterval,
             w: config.FSRSParams,
             enable_fuzz: config.enableFuzz,
             enable_short_term: config.enableShortTerm,
@@ -385,6 +408,7 @@ export class App {
         this.decks = decks || [];
         this.deckData = deckData || {};
         this.config = config || DEFAULT_CONFIG;
+        applyColorScheme(this.getConfig(null).colorScheme);
         this.reviewLogs = reviewLogs || [];
         this.autoReviewGradeLog = autoReviewGradeLog || [];
         this.meta = meta || {clientVersion: __APP_VERSION__};
@@ -392,6 +416,7 @@ export class App {
         this.isLoadDone = true;
     }
     async save(skipSync = false, awaitSync = false, updateMetaClientVersion = true) {
+        applyColorScheme(this.getConfig(null).colorScheme);
         const isChanged = await this.isDataChanged();
         if (!isChanged) return;
         
@@ -480,11 +505,12 @@ export class App {
     
     async processTodaySchedule(): Promise<void> {
         const today = this.getNow();
-        const todaysDate = getDaysSinceEpochLocal(today);
+        const startOfDayTime = this.getConfig(null).startOfDayTime;
+        const todaysDate = getDaysSinceEpochLocal(today, startOfDayTime);
         let changed = false;
         for (const deckId of Object.keys(this.deckData)) {
             const deckData = this.deckData[deckId];
-            const lastScheduleCheckDate = getDaysSinceEpochLocal(new Date(deckData.lastScheduleCheckDate));
+            const lastScheduleCheckDate = getDaysSinceEpochLocal(new Date(deckData.lastScheduleCheckDate), startOfDayTime);
             if (lastScheduleCheckDate < todaysDate) {
                 // do the daily routine
                 deckData.doneTodayNewCardCount = 0;
@@ -684,11 +710,90 @@ export class App {
         await this.save();
     }
     
+    /** A global draft replaces inherited limits; a scoped draft applies to the entire selected scope. */
+    scanOverMaximumIntervalCards(deckId: string|null = null, draftMaximumInterval?: number): OverMaximumIntervalCard[] {
+        const visited = new Set<string>();
+        const result: OverMaximumIntervalCard[] = [];
+        const visit = (id: string) => {
+            if (visited.has(id)) return;
+            visited.add(id);
+            const data = this.deckData[id];
+            if (!data) return;
+            if (data.isMetaDeck) {
+                for (const subId of data.subDeckIds ?? []) visit(subId);
+                return;
+            }
+            const useDraft = draftMaximumInterval !== undefined &&
+                (deckId !== null || data.deckConfig?.maximumInterval === undefined);
+            const maximumInterval = useDraft
+                ? this.normalizeMaximumInterval(draftMaximumInterval) : this.getMaximumInterval(id);
+            for (const [cardId, card] of Object.entries(data.schedule)) {
+                if (card.state === FSRS.State.Review && card.scheduled_days > maximumInterval &&
+                    Number.isFinite(new Date(card.due).getTime())) {
+                    result.push({ deckId: id, cardId: Number(cardId), maximumInterval });
+                }
+            }
+        };
+        if (deckId === null) Object.keys(this.deckData).forEach(visit);
+        else visit(deckId);
+        return result;
+    }
+
+    /** Use saved limits globally, or optionally a selected limit for a deck or meta deck. */
+    async adjustOverMaximumIntervalCards(deckId: string|null = null, selectedMaximumInterval?: number): Promise<number> {
+        const cards = this.scanOverMaximumIntervalCards(deckId, deckId === null ? undefined : selectedMaximumInterval);
+        const now = this.getNow().getTime();
+        const originals = cards.map(({ deckId, cardId }) => {
+            const card = this.deckData[deckId].schedule[cardId];
+            return { card, due: card.due, scheduledDays: card.scheduled_days };
+        });
+        for (const entry of cards) {
+            const card = this.deckData[entry.deckId].schedule[entry.cardId];
+            const lastReview = card.last_review == null ? NaN : new Date(card.last_review).getTime();
+            const anchor = Number.isFinite(lastReview) ? lastReview : now;
+            const due = Math.min(new Date(card.due).getTime(), anchor + entry.maximumInterval * 86400000);
+            card.due = new Date(due);
+            card.scheduled_days = entry.maximumInterval;
+        }
+        if (cards.length) {
+            try {
+                await this.save();
+            } catch (error) {
+                for (const { card, due, scheduledDays } of originals) {
+                    card.due = due;
+                    card.scheduled_days = scheduledDays;
+                }
+                throw error;
+            }
+        }
+        return cards.length;
+    }
+
+    private repeatCapped(fsrs: FSRS.FSRS, card: FSRS.Card, now: Date): FSRS.RecordLog {
+        const results = fsrs.repeat(card, now) as FSRS.RecordLog;
+        const maximum = fsrs.parameters.maximum_interval;
+        // Explicit learning steps are user-directed delays, not generated review intervals.
+        const steps = fsrs.parameters.enable_short_term
+            ? FSRS.BasicLearningStepsStrategy(fsrs.parameters, card.state,
+                (card.learning_steps || 0) + (card.state === FSRS.State.Learning ? 1 : 0))
+            : {};
+        for (const grade of FSRS_GRADES) {
+            const scheduled = results[grade].card;
+            if ((steps[grade]?.scheduled_minutes ?? 0) > 0) continue;
+            // FSRS may exceed its cap when enforcing increasing intervals across grades.
+            if (scheduled.scheduled_days > maximum) {
+                scheduled.scheduled_days = maximum;
+                scheduled.due = new Date(now.getTime() + maximum * 86400000);
+            }
+        }
+        return results;
+    }
+
     debugSimulateRateCard(deckId: string, cardId: number, grade: FSRS.Grade, date?: Date): void {
         const card = this.getCard(deckId, cardId, true);
         if (!card) return;
         const fsrs = this.fsrs;
-        const schedulingCards = fsrs.repeat(card, date ?? this.getNow()) as FSRS.RecordLog;
+        const schedulingCards = this.repeatCapped(fsrs, card, date ?? this.getNow());
         this.setCard(deckId, cardId, schedulingCards[grade].card);
     }
     
@@ -701,7 +806,7 @@ export class App {
         if (!card) return;
         const isPreviouslyStudied = this.deckData[deckId]?.previouslyStudied?.includes(cardId);
         const fsrs = isPreviouslyStudied ? this.fsrsPrevStudied : this.fsrs;
-        const schedulingCards = fsrs.repeat(card, date ?? this.getNow()) as FSRS.RecordLog;
+        const schedulingCards = this.repeatCapped(fsrs, card, date ?? this.getNow());
         this.setCard(deckId, cardId, schedulingCards[grade].card);
         this.pushReviewLog(deckId, cardId, schedulingCards[grade].log);
         
@@ -1007,7 +1112,7 @@ export class App {
         if (!card) return ratingScheduledTimeStr;
         const isPreviouslyStudied = this.deckData[deckId]?.previouslyStudied?.includes(cardId);
         const fsrs = isPreviouslyStudied ? this.fsrsPrevStudied : this.fsrs;
-        const schedulingCards = fsrs.repeat(card, this.getNow()) as FSRS.RecordLog;
+        const schedulingCards = this.repeatCapped(fsrs, card, this.getNow());
         for (const grade of FSRS_GRADES) {
             const now = schedulingCards[grade].log.review;
             const due = schedulingCards[grade].card.due;
@@ -1135,7 +1240,8 @@ export class App {
         const deckData = this.deckData[deckId];
         if (!deckData) return [];
         const now = this.getNow();
-        const today = getDaysSinceEpochLocal(now);
+        const startOfDayTime = this.getConfig(null).startOfDayTime;
+        const today = getDaysSinceEpochLocal(now, startOfDayTime);
         const tomorrow = today + 1;
         
         type Entry = [string, FSRS.Card];
@@ -1150,7 +1256,7 @@ export class App {
             const due = new Date(s.due);
             if (s.state === FSRS.State.Review) {
                 // for review cards, use date
-                const dueDay = getDaysSinceEpochLocal(due);
+                const dueDay = getDaysSinceEpochLocal(due, startOfDayTime);
                 if (dueDay < tomorrow) {
                     reviewCards.push([id,s]);
                 }

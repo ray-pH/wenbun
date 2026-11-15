@@ -305,7 +305,7 @@
         &.hidden {
             display: none;
         }
-        color: #00000090;
+        color: var(--theme-upload-deck-warning-text, var(--theme-muted, #00000090));
         font-size: 0.8em;
         max-width: 15em;
     }
