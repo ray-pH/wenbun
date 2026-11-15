@@ -28,6 +28,7 @@ interface DeepPartialArray<T> extends Array<DeepPartial<T>> {}
 export interface CharacterWriterData {
     characters: string;
     reading: string;
+    readings?: string[];
     meanings: string[];
     tags: string[][]; // separate tags for each character
     audioUrl: string[][];

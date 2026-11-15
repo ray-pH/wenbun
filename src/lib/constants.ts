@@ -70,6 +70,7 @@ export const ChineseToneColorPalette = {
 }
 
 export const CHINESE_DICT_SRC = `${base}/wenbun-assets/zh/zh_dict.json`;
+export const CHINESE_MANDARIN_ALTERNATIVES_SRC = `${base}/wenbun-assets/zh/zh_mandarin_alternatives.json`;
 export const CHINESE_CC_CEDICT_SRC = `${base}/wenbun-assets/zh/zh_cc_cedict_array.json`;
 export const CHINESE_MAKEMEAHANZI_SRC = `${base}/wenbun-assets/zh/zh_makemeahanzi.jsonl`;
 export const CHINESE_CUSTOM_NOTES_SRC = `${base}/wenbun-assets/zh/zh_note.jsonl`;

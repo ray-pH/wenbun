@@ -1,5 +1,5 @@
 import { pinyinToZhuyin } from "pinyin-zhuyin";
-import { CHINESE_CC_CEDICT_SRC, CHINESE_CUSTOM_NOTES_SRC, CHINESE_DICT_SRC, CHINESE_MAKEMEAHANZI_SRC, HANZI_WRITER_DATA_CHARS_SRC, HANZI_WRITER_DATA_DIR_SRC, SLUG_NO_DATA_IN_DICT, WENBUN_AUDIO_URL, WENBUN_AUDIO_ZH_PREFIX_SRC, WENBUN_CACHE_AUDIO_URL, YUE_AUDIO_DICT_SRC, ZH_AUDIO_DICT_SRC } from "./constants";
+import { CHINESE_CC_CEDICT_SRC, CHINESE_CUSTOM_NOTES_SRC, CHINESE_DICT_SRC, CHINESE_MANDARIN_ALTERNATIVES_SRC, CHINESE_MAKEMEAHANZI_SRC, HANZI_WRITER_DATA_CHARS_SRC, HANZI_WRITER_DATA_DIR_SRC, SLUG_NO_DATA_IN_DICT, WENBUN_AUDIO_URL, WENBUN_AUDIO_ZH_PREFIX_SRC, WENBUN_CACHE_AUDIO_URL, YUE_AUDIO_DICT_SRC, ZH_AUDIO_DICT_SRC } from "./constants";
 import { parseIntOrUndefined, type CharacterWriterData } from "./util";
 import * as OpenCC from 'opencc-js';
 import type { Lang } from "./app";
@@ -69,6 +69,7 @@ export class ChineseCharacterWordlist {
     private converter!: ChineseCharacterConverter;
     private simplifiedConverter!: ChineseCharacterConverter;
     private audioDict: Record<string, string[]> = {};
+    private mandarinAlternatives: Record<string, {pinyin_num: string, pinyin: string}[]> = {};
     private hanziWriterDataChars: Set<string> = new Set();
     private charDecompositionDict: Record<string, IChineseCharDecomposition> = {};
     private customNotes: Record<string, string> = {};
@@ -107,6 +108,11 @@ export class ChineseCharacterWordlist {
                 });
             }
         } 
+        const alternativesP = async () => {
+            const res = await fetch(CHINESE_MANDARIN_ALTERNATIVES_SRC);
+            if (!res.ok) throw new Error(`Failed to load Mandarin alternatives: ${res.status}`);
+            this.mandarinAlternatives = await res.json();
+        }
         const audioDictP = async () => {
             const res = await fetch(lang === 'zh' ? ZH_AUDIO_DICT_SRC : YUE_AUDIO_DICT_SRC)
             const dict = await res.json();
@@ -148,7 +154,7 @@ export class ChineseCharacterWordlist {
             });
             this.customNotes = dict;
         }
-        await Promise.allSettled([dictP(), audioDictP(), hanziWriterDataCharsP(), charDecompositionDictP(), notesDictP()]);
+        await Promise.allSettled([dictP(), alternativesP(), audioDictP(), hanziWriterDataCharsP(), charDecompositionDictP(), notesDictP()]);
         this.converter = new ChineseCharacterConverter('cn', 'tw');
         this.simplifiedConverter = new ChineseCharacterConverter('tw', 'cn');
         this.initialized = true;
@@ -174,7 +180,8 @@ export class ChineseCharacterWordlist {
     getCharacterWriterData(word: string, config: CharacterWriterDataConfig = {}): CharacterWriterData | undefined {
         word = word.replace(/\r/g, '');
         const wordData = this.getWordData(word);
-        const reading = this.getReading(word, this.lang, config.mandarinReading);
+        const readings = this.getReadings(word, this.lang, config.mandarinReading);
+        const reading = readings[0] ?? '';
         const meaning = this.getMeaning(word);
         if (!wordData && !reading && !meaning) {
             return {
@@ -191,14 +198,16 @@ export class ChineseCharacterWordlist {
         const audioUrl = config.isPlayAudio ? this.getAudioUrlArray(word) : [];
         const tags: string[][] = []
         
-        const pinyinReading = wordData?.pinyin_num ?? reading ?? "";
+        const pinyinReading = this.lang === 'zh' && this.isCustomEntry(word).reading
+            ? reading
+            : wordData?.pinyin_num ?? reading ?? "";
         const pinyinSyllables = splitPinyinSyllables(pinyinReading);
         pinyinSyllables.split(' ').forEach((r, i) => {
             const tone = toneFromPinyin(r);
             tags[i] = [`${TONE_PREFIX}${tone}`];
         });
         
-        return <CharacterWriterData>{ characters, reading, meanings, audioUrl, tags };
+        return <CharacterWriterData>{ characters, reading, readings, meanings, audioUrl, tags };
     }
 
     patchTraditionalConversion(traditional: string): string {
@@ -273,6 +282,28 @@ export class ChineseCharacterWordlist {
         return '';
     }
     
+    getReadings(
+        word: string,
+        lang: Lang = 'zh',
+        mandarinReading: ChineseMandarinReading = ChineseMandarinReading.Pinyin,
+    ): string[] {
+        const primary = this.getReading(word, lang, mandarinReading);
+        if (!primary) return [];
+        if (lang !== 'zh' || this.isCustomEntry(word).reading) return [primary];
+
+        const alternatives = this.mandarinAlternatives[word]
+            ?? this.mandarinAlternatives[this.simplifiedConverter.convert(word)]
+            ?? [];
+        const readings = alternatives.map(entry => {
+            switch (mandarinReading) {
+                case ChineseMandarinReading.Pinyin: return entry.pinyin;
+                case ChineseMandarinReading.PinyinNumeric: return entry.pinyin_num;
+                case ChineseMandarinReading.Zhuyin: return pinyinToZhuyin(entry.pinyin_num);
+            }
+        });
+        return [...new Set([primary, ...readings])];
+    }
+
     getCharDecompData(char: string): IChineseCharDecomposition | undefined {
         return this.charDecompositionDict[char];
     }

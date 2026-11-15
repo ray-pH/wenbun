@@ -606,6 +606,7 @@
         flex-direction: row;
         gap: 0.5em;
         margin-bottom: 0.5em;
+        max-width: 100%;
     }
     .is-hidden {
         visibility: hidden;
@@ -615,6 +616,7 @@
         background-color: #FFFFFF90;
         padding: 0.2em 0.4em;
         border-radius: 0.5rem;
+        overflow-wrap: anywhere;
     }
     .audio-button {
         all: unset;
@@ -887,7 +889,7 @@
                     <i class="fa-solid fa-eye"></i>
                 </button>
             {:else}
-                {characterData?.reading}
+                {characterData?.readings?.join(' / ') ?? characterData?.reading}
             {/if}
         </div>
         {#if audios.length > 0}
