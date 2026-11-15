@@ -1,5 +1,7 @@
 <script lang="ts">
+    import { base } from '$app/paths';
     import TopBar from '../../lib/components/TopBar.svelte';
+    import faqData from './faq.json';
 
     type FAQItem = {
         question: string;
@@ -9,153 +11,14 @@
         category: 'General' | 'Review' | 'Decks' | 'Account' | 'Troubleshooting' | 'SRS';
     };
 
-    const faqItems: FAQItem[] = [
-        {
-            question: 'How do I start studying a deck?',
-            answer: 'Go to Deck Browser, pick a deck, then open it and start a review session from the deck page.',
-            tags: ['deck browser', 'study', 'start'],
-            category: 'Decks'
-        },
-        {
-            question: 'Can I upload my own deck?',
-            answer: 'Yes. Use the Upload Custom Deck page to import your own words using supported formats like CSV or tab-separated text.',
-            tags: ['custom deck', 'import', 'csv', 'anki'],
-            category: 'Decks'
-        },
-        {
-            question: 'What is a meta deck in Wenbun?',
-            answer: 'A meta deck is a combined study view over multiple existing decks. Internally it is flagged as a meta deck and stores a list of source deck IDs, while the real cards and schedules remain in the original decks.',
-            tags: ['meta deck', 'combined deck', 'isMetaDeck', 'subDeckIds', 'source decks'],
-            category: 'Decks'
-        },
-        {
-            question: 'How does card selection work in a meta deck?',
-            answer: 'The app checks each source deck for its next eligible card, classifies candidates (new/warm-up, previously studied, review), then applies your normal card-order settings to choose what to show next. Scheduling still uses each source deck’s own data.',
-            tags: ['meta deck', 'card selection', 'scheduling', 'new/review mix', 'source deck schedule'],
-            category: 'SRS'
-        },
-        {
-            question: 'Will a meta deck reflect updates made to its source decks?',
-            answer: 'Yes. Because data stays in source decks, changes there are reflected in the meta deck. If a source deck is removed, invalid subdeck references are cleaned up automatically.',
-            tags: ['meta deck', 'source deck', 'updates', 'sync', 'deck changes', 'cleanup'],
-            category: 'Decks'
-        },
-        {
-            question: 'Can I add cards directly to a meta deck?',
-            answer: 'No. Meta decks are intended as aggregators, not independent card stores. Add/edit cards in the source deck(s) instead. Also note meta decks are still marked experimental, and some actions like quick adjust and extra study are disabled for them.',
-            tags: ['meta deck', 'edit', 'add cards', 'experimental', 'quick adjust', 'extra study'],
-            category: 'Decks'
-        },
-        {
-            question: 'How do deck-specific settings work?',
-            answer: 'Wenbun now supports per-deck settings overrides. Global settings are still your default, but a deck can have its own values for selected options. During review/study of that deck, Wenbun uses the deck-specific value when present, and falls back to global settings for everything else.',
-            tags: ['deck specific settings', 'per-deck', 'override', 'global settings', 'fallback'],
-            category: 'Decks'
-        },
-        {
-            question: 'How do I open deck-specific settings?',
-            answer: 'First open a deck context (Overview, Review, or the Deck page), then tap Settings from there. On the Settings screen, use the topmost "Go to Deck Specific Settings" button to open that deck’s specific settings page.',
-            tags: ['deck specific settings', 'open', 'go to deck specific settings', 'settings navigation', 'overview', 'review', 'deck page'],
-            category: 'Decks'
-        },
-        {
-            question: 'What do linked vs unlinked settings mean?',
-            answer: 'Linked means the deck follows the global value for that setting. Unlinked means the deck stores its own override for that setting. You can unlink a setting to customize it for one deck, or reset it back to global to relink it.',
-            tags: ['linked', 'unlinked', 'reset to global', 'override', 'deck config'],
-            category: 'Decks'
-        },
-        {
-            question: 'If I change a global setting, will deck-specific settings change too?',
-            answer: 'Only linked settings update from global changes. Any setting you unlinked for a deck keeps that deck’s own value until you relink it (reset to global).',
-            tags: ['global change', 'linked settings', 'unlinked settings', 'deck override behavior'],
-            category: 'Decks'
-        },
-        {
-            question: 'How do I configure a setting for only one deck?',
-            answer: 'Open that deck first (Overview, Review, or Deck page), tap Settings, then tap the topmost "Go to Deck Specific Settings" button. In deck-specific settings, unlink the setting you want to customize, change its value, and save. Only that deck will use the override; other decks keep using global settings unless you also change them.',
-            tags: ['single deck setting', 'deck-specific settings', 'unlink', 'override', 'only one deck', 'save'],
-            category: 'Decks'
-        },
-        {
-            question: 'What does "Previously Studied" mean?',
-            answer: '"Previously Studied" is a pool for cards you already know from outside Wenbun. It helps you seed reviews faster without treating those cards as completely new.',
-            tags: ['previously studied', 'known cards', 'seed', 'review'],
-            category: 'Decks'
-        },
-        {
-            question: 'How do I mark cards as Previously Studied?',
-            answer: 'Open a deck, enter selection mode, select cards (or use "select all in this group"), then use "Mark as previously studied" from the action menu.',
-            tags: ['mark as previously studied', 'select all', 'group', 'deck list'],
-            category: 'Decks'
-        },
-        {
-            question: 'How are Previously Studied cards scheduled each day?',
-            answer: 'Daily intake and ordering are controlled by settings like New Previously Studied Card Per Day and New Previously Studied Card Order. You can also choose whether to draw from the back of the previously studied pool.',
-            tags: ['newPreviouslyStudiedCardPerDay', 'order', 'start from back', 'settings'],
-            category: 'SRS'
-        },
-        {
-            question: 'What happens when I fail a card?',
-            answer: 'The card scheduling is adjusted so it appears again sooner. Depending on your settings, reading hints may also be shown.',
-            tags: ['grading', 'fail', 'schedule'],
-            category: 'Review'
-        },
-        {
-            question: 'Can I use Auto Next after a correct answer?',
-            answer: 'Yes. Enable "Auto Next On Success" in Settings to automatically move on after correct answers. This option is disabled when grading is set to manual.',
-            tags: ['auto next', 'correct answer', 'review flow', 'settings'],
-            category: 'Review'
-        },
-        {
-            question: 'Can I use keyboard shortcuts in review?',
-            answer: 'Yes. You can configure keyboard behavior in Settings, including advancing to the next card.',
-            tags: ['keyboard', 'shortcuts', 'settings'],
-            category: 'Review'
-        },
-        {
-            question: 'Can I practice writing on paper and grade manually?',
-            answer: 'Yes. Set Writing Mode to External to write outside the app (for example on paper). In this mode, grading is manual so you can fully self-evaluate handwriting quality.',
-            tags: ['external writing mode', 'manual grading', 'paper', 'handwriting'],
-            category: 'Review'
-        },
-        {
-            question: 'How does SRS work with Warm-up?',
-            answer: 'Warm-up itself is not FSRS scheduling. During warm-up, a card is shown multiple times (typically 3 times). After warm-up, it is shown again on the next day by design, and then normal SRS scheduling begins.',
-            tags: ['srs', 'warmup', 'fsrs', 'learning steps'],
-            category: 'SRS'
-        },
-        {
-            question: 'When does FSRS actually start for a new card?',
-            answer: 'FSRS starts after the warm-up phase and the programmed next-day follow-up. From there, card intervals are calculated using the configured learning steps and retention settings.',
-            tags: ['fsrs', 'start', 'new cards', 'intervals'],
-            category: 'SRS'
-        },
-        {
-            question: 'How do I sync my progress?',
-            answer: 'Sign in to your account so your study data can be linked and synchronized across devices.',
-            tags: ['sync', 'login', 'cloud'],
-            category: 'Account'
-        },
-        {
-            question: 'I cannot hear audio. What should I check?',
-            answer: 'Check device volume, confirm audio is enabled in Settings, and verify audio source options in More Audio Settings.',
-            tags: ['audio', 'sound', 'settings'],
-            category: 'Troubleshooting'
-        },
-        {
-            question: 'Why is a character not available for writing practice?',
-            answer: 'Some characters may not have Hanzi Writer data. In those cases, writing practice may be limited for that entry.',
-            tags: ['hanzi writer', 'unsupported', 'writing'],
-            category: 'Troubleshooting'
-        },
-        {
-            question: 'Where can I report bugs or suggest features?',
-            answer: 'Report issues on Discord or on GitHub Issues. If it is breaking really bad, manually tag @pHoton in Discord so it gets seen quickly.',
-            answerHtml: 'Report issues on <a href="https://discord.gg/pVUuqJqywt" target="_blank" rel="noopener noreferrer">Discord</a> or on <a href="https://github.com/ray-pH/wenbun/issues" target="_blank" rel="noopener noreferrer">GitHub Issues</a>. If it is breaking really bad, manually tag @pHoton in Discord so it gets seen quickly.',
-            tags: ['bug report', 'feature request', 'discord', 'github', 'issues', '@pHoton', 'urgent'],
-            category: 'General'
-        }
-    ];
+    const faqItems = faqData as FAQItem[];
+
+    // FAQ HTML is bundled application content; root-relative hrefs refer to app routes.
+    function resolveAnswerLinks(html: string): string {
+        return html.replace(/(\shref\s*=\s*)(["'])(\/(?!\/)[^"']*)\2/gi,
+            (_match, attribute: string, quote: string, href: string) =>
+                `${attribute}${quote}${base}${href}${quote}`);
+    }
 
     let searchQuery = '';
 
@@ -201,7 +64,7 @@
                         <span class="category">{item.category}</span>
                     </summary>
                     {#if item.answerHtml}
-                        <p class="answer">{@html item.answerHtml}</p>
+                        <p class="answer">{@html resolveAnswerLinks(item.answerHtml)}</p>
                     {:else}
                         <p class="answer">{item.answer}</p>
                     {/if}

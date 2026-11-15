@@ -1,0 +1,990 @@
+[
+    {
+        "question": "How do I start studying a deck?",
+        "answer": "Go to Deck Browser, pick a deck, then open it and start a review session from the deck page.",
+        "tags": [
+            "deck browser",
+            "study",
+            "start"
+        ],
+        "category": "Decks",
+        "answerHtml": "Go to <a href=\"/deck-browser\">Deck Browser</a>, pick a deck, then open it and start a review session from the deck page."
+    },
+    {
+        "question": "Can I upload my own deck?",
+        "answer": "Yes. Use the Upload Custom Deck page to import your own words using supported formats like CSV or tab-separated text.",
+        "tags": [
+            "custom deck",
+            "import",
+            "csv",
+            "anki"
+        ],
+        "category": "Decks",
+        "answerHtml": "Yes. Use the <a href=\"/upload-custom-deck\">Upload Custom Deck</a> page to import your own words using supported formats like CSV or tab-separated text."
+    },
+    {
+        "question": "How do I import readings and meanings from Anki, Pleco, or a spreadsheet?",
+        "answer": "On Upload Custom Deck, select CSV for a spreadsheet export or Anki Text for tab-separated text, then paste it or use Upload File. Set Column Index to the word column; enable Import Reading and/or Import Meaning and specify their columns. Column numbers start at 1. For a CSV header, enable Ignore CSV Header. Anki decks must first be exported as plain text; Pleco cards can be exported as tab-separated text. Check the preview and warnings before adding the deck.",
+        "tags": [
+            "anki",
+            "pleco",
+            "spreadsheet",
+            "csv",
+            "tsv",
+            "columns",
+            "reading",
+            "meaning",
+            "import"
+        ],
+        "category": "Decks",
+        "answerHtml": "On <a href=\"/upload-custom-deck\">Upload Custom Deck</a>, select CSV for a spreadsheet export or Anki Text for tab-separated text, then paste it or use Upload File. Set Column Index to the word column; enable Import Reading and/or Import Meaning and specify their columns. Column numbers start at 1. For a CSV header, enable Ignore CSV Header. Anki decks must first be exported as plain text; Pleco cards can be exported as tab-separated text. Check the preview and warnings before adding the deck."
+    },
+    {
+        "question": "How do I add a list of words to an existing deck?",
+        "answer": "On Upload Custom Deck, enter or upload your words and check the preview. Under Config, enable Add to Existing Deck, select a custom deck, and choose Add To Deck. Cards with issues in the preview may be marked ignored, so resolve those issues first if you want to study them immediately.",
+        "tags": [
+            "add words",
+            "bulk import",
+            "existing deck",
+            "custom deck",
+            "ignored"
+        ],
+        "category": "Decks",
+        "answerHtml": "On <a href=\"/upload-custom-deck\">Upload Custom Deck</a>, enter or upload your words and check the preview. Under Config, enable Add to Existing Deck, select a custom deck, and choose Add To Deck. Cards with issues in the preview may be marked ignored, so resolve those issues first if you want to study them immediately."
+    },
+    {
+        "question": "How do I create a meta deck?",
+        "answer": "First add the decks you want to combine. In Deck Browser, choose Create meta deck (experimental). On Add Meta Deck, review the listed subdecks, remove any unwanted entries, use Add Subdeck to choose your source decks, enter a name, and select Add Deck.",
+        "tags": [
+            "meta deck",
+            "combine decks",
+            "create",
+            "subdeck"
+        ],
+        "category": "Decks",
+        "answerHtml": "First add the decks you want to combine. In <a href=\"/deck-browser\">Deck Browser</a>, choose Create meta deck (experimental). On <a href=\"/upload-custom-deck/meta\">Add Meta Deck</a>, review the listed subdecks, remove any unwanted entries, use Add Subdeck to choose your source decks, enter a name, and select Add Deck."
+    },
+    {
+        "question": "How do I organize, ignore, or delete cards in a deck?",
+        "answer": "Open the deck, select cards, and use the action menu to edit them, move them to another group, or mark them as ignored. Moving cards to a new group name creates that group. To delete cards, switch View to Table (edit deck), select cards, and use delete selected cards. Marking cards ignored is a less destructive way to stop studying them.",
+        "tags": [
+            "organize",
+            "group",
+            "edit",
+            "delete",
+            "remove",
+            "ignore",
+            "suspend",
+            "select cards"
+        ],
+        "category": "Decks"
+    },
+    {
+        "question": "Can I avoid an audio voice or recording source I dislike?",
+        "answer": "In global Settings under Chinese, open More Audio Settings. Play the examples to hear a source, then choose blacklist to exclude it or allow to re-enable it. This controls the audio source, not an individual recording for a particular card.",
+        "tags": [
+            "audio",
+            "voice",
+            "pronunciation",
+            "blacklist",
+            "recording",
+            "source"
+        ],
+        "category": "General",
+        "answerHtml": "In global <a href=\"/settings#chinese\">Settings under Chinese</a>, open <a href=\"/settings/audio-settings\">More Audio Settings</a>. Play the examples to hear a source, then choose blacklist to exclude it or allow to re-enable it. This controls the audio source, not an individual recording for a particular card."
+    },
+    {
+        "question": "Can I open a word in Pleco or Dong Chinese?",
+        "answer": "In Settings under Dictionary, enable Show Pleco Link or Show Dong Link. The corresponding buttons then appear in the in-app dictionary. The Pleco button uses a Pleco app link; Dong Chinese opens its website.",
+        "tags": [
+            "dictionary",
+            "pleco",
+            "dong chinese",
+            "external link",
+            "lookup"
+        ],
+        "category": "General",
+        "answerHtml": "In <a href=\"/settings#dictionary\">Settings under Dictionary</a>, enable Show Pleco Link or Show Dong Link. The corresponding buttons then appear in the in-app dictionary. The Pleco button uses a Pleco app link; Dong Chinese opens its website."
+    },
+    {
+        "question": "How can I practice after finishing today’s reviews?",
+        "answer": "Use Extra Study on the deck overview, or select cards on the deck page and choose Start extra study. Extra Study is not available for meta decks.",
+        "tags": [
+            "extra study",
+            "practice",
+            "finished",
+            "no reviews",
+            "more cards"
+        ],
+        "category": "Review"
+    },
+    {
+        "question": "What is a meta deck in Wenbun?",
+        "answer": "A meta deck is a combined study view over multiple existing decks. Internally it is flagged as a meta deck and stores a list of source deck IDs, while the real cards and schedules remain in the original decks.",
+        "tags": [
+            "meta deck",
+            "combined deck",
+            "isMetaDeck",
+            "subDeckIds",
+            "source decks"
+        ],
+        "category": "Decks"
+    },
+    {
+        "question": "How does card selection work in a meta deck?",
+        "answer": "The app checks each source deck for its next eligible card, classifies candidates (new/warm-up, previously studied, review), then applies your normal card-order settings to choose what to show next. Scheduling still uses each source deck’s own data.",
+        "tags": [
+            "meta deck",
+            "card selection",
+            "scheduling",
+            "new/review mix",
+            "source deck schedule"
+        ],
+        "category": "SRS"
+    },
+    {
+        "question": "Will a meta deck reflect updates made to its source decks?",
+        "answer": "Yes. Because data stays in source decks, changes there are reflected in the meta deck. If a source deck is removed, invalid subdeck references are cleaned up automatically.",
+        "tags": [
+            "meta deck",
+            "source deck",
+            "updates",
+            "sync",
+            "deck changes",
+            "cleanup"
+        ],
+        "category": "Decks"
+    },
+    {
+        "question": "Can I add cards directly to a meta deck?",
+        "answer": "No. Meta decks are intended as aggregators, not independent card stores. Add/edit cards in the source deck(s) instead. Also note meta decks are still marked experimental, and some actions like quick adjust and extra study are disabled for them.",
+        "tags": [
+            "meta deck",
+            "edit",
+            "add cards",
+            "experimental",
+            "quick adjust",
+            "extra study"
+        ],
+        "category": "Decks"
+    },
+    {
+        "question": "How do deck-specific settings work?",
+        "answer": "Wenbun now supports per-deck settings overrides. Global settings are still your default, but a deck can have its own values for selected options. During review/study of that deck, Wenbun uses the deck-specific value when present, and falls back to global settings for everything else.",
+        "tags": [
+            "deck specific settings",
+            "per-deck",
+            "override",
+            "global settings",
+            "fallback"
+        ],
+        "category": "Decks"
+    },
+    {
+        "question": "How do I open deck-specific settings?",
+        "answer": "First open a deck context (Overview, Review, or the Deck page), then tap Settings from there. On the Settings screen, use the topmost \"Go to Deck Specific Settings\" button to open that deck’s specific settings page.",
+        "tags": [
+            "deck specific settings",
+            "open",
+            "go to deck specific settings",
+            "settings navigation",
+            "overview",
+            "review",
+            "deck page"
+        ],
+        "category": "Decks"
+    },
+    {
+        "question": "What do linked vs unlinked settings mean?",
+        "answer": "Linked means the deck follows the global value for that setting. Unlinked means the deck stores its own override for that setting. You can unlink a setting to customize it for one deck, or reset it back to global to relink it.",
+        "tags": [
+            "linked",
+            "unlinked",
+            "reset to global",
+            "override",
+            "deck config"
+        ],
+        "category": "Decks"
+    },
+    {
+        "question": "If I change a global setting, will deck-specific settings change too?",
+        "answer": "Only linked settings update from global changes. Any setting you unlinked for a deck keeps that deck’s own value until you relink it (reset to global).",
+        "tags": [
+            "global change",
+            "linked settings",
+            "unlinked settings",
+            "deck override behavior"
+        ],
+        "category": "Decks"
+    },
+    {
+        "question": "How do I configure a setting for only one deck?",
+        "answer": "Open that deck first (Overview, Review, or Deck page), tap Settings, then tap the topmost \"Go to Deck Specific Settings\" button. In deck-specific settings, unlink the setting you want to customize, change its value, and save. Only that deck will use the override; other decks keep using global settings unless you also change them.",
+        "tags": [
+            "single deck setting",
+            "deck-specific settings",
+            "unlink",
+            "override",
+            "only one deck",
+            "save"
+        ],
+        "category": "Decks"
+    },
+    {
+        "question": "What does \"Previously Studied\" mean?",
+        "answer": "\"Previously Studied\" is a pool for cards you already know from outside Wenbun. It helps you seed reviews faster without treating those cards as completely new.",
+        "tags": [
+            "previously studied",
+            "known cards",
+            "seed",
+            "review"
+        ],
+        "category": "Decks"
+    },
+    {
+        "question": "How do I mark cards as Previously Studied?",
+        "answer": "Open a deck, enter selection mode, select cards (or use \"select all in this group\"), then use \"Mark as previously studied\" from the action menu.",
+        "tags": [
+            "mark as previously studied",
+            "select all",
+            "group",
+            "deck list"
+        ],
+        "category": "Decks"
+    },
+    {
+        "question": "How are Previously Studied cards scheduled each day?",
+        "answer": "Daily intake and ordering are controlled by settings like New Previously Studied Card Per Day and New Previously Studied Card Order. You can also choose whether to draw from the back of the previously studied pool.",
+        "tags": [
+            "newPreviouslyStudiedCardPerDay",
+            "order",
+            "start from back",
+            "settings"
+        ],
+        "category": "SRS",
+        "answerHtml": "Daily intake and ordering are controlled by settings like <a href=\"/settings#learning\">New Previously Studied Card Per Day</a> and New Previously Studied Card Order. You can also choose whether to draw from the back of the previously studied pool."
+    },
+    {
+        "question": "What happens when I fail a card?",
+        "answer": "The card scheduling is adjusted so it appears again sooner. Depending on your settings, reading hints may also be shown.",
+        "tags": [
+            "grading",
+            "fail",
+            "schedule"
+        ],
+        "category": "Review"
+    },
+    {
+        "question": "Why is a failed card not shown again immediately?",
+        "answer": "A failed card is rescheduled rather than necessarily repeated immediately. To allow short-term scheduling, enable Enable Short Term in the FSRS settings and check your learning steps. When the card returns depends on its schedule and your session.",
+        "tags": [
+            "fail",
+            "again",
+            "retry",
+            "same day",
+            "short term",
+            "learning steps",
+            "fsrs"
+        ],
+        "category": "SRS",
+        "answerHtml": "A failed card is rescheduled rather than necessarily repeated immediately. To allow short-term scheduling, enable Enable Short Term in the <a href=\"/settings#fsrs\">FSRS settings</a> and check your learning steps. When the card returns depends on its schedule and your session."
+    },
+    {
+        "question": "Can I reveal a reading or fail only one character?",
+        "answer": "During review, use the eye button next to a hidden reading to reveal it. Fail/Reveal affects the current character by default; enable Fail Whole Word in Learning settings to affect the whole word instead.",
+        "tags": [
+            "hint",
+            "pinyin",
+            "zhuyin",
+            "reveal reading",
+            "fail whole word",
+            "character"
+        ],
+        "category": "Review",
+        "answerHtml": "During review, use the eye button next to a hidden reading to reveal it. Fail/Reveal affects the current character by default; enable Fail Whole Word in <a href=\"/settings#learning\">Learning settings</a> to affect the whole word instead."
+    },
+    {
+        "question": "Can I use Auto Next after a correct answer?",
+        "answer": "Yes. Enable \"Auto Next On Success\" in Settings to automatically move on after correct answers. This option is disabled when grading is set to manual.",
+        "tags": [
+            "auto next",
+            "correct answer",
+            "review flow",
+            "settings"
+        ],
+        "category": "Review",
+        "answerHtml": "Yes. Enable \"<a href=\"/settings#learning\">Auto Next On Success</a>\" in Settings to automatically move on after correct answers. This option is disabled when grading is set to manual."
+    },
+    {
+        "question": "Can I use keyboard shortcuts in review?",
+        "answer": "Yes. You can configure keyboard behavior in Settings, including advancing to the next card.",
+        "tags": [
+            "keyboard",
+            "shortcuts",
+            "settings"
+        ],
+        "category": "Review",
+        "answerHtml": "Yes. You can configure keyboard behavior in <a href=\"/settings#ui-audio-input\">Settings</a>, including advancing to the next card."
+    },
+    {
+        "question": "Can I practice writing on paper and grade manually?",
+        "answer": "Yes. Set Writing Mode to External to write outside the app (for example on paper). In this mode, grading is manual so you can fully self-evaluate handwriting quality.",
+        "tags": [
+            "external writing mode",
+            "manual grading",
+            "paper",
+            "handwriting"
+        ],
+        "category": "Review",
+        "answerHtml": "Yes. Set <a href=\"/settings#learning\">Writing Mode</a> to External to write outside the app (for example on paper). In this mode, grading is manual so you can fully self-evaluate handwriting quality."
+    },
+    {
+        "question": "How does SRS work with Warm-up?",
+        "answer": "Warm-up itself is not FSRS scheduling. During warm-up, a card is shown multiple times (typically 3 times). After warm-up, it is shown again on the next day by design, and then normal SRS scheduling begins.",
+        "tags": [
+            "srs",
+            "warmup",
+            "fsrs",
+            "learning steps"
+        ],
+        "category": "SRS"
+    },
+    {
+        "question": "When does FSRS actually start for a new card?",
+        "answer": "FSRS starts after the warm-up phase and the programmed next-day follow-up. From there, card intervals are calculated using the configured learning steps and retention settings.",
+        "tags": [
+            "fsrs",
+            "start",
+            "new cards",
+            "intervals"
+        ],
+        "category": "SRS"
+    },
+    {
+        "question": "How can I change my daily limits or separate learning and review?",
+        "answer": "In Settings under Learning, change New Card Per Day, Max Reviews Per Day, or the new-card ordering. Enable Separate Learn and Review to use separate sessions. The overview also offers Quick Adjust for today’s limits; it is disabled for meta decks.",
+        "tags": [
+            "daily limit",
+            "new cards",
+            "review limit",
+            "quick adjust",
+            "separate learn and review",
+            "order"
+        ],
+        "category": "Review",
+        "answerHtml": "In <a href=\"/settings#learning\">Settings under Learning</a>, change New Card Per Day, Max Reviews Per Day, or the new-card ordering. Enable Separate Learn and Review to use separate sessions. The overview also offers Quick Adjust for today’s limits; it is disabled for meta decks."
+    },
+    {
+        "question": "When does a new study day begin?",
+        "answer": "The global New Day Starts At setting under Learning controls the day boundary for daily new-card, previously studied, and review counts.",
+        "tags": [
+            "reset",
+            "daily",
+            "midnight",
+            "start of day",
+            "timezone"
+        ],
+        "category": "SRS",
+        "answerHtml": "The global <a href=\"/settings#learning\">New Day Starts At</a> setting under Learning controls the day boundary for daily new-card, previously studied, and review counts."
+    },
+    {
+        "question": "Can I limit how far into the future a review is scheduled?",
+        "answer": "Set Maximum Interval in the FSRS settings. If existing review cards exceed the limit, Settings offers Adjust existing cards. This brings their due dates forward from the last review and can make cards overdue. Deck-specific overrides can use different limits; explicit learning steps are separate from this cap.",
+        "tags": [
+            "maximum interval",
+            "long interval",
+            "cap",
+            "due date",
+            "fsrs",
+            "adjust existing cards"
+        ],
+        "category": "SRS",
+        "answerHtml": "Set Maximum Interval in the <a href=\"/settings#fsrs\">FSRS settings</a>. If existing review cards exceed the limit, Settings offers Adjust existing cards. This brings their due dates forward from the last review and can make cards overdue. Deck-specific overrides can use different limits; explicit learning steps are separate from this cap."
+    },
+    {
+        "question": "How do I sync my progress?",
+        "answer": "Sign in to your account so your study data can be linked and synchronized across devices.",
+        "tags": [
+            "sync",
+            "login",
+            "cloud"
+        ],
+        "category": "Account",
+        "answerHtml": "<a href=\"/settings#profile\">Sign in</a> to your account so your study data can be linked and synchronized across devices."
+    },
+    {
+        "question": "How do I back up or restore my progress?",
+        "answer": "In global Settings under Profile, use export profile data (download) and keep the file somewhere safe. To restore it, use import profile data (upload). You can also use manual import/export to copy or paste profile text. Importing replaces current profile data, so export a backup first, especially before signing in or resolving a sync conflict.",
+        "tags": [
+            "backup",
+            "save",
+            "export",
+            "import",
+            "restore",
+            "download",
+            "upload",
+            "profile",
+            "lost progress"
+        ],
+        "category": "Account",
+        "answerHtml": "In global <a href=\"/settings#profile\">Settings under Profile</a>, use export profile data (download) and keep the file somewhere safe. To restore it, use import profile data (upload). You can also use manual import/export to copy or paste profile text. Importing replaces current profile data, so export a backup first, especially before signing in or resolving a sync conflict."
+    },
+    {
+        "question": "What should I do about a sync conflict or missing progress?",
+        "answer": "First export any available local profile data as a backup. A sync conflict is not a merge: Use Remote overwrites the local save, while Use Local overwrites the remote save. Compare the modification times and deck summaries when available. If you are unsure which data to keep, ask for help before choosing; share profile exports privately because they may contain personal data.",
+        "tags": [
+            "sync conflict",
+            "local",
+            "remote",
+            "missing decks",
+            "lost progress",
+            "overwrite",
+            "recovery"
+        ],
+        "category": "Troubleshooting",
+        "answerHtml": "First <a href=\"/settings#profile\">export any available local profile data</a> as a backup. A sync conflict is not a merge: Use Remote overwrites the local save, while Use Local overwrites the remote save. Compare the modification times and deck summaries when available. If you are unsure which data to keep, ask for help before choosing; share profile exports privately because they may contain personal data."
+    },
+    {
+        "question": "Where is the manual sync button?",
+        "answer": "When signed in, choose Manual under Sync mode in Settings → Profile → Online Sync. The manual sync button is hidden in Auto mode. If it is still missing in Manual mode, report the issue with your platform and app version.",
+        "tags": [
+            "manual sync",
+            "auto sync",
+            "missing button",
+            "sync mode"
+        ],
+        "category": "Account",
+        "answerHtml": "When signed in, choose Manual under Sync mode in <a href=\"/settings#profile\">Settings → Profile → Online Sync</a>. The manual sync button is hidden in Auto mode. If it is still missing in Manual mode, report the issue with your platform and app version."
+    },
+    {
+        "question": "Can I use Wenbun offline? How do I download audio?",
+        "answer": "The web app can be installed as a PWA from Settings. Open Offline Data from Settings to check offline data status; on the web you can install core data there. Audio has a separate status and can be installed or uploaded on the same page. Offline data is not a profile backup: export your profile separately, since browser storage can be cleared.",
+        "tags": [
+            "offline",
+            "pwa",
+            "install",
+            "no internet",
+            "core data",
+            "audio download",
+            "iphone",
+            "ipad"
+        ],
+        "category": "General",
+        "answerHtml": "The web app can be installed as a <a href=\"/settings#offline-data\">PWA from Settings</a>. Open <a href=\"/offline-data\">Offline Data</a> from Settings to check offline data status; on the web you can install core data there. Audio has a separate status and can be installed or uploaded on the same page. Offline data is not a profile backup: export your profile separately, since browser storage can be cleared."
+    },
+    {
+        "question": "The handwriting checker rejects my strokes. Can I adjust it?",
+        "answer": "In Settings under Character Writer, adjust Stroke Leniency and use Test Writer to try the setting. You can also adjust when hints appear after missed strokes.",
+        "tags": [
+            "handwriting",
+            "stroke",
+            "recognition",
+            "sensitivity",
+            "leniency",
+            "test writer",
+            "hint"
+        ],
+        "category": "Troubleshooting",
+        "answerHtml": "In <a href=\"/settings#character-writer\">Settings under Character Writer</a>, adjust Stroke Leniency and use <a href=\"/settings/leniency-calibration\">Test Writer</a> to try the setting. You can also adjust when hints appear after missed strokes."
+    },
+    {
+        "question": "I cannot hear audio. What should I check?",
+        "answer": "Check device volume, confirm audio is enabled in Settings, and verify audio source options in More Audio Settings.",
+        "tags": [
+            "audio",
+            "sound",
+            "settings"
+        ],
+        "category": "Troubleshooting",
+        "answerHtml": "Check device volume, confirm <a href=\"/settings#chinese\">audio is enabled in Settings</a>, and verify audio source options in <a href=\"/settings/audio-settings\">More Audio Settings</a>."
+    },
+    {
+        "question": "Why is a character not available for writing practice?",
+        "answer": "Some characters may not have Hanzi Writer data. In those cases, writing practice may be limited for that entry.",
+        "tags": [
+            "hanzi writer",
+            "unsupported",
+            "writing"
+        ],
+        "category": "Troubleshooting"
+    },
+    {
+        "question": "Does Extra Study change my review schedule?",
+        "answer": "No. Extra Study lets you practice without affecting the SRS schedule. On the deck overview, expand Extra Study to choose the cards and mode for a practice session.",
+        "tags": [
+            "extra study",
+            "practice",
+            "schedule",
+            "srs",
+            "due date"
+        ],
+        "category": "Review"
+    },
+    {
+        "question": "Which cards can I practice in Extra Study?",
+        "answer": "On the deck overview, expand Extra Study and choose a Type: Studied Cards, All, Hard Cards, New Cards, Young Cards, Mature Cards, or Group. You can set a count and, for Group, choose a group. Hard Cards are selected by their recorded difficulty.",
+        "tags": [
+            "extra study",
+            "hard cards",
+            "new cards",
+            "young",
+            "mature",
+            "group",
+            "practice"
+        ],
+        "category": "Review"
+    },
+    {
+        "question": "How do I practice dictation?",
+        "answer": "On the deck overview, expand Extra Study and select Dictation (experimental) as the mode. The prompt plays audio instead of initially showing the meaning; you can reveal the meaning and reading during the exercise. Extra Study is unavailable for meta decks.",
+        "tags": [
+            "dictation",
+            "listening",
+            "audio",
+            "extra study",
+            "meaning",
+            "experimental"
+        ],
+        "category": "Review"
+    },
+    {
+        "question": "Can I study new cards before or after my reviews?",
+        "answer": "In Settings under Learning, set New Card Order to Mix, Before Reviews, or After Reviews. The Previously Studied pool has its own New Previously Studied Card Order with the same choices.",
+        "tags": [
+            "new card order",
+            "before reviews",
+            "after reviews",
+            "mix",
+            "previously studied"
+        ],
+        "category": "Review",
+        "answerHtml": "In <a href=\"/settings#learning\">Settings under Learning</a>, set New Card Order to Mix, Before Reviews, or After Reviews. The Previously Studied pool has its own New Previously Studied Card Order with the same choices."
+    },
+    {
+        "question": "What are FSRS learning steps?",
+        "answer": "Learning Steps are the sequence of intervals used during the initial FSRS learning phase before long-term review. Previously Studied Learning Steps configure a separate sequence for cards from the Previously Studied pool. Both are under FSRS in Settings.",
+        "tags": [
+            "fsrs",
+            "learning steps",
+            "intervals",
+            "previously studied",
+            "short term"
+        ],
+        "category": "SRS",
+        "answerHtml": "Learning Steps are the sequence of intervals used during the initial FSRS learning phase before long-term review. Previously Studied Learning Steps configure a separate sequence for cards from the Previously Studied pool. Both are under <a href=\"/settings#fsrs\">FSRS in Settings</a>."
+    },
+    {
+        "question": "What does Desired Retention change?",
+        "answer": "Desired Retention is the target probability of successful recall used by FSRS. Higher values increase review frequency and can increase workload. The setting help recommends a range of 0.8–0.9.",
+        "tags": [
+            "desired retention",
+            "fsrs",
+            "recall",
+            "workload",
+            "frequency"
+        ],
+        "category": "SRS",
+        "answerHtml": "<a href=\"/settings#fsrs\">Desired Retention</a> is the target probability of successful recall used by FSRS. Higher values increase review frequency and can increase workload. The setting help recommends a range of 0.8–0.9."
+    },
+    {
+        "question": "What does Enable Fuzz do?",
+        "answer": "In FSRS settings, Enable Fuzz adds slight random variation to intervals to help prevent reviews from clustering on the same day.",
+        "tags": [
+            "fuzz",
+            "fsrs",
+            "random",
+            "interval",
+            "review workload"
+        ],
+        "category": "SRS",
+        "answerHtml": "In <a href=\"/settings#fsrs\">FSRS settings</a>, Enable Fuzz adds slight random variation to intervals to help prevent reviews from clustering on the same day."
+    },
+    {
+        "question": "Can I write freely on screen without strict stroke-order grading?",
+        "answer": "In Settings under Learning, set Writing Mode to Manual. You can write freely on screen with flexible stroke order and then grade your answer yourself. External mode is for writing outside the app; Default mode uses on-screen stroke grading.",
+        "tags": [
+            "manual writing",
+            "stroke order",
+            "freehand",
+            "self grading",
+            "writing mode"
+        ],
+        "category": "Review",
+        "answerHtml": "In <a href=\"/settings#learning\">Settings under Learning</a>, set Writing Mode to Manual. You can write freely on screen with flexible stroke order and then grade your answer yourself. External mode is for writing outside the app; Default mode uses on-screen stroke grading."
+    },
+    {
+        "question": "Can I grade my own answers while using the default writer?",
+        "answer": "Yes. In Settings under Learning, choose manual for Grading Method. Manual and External writing modes also use manual grading.",
+        "tags": [
+            "grading method",
+            "manual grading",
+            "self grade",
+            "default writer"
+        ],
+        "category": "Review",
+        "answerHtml": "Yes. In <a href=\"/settings#learning\">Settings under Learning</a>, choose manual for Grading Method. Manual and External writing modes also use manual grading."
+    },
+    {
+        "question": "What does the bar above the writing grid mean?",
+        "answer": "The health bar indicates the automatic grade and drains as you make stroke mistakes. You can toggle Show Health Bar in Settings under UI, Audio & Input when automatic grading is selected.",
+        "tags": [
+            "health bar",
+            "progress bar",
+            "stroke mistakes",
+            "automatic grading",
+            "writer"
+        ],
+        "category": "Review",
+        "answerHtml": "The health bar indicates the automatic grade and drains as you make stroke mistakes. You can toggle Show Health Bar in <a href=\"/settings#ui-audio-input\">Settings under UI, Audio &amp; Input</a> when automatic grading is selected."
+    },
+    {
+        "question": "Can I change the speed of the stroke animation?",
+        "answer": "On a new card, tap the speed button showing a multiplier such as 1x to cycle through animation speeds. The choice is stored in local storage on that device or browser.",
+        "tags": [
+            "stroke speed",
+            "animation",
+            "new card",
+            "writer",
+            "playback"
+        ],
+        "category": "Review"
+    },
+    {
+        "question": "Can I change how quickly drawn strokes fade?",
+        "answer": "In Settings under Character Writer, adjust Stroke Fade Duration. The value is in milliseconds; the setting help lists 400 as the default.",
+        "tags": [
+            "stroke fade",
+            "duration",
+            "writer",
+            "handwriting",
+            "milliseconds"
+        ],
+        "category": "General",
+        "answerHtml": "In <a href=\"/settings#character-writer\">Settings under Character Writer</a>, adjust Stroke Fade Duration. The value is in milliseconds; the setting help lists 400 as the default."
+    },
+    {
+        "question": "Can I keep the Chinese reading visible during review?",
+        "answer": "In Settings under Chinese, enable Always Show Reading. When it is disabled, the reading is normally shown after a correct answer; you can also reveal a hidden reading during review.",
+        "tags": [
+            "always show reading",
+            "pinyin",
+            "zhuyin",
+            "pronunciation",
+            "hint"
+        ],
+        "category": "Review",
+        "answerHtml": "In <a href=\"/settings#chinese\">Settings under Chinese</a>, enable Always Show Reading. When it is disabled, the reading is normally shown after a correct answer; you can also reveal a hidden reading during review."
+    },
+    {
+        "question": "Can I switch between Pinyin and Zhuyin?",
+        "answer": "Yes. In Settings under Chinese, use Mandarin Reading to select Pinyin with tone marks, numeric Pinyin, or Zhuyin.",
+        "tags": [
+            "mandarin reading",
+            "pinyin",
+            "numeric pinyin",
+            "zhuyin",
+            "bopomofo"
+        ],
+        "category": "General",
+        "answerHtml": "Yes. In <a href=\"/settings#chinese\">Settings under Chinese</a>, use Mandarin Reading to select Pinyin with tone marks, numeric Pinyin, or Zhuyin."
+    },
+    {
+        "question": "Can I color Chinese characters by tone?",
+        "answer": "In Settings under Chinese, enable Color Characters Based On Their Tone. Tone Colors lets you choose the colors used for the tones, including the neutral tone.",
+        "tags": [
+            "tone colors",
+            "chinese",
+            "pinyin",
+            "tones",
+            "colors"
+        ],
+        "category": "General",
+        "answerHtml": "In <a href=\"/settings#chinese\">Settings under Chinese</a>, enable Color Characters Based On Their Tone. Tone Colors lets you choose the colors used for the tones, including the neutral tone."
+    },
+    {
+        "question": "When does pronunciation audio play?",
+        "answer": "The Chinese setting Play Audio controls audio when a new card is displayed or a card is answered correctly. Dictation is an experimental Extra Study mode that uses audio as the prompt.",
+        "tags": [
+            "play audio",
+            "pronunciation",
+            "new card",
+            "correct answer",
+            "dictation"
+        ],
+        "category": "General",
+        "answerHtml": "The <a href=\"/settings#chinese\">Chinese setting Play Audio</a> controls audio when a new card is displayed or a card is answered correctly. Dictation is an experimental Extra Study mode that uses audio as the prompt."
+    },
+    {
+        "question": "How do I stop audio from continuing into the next card?",
+        "answer": "In Settings under Chinese, enable Force Stop Audio On Next Card. This stops the current audio when the next card is displayed.",
+        "tags": [
+            "audio",
+            "overlap",
+            "next card",
+            "force stop",
+            "sound"
+        ],
+        "category": "General",
+        "answerHtml": "In <a href=\"/settings#chinese\">Settings under Chinese</a>, enable Force Stop Audio On Next Card. This stops the current audio when the next card is displayed."
+    },
+    {
+        "question": "What happens when a pronunciation recording is missing?",
+        "answer": "In Settings under Chinese, Use AI Generated Audio For Missing Audio controls the fallback: when enabled, audio is generated by AI; otherwise, audio is spliced from syllables, which the setting describes as lower quality.",
+        "tags": [
+            "missing audio",
+            "ai audio",
+            "fallback",
+            "syllables",
+            "pronunciation"
+        ],
+        "category": "General",
+        "answerHtml": "In <a href=\"/settings#chinese\">Settings under Chinese</a>, Use AI Generated Audio For Missing Audio controls the fallback: when enabled, audio is generated by AI; otherwise, audio is spliced from syllables, which the setting describes as lower quality."
+    },
+    {
+        "question": "Can I turn off the correct-answer ding?",
+        "answer": "Yes. Disable Play Success Sound in Settings under UI, Audio & Input. This controls the success ding separately from the Chinese Play Audio setting for pronunciation.",
+        "tags": [
+            "success sound",
+            "ding",
+            "mute",
+            "correct answer",
+            "audio"
+        ],
+        "category": "General",
+        "answerHtml": "Yes. Disable Play Success Sound in <a href=\"/settings#ui-audio-input\">Settings under UI, Audio &amp; Input</a>. This controls the success ding separately from the Chinese Play Audio setting for pronunciation."
+    },
+    {
+        "question": "Can I change the app theme or interface size?",
+        "answer": "In global Settings under UI, Audio & Input, choose a Color Scheme and UI Scale. For a custom scale, select custom and set Custom Font Size between 8 and 32 pixels.",
+        "tags": [
+            "theme",
+            "color scheme",
+            "ui scale",
+            "font size",
+            "accessibility"
+        ],
+        "category": "General",
+        "answerHtml": "In global <a href=\"/settings#ui-audio-input\">Settings under UI, Audio &amp; Input</a>, choose a Color Scheme and UI Scale. For a custom scale, select custom and set Custom Font Size between 8 and 32 pixels."
+    },
+    {
+        "question": "Where can I report bugs or suggest features?",
+        "answer": "Report issues on Discord or on GitHub Issues. Include your platform, app version, and steps to reproduce. Share profile exports or account details privately. If it is breaking really bad, manually tag @pHoton in Discord so it gets seen quickly.",
+        "answerHtml": "Report issues on <a href=\"https://discord.gg/pVUuqJqywt\" target=\"_blank\" rel=\"noopener noreferrer\">Discord</a> or on <a href=\"https://github.com/ray-pH/wenbun/issues\" target=\"_blank\" rel=\"noopener noreferrer\">GitHub Issues</a>. Include your platform, app version, and steps to reproduce. Share profile exports or account details privately. If it is breaking really bad, manually tag @pHoton in Discord so it gets seen quickly.",
+        "tags": [
+            "bug report",
+            "feature request",
+            "discord",
+            "github",
+            "issues",
+            "@pHoton",
+            "urgent"
+        ],
+        "category": "General"
+    },
+    {
+        "question": "What is the simplest format for a custom word list?",
+        "answer": "On Upload Custom Deck, choose Simple and enter one Chinese word or character per line. Blank lines are ignored; Wenbun looks up readings and meanings.",
+        "tags": [
+            "simple",
+            "word list",
+            "one per line",
+            "import"
+        ],
+        "category": "Decks",
+        "answerHtml": "On <a href=\"/upload-custom-deck\">Upload Custom Deck</a>, choose Simple and enter one Chinese word or character per line. Blank lines are ignored; Wenbun looks up readings and meanings."
+    },
+    {
+        "question": "Why is the first word missing from my CSV import?",
+        "answer": "Check Ignore CSV Header on Upload Custom Deck. When enabled, the importer skips the first nonempty, non-comment row, even if your file has no header.",
+        "tags": [
+            "csv",
+            "header",
+            "missing first row",
+            "import"
+        ],
+        "category": "Troubleshooting",
+        "answerHtml": "Check Ignore CSV Header on <a href=\"/upload-custom-deck\">Upload Custom Deck</a>. When enabled, the importer skips the first nonempty, non-comment row, even if your file has no header."
+    },
+    {
+        "question": "Why did punctuation disappear from imported words?",
+        "answer": "For CSV and Anki Text imports, Ignore Special Character removes a defined set of Chinese punctuation from the word column. Turn it off if you need to preserve those characters.",
+        "tags": [
+            "import",
+            "punctuation",
+            "special characters",
+            "csv",
+            "anki"
+        ],
+        "category": "Decks"
+    },
+    {
+        "question": "What do the warning icons in the import preview mean?",
+        "answer": "A triangle indicates missing character-writer support; a circle indicates missing dictionary data. Use Filter to Issues to inspect affected entries. If you proceed with issues, those cards are marked ignored.",
+        "tags": [
+            "import",
+            "preview",
+            "warning",
+            "unsupported",
+            "dictionary",
+            "ignored"
+        ],
+        "category": "Troubleshooting"
+    },
+    {
+        "question": "What can I try when an imported word is missing from the dictionary?",
+        "answer": "Enable the extended dictionary in the custom deck configuration and check the preview again. Initial loading can take a few moments.",
+        "tags": [
+            "import",
+            "missing word",
+            "extended dictionary",
+            "preview"
+        ],
+        "category": "Troubleshooting"
+    },
+    {
+        "question": "Can I rename a deck?",
+        "answer": "On the deck page, use the edit icon beside its name, enter a nonempty name, and confirm. The rename control is not offered for built-in decks.",
+        "tags": [
+            "rename",
+            "deck name",
+            "custom deck"
+        ],
+        "category": "Decks"
+    },
+    {
+        "question": "Can I split a long deck into smaller groups?",
+        "answer": "On the deck page, enter a group size and use the split-into-groups control. Confirm the prompt before applying the change.",
+        "tags": [
+            "split",
+            "groups",
+            "large deck",
+            "organize"
+        ],
+        "category": "Decks"
+    },
+    {
+        "question": "What happens if I delete an entire deck?",
+        "answer": "The deck page asks for confirmation twice and warns that its data will be lost. Export a profile backup first if you might need that progress.",
+        "tags": [
+            "delete deck",
+            "remove",
+            "progress",
+            "backup"
+        ],
+        "category": "Decks",
+        "answerHtml": "The deck page asks for confirmation twice and warns that its data will be lost. <a href=\"/settings#profile\">Export a profile backup</a> first if you might need that progress."
+    },
+    {
+        "question": "How do I request account deletion?",
+        "answer": "Open the Account page, enter your email address, and request deletion. The page says deletion proceeds only after confirmation through the verification email.",
+        "tags": [
+            "delete account",
+            "privacy",
+            "email",
+            "verification"
+        ],
+        "category": "Account",
+        "answerHtml": "Open the <a href=\"/account\">Account page</a>, enter your email address, and request deletion. The page says deletion proceeds only after confirmation through the verification email."
+    },
+    {
+        "question": "How do I sign out?",
+        "answer": "In global Settings under Profile, choose Log out in Online Sync while signed in.",
+        "tags": [
+            "logout",
+            "log out",
+            "sign out",
+            "account"
+        ],
+        "category": "Account",
+        "answerHtml": "In global <a href=\"/settings#profile\">Settings under Profile</a>, choose Log out in Online Sync while signed in."
+    },
+    {
+        "question": "What should I do if I was unexpectedly logged out?",
+        "answer": "The Profile panel suggests trying to log in again and reporting frequent occurrences. Dismiss (Stay Logged Out) may mean you need to sync manually later. Export a backup before signing in if local progress is important.",
+        "tags": [
+            "logged out",
+            "session expired",
+            "login",
+            "sync",
+            "backup"
+        ],
+        "category": "Troubleshooting",
+        "answerHtml": "The <a href=\"/settings#profile\">Profile panel</a> suggests trying to log in again and reporting frequent occurrences. Dismiss (Stay Logged Out) may mean you need to sync manually later. Export a backup before signing in if local progress is important."
+    },
+    {
+        "question": "My reviews disappeared after a clock or time-zone change. What should I check?",
+        "answer": "Check New Day Starts At in Settings and your device date and time zone. If the behavior persists, export a backup and report your app version and circumstances rather than resetting data.",
+        "tags": [
+            "missing reviews",
+            "clock",
+            "timezone",
+            "daylight saving",
+            "daily reset"
+        ],
+        "category": "Troubleshooting",
+        "answerHtml": "Check <a href=\"/settings#learning\">New Day Starts At in Settings</a> and your device date and time zone. If the behavior persists, export a backup and report your app version and circumstances rather than resetting data."
+    },
+    {
+        "question": "Offline Data says core data is missing. What can I do?",
+        "answer": "While online, open Offline Data and choose Install Core Data. The web page recommends redownloading when core data is missing.",
+        "tags": [
+            "offline",
+            "core data",
+            "missing",
+            "redownload",
+            "cache"
+        ],
+        "category": "Troubleshooting",
+        "answerHtml": "While online, open <a href=\"/offline-data\">Offline Data</a> and choose Install Core Data. The web page recommends redownloading when core data is missing."
+    },
+    {
+        "question": "Can I install offline audio from a downloaded file?",
+        "answer": "The Offline Data page links to the Mandarin audio ZIP and provides Manually upload Audio Data zip file. Manual core-data ZIP upload is currently disabled.",
+        "tags": [
+            "offline",
+            "audio",
+            "zip",
+            "manual upload",
+            "mandarin"
+        ],
+        "category": "General",
+        "answerHtml": "The <a href=\"/offline-data\">Offline Data</a> page links to the Mandarin audio ZIP and provides Manually upload Audio Data zip file. Manual core-data ZIP upload is currently disabled."
+    },
+    {
+        "question": "Can I remove downloaded offline data to free space?",
+        "answer": "Offline Data shows estimated storage usage and separate Clear Core Data and Clear Audio Data controls. Clearing offline assets is not a substitute for exporting a profile backup.",
+        "tags": [
+            "storage",
+            "free space",
+            "clear cache",
+            "offline",
+            "audio"
+        ],
+        "category": "General",
+        "answerHtml": "<a href=\"/offline-data\">Offline Data</a> shows estimated storage usage and separate Clear Core Data and Clear Audio Data controls. Clearing offline assets is not a substitute for exporting a profile backup."
+    },
+    {
+        "question": "Can I see when I last studied each deck?",
+        "answer": "Enable Show Deck Last Study Time in global Settings under UI, Audio & Input.",
+        "tags": [
+            "last study",
+            "last studied",
+            "deck",
+            "date"
+        ],
+        "category": "Decks",
+        "answerHtml": "Enable Show Deck Last Study Time in global <a href=\"/settings#ui-audio-input\">Settings under UI, Audio &amp; Input</a>."
+    },
+    {
+        "question": "Can I make the deck card list more compact?",
+        "answer": "Use the View selector on the deck page to switch between normal, small, table, and table-edit views.",
+        "tags": [
+            "deck",
+            "compact",
+            "small",
+            "table",
+            "view"
+        ],
+        "category": "Decks"
+    }
+]

@@ -1,6 +1,6 @@
 <script lang="ts">
     import { base } from '$app/paths';
-    import { onDestroy, onMount } from "svelte";
+    import { onDestroy, onMount, tick } from "svelte";
     import { applyColorScheme } from '$lib/theme';
     import { App, NewCardOrder, WritingMode, type DataExportReminderPeriod, type WenbunConfig } from "$lib/app";
     import TopBar from "$lib/components/TopBar.svelte";
@@ -17,7 +17,7 @@
     import type { PWAInstallElement } from '@khmyznikov/pwa-install';
     import { isTauri } from '@tauri-apps/api/core';
     import TopRevealBar from '$lib/components/TopRevealBar.svelte';
-    import { goto } from '$app/navigation';
+    import { afterNavigate, goto } from '$app/navigation';
     
     export let data: {leniency?: string, fadeDuration?: string, fromDeckId?: string, deckId?: string};
     
@@ -65,18 +65,26 @@
     }
     
 
-    function scrollToReminderHashTarget() {
-        if (typeof window === "undefined") return;
-        if (window.location.hash !== "#data-export-reminder") return;
-        const el = document.getElementById("data-export-reminder");
-        if (!el) return;
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
+    async function scrollToHashTarget() {
+        await tick();
+        const hash = window.location.hash.slice(1);
+        if (!hash) return;
+        try {
+            document.getElementById(decodeURIComponent(hash))?.scrollIntoView({ block: 'start' });
+        } catch {
+            // Ignore malformed URL fragments.
+        }
     }
+
+    afterNavigate(() => {
+        if (isAppInitialized) void scrollToHashTarget();
+    });
 
     onMount(async () => {
         await app.init(null);
         isAppInitialized = true;
         initComponent();
+        await scrollToHashTarget();
         const changed = await app.initProfile(null);
         isLoggedIn = app.profile.isLoggedIn;
         if (await app.profile.getSyncMode() === SyncMode.manual) {
@@ -84,7 +92,7 @@
         }
         isOnlineProfileLoaded = true;
         if (changed) initComponent();
-        scrollToReminderHashTarget();
+        await scrollToHashTarget();
     })
     
     function initComponent() {
@@ -337,7 +345,7 @@
             </div>
         {/if}
         {#if !data.deckId}
-        <div class="settings-section">
+        <div class="settings-section" id="profile">
             <div class="section-title">Profile</div>
             <div class="section-container">
                 {#if app}
@@ -369,7 +377,7 @@
         </div>
         {/if}
         
-        <div class="settings-section">
+        <div class="settings-section" id="learning">
             <div class="section-title">Learning</div>
             <div class="section-container">
                 {#if !data.deckId}
@@ -440,7 +448,7 @@
             </div>
         </div>
         
-        <div class="settings-section">
+        <div class="settings-section" id="ui-audio-input">
             <div class="section-title">UI, Audio & Input</div>
             <div class="section-container">
                 {#if !data.deckId}
@@ -494,7 +502,7 @@
             </div>
         </div>
         
-        <div class="settings-section">
+        <div class="settings-section" id="character-writer">
             <div class="section-title">Character Writer</div>
             <div class="section-container">
                 <SettingsItem key="showHintAfterMissesCount" {...deckSettingsItemProps}>
@@ -514,7 +522,7 @@
         </div>
         
         
-        <div class="settings-section">
+        <div class="settings-section" id="fsrs">
             <div class="section-title">FSRS</div>
             <div class="section-container">
                 <SettingsItem key="learningSteps" {...deckSettingsItemProps}>
@@ -560,7 +568,7 @@
             </div>
         </div>
         
-        <div class="settings-section">
+        <div class="settings-section" id="chinese">
             <div class="section-title">Chinese</div>
             <div class="section-container">
                 <SettingsItem key="zhAlwaysShowReading" inputKey="zh.alwaysShowReading" {...deckSettingsItemProps}>
@@ -622,7 +630,7 @@
             </div>
         </div>
         
-        <div class="settings-section">
+        <div class="settings-section" id="dictionary">
             <div class="section-title">Dictionary</div>
             <div class="section-container">
                 <SettingsItem key="isShowPlecoLink" {...deckSettingsItemProps}>
@@ -670,7 +678,7 @@
         -->
                 
         {#if !data.deckId}
-        <div class="settings-section">
+        <div class="settings-section" id="offline-data">
             <div class="section-title">Offline Data</div>
             <div class="section-container">
                 {#if !isTauri()}
@@ -760,8 +768,6 @@
         padding: 0 1em;
         max-width: 25em;
         box-sizing: border-box;
-    }
-    :global(#data-export-reminder) {
         scroll-margin-top: 6em;
     }
     :global(#data-export-reminder:target) {
