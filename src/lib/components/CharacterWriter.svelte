@@ -734,8 +734,8 @@
     .new-element-indicator-label {
         color: var(--theme-writer-new-element-indicator-label-text, var(--theme-text, black));
         background: var(--theme-writer-new-element-indicator-label-surface, var(--theme-surface, white));
-        border-radius: 0.25em;
-        padding: 0.1em 0.35em;
+        border-radius: var(--theme-writer-new-element-indicator-label-radius, 0.25em);
+        padding: var(--theme-writer-new-element-indicator-label-padding, 0.1em 0.35em);
     }
     .auto-review-indicator-container {
         all: unset;

@@ -37,6 +37,18 @@ describe('color schemes', () => {
         expect(ChineseToneColorPalette['Tofu Like Dark']).toEqual(['#F39496', '#7DD5A6', '#7BC6F3', '#B998FF', '#E9F1F4']);
     });
 
+    it('preserves the original WenBun Light colors', () => {
+        const light = themes.find(theme => theme.id === 'wenbun-light')!;
+        expect(light.colors).toMatchObject({
+            background: '#E0E0E0', blue: '#3E92CC', green: '#419E6F',
+            orange: '#DA8C22', red: '#DB6B6C', 'on-blue': '#FFFFFF',
+            'review-fail-text': '#DB6B6C', 'review-good-text': '#419E6F',
+            'review-easy-text': '#3E92CC', 'top-bar-text': 'white',
+            'writer-new-element-indicator-label-surface': 'transparent',
+            'deck-table-selected-odd-background': '#FFFFFF50',
+        });
+    });
+
     it('applies each palette and falls back for an unknown saved scheme', () => {
         const setProperty = vi.fn();
         const removeProperty = vi.fn();

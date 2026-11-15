@@ -534,6 +534,7 @@
     }
     .changelog-version {
         color: var(--theme-page-changelog-version-text, var(--theme-page-changelog-text, var(--theme-text, black)));
+        opacity: var(--theme-page-changelog-version-opacity, 1);
         font-weight: bold;
     }
     .update-circle {

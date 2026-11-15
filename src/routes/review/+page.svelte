@@ -650,7 +650,7 @@
         flex-grow: 1;
         max-width: 8.5em;
         border-radius: 0.5em;
-        background-color: transparent;
+        background-color: var(--theme-review-button-background, transparent);
         text-align: center;
         &.main-button {
             min-width: min(8.5em, 35vw);

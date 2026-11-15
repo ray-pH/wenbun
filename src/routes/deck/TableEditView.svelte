@@ -535,14 +535,22 @@
             color: var(--theme-deck-table-edit-button-hover, var(--theme-text, black));
         }
     }
+    tr.selected {
+        background-color: var(--theme-deck-table-selected-row-background, transparent);
+    }
     tr.selected > td {
         background-color: var(--theme-deck-table-selected-background, color-mix(in srgb, var(--wenbun-blue) 20%, var(--theme-background, #E0E0E0)));
-        color: var(--theme-text, black);
+        color: var(--theme-deck-table-selected-text, var(--theme-text, black));
+    }
+    tr.selected:nth-child(odd) > td {
+        background-color: var(--theme-deck-table-selected-odd-background, var(--theme-deck-table-selected-background, color-mix(in srgb, var(--wenbun-blue) 20%, var(--theme-background, #E0E0E0))));
     }
     tr.selected {
-        .not-custom,
+        .not-custom {
+            color: var(--theme-deck-table-selected-non-custom-text, var(--theme-text, black));
+        }
         .edit-button {
-            color: var(--theme-text, black);
+            color: var(--theme-deck-table-selected-edit-text, var(--theme-text, black));
         }
     }
     
