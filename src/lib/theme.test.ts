@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { applyColorScheme } from './theme';
+import { applyColorScheme, getWriterStrokeColor, getWriterToneColor } from './theme';
 import themes from './themes.json';
 import { App, type ColorScheme } from './app';
 
@@ -12,6 +12,28 @@ describe('color schemes', () => {
         expect(app.getConfig(null).colorScheme).toBe('wenbun-light');
         app.config.colorScheme = 'bamboo';
         expect(app.exportProfile().config.colorScheme).toBe('bamboo');
+    });
+
+    it('uses theme-aware writer colors while preserving custom and light-theme tones', () => {
+        const style = { colorScheme: 'light' };
+        vi.stubGlobal('document', { documentElement: { style } });
+        vi.stubGlobal('getComputedStyle', () => ({
+            getPropertyValue: (key: string) => key === '--theme-writer-stroke' ? '#eeeeee' : key === '--theme-writer-tone-purple' ? '#b998ff' : '',
+        }));
+
+        expect(getWriterStrokeColor()).toBe('#eeeeee');
+        expect(getWriterToneColor(undefined, undefined)).toBe('#eeeeee');
+        expect(getWriterToneColor('#555555', 5)).toBe('#555555');
+        expect(getWriterToneColor('#7C3AED', 3)).toBe('#7C3AED');
+
+        style.colorScheme = 'dark';
+        expect(getWriterToneColor('#555555', 5)).toBe('#eeeeee');
+        expect(getWriterToneColor('#7c3aed', 3)).toBe('#b998ff');
+        expect(getWriterToneColor('#7C3AED', 4)).toBe('#b998ff');
+        expect(getWriterToneColor('#555555', 1)).toBe('#555555');
+        expect(getWriterToneColor('#123456', 5)).toBe('#123456');
+        expect(getWriterToneColor('#3E92CC', 1)).toBe('#3E92CC');
+        expect(getWriterToneColor('', 5)).toBe('#eeeeee');
     });
 
     it('applies each palette and falls back for an unknown saved scheme', () => {

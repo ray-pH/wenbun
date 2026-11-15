@@ -1,11 +1,27 @@
 import themes from './themes.json';
 import type { ColorScheme } from './app';
+import { ChineseToneColorPalette } from './constants';
 
 export function getWriterStrokeColor(): string {
     const style = getComputedStyle(document.documentElement);
     return style.getPropertyValue('--theme-writer-stroke').trim()
         || style.getPropertyValue('--theme-text').trim()
         || '#555';
+}
+
+export function getWriterToneColor(color: string | undefined, tone: number | undefined): string {
+    if (!color) return getWriterStrokeColor();
+
+    // Saved colors have no preset metadata, so only adapt matching built-in tone slots.
+    const isBuiltinTone = tone && Object.values(ChineseToneColorPalette)
+        .some(palette => palette[tone - 1]?.toLowerCase() === color.toLowerCase());
+    if (isBuiltinTone && document.documentElement.style.colorScheme === 'dark') {
+        if (color.toLowerCase() === '#7c3aed') {
+            return getComputedStyle(document.documentElement).getPropertyValue('--theme-writer-tone-purple').trim() || color;
+        }
+        if (color.toLowerCase() === '#555555') return getWriterStrokeColor();
+    }
+    return color;
 }
 
 export function applyColorScheme(scheme: ColorScheme) {

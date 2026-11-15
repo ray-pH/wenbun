@@ -36,6 +36,7 @@
             highlightOnComplete: false,
             strokeFadeDuration: fadeDuration,
             strokeColor: getWriterStrokeColor(),
+            drawingColor: getWriterStrokeColor(),
             drawingWidth: CHARACTER_WRITER_DRAWING_WIDTH,
         });
         resetHanziWriter(leniency, chara);

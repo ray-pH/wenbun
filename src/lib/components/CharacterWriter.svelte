@@ -10,7 +10,7 @@
     import { AutoReview, AutoReviewGradeClass, AutoReviewGradeFAClass, AutoReviewGradeLabel, type AutoReviewData } from '$lib/autoReview';
     import { CHARACTER_WRITER_DRAWING_WIDTH, SLUG_UNSUPPORTED_CHAR_INTERACTION_NEXT, SLUG_UNSUPPORTED_CHAR_INTERACTION_WARNING } from "$lib/constants";
     import ManualWriter from "$lib/manualWriter";
-    import { getWriterStrokeColor } from '$lib/theme';
+    import { getWriterStrokeColor, getWriterToneColor } from '$lib/theme';
     import ManualWriterResultPreview from './ManualWriterResultPreview.svelte';
     
     let width = $state(500);
@@ -234,7 +234,7 @@
             showCharacter: false, 
             showOutline: cardConfig.isShowOutline || externalAndDone,
             highlightOnComplete: false,
-            strokeColor: app.getChineseToneColor(tone) ?? getWriterStrokeColor(),
+            strokeColor: getWriterToneColor(app.getChineseToneColor(tone), tone),
             // drawing
             drawingWidth: CHARACTER_WRITER_DRAWING_WIDTH,
             drawingColor: getWriterStrokeColor(),
@@ -315,7 +315,7 @@
             width,
             height,
             drawingWidth: CHARACTER_WRITER_DRAWING_WIDTH,
-            drawingColor: app.getChineseToneColor(tone) ?? getWriterStrokeColor(),
+            drawingColor: getWriterToneColor(app.getChineseToneColor(tone), tone),
             strokeAnimationSpeed: strokeSpeed,
             delayBetweenStrokes: linmap(strokeSpeed, 1, MAX_STROKE_SPEED, 1000, 10),
             delayBetweenLoops: linmap(strokeSpeed, 1, MAX_STROKE_SPEED, 2000, 10),
@@ -714,7 +714,6 @@
         &.is-complete { --p: var(--next-progress, 100%)}
         transition: --p 300ms ease;
         
-        color: var(--theme-writer-new-element-indicator-text, var(--theme-on-accent, white));
         background:
           linear-gradient(var(--wenbun-blue) 0 0) 0 / var(--p) 100% no-repeat,
           var(--theme-writer-new-element-indicator-track, var(--theme-muted, #BBB));
@@ -732,12 +731,18 @@
         max-inline-size: 12em;  /* don’t exceed target */
         min-inline-size: 6.5em; /* reasonable floor so it doesn’t collapse */
     }
+    .new-element-indicator-label {
+        color: var(--theme-writer-new-element-indicator-label-text, var(--theme-text, black));
+        background: var(--theme-writer-new-element-indicator-label-surface, var(--theme-surface, white));
+        border-radius: 0.25em;
+        padding: 0.1em 0.35em;
+    }
     .auto-review-indicator-container {
         all: unset;
         z-index: 100;
         cursor: pointer;
         background-color : var(--color);
-        color: var(--theme-writer-auto-review-indicator-text, var(--theme-on-accent, white));
+        color: var(--theme-writer-auto-review-indicator-text, var(--on-color, var(--theme-on-accent, white)));
         width: 8em;
         height: 8em;
         display: flex;
@@ -753,10 +758,10 @@
             font-size: 3em;
         }
         &:hover { opacity: 0.8; }
-        &.easy { --color: var(--wenbun-blue);}
-        &.good { --color: var(--wenbun-green);}
-        &.hard { --color: var(--wenbun-orange);}
-        &.again { --color: var(--wenbun-red);}
+        &.easy { --color: var(--wenbun-blue); --on-color: var(--theme-on-blue, var(--theme-on-accent, white)); }
+        &.good { --color: var(--wenbun-green); --on-color: var(--theme-on-green, var(--theme-on-accent, white)); }
+        &.hard { --color: var(--wenbun-orange); --on-color: var(--theme-on-orange, var(--theme-on-accent, white)); }
+        &.again { --color: var(--wenbun-red); --on-color: var(--theme-on-red, var(--theme-on-accent, white)); }
         &.blinking {
             animation: blinking 1s ease-in-out infinite;
         }
@@ -971,13 +976,13 @@
         <div class="bottom-container" style:max-width={`${width}px`}>
             {#if characterData?.characters}
                 {#if cardConfig.isFirstTime}
-                    <div class="new-element-indicator">New Card</div>
+                    <div class="new-element-indicator"><span class="new-element-indicator-label">New Card</span></div>
                 {:else if cardConfig.isWarmUp}
                     <div class="new-element-indicator" 
                         class:is-complete={isComplete}
                         style:--progress={warmUpProgressPercentStr()}
                         style:--next-progress={warmUpProgressPercentStr(1)}
-                    >Warm Up</div>
+                    ><span class="new-element-indicator-label">Warm Up</span></div>
                 {:else}
                     <div class="new-element-indicator is-hidden"></div>
                 {/if}

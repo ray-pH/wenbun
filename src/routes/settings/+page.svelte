@@ -876,6 +876,7 @@
     }
     input:invalid {
         background-color: var(--wenbun-red);
+        color: var(--theme-on-red, var(--theme-on-accent, white));
     }
     
     .hidden-button {

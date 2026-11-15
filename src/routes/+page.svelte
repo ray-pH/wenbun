@@ -156,10 +156,10 @@
 ></TopBar>
 <div class="main-container">
     <div class="top-container">
-        <a class="a-button" style="background-color: #A0D0F0;" href="{base}/about/">
+        <a class="a-button changelog-button" href="{base}/about/">
             <div style="display: flex; align-items: center; justify-content: space-between;">
                 <span>Changelog</span>
-                <span style="opacity: 0.4; font-weight: bold;">v{app.getCurrentAppVersion()}</span>
+                <span class="changelog-version">v{app.getCurrentAppVersion()}</span>
             </div>
             {#if isNewUpdateExist}
                 <span class="update-circle"></span>
@@ -500,7 +500,7 @@
     }
     .deck-card-button {
         all: unset;
-        color: var(--theme-page-deck-button-text, var(--theme-on-accent, white));
+        color: var(--theme-page-deck-button-text, var(--theme-on-blue, var(--theme-on-accent, white)));
         background-color: var(--wenbun-blue);
         cursor: pointer;
         border-radius: 0.5em;
@@ -527,6 +527,14 @@
         border-radius: 0.5em;
         padding: 1em;
         cursor: pointer;
+    }
+    .changelog-button {
+        background-color: var(--theme-page-changelog-background, var(--theme-surface-alt, #A0D0F0));
+        color: var(--theme-page-changelog-text, var(--theme-text, black));
+    }
+    .changelog-version {
+        color: var(--theme-page-changelog-version-text, var(--theme-page-changelog-text, var(--theme-text, black)));
+        font-weight: bold;
     }
     .update-circle {
         position: absolute;

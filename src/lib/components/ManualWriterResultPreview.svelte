@@ -5,6 +5,7 @@
     import { parseIntOrUndefined, type CharacterWriterData } from '$lib/util';
     import { CHARACTER_WRITER_DRAWING_WIDTH } from '$lib/constants';
     import ManualWriter from '$lib/manualWriter';
+    import { getWriterToneColor } from '$lib/theme';
 
     interface Props {
         characterData: CharacterWriterData | undefined;
@@ -54,8 +55,7 @@
 
     function getCharacterToneColor(index: number): string {
         const tone = getChineseTone(characterData?.tags[index] ?? []);
-        if (!tone) return '#555';
-        return toneColors[tone - 1] || '#555';
+        return getWriterToneColor(tone ? toneColors[tone - 1] : undefined, tone);
     }
 
     function getManualTargetId(index: number): string {

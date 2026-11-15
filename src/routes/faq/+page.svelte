@@ -141,8 +141,8 @@
 
     .category {
         font-size: 0.75rem;
-        background: #3a73c5;
-        color: var(--theme-faq-category-text, var(--theme-on-accent, #fff));
+        background: var(--theme-faq-category-background, #3a73c5);
+        color: var(--theme-faq-category-text, #fff);
         border-radius: 999px;
         padding: 0.18rem 0.55rem;
         white-space: nowrap;
