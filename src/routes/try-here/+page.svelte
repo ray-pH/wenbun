@@ -223,7 +223,7 @@
         flex-grow: 1;
         max-width: 8.5em;
         border-radius: 0.5em;
-        background-color: var(--theme-try-here-review-button-background, var(--theme-surface-alt, #E0E0E090));
+        background-color: transparent;
         text-align: center;
     }
 
@@ -248,7 +248,7 @@
     }
 
     .review-button.review-button-easy {
-        --color: var(--wenbun-blue);
+        --color: var(--theme-review-easy-text, var(--wenbun-blue));
     }
 
     .review-button:hover {

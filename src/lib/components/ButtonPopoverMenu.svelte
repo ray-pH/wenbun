@@ -264,7 +264,7 @@
     
     .tdm-trigger.blue {
         background: var(--wenbun-blue);
-        color: var(--theme-popover-menu-accent-trigger-text, var(--theme-on-accent, white));
+        color: var(--theme-popover-menu-accent-trigger-text, var(--theme-on-blue, var(--theme-on-accent, white)));
         opacity: 1;
         border-radius: 0.5em;
         &:hover {

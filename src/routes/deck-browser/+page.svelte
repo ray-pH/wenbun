@@ -176,7 +176,7 @@
     .deck-add-button {
         all: unset;
         background-color: var(--wenbun-blue);
-        color: var(--theme-deck-browser-add-button-text, var(--theme-on-accent, white));
+        color: var(--theme-deck-browser-add-button-text, var(--theme-on-blue, var(--theme-on-accent, white)));
         border-radius: 0.5em;
         padding: 0.5em 0.8em;
         cursor: pointer;

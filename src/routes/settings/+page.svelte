@@ -199,7 +199,7 @@
     function loadChineseToneColorPreset(key: string) {
         const colors = (ChineseToneColorPalette as any)[key];
         if (colors) {
-            config.zh.toneColors = colors;
+            config.zh.toneColors = [...colors];
         }
         selectedTonePreset = '';
     }
@@ -876,6 +876,7 @@
     }
     input:invalid {
         background-color: var(--wenbun-red);
+        color: var(--theme-on-red, var(--theme-on-accent, white));
     }
     
     .hidden-button {

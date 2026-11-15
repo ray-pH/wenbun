@@ -592,7 +592,7 @@
         cursor: pointer;
         background-color: var(--wenbun-blue);
         padding: 1em;
-        color: var(--theme-deck-group-header-text, var(--theme-on-accent, white));
+        color: var(--theme-deck-group-header-text, var(--theme-on-blue, var(--theme-on-accent, white)));
         border-radius: 0.5em;
         width: 100%;
         box-sizing: border-box;
@@ -600,7 +600,8 @@
         align-items: center;
         justify-content: space-between;
         &.not-completed {
-            background-color: var(--theme-deck-incomplete-group-background, var(--theme-overlay, #00000090));
+            background-color: var(--theme-deck-incomplete-group-background, var(--theme-surface-alt, #00000090));
+            color: var(--theme-deck-incomplete-group-text, var(--theme-text, white));
         }
     }
     .card {
@@ -644,6 +645,7 @@
                 color: var(--theme-deck-status-text, var(--theme-on-accent, white));
                 &.card-status-new {
                     background-color: gray;
+                    color: var(--theme-deck-new-status-text, black);
                 }
                 &.card-status-learning {
                     background-color: var(--wenbun-red);
@@ -659,6 +661,18 @@
                 }
                 &.card-status-previously-studied {
                     background-color: var(--wenbun-orange);
+                }
+                &.card-status-learning, &.card-status-relearning {
+                    color: var(--theme-on-red, var(--theme-on-accent, white));
+                }
+                &.card-status-review-young {
+                    color: var(--theme-on-green, var(--theme-on-accent, white));
+                }
+                &.card-status-review-mature {
+                    color: var(--theme-on-blue, var(--theme-on-accent, white));
+                }
+                &.card-status-previously-studied {
+                    color: var(--theme-on-orange, var(--theme-on-accent, white));
                 }
                 &.card-status-ignored {
                     color: var(--theme-deck-ignored-status-text, var(--theme-text, black));
