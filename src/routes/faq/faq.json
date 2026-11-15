@@ -275,8 +275,8 @@
         "category": "Review"
     },
     {
-        "question": "Why is a failed card not shown again immediately?",
-        "answer": "A failed card is rescheduled rather than necessarily repeated immediately. To allow short-term scheduling, enable Enable Short Term in the FSRS settings and check your learning steps. When the card returns depends on its schedule and your session.",
+        "question": "Can I retry failed cards on the same day, like in Anki?",
+        "answer": "Yes. In Settings under FSRS, enable Enable Short Term and save your settings. This allows failed cards to return for another attempt in the same session, outside Extra Study. It is disabled by default, which bypasses short-term scheduling under 24 hours. The exact return time depends on the card’s schedule and your learning steps, so it may not appear immediately. Previously Studied cards have separate learning steps.",
         "tags": [
             "fail",
             "again",
@@ -284,10 +284,14 @@
             "same day",
             "short term",
             "learning steps",
-            "fsrs"
+            "fsrs",
+            "anki",
+            "failed card disappears",
+            "repeat mistakes",
+            "relearning"
         ],
         "category": "SRS",
-        "answerHtml": "A failed card is rescheduled rather than necessarily repeated immediately. To allow short-term scheduling, enable Enable Short Term in the <a href=\"/settings#fsrs\">FSRS settings</a> and check your learning steps. When the card returns depends on its schedule and your session."
+        "answerHtml": "Yes. In <a href=\"/settings#fsrs\">Settings under FSRS</a>, enable Enable Short Term and save your settings. This allows failed cards to return for another attempt in the same session, outside Extra Study. It is disabled by default, which bypasses short-term scheduling under 24 hours. The exact return time depends on the card’s schedule and your learning steps, so it may not appear immediately. Previously Studied cards have separate learning steps."
     },
     {
         "question": "Can I reveal a reading or fail only one character?",
