@@ -227,8 +227,8 @@
         all: unset;
         width: var(--cell-size);
         height: var(--cell-size);
-        background: #FFFFFFDD;
-        border: 1px solid #00000018;
+        background: var(--theme-manual-result-preview-cell-surface, var(--theme-surface, #FFFFFFDD));
+        border: 1px solid var(--theme-manual-result-preview-cell-border, var(--theme-border, #00000018));
         border-radius: 0.5em;
         display: flex;
         align-items: center;
@@ -237,8 +237,8 @@
     }
 
     .preview-cell:hover {
-        border-color: #00000035;
-        background: #FFFFFF;
+        border-color: var(--theme-manual-result-preview-cell-hover-border, var(--theme-muted, #00000035));
+        background: var(--theme-manual-result-preview-cell-hover-surface, var(--theme-surface-alt, #FFFFFF));
     }
 
     .preview-svg {

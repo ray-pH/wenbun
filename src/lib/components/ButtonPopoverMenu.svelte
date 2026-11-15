@@ -259,12 +259,12 @@
         box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.35);
     }
     .tdm-trigger:hover {
-        background: var(--tdm-bg-hover, rgba(0,0,0,0.04));
+        background: var(--tdm-bg-hover, var(--theme-popover-menu-trigger-hover, var(--theme-surface-alt, rgba(0,0,0,0.04))));
     }
     
     .tdm-trigger.blue {
         background: var(--wenbun-blue);
-        color: white;
+        color: var(--theme-popover-menu-accent-trigger-text, var(--theme-on-accent, white));
         opacity: 1;
         border-radius: 0.5em;
         &:hover {
@@ -280,8 +280,8 @@
         max-height: min(60vh, 360px);
         overflow: auto;
         border-radius: 12px;
-        border: 1px solid var(--tdm-border, rgba(0,0,0,0.12));
-        background: var(--tdm-surface, #fff);
+        border: 1px solid var(--tdm-border, var(--theme-popover-menu-panel-border, var(--theme-border, rgba(0,0,0,0.12))));
+        background: var(--tdm-surface, var(--theme-popover-menu-panel-surface, var(--theme-surface, #fff)));
         box-shadow:
             0 8px 24px rgba(0,0,0,0.18),
             0 2px 8px rgba(0,0,0,0.12);
@@ -313,6 +313,7 @@
         cursor: pointer;
         outline: none;
         font: inherit;
+        color: var(--theme-text, inherit);
     }
     .tdm-item i {
         width: 1.25em;
@@ -321,7 +322,7 @@
     }
     .tdm-item:hover,
     .tdm-item:focus-visible {
-        background: var(--tdm-item-hover, rgba(0,0,0,0.06));
+        background: var(--tdm-item-hover, var(--theme-popover-menu-item-hover, var(--theme-surface-alt, rgba(0,0,0,0.06))));
     }
     .tdm-item:active {
         transform: translateY(0.5px);
@@ -331,7 +332,7 @@
     .tdm-backdrop {
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.5);
+        background: var(--theme-popover-menu-backdrop, var(--theme-overlay, rgba(0, 0, 0, 0.5)));
         z-index: 1000;
     }
     .tdm-sheet {
@@ -340,7 +341,7 @@
         right: 1vw;
         bottom: 0;
         z-index: 1001;
-        background: var(--tdm-surface, #fff);
+        background: var(--tdm-surface, var(--theme-popover-menu-sheet-surface, var(--theme-surface, #fff)));
         border-top-left-radius: 8px;
         border-top-right-radius: 8px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -355,8 +356,9 @@
         margin-top: 8px;
         min-height: 44px;
         border-radius: 12px;
-        border: 1px solid var(--tdm-border, rgba(0,0,0,0.12));
-        background: var(--tdm-bg, #fff);
+        border: 1px solid var(--tdm-border, var(--theme-popover-menu-cancel-border, var(--theme-border, rgba(0,0,0,0.12))));
+        background: var(--tdm-bg, var(--theme-popover-menu-cancel-surface, var(--theme-surface, #fff)));
+        color: var(--theme-text, inherit);
         cursor: pointer;
     }
     @keyframes tdm-slide-up {

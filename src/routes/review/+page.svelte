@@ -612,7 +612,7 @@
         bottom: 0;
         padding-bottom: calc(3em + var(--safe-bottom, 0em));
         box-sizing: border-box;
-        background-color: #E0E0E0;
+        background-color: var(--theme-review-bottom-background, var(--theme-background, #E0E0E0));
         width: 100vw;
         @media (max-width: 600px) {
             padding-bottom: calc(0.6em + var(--safe-bottom, 0em));
@@ -650,13 +650,13 @@
         flex-grow: 1;
         max-width: 8.5em;
         border-radius: 0.5em;
-        background-color: #E0E0E090;
+        background-color: var(--theme-review-button-background, var(--theme-surface-alt, #E0E0E090));
         text-align: center;
         &.main-button {
             min-width: min(8.5em, 35vw);
         }
         &:not(.is-complete) {
-            --color: gray;
+            --color: var(--theme-review-button-incomplete-text, var(--theme-muted, gray));
             pointer-events: none;
             opacity: 0.5;
             .review-time {
@@ -671,7 +671,7 @@
                 --color: var(--wenbun-red);
             }
             &.review-button-hard {
-                --color: black;
+                --color: var(--theme-review-button-hard-text, var(--theme-text, black));
             }
             &.review-button-good {
                 --color: var(--wenbun-green);
@@ -682,7 +682,7 @@
         }
     }
     .review-button:hover {
-        background-color: lightgray;
+        background-color: var(--theme-review-button-hover-background, var(--theme-surface-alt, lightgray));
     }
     .review-button::after {
         content: '';

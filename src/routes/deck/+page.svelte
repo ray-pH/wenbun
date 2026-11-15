@@ -551,7 +551,7 @@
         font-weight: bold;
         .deck-card-subtitle {
             font-weight: normal;
-            color: #00000080;
+            color: var(--theme-deck-subtitle, var(--theme-muted, #00000080));
         }
     }
     .deck-name-container {
@@ -561,7 +561,7 @@
     }
     .button-name-edit {
         all: unset;
-        color: gray;
+        color: var(--theme-deck-name-edit, var(--theme-muted, gray));
         cursor: pointer;
         &:hover {
             color: unset;
@@ -592,7 +592,7 @@
         cursor: pointer;
         background-color: var(--wenbun-blue);
         padding: 1em;
-        color: white;
+        color: var(--theme-deck-group-header-text, var(--theme-on-accent, white));
         border-radius: 0.5em;
         width: 100%;
         box-sizing: border-box;
@@ -600,7 +600,7 @@
         align-items: center;
         justify-content: space-between;
         &.not-completed {
-            background-color: #00000090;
+            background-color: var(--theme-deck-incomplete-group-background, var(--theme-overlay, #00000090));
         }
     }
     .card {
@@ -608,7 +608,7 @@
         position: relative;
         flex-direction: column;
         padding: 0.5em;
-        background-color: #FFFFFF90;
+        background-color: var(--theme-deck-card-background, var(--theme-surface, #FFFFFF90));
         width: fit-content;
         border-radius: 0.5rem;
         justify-content: space-between;
@@ -637,11 +637,11 @@
                 display: none;
             }
             .status{
-                background-color: white;
+                background-color: var(--theme-deck-status-background, var(--theme-surface, white));
                 padding: 0.2em 0.6em;
                 border-radius: 0.3rem;
                 flex-grow: 1;
-                color: white;
+                color: var(--theme-deck-status-text, var(--theme-on-accent, white));
                 &.card-status-new {
                     background-color: gray;
                 }
@@ -661,8 +661,8 @@
                     background-color: var(--wenbun-orange);
                 }
                 &.card-status-ignored {
-                    color: black;
-                    background-color: #FFFFFF;
+                    color: var(--theme-deck-ignored-status-text, var(--theme-text, black));
+                    background-color: var(--theme-deck-ignored-status-background, var(--theme-surface, #FFFFFF));
                 }
             }
         }
@@ -672,7 +672,7 @@
     }
     .card-status-new {
         .due {
-            color: #00000050;
+            color: var(--theme-deck-new-due-text, var(--theme-muted, #00000050));
         }
     }
     .card.card-status-previously-studied {
@@ -708,7 +708,7 @@
         justify-content: space-between;
         gap: 0.5em;
         padding: 0.5em;
-        background-color: #FFFFFF90;
+        background-color: var(--theme-deck-edit-card-background, var(--theme-surface, #FFFFFF90));
         width: fit-content;
         border-radius: 0.5rem;
         cursor: pointer;
@@ -723,7 +723,7 @@
             font-size: 1.5em;
         }
         .card-details {
-            color: white;
+            color: var(--theme-deck-edit-card-details, var(--theme-on-accent, white));
             .due {
                 padding: 0.2em 0.2em;
                 min-width: 0.05em;

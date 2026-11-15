@@ -37,9 +37,9 @@
     }
     .reset-button,
     .unlink-button {
-        border: 1px solid #00000033;
-        background: #ffffff;
-        color: #000000b0;
+        border: 1px solid var(--theme-settings-item-action-border, var(--theme-border, #00000033));
+        background: var(--theme-settings-item-action-background, var(--theme-surface, #ffffff));
+        color: var(--theme-settings-item-action-text, var(--theme-muted, #000000b0));
         border-radius: 0.35em;
         padding: 0.25em 0.45em;
         cursor: pointer;
@@ -47,7 +47,7 @@
     }
     .reset-button:hover,
     .unlink-button:hover {
-        background: #00000010;
+        background: var(--theme-settings-item-action-hover-background, var(--theme-surface-alt, #00000010));
     }
     .settings-label {
         display: flex;
@@ -56,7 +56,7 @@
         flex: 1;
         gap: 1em;
         .settings-label-help {
-            color: #00000090;
+            color: var(--theme-settings-help-text, var(--theme-muted, #00000090));
             white-space: pre-line;
             font-size: 0.8em;
             max-width: 18em;

@@ -1,6 +1,7 @@
 <script lang="ts">
     import { base } from '$app/paths';
-    import { onMount } from "svelte";
+    import { onDestroy, onMount } from "svelte";
+    import { applyColorScheme } from '$lib/theme';
     import { App, NewCardOrder, WritingMode, type DataExportReminderPeriod, type WenbunConfig } from "$lib/app";
     import TopBar from "$lib/components/TopBar.svelte";
     import _ from "lodash";
@@ -8,6 +9,7 @@
     import * as FSRS from "ts-fsrs"
     import { getKeysRecursive, type DeepRequired } from "$lib/util";
     import { ChineseToneColorPalette } from "$lib/constants";
+    import themes from '$lib/themes.json';
     import { ChineseMandarinReading } from '$lib/chinese';
     import ProfileLogin from './ProfileLogin.svelte';
     import { SyncMode, type ManualSyncStatus } from '$lib/profile';
@@ -22,6 +24,15 @@
     let app = new App();
     let config: DeepRequired<WenbunConfig>;
     let initialConfig: DeepRequired<WenbunConfig>;
+    let isPreviewingColorScheme = false;
+
+    function restoreSavedColorScheme() {
+        if (isPreviewingColorScheme) {
+            applyColorScheme(app.getConfig(null).colorScheme);
+            isPreviewingColorScheme = false;
+        }
+    }
+    onDestroy(restoreSavedColorScheme);
     let unlinkedKeys: string[] = [];
     let initialUnlinkedKeys: string[] = [];
     let isOnlineProfileLoaded = false;
@@ -77,6 +88,7 @@
     })
     
     function initComponent() {
+        restoreSavedColorScheme();
         config = _.cloneDeep(app.getConfig(data.deckId ?? null));
         initialConfig = _.cloneDeep(config);
         learningStepsString = config.learningSteps.join(" ");
@@ -123,7 +135,7 @@
 
     $: isConfigChanged = !_.isEqual(config, initialConfig) || !_.isEqual(_.sortBy(unlinkedKeys), _.sortBy(initialUnlinkedKeys)) || dataExportReminderEnabled !== initialDataExportReminderEnabled || dataExportReminderPeriod !== initialDataExportReminderPeriod; async function saveConfig() { app.setDataExportReminderMeta(dataExportReminderEnabled, dataExportReminderPeriod); if (data.deckId) { await app.saveDeckConfig(data.deckId, config, unlinkedKeys); } else {
             await app.saveConfig(config); } initialConfig = _.cloneDeep(config); initialUnlinkedKeys = _.cloneDeep(unlinkedKeys);
-        initialDataExportReminderEnabled = dataExportReminderEnabled; initialDataExportReminderPeriod = dataExportReminderPeriod; } function discardChanges() { config = _.cloneDeep(initialConfig); unlinkedKeys = _.cloneDeep(initialUnlinkedKeys); dataExportReminderEnabled = initialDataExportReminderEnabled; dataExportReminderPeriod = initialDataExportReminderPeriod; }
+        initialDataExportReminderEnabled = dataExportReminderEnabled; initialDataExportReminderPeriod = dataExportReminderPeriod; } function discardChanges() { restoreSavedColorScheme(); config = _.cloneDeep(initialConfig); unlinkedKeys = _.cloneDeep(initialUnlinkedKeys); dataExportReminderEnabled = initialDataExportReminderEnabled; dataExportReminderPeriod = initialDataExportReminderPeriod; }
     async function resetConfigToDefault() { const confirm = window.confirm("Are you sure you want to reset to the default settings?"); if (!confirm) return; await app.resetConfigToDefault(); config = _.cloneDeep(app.getConfig(data.deckId ?? null)); initialConfig = _.cloneDeep(config); } async function resetDebugProfile(): Promise<void> { const confirm = window.confirm("Are you sure you want to reset to the debug profile?"); if (!confirm) return;
         await app.debug();
         app = app;
@@ -389,6 +401,16 @@
             <div class="section-title">UI, Audio & Input</div>
             <div class="section-container">
                 {#if !data.deckId}
+                <SettingsItem key="colorScheme">
+                    <select bind:value={config.colorScheme} onchange={(event) => {
+                        applyColorScheme(event.currentTarget.value);
+                        isPreviewingColorScheme = true;
+                    }}>
+                        {#each themes as theme (theme.id)}
+                            <option value={theme.id}>{theme.name}</option>
+                        {/each}
+                    </select>
+                </SettingsItem>
                 <SettingsItem key="uiScale" {...deckSettingsItemProps}>
                     <select bind:value={config.uiScale}>
                         <option value="small">small</option>
@@ -702,7 +724,7 @@
     .settings-section:not(.no-line)::after {
         width: 90%;
         height: 1px;
-        background-color: #00000090;
+        background-color: var(--theme-settings-section-divider, var(--theme-border, #00000090));
         content: '';
         display: block;
         align-self: center;
@@ -724,7 +746,7 @@
         }
     }
     .settings-label-help {
-        color: #00000090;
+        color: var(--theme-settings-help-text, var(--theme-muted, #00000090));
         font-size: 0.8em;
     }
     .profile-textarea {

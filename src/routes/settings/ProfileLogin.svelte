@@ -181,7 +181,7 @@
         {#each deckInfoList as deck}
             <div>
                 {deck.label ?? deck.id}
-                <span style="color: #00000090">
+                <span style="color: var(--theme-settings-profile-deck-count, var(--theme-muted, #00000090))">
                     ({deck.studiedCount}/{deck.totalCount})
                 </span>
             </div> 
@@ -192,7 +192,7 @@
 <style>
     
     .container {
-        background-color: #FFFFFF90;
+        background-color: var(--theme-settings-profile-background, var(--theme-surface, #FFFFFF90));
         padding: 1em;
         border-radius: 0.5em;
     }
@@ -209,7 +209,7 @@
     .uid {
         font-size: 0.8em;
         font-family: monospace;
-        background-color: #e0e0e0;
+        background-color: var(--theme-settings-profile-uid-background, var(--theme-surface-alt, #e0e0e0));
         padding: 0.2em 0.4em;
         border-radius: 0.3em;
     }
@@ -223,7 +223,7 @@
     }
     
     .label {
-        color: #00000090;
+        color: var(--theme-settings-profile-label, var(--theme-muted, #00000090));
     }
     
     .sync-conflict-info-title {
@@ -231,7 +231,7 @@
         font-weight: bold;
     }
     .sync-conflict-section {
-        background-color: #e0e0e0;
+        background-color: var(--theme-settings-profile-conflict-background, var(--theme-surface-alt, #e0e0e0));
         padding: 0.5em 0.5em;
         margin-bottom: 0.5em;
         border-radius: 0.5rem;
@@ -248,7 +248,7 @@
     }
     .note {
         font-size: 0.9em;
-        color: #00000090;
+        color: var(--theme-settings-profile-note, var(--theme-muted, #00000090));
     }
     .fullwidth {
         width: 100%;

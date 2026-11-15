@@ -9,6 +9,7 @@ import { WebFileManager, type IFileManager } from "./fileManager";
 import { ChineseMandarinReading } from "./chinese";
 import { AppExtraStudyHandler } from "./appExtraStudyHandler";
 import { Profile, SyncConflicAutoResolve, SyncMode, type DeckInfoSummary } from "./profile";
+import { applyColorScheme } from "./theme";
 declare const __APP_VERSION__: string; // injected by vite
 const UNGROUPED_GROUP = "__ungrouped__"
 
@@ -31,6 +32,7 @@ const GENERATED_DECK_ID_LENGTH = 8;
 
 export type DataExportReminderPeriod = 'daily' | '2day' | '3day' | '4day' | 'weekly' | 'monthly';
 export type Lang = 'zh' | 'yue';
+export type ColorScheme = string;
 
 export enum WenBunCustomState {
     New = "New",
@@ -97,6 +99,7 @@ export interface WenbunConfig {
     isSeparateLearnAndReview?: boolean;
     
     // UI, Audio & Input
+    colorScheme?: ColorScheme;
     uiScale?: 'small' | 'normal' | 'custom'; // 10px, 16px
     customFontSize?: number;
     playSuccessSound?: boolean;
@@ -154,6 +157,7 @@ const DEFAULT_CONFIG: DeepRequired<WenbunConfig> = {
     gradeWarmUpCards: false,
     isSeparateLearnAndReview: false,
     
+    colorScheme: 'wenbun-light',
     uiScale: 'normal',
     customFontSize: 16,
     playSuccessSound: true,
@@ -387,6 +391,7 @@ export class App {
         this.decks = decks || [];
         this.deckData = deckData || {};
         this.config = config || DEFAULT_CONFIG;
+        applyColorScheme(this.getConfig(null).colorScheme);
         this.reviewLogs = reviewLogs || [];
         this.autoReviewGradeLog = autoReviewGradeLog || [];
         this.meta = meta || {clientVersion: __APP_VERSION__};
@@ -394,6 +399,7 @@ export class App {
         this.isLoadDone = true;
     }
     async save(skipSync = false, awaitSync = false, updateMetaClientVersion = true) {
+        applyColorScheme(this.getConfig(null).colorScheme);
         const isChanged = await this.isDataChanged();
         if (!isChanged) return;
         

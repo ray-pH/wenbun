@@ -133,6 +133,10 @@ export const SETTINGS_LABEL_DATA = {
         help: "When enabled, the app will treat learning and review as separate sessions, with individual buttons to begin each.",
     },
     
+    colorScheme: {
+        label: "Color Scheme",
+        help: "Choose the app color scheme.",
+    },
     uiScale: {
         label: "UI Scale",
         help: "Specifies the UI scale.",

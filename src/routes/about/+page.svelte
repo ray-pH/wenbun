@@ -873,7 +873,7 @@
         text-align: center;
         margin-bottom: 1em;
         gap: 0.5em;
-        background-color: #FFFFFF90;
+        background-color: var(--theme-about-beta-notice-background, var(--theme-surface, #FFFFFF90));
         padding: 2em;
         border-radius: 0.5em;
     }
@@ -881,7 +881,7 @@
         max-width: 32em;
     }
     .note {
-        background-color: #f0f0f0;
+        background-color: var(--theme-about-note-background, var(--theme-surface-alt, #f0f0f0));
         padding: 0.5em;
         border-radius: 0.3em;
         font-size: 0.9em;
@@ -889,7 +889,7 @@
     }
 
     .note > code {
-        background-color: white;
+        background-color: var(--theme-about-note-code-background, var(--theme-surface, white));
     }
 
     .privacy-policy-link {
@@ -902,7 +902,7 @@
     }
     
     code {
-        background-color: #f0f0f0;
+        background-color: var(--theme-about-code-background, var(--theme-surface-alt, #f0f0f0));
         padding: 0.2em 0.4em;
         border-radius: 0.3em;
     }

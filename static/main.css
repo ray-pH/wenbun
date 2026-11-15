@@ -1,6 +1,6 @@
 .button {
     all: unset;
-    color: white;
+    color: var(--theme-on-accent, white);
     background-color: var(--wenbun-blue);
     border-radius: 0.5em;
     font-size: 0.9em;
@@ -14,10 +14,10 @@
     }
     &.invert {
         border: var(--wenbun-blue) solid 1px;
-        background-color: #FFFFFF90;
+        background-color: var(--theme-inverted-button-surface, var(--theme-surface, #FFFFFF90));
         color: var(--wenbun-blue);
         &:hover {
-            background-color: lightgray;
+            background-color: var(--theme-inverted-button-hover-surface, var(--theme-surface-alt, lightgray));
         }
     }
     &:hover {

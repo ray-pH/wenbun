@@ -220,7 +220,7 @@
     }
 
     .search-card {
-        background: #ffffff90;
+        background: var(--theme-faq-search-background, var(--theme-surface, #ffffff90));
         border-radius: 0.75rem;
         padding: 0.9rem;
         margin-bottom: 1rem;
@@ -235,7 +235,7 @@
     .search-input {
         width: 100%;
         box-sizing: border-box;
-        border: 1px solid #00000030;
+        border: 1px solid var(--theme-faq-search-input-border, var(--theme-border, #00000030));
         border-radius: 0.6rem;
         padding: 0.65rem 0.75rem;
         font-size: 1rem;
@@ -244,7 +244,7 @@
     .result-count {
         margin-top: 0.5rem;
         font-size: 0.9rem;
-        color: #00000090;
+        color: var(--theme-faq-result-count, var(--theme-muted, #00000090));
     }
 
     .faq-list {
@@ -254,7 +254,7 @@
     }
 
     .faq-item {
-        background: #ffffff90;
+        background: var(--theme-faq-item-background, var(--theme-surface, #ffffff90));
         border-radius: 0.75rem;
         padding: 0.75rem 0.9rem;
     }
@@ -279,7 +279,7 @@
     .category {
         font-size: 0.75rem;
         background: #3a73c5;
-        color: #fff;
+        color: var(--theme-faq-category-text, var(--theme-on-accent, #fff));
         border-radius: 999px;
         padding: 0.18rem 0.55rem;
         white-space: nowrap;
@@ -287,7 +287,7 @@
 
     .answer {
         margin: 0.7rem 0 0 0;
-        color: #000000dd;
+        color: var(--theme-faq-answer-text, var(--theme-text, #000000dd));
         line-height: 1.45;
     }
 
@@ -303,10 +303,10 @@
     }
 
     .empty-state {
-        background: #00000010;
+        background: var(--theme-faq-empty-background, var(--theme-surface-alt, #00000010));
         border-radius: 0.75rem;
         padding: 1rem;
         text-align: center;
-        color: #000000a0;
+        color: var(--theme-faq-empty-text, var(--theme-muted, #000000a0));
     }
 </style>

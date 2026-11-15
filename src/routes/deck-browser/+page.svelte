@@ -93,7 +93,7 @@
                             <span class="deck-card-title">{info.title}</span>
                             <span 
                                 class="deck-card-subtitle"
-                                style={`--subtitle-color: ${info.color ?? '#00000080'}`}
+                                style={`--subtitle-color: ${info.color ?? 'var(--theme-deck-browser-subtitle, var(--theme-muted, #00000080))'}`}
                             >
                                 {info.subtitle}
                             </span>
@@ -148,7 +148,7 @@
         gap: 0.8em;
     }
     .deck-card {
-        background-color: #FFFFFF90;
+        background-color: var(--theme-deck-browser-card-background, var(--theme-surface, #FFFFFF90));
         border-radius: 0.5em;
         box-sizing: border-box;
         padding: 1em;
@@ -163,7 +163,7 @@
         }
         .deck-card-subtitle {
             padding-left: 0.2em;
-            color: var(--subtitle-color, #00000080);
+            color: var(--subtitle-color, var(--theme-deck-browser-subtitle, var(--theme-muted, #00000080)));
             font-size: 0.9em;
         }
         .deck-card-count {
@@ -176,7 +176,7 @@
     .deck-add-button {
         all: unset;
         background-color: var(--wenbun-blue);
-        color: white;
+        color: var(--theme-deck-browser-add-button-text, var(--theme-on-accent, white));
         border-radius: 0.5em;
         padding: 0.5em 0.8em;
         cursor: pointer;

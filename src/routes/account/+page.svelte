@@ -63,7 +63,7 @@
     }
     .text-danger {
         font-size: 0.9em;
-        color: #00000090;
+        color: var(--theme-account-danger-text, var(--theme-muted, #00000090));
         margin: 1em 0;
     }
 </style>

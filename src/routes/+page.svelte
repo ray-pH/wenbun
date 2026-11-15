@@ -253,7 +253,7 @@
     {:else}
         <div class="auto-logout-info-container">
             <div>
-                <i class="fa-solid fa-circle-info" style="color: #3E92CC;"></i>
+                <i class="fa-solid fa-circle-info" style="color: var(--wenbun-blue);"></i>
                 <p>
                     You are <b>unexpectedly logged out</b> due to session expiration or server issue.
                     Try logging in again.
@@ -281,7 +281,7 @@
                 <span class="deck-card-title">{info.title}</span>
                 <span 
                     class="deck-card-subtitle"
-                    style={`--subtitle-color: ${info.color ?? '#00000080'}`}
+                    style={`--subtitle-color: ${info.color ?? 'var(--theme-page-deck-subtitle, var(--theme-muted, #00000080))'}`}
                 >{info.subtitle}</span>
             </div>
             <div class="right" class:no-new={isSeparateLearnAndReview}>
@@ -319,8 +319,8 @@
         margin: 1em 0;
     }
     .data-export-reminder {
-        background-color: #FFFFFF90;
-        border: 1px solid #00000020;
+        background-color: var(--theme-page-export-reminder-background, var(--theme-surface, #FFFFFF90));
+        border: 1px solid var(--theme-page-export-reminder-border, var(--theme-border, #00000020));
         border-radius: 0.5em;
         width: calc(100vw - 4em);
         max-width: 30em;
@@ -382,7 +382,7 @@
         width: calc(100vw - 2em);
         max-width: 24em;
         height: 1px;
-        background-color: #00000090;
+        background-color: var(--theme-page-divider, var(--theme-border, #00000090));
     }
     .deck-list-container {
         display: flex;
@@ -409,7 +409,7 @@
     
     .drag-handle {
         cursor: grab;
-        color: #999;
+        color: var(--theme-page-drag-handle, var(--theme-muted, #999));
         padding: 0.25em;
         display: flex;
         align-items: center;
@@ -420,8 +420,8 @@
     }
     
     .drag-handle:hover {
-        background: rgba(255, 255, 255, 0.1);
-        color: #666;
+        background: var(--theme-page-drag-handle-hover-background, var(--theme-surface-alt, rgba(255, 255, 255, 0.1)));
+        color: var(--theme-page-drag-handle-hover, var(--theme-muted, #666));
     }
     
     .drag-handle:active {
@@ -429,7 +429,7 @@
     }
     .deck-card {
         all: unset;
-        background-color: #FFFFFF90;
+        background-color: var(--theme-page-deck-card-background, var(--theme-surface, #FFFFFF90));
         border-radius: 0.5em;
         padding: 1em;
         flex-grow: 1;
@@ -456,8 +456,8 @@
             font-weight: bold;
         }
         .deck-card-subtitle {
-            color: #00000080;
-            color: var(--subtitle-color, #00000080);
+            color: var(--theme-page-deck-subtitle, var(--theme-muted, #00000080));
+            color: var(--subtitle-color, var(--theme-page-deck-subtitle, var(--theme-muted, #00000080)));
             font-size: 0.9em;
         }
         .right {
@@ -500,7 +500,7 @@
     }
     .deck-card-button {
         all: unset;
-        color: white;
+        color: var(--theme-page-deck-button-text, var(--theme-on-accent, white));
         background-color: var(--wenbun-blue);
         cursor: pointer;
         border-radius: 0.5em;
@@ -521,7 +521,7 @@
         all: unset;
         position: relative;
         display: block;
-        background-color: #FFFFFF90;
+        background-color: var(--theme-page-action-background, var(--theme-surface, #FFFFFF90));
         width: calc(100vw - 4em);
         max-width: 20em;
         border-radius: 0.5em;
@@ -538,7 +538,7 @@
         border-radius: 50%;
     }
     .auto-logout-info-container {
-        background-color: #FFFFFF90;
+        background-color: var(--theme-page-logout-info-background, var(--theme-surface, #FFFFFF90));
         border-radius: 0.5em;
         width: calc(100vw - 4em);
         max-width: 30em;
@@ -549,7 +549,7 @@
         padding: 2em;
         .note {
             font-size: 0.9em;
-            color: #00000090;
+            color: var(--theme-page-logout-info-note, var(--theme-muted, #00000090));
         }
     }
     .button {

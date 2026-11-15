@@ -140,7 +140,7 @@
         &.hidden {
             display: none;
         }
-        color: #00000090;
+        color: var(--theme-upload-deck-warning-text, var(--theme-muted, #00000090));
         font-size: 0.8em;
         max-width: 15em;
     }
@@ -184,7 +184,7 @@
         gap: 0.5em;
     }
     .subdeck-item {
-        background-color: white;
+        background-color: var(--theme-upload-deck-meta-subdeck-background, var(--theme-surface, white));
         padding: 0.5em 1em;
         border-radius: 0.5em;
         display: flex;
