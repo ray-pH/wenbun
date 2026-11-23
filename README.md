@@ -59,7 +59,7 @@ git clone --recurse-submodules https://github.com/ray-pH/wenbun.git
 
 Install dependencies:  
 ```bash
-npm install
+npm ci
 ```  
     
 Web version:  
@@ -95,6 +95,8 @@ index ddedcb4d..ae269c02 100644
  }));
 ```
 
-### Deployment Note For Publishing
+### Native release builds
 
-For Android builds, ensure the correct version name is set in `src-tauri/gen/android/app/tauri.properties`. You may need to update this file manually before deployment.
+Keep `wenbun-deploy` alongside this checkout. See the [deployment guide](../wenbun-deploy/README.md)
+for Android, Linux, and Windows build commands. Release packages go in
+`wenbun-deploy/<version>/`.

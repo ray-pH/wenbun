@@ -36,7 +36,7 @@
     "@sveltejs/adapter-static": "^3.0.6",
     "@sveltejs/kit": "^2.9.0",
     "@sveltejs/vite-plugin-svelte": "^5.0.0",
-    "@tauri-apps/cli": "^2",
+    "@tauri-apps/cli": "2.6.2",
     "@types/lodash": "^4.17.20",
     "@types/node": "^24.2.1",
     "@types/opencc-js": "^1.0.3",
