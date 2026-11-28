@@ -167,6 +167,7 @@
         </a>
         {#if !locked}
             <a class="a-button" href="{base}/deck-browser/">Add New Deck</a>
+            <a class="a-button" href="{base}/toys/"><i class="fa-solid fa-shapes"></i>&nbsp; Toys</a>
         {/if}
     </div>
     {#if isShowDataExportReminder}

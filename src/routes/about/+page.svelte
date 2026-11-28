@@ -28,6 +28,12 @@
     <div class="changelog-container">
         Changelog
 
+        <h4>v0.30.0 (2026-11-28)</h4>
+        <ul>
+            <li><b>Toys</b>: Add a Toys page with an experimental Mandarin <b>Tone Lab</b>.</li>
+            <li><b>Tone Lab</b>: Practice listening quizzes and record speaking prompts with 1–6 syllables. Explore recordings with smooth pitch contours, raw and relative pitch views, waveforms, and spectrograms.</li>
+        </ul>
+
         <h4>v0.29.1 (2026-11-15)</h4>
         <ul>
             <li>
